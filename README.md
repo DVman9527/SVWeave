@@ -1,5 +1,7 @@
 # SVWeave
 
+English | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
+
 **SVWeave is a SystemVerilog-first, local code-intelligence layer.** It lets an AI client first
 find the relevant source (repository graph), then verify static semantics against a **named build**
 (slang elaboration), and only then change code through a traceable, refusable, recoverable flow

@@ -170,9 +170,10 @@ def resolves(words: list[str]) -> bool:
 def test_DOC_01_documented_commands_exist() -> None:
     docs = sorted((REPO / "docs").glob("*.md"))
     docs = [d for d in docs if "adr" not in d.parts and d.name != "m0_spike_report.md"]
-    readme = REPO / "README.md"
-    if readme.exists():
-        docs.append(readme)
+    for readme_name in ("README.md", "README.zh-TW.md", "README.zh-CN.md"):
+        readme = REPO / readme_name
+        if readme.exists():
+            docs.append(readme)
     seen = 0
     missing = []
     for d in docs:
