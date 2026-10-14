@@ -175,7 +175,7 @@ These are reported as limitations/gaps in the outputs; none is emulated with reg
   that specialization is not walked unless the specialization is also used as a type).
 * Not extracted as references: packed/unpacked dimension expressions, subroutine return-type
   names, class names used only as scope prefixes (`Cls::member`), enum/struct member type names,
-  `export`/`import` of DPI beyond the declaration, clocking-block signals, `defparam`, bind
+  `export`/`import` of DPI beyond the declaration, clocking-block signals, bind
   target instance lists (`bind mod : inst_list`), checker instances, primitives, config blocks
   (counted in `unsupported_nodes`).
 * Multiple (macro-expanded) origins of one occurrence are reported as candidates; picking one is
@@ -184,6 +184,15 @@ These are reported as limitations/gaps in the outputs; none is emulated with reg
   inputs (`CAPABILITY_MISMATCH`). Top parameter overrides are passed as `-G <top>.NAME=VALUE`
   (slang 12 top-scoped form, verified against the pinned build); the DefParam symbol slang creates
   for it in its `<command-line>` buffer is not reported as an unsupported node.
+* `defparam` in source: the assignment's name is recorded as a `defparam` reference to the overridden
+  parameter (slang applies the override during elaboration, so the hierarchy's parameter values
+  already reflect it; checked in `tests/integration/test_vcs_compat_defparam.py`). A `defparam` whose
+  target slang cannot resolve is still counted in `unsupported_nodes`; no reference is invented.
+* `language_options.compat: vcs` passes `--compat vcs` to slang (use-before-declare, enum/string
+  conversions, hierarchical const, ... as VCS tolerates them). It is part of `config_id`, listed in
+  `semantic_deviations`, and off by default; use a separate profile so strict and relaxed results
+  do not mix. It does NOT fix VCS-only constructs slang rejects regardless (`string.match()`,
+  covergroup cross/binsof over sample formals or class members, ...): those stay errors.
 * `-D NAME` (no value) defines the macro as slang does (value `1`); the manifest keeps the
   `NAME` versus `NAME=` distinction in `config_id`. Snapshot files live under the snapshot
   directory, so `` `__FILE__ `` shows that path (plan 9.4): not bit-identical to the original tree.

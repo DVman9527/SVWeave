@@ -677,3 +677,28 @@ def test_example_svweave_yaml_profiles_resolve_against_demo_fixtures(tmp_path: P
     with pytest.raises(SvwError) as ei:  # external root "uvm" is not mapped
         resolve_profile(ctx, "uvm_smoke", {})
     assert ei.value.code == ErrorCode.MISSING_INPUT
+
+
+# --------------------------------------------------------------------------- compat: vcs
+def test_language_option_compat_vcs_is_explicit_recorded_and_off_by_default(ws: Ws) -> None:
+    base = resolve(ws, source_inputs=[{"kind": "file", "path": "rtl/a.sv"}])
+    vcs = resolve(
+        ws, source_inputs=[{"kind": "file", "path": "rtl/a.sv"}], language_options={"compat": "vcs"}
+    )
+    assert "--compat" not in to_slang_args(base, ws.root)
+    args = to_slang_args(vcs, ws.root)
+    assert args[args.index("--compat") + 1] == "vcs"
+    assert vcs.config_id != base.config_id  # strict and relaxed builds never share an identity
+    assert not any("--compat vcs" in d for d in base.semantic_deviations)
+    assert any("compat=vcs" in d for d in vcs.semantic_deviations)
+    assert any("weaker evidence" in d for d in vcs.semantic_deviations)
+
+
+def test_language_option_compat_rejects_other_vendors_and_free_text(ws: Ws) -> None:
+    for bad in ("questa", "vcs --allow-hierarchical-const", ""):
+        ws.config(
+            {"p": profile(source_inputs=[{"kind": "file", "path": "rtl/a.sv"}],
+                          language_options={"compat": bad})}
+        )
+        with pytest.raises(SvwError):
+            resolve_profile(ws.ctx(), "p", {})

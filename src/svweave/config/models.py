@@ -149,11 +149,13 @@ _TIME_UNIT = r"(?:1|10|100)(?:s|ms|us|ns|ps|fs)"
 
 class LanguageOptions(_Strict):
     """Allowlisted slang language knobs (plan 8.3 'unsupported options block'): ``timescale`` ->
-    ``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``. Recorded in config_id and
-    in the build's semantic_deviations. Nothing else can be passed through to slang."""
+    ``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``, ``compat`` ->
+    ``--compat <vendor>`` (slang's vendor-leniency bundle; only ``vcs`` is accepted). Recorded in
+    config_id and in the build's semantic_deviations. Nothing else can be passed through to slang."""
 
     timescale: Annotated[str, StringConstraints(pattern=rf"^{_TIME_UNIT}/{_TIME_UNIT}$")] | None = None
     std: Literal["1364-2005", "1800-2017", "1800-2023", "latest"] | None = None
+    compat: Literal["vcs"] | None = None
 
 
 class Profile(_Strict):

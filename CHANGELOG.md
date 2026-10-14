@@ -18,6 +18,15 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 ### Added
 
+* **`language_options.compat: vcs`** (opt-in, default off): passes `--compat vcs` to slang. Part of
+  `config_id` and listed in `semantic_deviations`, so relaxed and strict builds never share an
+  identity; keep it in a separate profile. Measured on a 10x10 AXI VIP: it only turns 1 of 64 slang
+  errors into a warning (`Redefinition`) and removes 3 warnings; VCS-only constructs slang rejects
+  regardless (`string.match()`, covergroup cross over sample formals) remain errors by design.
+* **Source `defparam` support**: recorded as a `defparam` reference to the overridden parameter
+  (slang already elaborates the override); an unresolvable target stays an `unsupported_nodes` entry.
+  Removes the `DefParam` PARTIAL reason for designs that use it.
+
 * **M0 toolchain pinning**: `toolchain.lock.json` (pyslang 12.0.0, slang v12.0, codebase-memory-mcp
   v0.11.0 portable, Serena v1.7.0 + Verible v0.0-4296, MCP SDK 2.3.0, UVM 2020.3.1) with SHA-256
   for every artifact, `scripts/bootstrap_locked.py` (install and `--verify-only`),
