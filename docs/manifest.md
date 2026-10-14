@@ -238,7 +238,8 @@ shell string) for the future slang/pyslang adapter: `--single-unit` (single mode
 mounted under `files_root` (`<snapshot>/files`, external roots under `_ext/<id>/`). `per_file` is
 slang's default and needs no flag. `explicit_groups` raises `CAPABILITY_MISMATCH` here (the adapter writes per-group `-C` files).
 Top parameters use slang 12's top-scoped `-G TOP.NAME=VALUE`; `language_options` map to
-`--timescale` / `--std`. The flag spellings were verified against the pinned slang 12.0.0.
+`--timescale` / `--std` / `--compat vcs` (`language_options.compat: vcs`, off by default, recorded in
+`config_id` and `semantic_deviations`). The flag spellings were verified against the pinned slang 12.0.0.
 
 ## 6. Snapshot lookup space (provisional) and concurrency
 

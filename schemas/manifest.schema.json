@@ -275,8 +275,21 @@
     },
     "LanguageOptions": {
       "additionalProperties": false,
-      "description": "Allowlisted slang language knobs (plan 8.3 'unsupported options block'): ``timescale`` ->\n``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``. Recorded in config_id and\nin the build's semantic_deviations. Nothing else can be passed through to slang.",
+      "description": "Allowlisted slang language knobs (plan 8.3 'unsupported options block'): ``timescale`` ->\n``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``, ``compat`` ->\n``--compat <vendor>`` (slang's vendor-leniency bundle; only ``vcs`` is accepted). Recorded in\nconfig_id and in the build's semantic_deviations. Nothing else can be passed through to slang.",
       "properties": {
+        "compat": {
+          "anyOf": [
+            {
+              "const": "vcs",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compat"
+        },
         "std": {
           "anyOf": [
             {

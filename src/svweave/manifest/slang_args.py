@@ -17,12 +17,15 @@ from svweave.manifest.models import NormalizedManifest
 
 
 def language_args(nm: NormalizedManifest) -> list[str]:
-    """Allowlisted language knobs only (``timescale``, ``std``); never a free-form pass-through."""
+    """Allowlisted language knobs only (``timescale``, ``std``, ``compat``); never a free-form
+    pass-through."""
     args: list[str] = []
     if "std" in nm.language_options:
         args += ["--std", nm.language_options["std"]]
     if "timescale" in nm.language_options:
         args += ["--timescale", nm.language_options["timescale"]]
+    if "compat" in nm.language_options:
+        args += ["--compat", nm.language_options["compat"]]
     return args
 
 

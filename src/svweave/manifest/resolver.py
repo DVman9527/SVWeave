@@ -665,6 +665,13 @@ class _Resolver:
             )
         for k, v in sorted(lang_opts.items()):
             out.append(f"language option {k}={v} supplied by the manifest (not from the sources)")
+        if lang_opts.get("compat") == "vcs":
+            out.append(
+                "slang --compat vcs relaxes IEEE checks (hierarchical const, use-before-declare, "
+                "enum/string conversions, ...) to approximate VCS leniency: diagnostics slang would "
+                "report under strict IEEE mode may be absent, so a clean result is weaker evidence "
+                "of standard conformance; vendor extensions slang still rejects remain errors"
+            )
         for st in sorted(stubs, key=lambda x: x["module"]):
             out.append(
                 f"declared stub for module {st['module']}: replaces {st['replaced_scope']!r} "
