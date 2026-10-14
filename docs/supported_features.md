@@ -100,8 +100,12 @@ All return the common envelope: `snapshot_id`, `build_id`, `profile`, `freshness
 (`CURRENT` = the snapshot equals the workspace now by the M1 check **and** the build's `config_id`
 and `toolchain_id` equal what the workspace resolves to now, so a change that only touches
 `svweave.yaml` (defines, parameters, include order, CU mode) or the toolchain makes the old build
-`STALE`; `STALE` = not current and this is the latest build of the profile; `HISTORICAL` = not
-current and a newer build of the same profile exists, or the snapshot was garbage-collected), `analysis_coverage{completeness, scope, basis, unresolved_count, limitations}`,
+`STALE`; `STALE` = not current and this is the build the profile serves (its published build; a profile
+with no published build serves its latest stored one), also while a newer build is still running
+or failed, because only a fully validated build moves the published pointer; `HISTORICAL` = not
+current and not the served build (another build of the profile is published, which may be a newer
+build or an older one re-published by build reuse; or this build was never published while
+another is), or the snapshot was garbage-collected), `analysis_coverage{completeness, scope, basis, unresolved_count, limitations}`,
 `provenance{backend: slang, toolchain_id, evidence_kind: HDL_STATIC_RESOLVED}`, pagination.
 
 | CLI | Service | Notes |

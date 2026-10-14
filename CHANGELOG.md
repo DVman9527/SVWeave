@@ -40,6 +40,22 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
   planning for all edit kinds (`POLICY_DENIED` / `control_character_in_edit`) instead of later as
   `candidate_rejected`.
 
+### Fixed
+
+* `freshness_of()` no longer calls the published build HISTORICAL as soon as a newer build row of
+  the profile exists. The decision follows the published pointer (plan 9.6): the published build
+  stays `STALE` (inputs changed) while a newer build is stored but unpublished (PARTIAL, failed,
+  not promoted); only a build that is no longer the published one is `HISTORICAL`. Edit/commit
+  gates still require `CURRENT` and are unchanged. (`stage_build` inserts a row and moves the
+  pointer in one transaction, so API-PAR-02 could not hit this; it is covered by unit tests.)
+* `svw_status` read the published pointer, the build rows and each freshness at different
+  instants, so a build publishing concurrently could yield a `current_build` reported HISTORICAL
+  or a `latest_build` that disagreed with it (seen once in API-PAR-02). The whole view now runs in
+  one deferred SQLite read transaction (one WAL snapshot).
+* Test measurement: API-PAR overlap intervals get a 2 ms margin (event `ts` is wall clock
+  truncated to 1 ms, `duration_s` is monotonic), the threshold is 4, and the lock mutation now
+  turns all three tests red.
+
 ### Known issues and limits
 
 See `docs/limitations.md`. Highlights: graph extraction of SystemVerilog is partial (DEGRADED);

@@ -106,14 +106,24 @@ def _backend_view(session: Session, probe: bool) -> dict[str, Any]:
 
 
 def _builds_view(ctx: Any, db: Database, profiles: list[str]) -> list[dict[str, Any]]:
+    """Per-profile current/latest build view from ONE read snapshot. A build can publish while
+    this runs; a deferred read transaction (WAL) makes the published pointer, the build rows and
+    the pointer read inside ``freshness_of`` all see the same instant, so ``current_build`` and
+    ``latest_build`` can never describe different moments. Nothing in here writes."""
+    if db.conn.in_transaction:  # already inside a caller's transaction: it is the snapshot
+        return _builds_view_unlocked(ctx, db, profiles)
+    db.conn.execute("BEGIN")  # deferred: the snapshot starts at the first read
+    try:
+        return _builds_view_unlocked(ctx, db, profiles)
+    finally:
+        if db.conn.in_transaction:  # SQLite may already have rolled back (e.g. I/O error)
+            db.conn.execute("ROLLBACK")  # read-only: nothing to commit, never leaves a txn open
+
+
+def _builds_view_unlocked(ctx: Any, db: Database, profiles: list[str]) -> list[dict[str, Any]]:
     out = []
     for p in profiles:
         pub = db.published(ctx.workspace_id, p)
-        latest = db.conn.execute(
-            "SELECT * FROM builds WHERE workspace_id=? AND profile=? "
-            "ORDER BY created_at DESC, rowid DESC LIMIT 1",
-            (ctx.workspace_id, p),
-        ).fetchone()
         cur = None
         if pub is not None:
             row = db.conn.execute(
@@ -128,6 +138,11 @@ def _builds_view(ctx: Any, db: Database, profiles: list[str]) -> list[dict[str, 
                     "freshness": freshness_of(ctx, db, row).value,
                     "published_at": pub["published_at"],
                 }
+        latest = db.conn.execute(
+            "SELECT * FROM builds WHERE workspace_id=? AND profile=? "
+            "ORDER BY created_at DESC, rowid DESC LIMIT 1",
+            (ctx.workspace_id, p),
+        ).fetchone()
         entry: dict[str, Any] = {"profile": p, "current_build": cur, "latest_build": None}
         if latest is not None and (cur is None or latest["build_id"] != cur["build_id"]):
             entry["latest_build"] = {

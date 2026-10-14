@@ -52,22 +52,22 @@ simulation, formal or EDA result: `eda_compile`, `simulation` and `formal` are `
 import your own evidence, and imported evidence is `EXTERNAL_DECLARED`, never verified by SVWeave.
 Read `docs/limitations.md` before relying on any result.
 
-**Latest recorded qualification run (2026-10-13, source tree sha256 `cf30168d...`, git HEAD NONE,
+**Latest recorded qualification run (2026-10-14, source tree sha256 `1ff91022...`, git HEAD `9784de3` plus uncommitted changes,
 Linux x86_64, this host only):**
 
 | Item | Result |
 |---|---|
 | Gates | G0 `PASS_WITH_OWNER_WAIVER_OPEN`, G1 to G5 `PASS` |
-| P0 tests (passed / failed / blocked / skipped) | 908 / 0 / 0 / 0 |
+| P0 tests (passed / failed / blocked / skipped) | 916 / 0 / 0 / 0 |
 | Critical mutations | 22 of 22 killed, none survived |
-| Coverage of SVWeave's own code | 93.57% statements / 87.66% branches (software QA, not RTL coverage) |
+| Coverage of SVWeave's own code | 93.57% statements / 87.67% branches (software QA, not RTL coverage) |
 | EDA compile, simulation, formal | `NOT_RUN` |
 | Release decision | **BLOCKED**, only on three open owner sign-offs: `g0_waiver`, `adr_012`, `license_review` |
 
 G0 is not a plain PASS because codebase-memory-mcp and Serena probe as `DEGRADED` (inside the
 declared subset) and the owner has not signed the waiver. Copies of the evidence are in
 `evidence/qualification/` (`report.md`, `report.json`, `mutation.json`) and
-`evidence/bench/20261013T162122Z-s1.0.json`. This is a snapshot of one run, not a standing claim;
+`evidence/bench/20261014T042010Z-s1.0.json`. This is a snapshot of one run, not a standing claim;
 re-run `scripts/qualify.py` for the state of your tree.
 
 | Backend (pinned in `toolchain.lock.json`) | Role |
@@ -616,7 +616,7 @@ there. Do not swap the binary without re-probing and updating the lock and licen
 real pinned backend, records negotiated protocol, tool list and schema hashes, and runs a real
 fixture query. A backend is never READY because its process started: READY requires the expected
 tools and correct answers to the fixture queries. Recorded, accepted gaps keep it `DEGRADED`
-(codebase-memory-mcp and Serena are `DEGRADED` in the 2026-10-13 run); a missing or failing
+(codebase-memory-mcp and Serena are `DEGRADED` in the 2026-10-14 run); a missing or failing
 backend is `UNAVAILABLE`. A fallback never turns a failed mandatory backend into success: search
 falls back to a marked literal-text search with outcome `PARTIAL`.
 
@@ -658,23 +658,23 @@ a reduced scale is labelled as such.
 
 | Target (plan 22.3) | Budget | Measured (scale 1.0, 5 cold runs, 30 hot runs) |
 |---|---|---|
-| cold semantic build | 120 s | median 24.3 s, max 25.7 s |
+| cold semantic build | 120 s | median 24.2 s, max 24.6 s |
 | HDL worker peak memory | 8 GiB | 0.059 GiB |
 | hot symbol query p95 | 1 s | 0.044 s |
-| hot hierarchy query p95 | 1 s | 0.024 s |
-| hot references query p95 | 1 s | 0.169 s |
-| hot search p95, text fallback / graph | 2 s | 0.071 s / 0.658 s |
+| hot hierarchy query p95 | 1 s | 0.020 s |
+| hot references query p95 | 1 s | 0.162 s |
+| hot search p95, text fallback / graph | 2 s | 0.070 s / 0.651 s |
 
-These come from `evidence/bench/20261013T162122Z-s1.0.json`: 500 files, 100,374 lines, on an Intel
+These come from `evidence/bench/20261014T042010Z-s1.0.json`: 500 files, 100,374 lines, on an Intel
 Xeon Gold 6138 host with 16 logical CPUs and 19.3 GiB RAM, which is **not** the plan's reference
 host (`reference_host_met: false`). They say nothing about other hosts or real projects. No token or
 time saving is claimed: plan 22.4 has not been run.
 
-<p align="center"><img src="docs/images/evidence-status.svg" alt="Left: the six evidence kinds SOURCE_CANDIDATE, LSP_RESOLVED, HDL_STATIC_RESOLVED, RUNTIME_OBSERVED, EXTERNAL_DECLARED and UNRESOLVED, each with what it can and cannot support. Right: a snapshot of the 2026-10-13 qualification run: G0 PASS_WITH_OWNER_WAIVER_OPEN, G1 to G5 PASS, 908 P0 tests passed with 0 failed, blocked or skipped, 22 of 22 mutations killed, coverage 93.57 percent statements and 87.66 percent branches, EDA compile, simulation and formal NOT_RUN, and release decision BLOCKED pending the owner sign-offs g0_waiver, adr_012 and license_review." width="100%"></p>
+<p align="center"><img src="docs/images/evidence-status.svg" alt="Left: the six evidence kinds SOURCE_CANDIDATE, LSP_RESOLVED, HDL_STATIC_RESOLVED, RUNTIME_OBSERVED, EXTERNAL_DECLARED and UNRESOLVED, each with what it can and cannot support. Right: a snapshot of the 2026-10-14 qualification run: G0 PASS_WITH_OWNER_WAIVER_OPEN, G1 to G5 PASS, 916 P0 tests passed with 0 failed, blocked or skipped, 22 of 22 mutations killed, coverage 93.57 percent statements and 87.67 percent branches, EDA compile, simulation and formal NOT_RUN, and release decision BLOCKED pending the owner sign-offs g0_waiver, adr_012 and license_review." width="100%"></p>
 
 *The table of evidence kinds is not a ranking: runtime evidence proves one run, static analysis
 covers code that never ran, and neither replaces the other. The lower panel is a dated snapshot of
-the 2026-10-13 qualification run (source tree sha256 `cf30168d...`), not a standing claim. The
+the 2026-10-14 qualification run (source tree sha256 `1ff91022...`), not a standing claim. The
 static preview gates G0 to G5 are kept apart from EDA compile, simulation and formal, which stay
 `NOT_RUN` unless the user imports evidence, stored as `EXTERNAL_DECLARED`. The release decision is
 `BLOCKED` only because three owner sign-offs are open.*

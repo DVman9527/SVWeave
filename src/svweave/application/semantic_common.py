@@ -149,8 +149,10 @@ def freshness_of(
     ctx: WorkspaceContext, db: Database, build: sqlite3.Row, *, strict: bool = False
 ) -> Freshness:
     """CURRENT: snapshot equals the workspace AND the config/toolchain identities still match.
-    Otherwise STALE if this is the latest build of the profile, HISTORICAL if a newer build of the
-    same profile exists (explicit old-build query). ``strict`` skips the stat fast path."""
+    Otherwise STALE if this is the build the profile currently serves (its published build, or the
+    latest stored one while nothing is published), HISTORICAL for any other build (superseded by a
+    published newer build, or never published while another build is). A newer build row that is
+    unpublished (running, failed, PARTIAL) does not demote the published build. ``strict`` skips the stat fast path."""
     sid = build["snapshot_id"]
     sdir = snapshots_dir(ctx) / sid
     snap_row = db.conn.execute(
@@ -181,16 +183,24 @@ def freshness_of(
         return Freshness.UNKNOWN
     if current:
         return Freshness.CURRENT
+    return Freshness.STALE if _is_live_build(db, build) else Freshness.HISTORICAL
+
+
+def _is_live_build(db: Database, build: sqlite3.Row) -> bool:
+    """True when ``build`` is what the profile currently serves: the build the published pointer
+    names (plan 9.6: the pointer moves only after full validation, so a newer build row that is
+    still running, failed or PARTIAL never supersedes it). A profile with no published build at
+    all serves its latest stored build (e.g. a first PARTIAL build). Every other build has been
+    superseded or was never the served one: explicit old-build queries, HISTORICAL."""
+    pub = db.published(build["workspace_id"], build["profile"])
+    if pub is not None:
+        return bool(pub["build_id"] == build["build_id"])
     latest = db.conn.execute(
         "SELECT build_id FROM builds WHERE workspace_id=? AND profile=? "
         "ORDER BY created_at DESC, rowid DESC LIMIT 1",
         (build["workspace_id"], build["profile"]),
     ).fetchone()
-    return (
-        Freshness.STALE
-        if latest and latest["build_id"] == build["build_id"]
-        else Freshness.HISTORICAL
-    )
+    return bool(latest and latest["build_id"] == build["build_id"])
 
 
 def report_of(db: Database, build_id: str) -> dict[str, Any]:

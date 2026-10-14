@@ -16,6 +16,15 @@ Plan references: section 14 of `SVWeave_plan.md`. Schemas: `schemas/mcp/<tool>.i
   and to `.svweave/runs/serve-*/{server.log,events.jsonl}`.
 * The pagination-cursor signing key is stored in the trusted directory
   (`$XDG_CONFIG_HOME/svweave/workspaces/<key>/cursor.key`, mode 0600), never inside the repository.
+* Tool calls run in worker threads (anyio default: at most 40 at once), each with its own SQLite
+  connection, so read tools may be called concurrently, also during a running build job and from
+  two gateway processes on one workspace. The real-pyslang stress tests API-PAR-01..03
+  (`tests/integration/test_api_parallel_reads.py`, an extension of the plan API tests) measure the
+  overlap server side and check that concurrent results equal the sequential ones: only
+  `request_id` differs, except while a rebuild changes the workspace, where `freshness` (STALE,
+  then HISTORICAL) and the matching freshness warning change too. `svw_search` is keyed by
+  snapshot, not build: it stays STALE for as long as the workspace differs from that snapshot and
+  never turns HISTORICAL.
 * Exiting the server (stdin EOF) cancels a running build job and shuts every launched backend down.
 
 ## Tools
