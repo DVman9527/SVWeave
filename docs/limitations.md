@@ -34,7 +34,7 @@ timing or signoff result (plan 4.3).
 * **Unsupported reference kinds** (not extracted, counted in `unsupported_nodes`): packed and
   unpacked dimension expressions, subroutine return-type names, class names used only as scope
   prefixes (`Cls::member`), enum/struct member type names, `export` and `import` of DPI beyond the
-  declaration, clocking-block signals, `defparam`, bind target instance lists
+  declaration, clocking-block signals, bind target instance lists
   (`bind mod : inst_list`), checker instances, primitives, config blocks.
 * **Virtual dispatch.** A call through a handle is `dynamic_unresolved`; the static target is the
   declared method and the overriding methods are listed as candidates. None is chosen.

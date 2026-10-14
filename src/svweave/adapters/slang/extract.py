@@ -275,6 +275,7 @@ class Extractor:
             SK.Field: self._h_valuedecl,
             SK.LetDecl: self._h_decl,
             SK.Instance: self._h_instance_node,
+            SK.DefParam: self._h_defparam,
             SK.Subroutine: self._h_subroutine,
             SK.ExplicitImport: self._h_import,
             SK.WildcardImport: self._h_import,
@@ -649,15 +650,16 @@ class Extractor:
                 h(n)
             except Exception as e:  # noqa: BLE001
                 self.errors[f"handler:{_short(n.kind)}:{type(e).__name__}"] += 1
-        elif n.kind == SK.DefParam and self._is_command_line_override(n):
-            pass  # the manifest's own `-G top.NAME=VALUE` (recorded in config_id), not source
         elif isinstance(n, ast.Symbol) and n.kind not in _IGNORED_KINDS:
-            sample = self._guard("sample", self.loc.name_span, n)
-            key = (_short(n.kind), self.scope_of(sample))
-            self.kind_counts[key] += 1
-            if key not in self.kind_sample:
-                self.kind_sample[key] = sample
+            self._note_unsupported(n)
         return ast.VisitAction.Advance
+
+    def _note_unsupported(self, n: Any) -> None:
+        sample = self._guard("sample", self.loc.name_span, n)
+        key = (_short(n.kind), self.scope_of(sample))
+        self.kind_counts[key] += 1
+        if key not in self.kind_sample:
+            self.kind_sample[key] = sample
 
     def _h_decl(self, n: Any) -> None:
         if n.kind in (SK.GenerateBlock, SK.GenerateBlockArray) and not n.name:
@@ -712,6 +714,24 @@ class Extractor:
             return
         loc = self.loc.range(n.syntax.sourceRange)
         self.add_ref("import", loc, pidx, context={"package": n.packageName})
+
+    def _h_defparam(self, n: Any) -> None:
+        """A source ``defparam`` is a reference from the assignment's name to the overridden
+        parameter. slang applies the override during elaboration, so the hierarchy's parameter
+        values already reflect it; only the reference was missing. The manifest's own
+        ``-G top.NAME=VALUE`` (a DefParam in the synthetic ``<command-line>`` buffer, recorded in
+        config_id) is not source and is skipped."""
+        if self._is_command_line_override(n):
+            return
+        syntax = n.syntax
+        name = getattr(syntax, "name", None)
+        loc = self.loc.range(name.sourceRange) if name is not None else None
+        target = n.target
+        idx = self.decl_for(target) if target is not None else None
+        if idx is None or loc is None:
+            self._note_unsupported(n)  # target not resolvable to a declaration: stay honest
+            return
+        self.add_ref("defparam", loc, idx)
 
     def _h_instance_node(self, n: Any) -> None:
         self.decl_for(n)
