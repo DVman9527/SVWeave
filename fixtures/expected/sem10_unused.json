@@ -1,0 +1,240 @@
+{
+  "topic": "sem10_unused",
+  "fixture_dir": "language/sem10_unused",
+  "top": "sem10_top",
+  "library_dirs": [
+    "lib"
+  ],
+  "declarations": [
+    {
+      "kind": "function",
+      "qualified_name": "pkg10::helper",
+      "file": "pkg10.sv",
+      "ctx": "function automatic int helper(int x);",
+      "nth": 0,
+      "text": "helper",
+      "start": 40,
+      "end": 46
+    },
+    {
+      "kind": "class",
+      "qualified_name": "pkg10::used_cls",
+      "file": "pkg10.sv",
+      "ctx": "class used_cls;",
+      "nth": 0,
+      "text": "used_cls",
+      "start": 96,
+      "end": 104
+    },
+    {
+      "kind": "class",
+      "qualified_name": "pkg10::gen_unused",
+      "file": "pkg10.sv",
+      "ctx": "class gen_unused #(",
+      "nth": 0,
+      "text": "gen_unused",
+      "start": 188,
+      "end": 198
+    },
+    {
+      "kind": "package",
+      "qualified_name": "pkg10",
+      "file": "pkg10.sv",
+      "ctx": "package pkg10;",
+      "nth": 0,
+      "text": "pkg10",
+      "start": 8,
+      "end": 13
+    },
+    {
+      "kind": "argument",
+      "qualified_name": "pkg10::helper.x",
+      "file": "pkg10.sv",
+      "ctx": "helper(int x);",
+      "nth": 0,
+      "text": "x",
+      "start": 51,
+      "end": 52
+    },
+    {
+      "kind": "function",
+      "qualified_name": "pkg10::used_cls::f",
+      "file": "pkg10.sv",
+      "ctx": "function int f();",
+      "nth": 0,
+      "text": "f",
+      "start": 123,
+      "end": 124
+    },
+    {
+      "kind": "module",
+      "qualified_name": "sem10_top",
+      "file": "top.sv",
+      "ctx": "module sem10_top;",
+      "nth": 0,
+      "text": "sem10_top",
+      "start": 7,
+      "end": 16
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem10_top.u",
+      "file": "top.sv",
+      "ctx": "used_cls u = new();",
+      "nth": 0,
+      "text": "u",
+      "start": 48,
+      "end": 49
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem10_top.r",
+      "file": "top.sv",
+      "ctx": "int r;",
+      "nth": 0,
+      "text": "r",
+      "start": 65,
+      "end": 66
+    }
+  ],
+  "references": [
+    {
+      "kind": "call",
+      "target": "pkg10::helper",
+      "status": "resolved_static",
+      "file": "pkg10.sv",
+      "ctx": "return helper(1);",
+      "nth": 0,
+      "text": "helper",
+      "start": 141,
+      "end": 147
+    },
+    {
+      "kind": "value",
+      "target": "pkg10::helper.x",
+      "status": "resolved_static",
+      "file": "pkg10.sv",
+      "ctx": "return x + 1;",
+      "nth": 0,
+      "text": "x",
+      "start": 66,
+      "end": 67
+    },
+    {
+      "kind": "import",
+      "target": "pkg10",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "import pkg10::*;",
+      "nth": 0,
+      "text": "pkg10::*",
+      "start": 27,
+      "end": 35
+    },
+    {
+      "kind": "type",
+      "target": "pkg10::used_cls",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "used_cls u = new();",
+      "nth": 0,
+      "text": "used_cls",
+      "start": 39,
+      "end": 47
+    },
+    {
+      "kind": "new",
+      "target": "pkg10::used_cls",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "u = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 52,
+      "end": 57
+    },
+    {
+      "kind": "value",
+      "target": "sem10_top.r",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "r = u.f();",
+      "nth": 0,
+      "text": "r",
+      "start": 78,
+      "end": 79
+    },
+    {
+      "kind": "value",
+      "target": "sem10_top.u",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "r = u.f();",
+      "nth": 0,
+      "text": "u",
+      "start": 82,
+      "end": 83
+    },
+    {
+      "kind": "call",
+      "target": "pkg10::used_cls::f",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "u.f()",
+      "nth": 0,
+      "text": "f",
+      "start": 84,
+      "end": 85
+    }
+  ],
+  "not_covered": {
+    "uncovered_reference_sites": [
+      "helper(2) in the never-specialized generic class gen_unused",
+      "helper(3) in library module lib_unused (never instantiated)"
+    ],
+    "helper_2": {
+      "file": "pkg10.sv",
+      "ctx": "return helper(2);",
+      "nth": 0,
+      "text": "helper",
+      "start": 251,
+      "end": 257
+    },
+    "helper_3": {
+      "file": "lib/lib_unused.sv",
+      "ctx": "q = helper(3);",
+      "nth": 0,
+      "text": "helper",
+      "start": 61,
+      "end": 67
+    },
+    "gap_kinds": [
+      "generic_class_not_specialized",
+      "library_member_not_loaded"
+    ],
+    "reference_count_for_helper": 1
+  },
+  "closed_scope": {
+    "declaration_files": [
+      "pkg10.sv",
+      "top.sv"
+    ],
+    "reference_files": [
+      "pkg10.sv",
+      "top.sv"
+    ],
+    "exclude_declarations": [
+      {
+        "kind": "instance",
+        "qualified_name": "sem10_top",
+        "file": "top.sv",
+        "ctx": "module sem10_top;",
+        "nth": 0,
+        "text": "sem10_top",
+        "start": 7,
+        "end": 16,
+        "reason": "the hierarchy root is modelled as an `instance` row spanning the same bytes as its module declaration; the module row is the golden entry"
+      }
+    ]
+  }
+}

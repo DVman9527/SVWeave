@@ -1,0 +1,55 @@
+{
+  "topic": "sva02_unresolved",
+  "fixture_dir": "language/sva02_unresolved",
+  "top": "sva02_top",
+  "diagnostics": [
+    {
+      "code": "UndeclaredIdentifier",
+      "file": "chk.sv",
+      "ctx": "@(posedge clk) a |-> missing_sig;",
+      "nth": 0,
+      "text": "missing_sig",
+      "start": 91,
+      "end": 102
+    },
+    {
+      "code": "UnknownModule",
+      "file": "chk.sv",
+      "ctx": "bind no_such_module chk",
+      "nth": 0,
+      "text": "no_such_module",
+      "start": 177,
+      "end": 191
+    }
+  ],
+  "assertion": {
+    "label": "ap_unknown",
+    "resolved": false,
+    "errors": [
+      "UndeclaredIdentifier"
+    ],
+    "file": "chk.sv",
+    "ctx": "ap_unknown: assert property (p_unknown);",
+    "nth": 0,
+    "text": "ap_unknown: assert property (p_unknown);",
+    "start": 120,
+    "end": 160
+  },
+  "bind": {
+    "target_text": "no_such_module",
+    "elaborated": 0,
+    "resolved": false,
+    "errors": [
+      "UnknownModule"
+    ],
+    "file": "chk.sv",
+    "ctx": "bind no_such_module chk u_bad (.clk(clk), .a(a));",
+    "nth": 0,
+    "text": "bind no_such_module chk u_bad (.clk(clk), .a(a));",
+    "start": 172,
+    "end": 221
+  },
+  "expect": {
+    "completeness": "PARTIAL"
+  }
+}

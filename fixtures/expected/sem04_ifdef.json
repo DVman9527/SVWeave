@@ -1,0 +1,64 @@
+{
+  "topic": "sem04_ifdef",
+  "fixture_dir": "language/sem04_ifdef",
+  "top": "sem04_top",
+  "variants": {
+    "default": {
+      "defines": [],
+      "active_definition": "branch_b",
+      "inactive_modules": [
+        {
+          "name": "branch_a",
+          "file": "top.sv",
+          "ctx": "module branch_a",
+          "nth": 0,
+          "text": "module",
+          "start": 13,
+          "end": 19
+        }
+      ],
+      "disabled_directive": "IfDefDirective",
+      "condition": "USE_A"
+    },
+    "USE_A": {
+      "defines": [
+        "USE_A"
+      ],
+      "active_definition": "branch_a",
+      "inactive_modules": [
+        {
+          "name": "branch_b",
+          "file": "top.sv",
+          "ctx": "module branch_b",
+          "nth": 0,
+          "text": "module",
+          "start": 81,
+          "end": 87
+        }
+      ],
+      "disabled_directive": "ElseDirective"
+    }
+  },
+  "never_instantiated": {
+    "name": "sem04_never_instantiated",
+    "file": "top.sv",
+    "ctx": "module sem04_never_instantiated",
+    "nth": 0,
+    "text": "sem04_never_instantiated",
+    "start": 285,
+    "end": 309
+  },
+  "declarations": [
+    {
+      "kind": "module",
+      "qualified_name": "sem04_top",
+      "file": "top.sv",
+      "ctx": "module sem04_top(",
+      "nth": 0,
+      "text": "sem04_top",
+      "start": 158,
+      "end": 167
+    }
+  ],
+  "instance_path": "sem04_top.u_branch"
+}

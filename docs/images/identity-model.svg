@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1030" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Build identity and state dimensions</title>
+<desc id="d">How snapshot_id, config_id and toolchain_id combine into build_id, how job_id differs, the five orthogonal state dimensions, and why the lookup inventory is part of snapshot_id.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="1030" class="bg"/>
+<text x="40" y="32" class="tx b s16">Identities are never mixed; states are never collapsed</text>
+<text x="40" y="56" class="mu s12">Four deterministic identities and one per-attempt id</text>
+<rect x="40" y="68" width="370" height="84" rx="8" class="n"/>
+<text x="52" y="90" class="tx b s14 mono">snapshot_id</text>
+<text x="52" y="110" class="mu s12">SHA-256 of the ordered file inventory, source</text>
+<text x="52" y="126" class="mu s12">byte hashes, root/path mapping and the</text>
+<text x="52" y="142" class="mu s12">lookup search-space inventory</text>
+<rect x="40" y="162" width="370" height="84" rx="8" class="n"/>
+<text x="52" y="184" class="tx b s14 mono">config_id</text>
+<text x="52" y="204" class="mu s12">SHA-256 of normalized build semantics; arrays</text>
+<text x="52" y="220" class="mu s12">keep their order (sources, include dirs, macro</text>
+<text x="52" y="236" class="mu s12">events, compilation groups); profile name excluded</text>
+<rect x="40" y="256" width="370" height="84" rx="8" class="n"/>
+<text x="52" y="278" class="tx b s14 mono">toolchain_id</text>
+<text x="52" y="298" class="mu s12">SHA-256 of lock artifact hashes (pyslang wheel +</text>
+<text x="52" y="314" class="mu s12">RECORD, slang binary), extractor source hash</text>
+<text x="52" y="330" class="mu s12">and the DTO schema</text>
+<rect x="40" y="350" width="370" height="84" rx="8" class="n"/>
+<text x="52" y="372" class="tx b s14 mono">semantic schema version</text>
+<text x="52" y="392" class="mu s12">layout of the stored semantic rows; part of</text>
+<text x="52" y="408" class="mu s12">the build_id input, not a hash itself</text>
+<line x1="440" y1="110" x2="440" y2="392" class="l"/>
+<line x1="410" y1="110" x2="440" y2="110" class="l"/>
+<line x1="410" y1="204" x2="440" y2="204" class="l"/>
+<line x1="410" y1="298" x2="440" y2="298" class="l"/>
+<line x1="410" y1="392" x2="440" y2="392" class="l"/>
+<path d="M440,251 L500,251" class="la" marker-end="url(#ma)"/>
+<rect x="500" y="171" width="350" height="160" rx="8" class="a"/>
+<text x="512" y="193" class="ta b s16">build_id</text>
+<text x="512" y="213" class="tx s12 mono">= SHA-256(snapshot_id : config_id :</text>
+<text x="512" y="231" class="tx s12 mono">          toolchain_id : schema_version)</text>
+<text x="512" y="249" class="tx s12">deterministic: same inputs, same id</text>
+<text x="512" y="267" class="tx s12">one changed input gives a new build_id</text>
+<text x="512" y="285" class="tx s12">explain_build_change() names which</text>
+<text x="512" y="303" class="tx s12">of the three ids moved</text>
+<rect x="930" y="171" width="240" height="160" rx="8" class="n"/>
+<text x="942" y="193" class="tx b s16 mono">job_id</text>
+<text x="942" y="216" class="mu s12">uuid, one per attempt</text>
+<text x="942" y="234" class="mu s12">not equal to build_id</text>
+<text x="942" y="252" class="mu s12">a retry of the same input keeps</text>
+<text x="942" y="270" class="mu s12">the build_id, gets a new job_id</text>
+<text x="942" y="288" class="mu s12">timeout, crash and success of</text>
+<text x="942" y="306" class="mu s12">each attempt stay on record</text>
+<path d="M850,251 L930,251" class="lt" marker-end="url(#mt)"/>
+<text x="890" y="243" class="tt s12" text-anchor="middle">runs</text>
+<text x="500" y="358" class="mu s12">A COMPLETE build with the same build_id is reused (no new job).</text>
+<text x="500" y="376" class="mu s12">Only COMPLETE builds move the published pointer; the previous one becomes HISTORICAL after an edit.</text>
+<text x="40" y="458" class="tx b s14">Five orthogonal state dimensions: one result reports all of them, none implies another</text>
+<rect x="40" y="470" width="216" height="282" rx="8" class="n"/>
+<text x="52" y="494" class="tx b s13">Job lifecycle</text>
+<rect x="52" y="508" width="192" height="24" rx="5" class="chip"/>
+<text x="62" y="524.5" class="tx s12 mono">QUEUED</text>
+<rect x="52" y="538" width="192" height="24" rx="5" class="chip"/>
+<text x="62" y="554.5" class="tx s12 mono">RUNNING</text>
+<rect x="52" y="568" width="192" height="24" rx="5" class="a"/>
+<text x="62" y="584.5" class="ta b s12 mono">SUCCEEDED</text>
+<rect x="52" y="598" width="192" height="24" rx="5" class="chip"/>
+<text x="62" y="614.5" class="tx s12 mono">FAILED</text>
+<rect x="52" y="628" width="192" height="24" rx="5" class="chip"/>
+<text x="62" y="644.5" class="tx s12 mono">CANCELLED</text>
+<rect x="52" y="658" width="192" height="24" rx="5" class="chip"/>
+<text x="62" y="674.5" class="tx s12 mono">TIMED_OUT</text>
+<text x="52" y="700" class="mu s12">did the work finish; not a</text>
+<text x="52" y="716" class="mu s12">design verdict</text>
+<rect x="268" y="470" width="216" height="282" rx="8" class="n"/>
+<text x="280" y="494" class="tx b s13">Completeness</text>
+<rect x="280" y="508" width="192" height="24" rx="5" class="chip"/>
+<text x="290" y="524.5" class="tx s12 mono">COMPLETE</text>
+<rect x="280" y="538" width="192" height="24" rx="5" class="a"/>
+<text x="290" y="554.5" class="ta b s12 mono">PARTIAL</text>
+<rect x="280" y="568" width="192" height="24" rx="5" class="chip"/>
+<text x="290" y="584.5" class="tx s12 mono">BLOCKED</text>
+<text x="280" y="700" class="mu s12">only relative to the declared</text>
+<text x="280" y="716" class="mu s12">profile, queries and support</text>
+<rect x="496" y="470" width="216" height="282" rx="8" class="n"/>
+<text x="508" y="494" class="tx b s13">Freshness</text>
+<rect x="508" y="508" width="192" height="24" rx="5" class="chip"/>
+<text x="518" y="524.5" class="tx s12 mono">CURRENT</text>
+<rect x="508" y="538" width="192" height="24" rx="5" class="chip"/>
+<text x="518" y="554.5" class="tx s12 mono">STALE</text>
+<rect x="508" y="568" width="192" height="24" rx="5" class="chip"/>
+<text x="518" y="584.5" class="tx s12 mono">HISTORICAL</text>
+<rect x="508" y="598" width="192" height="24" rx="5" class="chip"/>
+<text x="518" y="614.5" class="tx s12 mono">UNKNOWN</text>
+<text x="508" y="700" class="mu s12">relation to the workspace now</text>
+<rect x="724" y="470" width="216" height="282" rx="8" class="n"/>
+<text x="736" y="494" class="tx b s13">Diagnostic outcome</text>
+<rect x="736" y="508" width="192" height="24" rx="5" class="chip"/>
+<text x="746" y="524.5" class="tx s12 mono">NO_ERRORS</text>
+<rect x="736" y="538" width="192" height="24" rx="5" class="a"/>
+<text x="746" y="554.5" class="ta b s12 mono">HAS_ERRORS</text>
+<rect x="736" y="568" width="192" height="24" rx="5" class="chip"/>
+<text x="746" y="584.5" class="tx s12 mono">NOT_AVAILABLE</text>
+<text x="736" y="700" class="mu s12">did the tool report errors</text>
+<rect x="952" y="470" width="216" height="282" rx="8" class="n"/>
+<text x="964" y="494" class="tx b s13">Backend availability</text>
+<rect x="964" y="508" width="192" height="24" rx="5" class="chip"/>
+<text x="974" y="524.5" class="tx s12 mono">READY</text>
+<rect x="964" y="538" width="192" height="24" rx="5" class="chip"/>
+<text x="974" y="554.5" class="tx s12 mono">DEGRADED</text>
+<rect x="964" y="568" width="192" height="24" rx="5" class="chip"/>
+<text x="974" y="584.5" class="tx s12 mono">UNAVAILABLE</text>
+<text x="964" y="700" class="mu s12">per backend; READY needs a</text>
+<text x="964" y="716" class="mu s12">real fixture query</text>
+<rect x="40" y="768" width="1130" height="40" rx="8" class="a"/>
+<text x="52" y="786" class="ta b s12">Example (blue chips): a design with errors is a job SUCCEEDED, analysis PARTIAL and diagnostics HAS_ERRORS.</text>
+<text x="52" y="802" class="tx s12">Job success is never shown as design PASS; absence of a result in a PARTIAL, STALE or truncated answer is not proof of absence.</text>
+<text x="40" y="842" class="tx b s14">Why the lookup inventory is part of snapshot_id (include search order: dir_a, dir_b)</text>
+<rect x="40" y="856" width="360" height="152" rx="8" class="n"/>
+<text x="52" y="878" class="tx b s12">before: common.svh exists only in dir_b</text>
+<rect x="52" y="898" width="336" height="22" rx="4" class="chip"/>
+<text x="62" y="913.5" class="tx s12 mono">dir_a/</text>
+<rect x="52" y="924" width="336" height="22" rx="4" class="a"/>
+<text x="62" y="939.5" class="ta b s12 mono">dir_b/common.svh   &lt;- selected</text>
+<rect x="420" y="856" width="360" height="152" rx="8" class="n"/>
+<text x="432" y="878" class="tx b s12">after: dir_a/common.svh is added</text>
+<rect x="432" y="898" width="336" height="22" rx="4" class="a"/>
+<text x="442" y="913.5" class="ta b s12 mono">dir_a/common.svh   &lt;- selected (new)</text>
+<rect x="432" y="924" width="336" height="22" rx="4" class="chip"/>
+<text x="442" y="939.5" class="tx s12 mono">dir_b/common.svh   unchanged, shadowed</text>
+<path d="M400,932 L420,932" class="l" marker-end="url(#mg)"/>
+<rect x="800" y="856" width="370" height="152" rx="8" class="chip"/>
+<text x="812" y="878" class="tx b s12">consequence</text>
+<text x="812" y="898" class="mu s12">dir_b/common.svh did not change, yet the</text>
+<text x="812" y="915" class="mu s12">header actually selected did. A hash of</text>
+<text x="812" y="932" class="mu s12">the used sources alone would miss it.</text>
+<text x="812" y="949" class="mu s12">Added or removed candidates, library</text>
+<text x="812" y="966" class="mu s12">members and negative lookups therefore</text>
+<text x="812" y="983" class="mu s12">change snapshot_id, and so the build_id.</text>
+</svg>

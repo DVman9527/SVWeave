@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "build_id"
+      ]
+    },
+    {
+      "required": [
+        "evidence_id"
+      ]
+    }
+  ],
+  "properties": {
+    "build_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "cursor": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+$",
+      "type": "string"
+    },
+    "evidence_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "limit": {
+      "default": 100,
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "type": {
+      "enum": [
+        "static",
+        "eda_compile",
+        "simulation",
+        "formal",
+        "coverage"
+      ]
+    }
+  },
+  "type": "object"
+}

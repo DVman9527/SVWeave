@@ -1,0 +1,625 @@
+{
+  "$defs": {
+    "CbmPin": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_strip_components": {
+          "title": "Archive Strip Components",
+          "type": "integer"
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "binary": {
+          "minLength": 1,
+          "title": "Binary",
+          "type": "string"
+        },
+        "binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Binary Sha256",
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "install_dir": {
+          "minLength": 1,
+          "title": "Install Dir",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        },
+        "upstream_checksums_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Upstream Checksums Sha256",
+          "type": "string"
+        },
+        "upstream_checksums_url": {
+          "minLength": 1,
+          "title": "Upstream Checksums Url",
+          "type": "string"
+        },
+        "variant": {
+          "minLength": 1,
+          "title": "Variant",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commit",
+        "artifact_sha256",
+        "tag",
+        "variant",
+        "source_url",
+        "upstream_checksums_url",
+        "upstream_checksums_sha256",
+        "install_dir",
+        "archive_strip_components",
+        "binary",
+        "binary_sha256"
+      ],
+      "title": "CbmPin",
+      "type": "object"
+    },
+    "Components": {
+      "additionalProperties": false,
+      "properties": {
+        "codebase_memory_mcp": {
+          "$ref": "#/$defs/CbmPin"
+        },
+        "mcp_sdk": {
+          "$ref": "#/$defs/McpSdkPin"
+        },
+        "pyslang": {
+          "$ref": "#/$defs/PyslangPin"
+        },
+        "serena": {
+          "$ref": "#/$defs/SerenaPin"
+        },
+        "slang": {
+          "$ref": "#/$defs/SlangPin"
+        },
+        "uvm_core": {
+          "$ref": "#/$defs/UvmPin"
+        },
+        "verible": {
+          "$ref": "#/$defs/VeriblePin"
+        }
+      },
+      "required": [
+        "slang",
+        "pyslang",
+        "serena",
+        "verible",
+        "codebase_memory_mcp",
+        "mcp_sdk",
+        "uvm_core"
+      ],
+      "title": "Components",
+      "type": "object"
+    },
+    "GatewayWheelhouse": {
+      "additionalProperties": false,
+      "description": "Hash-pinned offline wheelhouse of the gateway environment (scripts/gateway-requirements).",
+      "properties": {
+        "install": {
+          "minLength": 1,
+          "title": "Install",
+          "type": "string"
+        },
+        "requirements_file": {
+          "minLength": 1,
+          "title": "Requirements File",
+          "type": "string"
+        },
+        "requirements_in": {
+          "minLength": 1,
+          "title": "Requirements In",
+          "type": "string"
+        },
+        "requirements_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Requirements Sha256",
+          "type": "string"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "wheelhouse_dir": {
+          "minLength": 1,
+          "title": "Wheelhouse Dir",
+          "type": "string"
+        },
+        "wheels": {
+          "items": {
+            "$ref": "#/$defs/Wheel"
+          },
+          "title": "Wheels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "requirements_in",
+        "requirements_file",
+        "requirements_sha256",
+        "wheelhouse_dir",
+        "target",
+        "install",
+        "wheels"
+      ],
+      "title": "GatewayWheelhouse",
+      "type": "object"
+    },
+    "McpSdkPin": {
+      "additionalProperties": false,
+      "properties": {
+        "install_target": {
+          "minLength": 1,
+          "title": "Install Target",
+          "type": "string"
+        },
+        "note": {
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "wheel_filename": {
+          "minLength": 1,
+          "title": "Wheel Filename",
+          "type": "string"
+        },
+        "wheel_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Wheel Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "wheel_sha256",
+        "wheel_filename",
+        "source_url",
+        "install_target",
+        "note"
+      ],
+      "title": "McpSdkPin",
+      "type": "object"
+    },
+    "PyslangPin": {
+      "additionalProperties": false,
+      "properties": {
+        "install_target": {
+          "minLength": 1,
+          "title": "Install Target",
+          "type": "string"
+        },
+        "record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Sha256",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "upstream_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Upstream Commit",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "wheel_filename": {
+          "minLength": 1,
+          "title": "Wheel Filename",
+          "type": "string"
+        },
+        "wheel_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Wheel Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "wheel_sha256",
+        "record_sha256",
+        "wheel_filename",
+        "source_url",
+        "install_target",
+        "upstream_commit"
+      ],
+      "title": "PyslangPin",
+      "type": "object"
+    },
+    "SerenaPin": {
+      "additionalProperties": false,
+      "properties": {
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "dependency_lock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dependency Lock Sha256",
+          "type": "string"
+        },
+        "install_method": {
+          "minLength": 1,
+          "title": "Install Method",
+          "type": "string"
+        },
+        "license_file_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "License File Sha256",
+          "type": "string"
+        },
+        "package": {
+          "minLength": 1,
+          "title": "Package",
+          "type": "string"
+        },
+        "pinned_mcp_python_sdk_inside_serena": {
+          "minLength": 1,
+          "title": "Pinned Mcp Python Sdk Inside Serena",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "src_dir": {
+          "minLength": 1,
+          "title": "Src Dir",
+          "type": "string"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        },
+        "venv_dir": {
+          "minLength": 1,
+          "title": "Venv Dir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commit",
+        "dependency_lock_sha256",
+        "tag",
+        "package",
+        "source_url",
+        "src_dir",
+        "venv_dir",
+        "install_method",
+        "license_file_sha256",
+        "pinned_mcp_python_sdk_inside_serena"
+      ],
+      "title": "SerenaPin",
+      "type": "object"
+    },
+    "SlangPin": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_strip_components": {
+          "title": "Archive Strip Components",
+          "type": "integer"
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "binary": {
+          "minLength": 1,
+          "title": "Binary",
+          "type": "string"
+        },
+        "binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Binary Sha256",
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "install_dir": {
+          "minLength": 1,
+          "title": "Install Dir",
+          "type": "string"
+        },
+        "paired_with": {
+          "minLength": 1,
+          "title": "Paired With",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        },
+        "version_string": {
+          "minLength": 1,
+          "title": "Version String",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commit",
+        "artifact_sha256",
+        "tag",
+        "version_string",
+        "source_url",
+        "install_dir",
+        "archive_strip_components",
+        "binary",
+        "binary_sha256",
+        "role",
+        "paired_with"
+      ],
+      "title": "SlangPin",
+      "type": "object"
+    },
+    "UvmPin": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_strip_components": {
+          "title": "Archive Strip Components",
+          "type": "integer"
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "install_dir": {
+          "minLength": 1,
+          "title": "Install Dir",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "commit",
+        "artifact_sha256",
+        "source_url",
+        "install_dir",
+        "archive_strip_components",
+        "role"
+      ],
+      "title": "UvmPin",
+      "type": "object"
+    },
+    "VeriblePin": {
+      "additionalProperties": false,
+      "properties": {
+        "archive_strip_components": {
+          "title": "Archive Strip Components",
+          "type": "integer"
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "binary": {
+          "minLength": 1,
+          "title": "Binary",
+          "type": "string"
+        },
+        "binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Binary Sha256",
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "install_dir": {
+          "minLength": 1,
+          "title": "Install Dir",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "artifact_sha256",
+        "commit",
+        "source_url",
+        "install_dir",
+        "archive_strip_components",
+        "binary",
+        "binary_sha256"
+      ],
+      "title": "VeriblePin",
+      "type": "object"
+    },
+    "Wheel": {
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "sha256",
+        "source_url"
+      ],
+      "title": "Wheel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "capability_report_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capability Report Sha256"
+    },
+    "components": {
+      "$ref": "#/$defs/Components"
+    },
+    "created_at": {
+      "minLength": 1,
+      "title": "Created At",
+      "type": "string"
+    },
+    "created_by": {
+      "minLength": 1,
+      "title": "Created By",
+      "type": "string"
+    },
+    "gateway_wheelhouse": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GatewayWheelhouse"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "license_manifest_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "License Manifest Sha256"
+    },
+    "platform": {
+      "minLength": 1,
+      "title": "Platform",
+      "type": "string"
+    },
+    "python_minor": {
+      "minLength": 1,
+      "title": "Python Minor",
+      "type": "string"
+    },
+    "qualification_state": {
+      "minLength": 1,
+      "title": "Qualification State",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "qualification_state",
+    "platform",
+    "python_minor",
+    "created_at",
+    "created_by",
+    "components"
+  ],
+  "title": "ToolchainLock",
+  "type": "object"
+}

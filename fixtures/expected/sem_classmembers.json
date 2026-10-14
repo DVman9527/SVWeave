@@ -1,0 +1,457 @@
+{
+  "topic": "sem_classmembers",
+  "fixture_dir": "language/sem_classmembers",
+  "top": "cm_top",
+  "declarations": [
+    {
+      "kind": "class",
+      "qualified_name": "cm_pkg::base_item",
+      "file": "top.sv",
+      "ctx": "class base_item;",
+      "nth": 0,
+      "text": "base_item",
+      "start": 76,
+      "end": 85
+    },
+    {
+      "kind": "class",
+      "qualified_name": "cm_pkg::ext_item",
+      "file": "top.sv",
+      "ctx": "class ext_item extends",
+      "nth": 0,
+      "text": "ext_item",
+      "start": 480,
+      "end": 488
+    },
+    {
+      "kind": "field",
+      "qualified_name": "cm_pkg::base_item::created",
+      "file": "top.sv",
+      "ctx": "static int created;",
+      "nth": 0,
+      "text": "created",
+      "start": 102,
+      "end": 109
+    },
+    {
+      "kind": "field",
+      "qualified_name": "cm_pkg::base_item::addr",
+      "file": "top.sv",
+      "ctx": "rand bit [7:0] addr;",
+      "nth": 0,
+      "text": "addr",
+      "start": 130,
+      "end": 134,
+      "rand_mode": "rand"
+    },
+    {
+      "kind": "constraint",
+      "qualified_name": "cm_pkg::base_item::c_addr",
+      "file": "top.sv",
+      "ctx": "constraint c_addr",
+      "nth": 0,
+      "text": "c_addr",
+      "start": 189,
+      "end": 195
+    },
+    {
+      "kind": "constraint",
+      "qualified_name": "cm_pkg::ext_item::c_data",
+      "file": "top.sv",
+      "ctx": "constraint c_data",
+      "nth": 0,
+      "text": "c_data",
+      "start": 523,
+      "end": 529
+    },
+    {
+      "kind": "covergroup",
+      "qualified_name": "cm_pkg::base_item::cg_item",
+      "file": "top.sv",
+      "ctx": "covergroup cg_item",
+      "nth": 0,
+      "text": "cg_item",
+      "start": 244,
+      "end": 251
+    },
+    {
+      "kind": "coverpoint",
+      "qualified_name": "cm_pkg::base_item.cp_addr",
+      "file": "top.sv",
+      "ctx": "cp_addr: coverpoint addr;",
+      "nth": 0,
+      "text": "cp_addr",
+      "start": 274,
+      "end": 281
+    },
+    {
+      "kind": "function",
+      "qualified_name": "cm_pkg::base_item::new",
+      "file": "top.sv",
+      "ctx": "function new();",
+      "nth": 0,
+      "text": "new",
+      "start": 326,
+      "end": 329,
+      "constructor": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "cm_pkg::base_item::count",
+      "file": "top.sv",
+      "ctx": "static function int count();",
+      "nth": 0,
+      "text": "count",
+      "start": 413,
+      "end": 418,
+      "static": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "cm_pkg::c_add",
+      "file": "top.sv",
+      "ctx": "function int c_add(int a, int b);",
+      "nth": 0,
+      "text": "c_add",
+      "start": 46,
+      "end": 51,
+      "dpi_import": true,
+      "dpi_spec": "DPI-C"
+    },
+    {
+      "kind": "package",
+      "qualified_name": "cm_pkg",
+      "file": "top.sv",
+      "ctx": "package cm_pkg;",
+      "nth": 0,
+      "text": "cm_pkg",
+      "start": 8,
+      "end": 14
+    },
+    {
+      "kind": "argument",
+      "qualified_name": "cm_pkg::c_add.a",
+      "file": "top.sv",
+      "ctx": "c_add(int a, int b)",
+      "nth": 0,
+      "text": "a",
+      "start": 56,
+      "end": 57
+    },
+    {
+      "kind": "argument",
+      "qualified_name": "cm_pkg::c_add.b",
+      "file": "top.sv",
+      "ctx": "c_add(int a, int b)",
+      "nth": 0,
+      "text": "b",
+      "start": 63,
+      "end": 64
+    },
+    {
+      "kind": "field",
+      "qualified_name": "cm_pkg::base_item::data",
+      "file": "top.sv",
+      "ctx": "rand bit [7:0] data;",
+      "nth": 0,
+      "text": "data",
+      "start": 155,
+      "end": 159
+    },
+    {
+      "kind": "field",
+      "qualified_name": "cm_pkg::base_item::clk",
+      "file": "top.sv",
+      "ctx": "bit clk;",
+      "nth": 0,
+      "text": "clk",
+      "start": 169,
+      "end": 172
+    },
+    {
+      "kind": "field",
+      "qualified_name": "cm_pkg::base_item::cg_item",
+      "file": "top.sv",
+      "ctx": "covergroup cg_item @",
+      "nth": 0,
+      "text": "cg_item",
+      "start": 244,
+      "end": 251
+    },
+    {
+      "kind": "function",
+      "qualified_name": "cm_pkg::ext_item::total",
+      "file": "top.sv",
+      "ctx": "function int total();",
+      "nth": 0,
+      "text": "total",
+      "start": 565,
+      "end": 570
+    },
+    {
+      "kind": "module",
+      "qualified_name": "cm_top",
+      "file": "top.sv",
+      "ctx": "module cm_top;",
+      "nth": 0,
+      "text": "cm_top",
+      "start": 652,
+      "end": 658
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "cm_top.it",
+      "file": "top.sv",
+      "ctx": "ext_item it;",
+      "nth": 0,
+      "text": "it",
+      "start": 691,
+      "end": 693
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "cm_top.n",
+      "file": "top.sv",
+      "ctx": "int n;",
+      "nth": 0,
+      "text": "n",
+      "start": 701,
+      "end": 702
+    }
+  ],
+  "bases": {
+    "cm_pkg::ext_item": "cm_pkg::base_item"
+  },
+  "references": [
+    {
+      "kind": "extends",
+      "target": "cm_pkg::base_item",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "class ext_item extends base_item;",
+      "nth": 0,
+      "text": "base_item",
+      "start": 497,
+      "end": 506
+    },
+    {
+      "kind": "call",
+      "target": "cm_pkg::c_add",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "c_add(addr, data)",
+      "nth": 0,
+      "text": "c_add",
+      "start": 587,
+      "end": 592
+    },
+    {
+      "kind": "call",
+      "target": "cm_pkg::base_item::count",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "base_item::count()",
+      "nth": 0,
+      "text": "count",
+      "start": 755,
+      "end": 760
+    },
+    {
+      "kind": "call",
+      "target": "cm_pkg::ext_item::total",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "it.total()",
+      "nth": 0,
+      "text": "total",
+      "start": 768,
+      "end": 773
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::addr",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "constraint c_addr { addr inside",
+      "nth": 0,
+      "text": "addr",
+      "start": 198,
+      "end": 202
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::clk",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "@(posedge clk)",
+      "nth": 0,
+      "text": "clk",
+      "start": 262,
+      "end": 265
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::addr",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "coverpoint addr",
+      "nth": 0,
+      "text": "addr",
+      "start": 294,
+      "end": 298
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::cg_item",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "cg_item = new();",
+      "nth": 0,
+      "text": "cg_item",
+      "start": 339,
+      "end": 346
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::created",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "created++",
+      "nth": 0,
+      "text": "created",
+      "start": 362,
+      "end": 369
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::created",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "return created;",
+      "nth": 0,
+      "text": "created",
+      "start": 435,
+      "end": 442
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::data",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "data > 8'h80",
+      "nth": 0,
+      "text": "data",
+      "start": 532,
+      "end": 536
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::addr",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "c_add(addr, data)",
+      "nth": 0,
+      "text": "addr",
+      "start": 593,
+      "end": 597
+    },
+    {
+      "kind": "value",
+      "target": "cm_pkg::base_item::data",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "c_add(addr, data)",
+      "nth": 0,
+      "text": "data",
+      "start": 599,
+      "end": 603
+    },
+    {
+      "kind": "import",
+      "target": "cm_pkg",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "import cm_pkg::*;",
+      "nth": 0,
+      "text": "cm_pkg::*",
+      "start": 669,
+      "end": 678
+    },
+    {
+      "kind": "type",
+      "target": "cm_pkg::ext_item",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "ext_item it;",
+      "nth": 0,
+      "text": "ext_item",
+      "start": 682,
+      "end": 690
+    },
+    {
+      "kind": "value",
+      "target": "cm_top.it",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "it = new();",
+      "nth": 0,
+      "text": "it",
+      "start": 724,
+      "end": 726
+    },
+    {
+      "kind": "new",
+      "target": "cm_pkg::ext_item",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "it = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 729,
+      "end": 734
+    },
+    {
+      "kind": "value",
+      "target": "cm_top.n",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "n = base_item::count()",
+      "nth": 0,
+      "text": "n",
+      "start": 740,
+      "end": 741
+    },
+    {
+      "kind": "value",
+      "target": "cm_top.it",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "it.total()",
+      "nth": 0,
+      "text": "it",
+      "start": 765,
+      "end": 767
+    }
+  ],
+  "closed_scope": {
+    "declaration_files": [
+      "top.sv"
+    ],
+    "reference_files": [
+      "top.sv"
+    ],
+    "exclude_declarations": [
+      {
+        "kind": "instance",
+        "qualified_name": "cm_top",
+        "file": "top.sv",
+        "ctx": "module cm_top;",
+        "nth": 0,
+        "text": "cm_top",
+        "start": 652,
+        "end": 658,
+        "reason": "the hierarchy root is modelled as an `instance` row spanning the same bytes as its module declaration; the module row is the golden entry"
+      }
+    ]
+  }
+}

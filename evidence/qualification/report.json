@@ -1,0 +1,2994 @@
+{
+  "version": "0.1.0-dev",
+  "generated_utc": "2026-10-13T15:44:43+00:00",
+  "platform": "Linux x86_64 4.18.0-553.74.1.el8_10.x86_64 py3.12.4",
+  "source_commit": "NONE (no commit in this repository) +dirty",
+  "lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+  "source_identity": {
+    "git_head": "NONE",
+    "src_tree_sha256": "cf30168deead688356f56ccdd323f75846dd6714ab508d0566fd807c768a1c5e"
+  },
+  "skipped_steps": [],
+  "step_summary": {
+    "lock verify": "rc=0",
+    "probe backends": "rc=0 {'pyslang': 'READY', 'slang_cli': 'READY', 'cbm': 'DEGRADED', 'serena': 'DEGRADED'}",
+    "tests/unit": "rc=0 passed=693 failed=0 errors=0 skipped=0",
+    "tests/contract": "rc=0 passed=40 failed=0 errors=0 skipped=0",
+    "tests/fault_injection": "rc=0 passed=19 failed=0 errors=0 skipped=0",
+    "tests/integration": "rc=0 passed=144 failed=0 errors=0 skipped=0",
+    "tests/acceptance": "rc=0 passed=12 failed=0 errors=0 skipped=0",
+    "coverage": "stmt 93.57% / branch 87.66%",
+    "mutation": "killed 22/22",
+    "benchmark (this run)": "rc=0 .svweave/qualification/bench/20261013T162122Z-s1.0.json",
+    "docs": "schema rc=0, doc tests rc=0"
+  },
+  "lock": {
+    "cmd": "${REPO}/.venv/bin/python scripts/bootstrap_locked.py --verify-only --report ${REPO}/.svweave/qualification/lock_verify.json",
+    "rc": 0,
+    "seconds": 1.7,
+    "log": ".svweave/qualification/logs/lock.log",
+    "tail": "lliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz\",\n      \"download_present\": true,\n      \"download_sha256_ok\": true,\n      \"binary_sha256_ok\": true\n    },\n    \"codebase_memory_mcp\": {\n      \"source_url\": \"https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz\",\n      \"download_present\": true,\n      \"download_sha256_ok\": true,\n      \"binary_sha256_ok\": true\n    },\n    \"uvm_core\": {\n      \"source_url\": \"https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz\",\n      \"download_present\": true,\n      \"download_sha256_ok\": true,\n      \"install_dir_present\": true\n    },\n    \"gateway_wheelhouse\": {\n      \"requirements_sha256_ok\": true,\n      \"wheels_expected\": 31,\n      \"wheels_present_sha256_ok\": 31\n    },\n    \"pyslang\": {\n      \"installed_version\": \"12.0.0\"\n    },\n    \"mcp_sdk\": {\n      \"installed_version\": \"2.3.0\"\n    },\n    \"serena\": {\n      \"commit_ok\": true,\n      \"uv_lock_sha256_ok\": true,\n      \"license_sha256_ok\": true,\n      \"serena_exe_present\": true,\n      \"serena_agent_version\": \"1.7.0\"\n    }\n  },\n  \"errors\": [],\n  \"ok\": true\n}",
+    "lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+    "null_or_empty_fields": [],
+    "verify_report": {
+      "lock": "${REPO}/toolchain.lock.json",
+      "lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+      "toolchain_dir": "${REPO}/.toolchain",
+      "verify_only": true,
+      "offline": false,
+      "components": {
+        "slang": {
+          "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+          "download_present": true,
+          "download_sha256_ok": true,
+          "binary_sha256_ok": true
+        },
+        "verible": {
+          "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+          "download_present": true,
+          "download_sha256_ok": true,
+          "binary_sha256_ok": true
+        },
+        "codebase_memory_mcp": {
+          "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+          "download_present": true,
+          "download_sha256_ok": true,
+          "binary_sha256_ok": true
+        },
+        "uvm_core": {
+          "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+          "download_present": true,
+          "download_sha256_ok": true,
+          "install_dir_present": true
+        },
+        "gateway_wheelhouse": {
+          "requirements_sha256_ok": true,
+          "wheels_expected": 31,
+          "wheels_present_sha256_ok": 31
+        },
+        "pyslang": {
+          "installed_version": "12.0.0"
+        },
+        "mcp_sdk": {
+          "installed_version": "2.3.0"
+        },
+        "serena": {
+          "commit_ok": true,
+          "uv_lock_sha256_ok": true,
+          "license_sha256_ok": true,
+          "serena_exe_present": true,
+          "serena_agent_version": "1.7.0"
+        }
+      },
+      "errors": [],
+      "ok": true
+    }
+  },
+  "probe": {
+    "cmd": "${REPO}/.venv/bin/python scripts/probe_backends.py --out ${REPO}/.svweave/qualification/capability_report.json",
+    "rc": 0,
+    "seconds": 35.3,
+    "log": ".svweave/qualification/logs/probe.log",
+    "tail": "{\n  \"summary\": {\n    \"pyslang\": \"READY\",\n    \"slang_cli\": \"READY\",\n    \"cbm\": \"DEGRADED\",\n    \"serena\": \"DEGRADED\"\n  },\n  \"limitations\": [\n    \"cbm: search_graph finds class svw_driver\",\n    \"cbm: two run_phase methods extracted\",\n    \"cbm: no fixture file parse_unusable\",\n    \"serena: find_symbol svw_driver/run_phase (task method)\"\n  ]\n}",
+    "summary": {
+      "pyslang": "READY",
+      "slang_cli": "READY",
+      "cbm": "DEGRADED",
+      "serena": "DEGRADED"
+    },
+    "failed_checks": {
+      "pyslang": [],
+      "slang_cli": [],
+      "cbm": [
+        "search_graph finds class svw_driver",
+        "two run_phase methods extracted",
+        "no fixture file parse_unusable"
+      ],
+      "serena": [
+        "find_symbol svw_driver/run_phase (task method)"
+      ]
+    }
+  },
+  "tests": {
+    "unit": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/unit -p no:cacheprovider --junitxml=${REPO}/.svweave/qualification/junit_unit.xml -q ...",
+      "rc": 0,
+      "seconds": 241.2,
+      "log": ".svweave/qualification/logs/tests_unit.log",
+      "tail": "137, 164->166, 168-169\nsrc/svweave/security/sandbox.py                       135      4     48      2    97%   68, 116-117, 236->235, 315\nsrc/svweave/server.py                                  70     42      4      0    38%   45-46, 56-96, 108-120, 125-128, 132-133, 138-144\nsrc/svweave/snapshot/capture.py                       337     32    162      8    90%   76, 79, 81-82, 87-101, 118, 152, 171-173, 181->179, 242->234, 317-321, 383-385\nsrc/svweave/storage/db.py                             203      5     72      3    96%   276, 322-323, 347->343, 360-361\nsrc/svweave/storage/semantic.py                        15      5      4      0    53%   156-160\n-----------------------------------------------------------------------------------------------\nTOTAL                                               11501   2408   3500    293    77%\n\n47 files skipped due to complete coverage.\n${REPO}/.venv/lib/python3.12/site-packages/coverage/inorout.py:574: CoverageWarning: Module svweave was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured\n  self.warn(msg, slug=\"module-not-measured\")",
+      "passed": 693,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_adapters_cbm": {
+          "passed": 25,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_hardening": {
+          "passed": 34,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_mcp_client": {
+          "passed": 15,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_orchestration": {
+          "passed": 14,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_redaction": {
+          "passed": 6,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_search": {
+          "passed": 18,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_adapters_serena": {
+          "passed": 35,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_bench_evidence": {
+          "passed": 6,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_cli": {
+          "passed": 14,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_config": {
+          "passed": 24,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_cursor": {
+          "passed": 7,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_domain": {
+          "passed": 10,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_commit": {
+          "passed": 25,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_final_a": {
+          "passed": 26,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_machine": {
+          "passed": 18,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_prepare": {
+          "passed": 31,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_review_fixes": {
+          "passed": 32,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_slang_symbol": {
+          "passed": 64,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edit_validate": {
+          "passed": 19,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_fix_round_b1": {
+          "passed": 6,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_fix_round_b2": {
+          "passed": 7,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_cli": {
+          "passed": 8,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_evidence": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_jobs": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_status_report": {
+          "passed": 11,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_locations": {
+          "passed": 8,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_m3b_fixes": {
+          "passed": 35,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_manifest": {
+          "passed": 49,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_review_fixes": {
+          "passed": 41,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_sandbox": {
+          "passed": 20,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_semantic_envelope": {
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_slang_args": {
+          "passed": 3,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_slang_ingest": {
+          "passed": 20,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_slang_runner": {
+          "passed": 12,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_snapshot": {
+          "passed": 18,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_storage": {
+          "passed": 12,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    },
+    "contract": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/contract -p no:cacheprovider --junitxml=${REPO}/.svweave/qualification/junit_contract.xml -q ...",
+      "rc": 0,
+      "seconds": 25.9,
+      "log": ".svweave/qualification/logs/tests_contract.log",
+      "tail": " 98, 110-113, 137, 164->166, 168-169\nsrc/svweave/security/sandbox.py                       135      4     48      2    97%   68, 116-117, 236->235, 315\nsrc/svweave/server.py                                  70     25      4      0    61%   108-120, 125-128, 132-133, 138-144\nsrc/svweave/snapshot/capture.py                       337     32    162      8    90%   76, 79, 81-82, 87-101, 118, 152, 171-173, 181->179, 242->234, 317-321, 383-385\nsrc/svweave/storage/db.py                             203      5     72      3    96%   276, 322-323, 347->343, 360-361\nsrc/svweave/storage/semantic.py                        15      5      4      0    53%   156-160\n-----------------------------------------------------------------------------------------------\nTOTAL                                               11501   2203   3500    300    79%\n\n47 files skipped due to complete coverage.\n${REPO}/.venv/lib/python3.12/site-packages/coverage/inorout.py:574: CoverageWarning: Module svweave was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured\n  self.warn(msg, slug=\"module-not-measured\")",
+      "passed": 40,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_cli_parity": {
+          "passed": 8,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_mcp_api": {
+          "passed": 11,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_mcp_schemas": {
+          "passed": 17,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_stdio_server": {
+          "passed": 4,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    },
+    "fault_injection": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/fault_injection -p no:cacheprovider --junitxml=${REPO}/.svweave/qualification/junit_fault_injection.xml -q ...",
+      "rc": 0,
+      "seconds": 34.7,
+      "log": ".svweave/qualification/logs/tests_fault_injection.log",
+      "tail": " 98, 110-113, 137, 164->166, 168-169\nsrc/svweave/security/sandbox.py                       135      4     48      2    97%   68, 116-117, 236->235, 315\nsrc/svweave/server.py                                  70     25      4      0    61%   108-120, 125-128, 132-133, 138-144\nsrc/svweave/snapshot/capture.py                       337     32    162      8    90%   76, 79, 81-82, 87-101, 118, 152, 171-173, 181->179, 242->234, 317-321, 383-385\nsrc/svweave/storage/db.py                             203      5     72      3    96%   276, 322-323, 347->343, 360-361\nsrc/svweave/storage/semantic.py                        15      5      4      0    53%   156-160\n-----------------------------------------------------------------------------------------------\nTOTAL                                               11501   2165   3500    294    79%\n\n47 files skipped due to complete coverage.\n${REPO}/.venv/lib/python3.12/site-packages/coverage/inorout.py:574: CoverageWarning: Module svweave was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured\n  self.warn(msg, slug=\"module-not-measured\")",
+      "passed": 19,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_edit_crash": {
+          "passed": 11,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_recover_gates": {
+          "passed": 8,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    },
+    "integration": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/integration -p no:cacheprovider --junitxml=${REPO}/.svweave/qualification/junit_integration.xml -q ...",
+      "rc": 0,
+      "seconds": 895.4,
+      "log": ".svweave/qualification/logs/tests_integration.log",
+      "tail": "    93%   53-54, 98, 110-113, 168-169\nsrc/svweave/security/sandbox.py                       135      3     48      2    97%   68, 116-117, 236->235\nsrc/svweave/server.py                                  70     25      4      0    61%   108-120, 125-128, 132-133, 138-144\nsrc/svweave/snapshot/capture.py                       337     17    162      8    95%   76, 79, 81-82, 89, 98-99, 118, 152, 171->170, 181->179, 242->234, 317-321, 383-385\nsrc/svweave/storage/db.py                             203      5     72      3    96%   276, 322-323, 347->343, 360-361\nsrc/svweave/storage/semantic.py                        15      5      4      0    53%   156-160\n-----------------------------------------------------------------------------------------------\nTOTAL                                               11501    745   3500    345    92%\n\n47 files skipped due to complete coverage.\n${REPO}/.venv/lib/python3.12/site-packages/coverage/inorout.py:574: CoverageWarning: Module svweave was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured\n  self.warn(msg, slug=\"module-not-measured\")",
+      "passed": 144,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_api_semantic": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_build_identity": {
+          "passed": 5,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_cli_semantic": {
+          "passed": 4,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_dep01_cleanroom": {
+          "passed": 1,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edt_flow": {
+          "passed": 5,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_edt_slang_symbol": {
+          "passed": 4,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_extractor_dto": {
+          "passed": 18,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_fix_round_b": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_freshness_fastpath": {
+          "passed": 3,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_stdio": {
+          "passed": 1,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_cbm": {
+          "passed": 12,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_hardening": {
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_leaks": {
+          "passed": 5,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_registry": {
+          "passed": 6,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_sandbox": {
+          "passed": 4,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_int_serena": {
+          "passed": 10,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_loc": {
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_obs01_repro": {
+          "passed": 1,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_repo_profiles": {
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_review_fixes": {
+          "passed": 18,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_run_artifacts_freshness": {
+          "passed": 4,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_sem": {
+          "passed": 11,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_sva": {
+          "passed": 5,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_uvm": {
+          "passed": 3,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    },
+    "acceptance": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/acceptance -p no:cacheprovider --junitxml=${REPO}/.svweave/qualification/junit_acceptance.xml -q ...",
+      "rc": 0,
+      "seconds": 67.2,
+      "log": ".svweave/qualification/logs/tests_acceptance.log",
+      "tail": "    93%   53-54, 98, 110-113, 168-169\nsrc/svweave/security/sandbox.py                       135      3     48      2    97%   68, 116-117, 236->235\nsrc/svweave/server.py                                  70     25      4      0    61%   108-120, 125-128, 132-133, 138-144\nsrc/svweave/snapshot/capture.py                       337     17    162      8    95%   76, 79, 81-82, 89, 98-99, 118, 152, 171->170, 181->179, 242->234, 317-321, 383-385\nsrc/svweave/storage/db.py                             203      5     72      3    96%   276, 322-323, 347->343, 360-361\nsrc/svweave/storage/semantic.py                        15      5      4      0    53%   156-160\n-----------------------------------------------------------------------------------------------\nTOTAL                                               11501    740   3500    344    92%\n\n47 files skipped due to complete coverage.\n${REPO}/.venv/lib/python3.12/site-packages/coverage/inorout.py:574: CoverageWarning: Module svweave was previously imported, but not measured (module-not-measured); see https://coverage.readthedocs.io/en/7.16.2/messages.html#warning-module-not-measured\n  self.warn(msg, slug=\"module-not-measured\")",
+      "passed": 12,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_demo_flow": {
+          "passed": 12,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    }
+  },
+  "coverage": {
+    "statements": 11501,
+    "missing_statements": 740,
+    "statement_percent": 93.57,
+    "branches": 3500,
+    "missing_branches": 432,
+    "partial_branches": 344,
+    "branch_percent": 87.66,
+    "combined_percent": 92.18718752083194,
+    "worst_files": [
+      {
+        "file": "src/svweave/adapters/slang/worker.py",
+        "percent": 51.1
+      },
+      {
+        "file": "src/svweave/storage/semantic.py",
+        "percent": 52.6
+      },
+      {
+        "file": "src/svweave/server.py",
+        "percent": 60.8
+      },
+      {
+        "file": "src/svweave/adapters/slang/locator.py",
+        "percent": 74.4
+      },
+      {
+        "file": "src/svweave/orchestration/registry.py",
+        "percent": 81.7
+      },
+      {
+        "file": "src/svweave/application/services.py",
+        "percent": 84.2
+      },
+      {
+        "file": "src/svweave/editing/candidate.py",
+        "percent": 84.8
+      },
+      {
+        "file": "src/svweave/application/jobs.py",
+        "percent": 87.3
+      },
+      {
+        "file": "src/svweave/adapters/slang/extract.py",
+        "percent": 87.5
+      },
+      {
+        "file": "src/svweave/editing/journal.py",
+        "percent": 88.2
+      }
+    ],
+    "scope": "src/svweave (own Python only; no exclusions added)",
+    "note": "the HDL worker runs in a subprocess with a clean environment, so its lines count only where tests import the extractor in-process"
+  },
+  "mutation": {
+    "cmd": "${REPO}/.venv/bin/python scripts/mutation_suite.py --out ${REPO}/.svweave/qualification/mutation.json",
+    "rc": 0,
+    "seconds": 894.6,
+    "log": ".svweave/qualification/logs/mutation.log",
+    "tail": "cape check after the candidate build removed\n[mut] baseline for M18: rc=0 ['..                                                                       [100%]']\n[mut] M18 KILLED: slang_symbol base-span shape check removed (extern / prototype / odd span)\n[mut] baseline for M19: rc=0 ['.                                                                        [100%]']\n[mut] M19 KILLED: slang_symbol accepts a symbol_id that is not a task or function\n[mut] baseline for M20: rc=0 ['...............                                                          [100%]']\n[mut] M20 KILLED: slang_symbol replacement may contain preprocessor directives / pasting / any macro\n[mut] baseline for M21: rc=0 ['.                                                                        [100%]']\n[mut] M21 KILLED: slang_symbol candidate target span is not required to equal the replacement\n[mut] baseline for M22: rc=0 ['.                                                                        [100%]']\n[mut] M22 KILLED: slang_symbol macro-body walk ignores state-changing directives (include / undef / define)\n[mut] killed 22/22; survived=[] errors=[]; wrote ${REPO}/.svweave/qualification/mutation.json",
+    "result": {
+      "suite": "critical-mutations (plan 20.5)",
+      "date": "2026-10-13T16:21:21+00:00",
+      "import_proof": {
+        "svweave_origin_under_python_I": "${REPO}/.svweave/mutation/repo/src/svweave/__init__.py",
+        "inside_scratch_copy": true
+      },
+      "total": 22,
+      "killed": 22,
+      "survived": [],
+      "errors": [],
+      "all_killed": true,
+      "baselines": {
+        "tests/unit/test_snapshot.py tests/unit/test_review_fixes.py -k SNP or header": {
+          "rc": 0,
+          "seconds": 4.9,
+          "tail": [
+            "...........                                                              [100%]"
+          ]
+        },
+        "tests/unit/test_slang_args.py tests/integration/test_build_identity.py -k BLD_07 or include or incdir or slang_args or args": {
+          "rc": 0,
+          "seconds": 6.4,
+          "tail": [
+            "....                                                                     [100%]"
+          ]
+        },
+        "tests/integration/test_uvm.py tests/integration/test_sem.py tests/integration/test_edt_flow.py::test_bare_method_name_is_ambiguous_even_with_real_serena": {
+          "rc": 0,
+          "seconds": 61.1,
+          "tail": [
+            "...............                                                          [100%]"
+          ]
+        },
+        "tests/integration/test_sem.py tests/integration/test_sva.py tests/integration/test_cli_semantic.py": {
+          "rc": 0,
+          "seconds": 21.2,
+          "tail": [
+            "....................                                                     [100%]"
+          ]
+        },
+        "tests/unit/test_edit_prepare.py tests/unit/test_edit_commit.py tests/fault_injection/test_edit_crash.py": {
+          "rc": 0,
+          "seconds": 84.6,
+          "tail": [
+            "...................................................................      [100%]"
+          ]
+        },
+        "tests/unit/test_edit_commit.py tests/unit/test_edit_machine.py tests/unit/test_edit_validate.py": {
+          "rc": 0,
+          "seconds": 64.6,
+          "tail": [
+            "..............................................................           [100%]"
+          ]
+        },
+        "tests/unit/test_edit_prepare.py tests/unit/test_edit_validate.py tests/unit/test_adapters_serena.py": {
+          "rc": 0,
+          "seconds": 51.2,
+          "tail": [
+            "........................................................................ [ 84%]",
+            ".............                                                            [100%]"
+          ]
+        },
+        "tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable tests/unit/test_sandbox.py": {
+          "rc": 0,
+          "seconds": 4.1,
+          "tail": [
+            ".....................                                                    [100%]"
+          ]
+        },
+        "tests/fault_injection/test_edit_crash.py tests/unit/test_edit_commit.py": {
+          "rc": 0,
+          "seconds": 61.3,
+          "tail": [
+            "....................................                                     [100%]"
+          ]
+        },
+        "tests/unit/test_manifest.py tests/unit/test_slang_args.py tests/unit/test_config.py": {
+          "rc": 0,
+          "seconds": 6.1,
+          "tail": [
+            "........................................................................ [ 94%]",
+            "....                                                                     [100%]"
+          ]
+        },
+        "tests/unit/test_gateway_evidence.py tests/unit/test_gateway_status_report.py tests/contract": {
+          "rc": 0,
+          "seconds": 23.7,
+          "tail": [
+            "............................................................             [100%]"
+          ]
+        },
+        "tests/fault_injection/test_recover_gates.py": {
+          "rc": 0,
+          "seconds": 12.3,
+          "tail": [
+            "........                                                                 [100%]"
+          ]
+        },
+        "tests/unit/test_edit_final_a.py tests/fault_injection/test_recover_gates.py tests/unit/test_edit_review_fixes.py::test_f10_m12_commit_time_policy_narrowing_is_policy_denied tests/unit/test_edit_review_fixes.py::test_m12_precommit_path_check_is_independent_of_the_freeze_check": {
+          "rc": 0,
+          "seconds": 24.7,
+          "tail": [
+            "....................................                                     [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_resolver_refuses_a_build_that_belongs_to_another_snapshot tests/unit/test_edit_slang_symbol.py::test_partial_build_refuses_name_resolution_at_prepare_and_in_the_resolver": {
+          "rc": 0,
+          "seconds": 5.3,
+          "tail": [
+            "..                                                                       [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_b1_bare_name_shared_by_module_interface_and_class_is_ambiguous tests/unit/test_edit_slang_symbol.py::test_bare_name_matching_several_is_ambiguous_and_lists_scoped_candidates": {
+          "rc": 0,
+          "seconds": 4.4,
+          "tail": [
+            "..                                                                       [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration tests/unit/test_edit_slang_symbol.py::test_replacement_must_be_a_whole_declaration_of_the_same_kind": {
+          "rc": 0,
+          "seconds": 10.7,
+          "tail": [
+            "..............                                                           [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape": {
+          "rc": 0,
+          "seconds": 5.4,
+          "tail": [
+            "..                                                                       [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_m18_non_declaration_span_is_refused_with_the_specific_reason tests/unit/test_edit_slang_symbol.py::test_extern_prototype_span_is_refused": {
+          "rc": 0,
+          "seconds": 4.4,
+          "tail": [
+            "..                                                                       [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused": {
+          "rc": 0,
+          "seconds": 3.8,
+          "tail": [
+            ".                                                                        [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused tests/unit/test_edit_slang_symbol.py::test_r1_macro_end_task_escape_on_a_module_task_is_refused tests/unit/test_edit_slang_symbol.py::test_r2_macro_redefinition_cannot_change_later_code tests/unit/test_edit_slang_symbol.py::test_r1_macro_invocation_rules": {
+          "rc": 0,
+          "seconds": 11.4,
+          "tail": [
+            "...............                                                          [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs": {
+          "rc": 0,
+          "seconds": 4.2,
+          "tail": [
+            ".                                                                        [100%]"
+          ]
+        },
+        "tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused": {
+          "rc": 0,
+          "seconds": 4.1,
+          "tail": [
+            ".                                                                        [100%]"
+          ]
+        }
+      },
+      "mutations": [
+        {
+          "id": "M01",
+          "title": "remove the header hash from the snapshot inventory (headers hash to a constant)",
+          "plan": "20.5 #1; 9.1/9.3",
+          "files": [
+            "src/svweave/snapshot/capture.py"
+          ],
+          "tests": [
+            "tests/unit/test_snapshot.py",
+            "tests/unit/test_review_fixes.py",
+            "-k",
+            "SNP or header"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.snapshot.capture": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 5.3,
+          "failing_tests": [
+            "tests/unit/test_snapshot.py::test_SNP_01_modified_included_header_makes_snapshot_stale",
+            "tests/unit/test_snapshot.py::test_SNP_02_new_higher_priority_header_invalidates_even_if_original_unchanged",
+            "tests/unit/test_snapshot.py::test_SNP_02_lookup_inventory_covers_search_space_even_when_empty_dir",
+            "tests/unit/test_snapshot.py::test_SNP_02_nested_include_subdir_and_excluded_dirs",
+            "tests/unit/test_snapshot.py::test_SNP_05_new_file_appearing_in_lookup_dir_during_capture"
+          ],
+          "pytest_tail": [
+            "FAILED tests/unit/test_snapshot.py::test_SNP_02_lookup_inventory_covers_search_space_even_when_empty_dir",
+            "FAILED tests/unit/test_snapshot.py::test_SNP_02_nested_include_subdir_and_excluded_dirs",
+            "FAILED tests/unit/test_snapshot.py::test_SNP_05_new_file_appearing_in_lookup_dir_during_capture",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M02",
+          "title": "ignore include-directory order (slang -I dirs are sorted alphabetically)",
+          "plan": "20.5 #2; BLD-07",
+          "files": [
+            "src/svweave/manifest/slang_args.py"
+          ],
+          "tests": [
+            "tests/unit/test_slang_args.py",
+            "tests/integration/test_build_identity.py",
+            "-k",
+            "BLD_07 or include or incdir or slang_args or args"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.manifest.slang_args": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 6.1,
+          "failing_tests": [
+            "tests/integration/test_build_identity.py::test_BLD_07_include_dir_order_changes_selected_header_and_build_id"
+          ],
+          "pytest_tail": [
+            "      + 11",
+            "${REPO}/.svweave/mutation/repo/tests/integration/test_build_identity.py:68: AssertionError: assert '11' == '22'",
+            "=========================== short test summary info ============================",
+            "FAILED tests/integration/test_build_identity.py::test_BLD_07_include_dir_order_changes_selected_header_and_build_id"
+          ]
+        },
+        {
+          "id": "M03",
+          "title": "merge methods by bare name (function/task qualified_name = bare name)",
+          "plan": "20.5 #3; SEM same-name methods",
+          "files": [
+            "src/svweave/adapters/slang/extract.py"
+          ],
+          "tests": [
+            "tests/integration/test_uvm.py",
+            "tests/integration/test_sem.py",
+            "tests/integration/test_edt_flow.py::test_bare_method_name_is_ambiguous_even_with_real_serena"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.adapters.slang.extract": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 36.1,
+          "failing_tests": [
+            "tests/integration/test_uvm.py::test_UVM_01_real_uvm_static_compile_finds_classes_and_methods",
+            "tests/integration/test_uvm.py::test_UVM_02_factory_overrides_are_listed_call_sites_not_a_topology",
+            "tests/integration/test_uvm.py::test_UVM_03_config_db_sites_keep_type_wildcard_and_context",
+            "tests/integration/test_sem.py::test_SEM_01_same_name_methods_in_two_packages_stay_separate",
+            "tests/integration/test_sem.py::test_SEM_02_parameterized_class_specializations_share_one_declaration"
+          ],
+          "pytest_tail": [
+            "FAILED tests/integration/test_uvm.py::test_UVM_03_config_db_sites_keep_type_wildcard_and_context",
+            "FAILED tests/integration/test_sem.py::test_SEM_01_same_name_methods_in_two_packages_stay_separate",
+            "FAILED tests/integration/test_sem.py::test_SEM_02_parameterized_class_specializations_share_one_declaration",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M04",
+          "title": "PARTIAL becomes COMPLETE (ingest completeness verdict always COMPLETE)",
+          "plan": "20.5 #4; SEM-07",
+          "files": [
+            "src/svweave/adapters/slang/ingest.py"
+          ],
+          "tests": [
+            "tests/integration/test_sem.py",
+            "tests/integration/test_sva.py",
+            "tests/integration/test_cli_semantic.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.adapters.slang.ingest": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 20.4,
+          "failing_tests": [
+            "tests/integration/test_sem.py::test_SEM_07_errors_give_precise_diagnostics_and_partial",
+            "tests/integration/test_sva.py::test_SVA_02_unknown_signal_and_unresolvable_bind_are_not_a_valid_inventory",
+            "tests/integration/test_sva.py::test_stub_boundary_marks_partial_and_names_the_stub",
+            "tests/integration/test_cli_semantic.py::test_build_exit_code_3_for_errors_and_connections_query"
+          ],
+          "pytest_tail": [
+            "FAILED tests/integration/test_sem.py::test_SEM_07_errors_give_precise_diagnostics_and_partial",
+            "FAILED tests/integration/test_sva.py::test_SVA_02_unknown_signal_and_unresolvable_bind_are_not_a_valid_inventory",
+            "FAILED tests/integration/test_sva.py::test_stub_boundary_marks_partial_and_names_the_stub",
+            "FAILED tests/integration/test_cli_semantic.py::test_build_exit_code_3_for_errors_and_connections_query"
+          ]
+        },
+        {
+          "id": "M05",
+          "title": "cancel the expected-hash compare-and-set (exact range and commit precondition)",
+          "plan": "20.5 #5; EDT-02",
+          "files": [
+            "src/svweave/editing/plan.py",
+            "src/svweave/application/edit.py",
+            "src/svweave/editing/journal.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_prepare.py",
+            "tests/unit/test_edit_commit.py",
+            "tests/fault_injection/test_edit_crash.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            },
+            "svweave.application.edit": {
+              "origin_in_copy": true,
+              "marker_present": true
+            },
+            "svweave.editing.journal": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 84.0,
+          "failing_tests": [
+            "tests/unit/test_edit_commit.py::test_edt02_stale_expected_hash_check_protects_the_target_even_if_snapshot_check_passes",
+            "tests/fault_injection/test_edit_crash.py::test_failure_during_apply_after_some_files_requires_recovery"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/fault_injection/test_edit_crash.py:50: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_commit.py::test_edt02_stale_expected_hash_check_protects_the_target_even_if_snapshot_check_passes",
+            "FAILED tests/fault_injection/test_edit_crash.py::test_failure_during_apply_after_some_files_requires_recovery"
+          ]
+        },
+        {
+          "id": "M06",
+          "title": "accept a fake approval (HMAC signature check disabled)",
+          "plan": "20.5 #6; EDT-04",
+          "files": [
+            "src/svweave/editing/approval.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_commit.py",
+            "tests/unit/test_edit_machine.py",
+            "tests/unit/test_edit_validate.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.approval": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 65.5,
+          "failing_tests": [
+            "tests/unit/test_edit_commit.py::test_sec06_forged_approval_files_are_refused"
+          ],
+          "pytest_tail": [
+            "      + approval_binding_mismatch",
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_commit.py:132: AssertionError: assert 'approval_binding_mismatch' == 'approval_signature_invalid'",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_commit.py::test_sec06_forged_approval_files_are_refused"
+          ]
+        },
+        {
+          "id": "M07",
+          "title": "snapshot/candidate separation lost (candidate files are hardlinks of the snapshot, so a candidate write mutates the snapshot)",
+          "plan": "20.5 #7 (backend must not write the original: snapshot side); ADR-007, SEC-01",
+          "files": [
+            "src/svweave/editing/candidate.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_prepare.py",
+            "tests/unit/test_edit_validate.py",
+            "tests/unit/test_adapters_serena.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.candidate": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 28.8,
+          "failing_tests": [
+            "tests/unit/test_edit_prepare.py::test_prepare_creates_independent_byte_copy_and_never_touches_the_original",
+            "tests/unit/test_edit_prepare.py::test_edit_path_is_recorded_per_edit_and_serena_edit_is_labelled",
+            "tests/unit/test_edit_prepare.py::test_overlapping_and_mixed_edits_are_refused",
+            "tests/unit/test_edit_prepare.py::test_edt06_serena_touching_an_extra_file_rejects_the_candidate",
+            "tests/unit/test_edit_prepare.py::test_serena_span_wider_than_the_declaration_keeps_the_extra_qualifier_bytes"
+          ],
+          "pytest_tail": [
+            "FAILED tests/unit/test_edit_prepare.py::test_overlapping_and_mixed_edits_are_refused",
+            "FAILED tests/unit/test_edit_prepare.py::test_edt06_serena_touching_an_extra_file_rejects_the_candidate",
+            "FAILED tests/unit/test_edit_prepare.py::test_serena_span_wider_than_the_declaration_keeps_the_extra_qualifier_bytes",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M11",
+          "title": "sandbox write-surface check removed (a backend may get a writable bind of the protected original)",
+          "plan": "20.5 #7 (backend must not write the original: sandbox side); SEC-05, ADR-011",
+          "files": [
+            "src/svweave/security/sandbox.py"
+          ],
+          "tests": [
+            "tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable",
+            "tests/unit/test_sandbox.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.security.sandbox": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 4.1,
+          "failing_tests": [
+            "tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable",
+            "tests/unit/test_sandbox.py::test_protected_original_cannot_be_exposed_writable",
+            "tests/unit/test_sandbox.py::test_symlinked_rw_path_into_protected_is_caught"
+          ],
+          "pytest_tail": [
+            "=========================== short test summary info ============================",
+            "FAILED tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable",
+            "FAILED tests/unit/test_sandbox.py::test_protected_original_cannot_be_exposed_writable",
+            "FAILED tests/unit/test_sandbox.py::test_symlinked_rw_path_into_protected_is_caught"
+          ]
+        },
+        {
+          "id": "M08",
+          "title": "blind rollback after a crash (conflicting files are classified as applied, recovery CAS removed)",
+          "plan": "20.5 #8; EDT-07/08",
+          "files": [
+            "src/svweave/editing/journal.py",
+            "src/svweave/application/edit.py"
+          ],
+          "tests": [
+            "tests/fault_injection/test_edit_crash.py",
+            "tests/unit/test_edit_commit.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.journal": {
+              "origin_in_copy": true,
+              "marker_present": true
+            },
+            "svweave.application.edit": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 59.1,
+          "failing_tests": [
+            "tests/fault_injection/test_edit_crash.py::test_edt08_human_edit_after_crash_is_never_overwritten",
+            "tests/fault_injection/test_edit_crash.py::test_edt08_unrelated_third_state_is_a_conflict_not_a_guess"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/src/svweave/application/edit.py:1083: svweave.domain.errors.SvwError: EDIT_CONFLICT: the workspace changed since validation (a source or dependency was edited); nothing was written",
+            "=========================== short test summary info ============================",
+            "FAILED tests/fault_injection/test_edit_crash.py::test_edt08_human_edit_after_crash_is_never_overwritten",
+            "FAILED tests/fault_injection/test_edit_crash.py::test_edt08_unrelated_third_state_is_a_conflict_not_a_guess"
+          ]
+        },
+        {
+          "id": "M09",
+          "title": "ignore unsupported options (unknown flag is logged and dropped, build not blocked)",
+          "plan": "20.5 #9; MAN unsupported flags",
+          "files": [
+            "src/svweave/manifest/resolver.py"
+          ],
+          "tests": [
+            "tests/unit/test_manifest.py",
+            "tests/unit/test_slang_args.py",
+            "tests/unit/test_config.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.manifest.resolver": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 6.2,
+          "failing_tests": [
+            "tests/unit/test_manifest.py::test_BLD_03_unsupported_options_reported_with_origin",
+            "tests/unit/test_manifest.py::test_BLD_03_all_unsupported_options_collected_not_dropped"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_manifest.py:40: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_manifest.py::test_BLD_03_unsupported_options_reported_with_origin",
+            "FAILED tests/unit/test_manifest.py::test_BLD_03_all_unsupported_options_collected_not_dropped"
+          ]
+        },
+        {
+          "id": "M10",
+          "title": "treat a static build as simulation PASS (absent evidence reported as PASS)",
+          "plan": "20.5 #10; REL-01, SVA-03",
+          "files": [
+            "src/svweave/application/evidence.py"
+          ],
+          "tests": [
+            "tests/unit/test_gateway_evidence.py",
+            "tests/unit/test_gateway_status_report.py",
+            "tests/contract"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.application.evidence": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 20.1,
+          "failing_tests": [
+            "tests/unit/test_gateway_evidence.py::test_UVM_04_unlinked_evidence_is_never_attached_to_a_build",
+            "tests/unit/test_gateway_evidence.py::test_REL_01_states_are_separate_and_never_merged",
+            "tests/unit/test_gateway_status_report.py::test_report_fills_template_from_real_data_and_marks_the_rest",
+            "tests/unit/test_gateway_status_report.py::test_report_shows_last_probe_and_declared_evidence_separately"
+          ],
+          "pytest_tail": [
+            "FAILED tests/unit/test_gateway_evidence.py::test_UVM_04_unlinked_evidence_is_never_attached_to_a_build",
+            "FAILED tests/unit/test_gateway_evidence.py::test_REL_01_states_are_separate_and_never_merged",
+            "FAILED tests/unit/test_gateway_status_report.py::test_report_fills_template_from_real_data_and_marks_the_rest",
+            "FAILED tests/unit/test_gateway_status_report.py::test_report_shows_last_probe_and_declared_evidence_separately"
+          ]
+        },
+        {
+          "id": "M12",
+          "title": "roll-forward skips recovery gates (policy / approval / candidate rechecks)",
+          "plan": "A3 (beyond 20.5); EDT-04, EDT-07/08",
+          "files": [
+            "src/svweave/application/edit.py"
+          ],
+          "tests": [
+            "tests/fault_injection/test_recover_gates.py"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.application.edit": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 9.2,
+          "failing_tests": [
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_without_a_valid_approval_is_refused",
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_with_editing_disabled_is_refused",
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_toolchain_change_is_refused",
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_config_change_is_refused",
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_dependency_changed_is_refused"
+          ],
+          "pytest_tail": [
+            "FAILED tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_toolchain_change_is_refused",
+            "FAILED tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_config_change_is_refused",
+            "FAILED tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_after_a_dependency_changed_is_refused",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M13",
+          "title": "commit and roll-forward skip the current edit-policy recheck (A4)",
+          "plan": "A4 (beyond 20.5); EDT-04",
+          "files": [
+            "src/svweave/application/edit.py",
+            "src/svweave/application/edit.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_final_a.py",
+            "tests/fault_injection/test_recover_gates.py",
+            "tests/unit/test_edit_review_fixes.py::test_f10_m12_commit_time_policy_narrowing_is_policy_denied",
+            "tests/unit/test_edit_review_fixes.py::test_m12_precommit_path_check_is_independent_of_the_freeze_check"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.application.edit": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 25.1,
+          "failing_tests": [
+            "tests/unit/test_edit_final_a.py::test_a4_newly_mandatory_validate_profile_refuses_the_commit",
+            "tests/unit/test_edit_final_a.py::test_a4_source_root_made_read_only_after_approval_refuses_the_commit",
+            "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_with_a_newly_narrowed_path_policy_is_refused",
+            "tests/unit/test_edit_review_fixes.py::test_f10_m12_commit_time_policy_narrowing_is_policy_denied",
+            "tests/unit/test_edit_review_fixes.py::test_m12_precommit_path_check_is_independent_of_the_freeze_check"
+          ],
+          "pytest_tail": [
+            "FAILED tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_with_a_newly_narrowed_path_policy_is_refused",
+            "FAILED tests/unit/test_edit_review_fixes.py::test_f10_m12_commit_time_policy_narrowing_is_policy_denied",
+            "FAILED tests/unit/test_edit_review_fixes.py::test_m12_precommit_path_check_is_independent_of_the_freeze_check",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M14",
+          "title": "slang_symbol resolution ignores the build/snapshot identity and COMPLETE check",
+          "plan": "ADR-013 (beyond 20.5); AGENTS rule 5, EDT-03",
+          "files": [
+            "src/svweave/editing/plan.py",
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_resolver_refuses_a_build_that_belongs_to_another_snapshot",
+            "tests/unit/test_edit_slang_symbol.py::test_partial_build_refuses_name_resolution_at_prepare_and_in_the_resolver"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 5.0,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_resolver_refuses_a_build_that_belongs_to_another_snapshot",
+            "tests/unit/test_edit_slang_symbol.py::test_partial_build_refuses_name_resolution_at_prepare_and_in_the_resolver"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:59: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_resolver_refuses_a_build_that_belongs_to_another_snapshot",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_partial_build_refuses_name_resolution_at_prepare_and_in_the_resolver"
+          ]
+        },
+        {
+          "id": "M15",
+          "title": "slang_symbol picks the first of several matching names (ambiguity refusal removed)",
+          "plan": "ADR-013 (beyond 20.5); EDT-03",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b1_bare_name_shared_by_module_interface_and_class_is_ambiguous",
+            "tests/unit/test_edit_slang_symbol.py::test_bare_name_matching_several_is_ambiguous_and_lists_scoped_candidates"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 4.4,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b1_bare_name_shared_by_module_interface_and_class_is_ambiguous",
+            "tests/unit/test_edit_slang_symbol.py::test_bare_name_matching_several_is_ambiguous_and_lists_scoped_candidates"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:59: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b1_bare_name_shared_by_module_interface_and_class_is_ambiguous",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_bare_name_matching_several_is_ambiguous_and_lists_scoped_candidates"
+          ]
+        },
+        {
+          "id": "M16",
+          "title": "slang_symbol replacement shape check removed (class / comment / qualifier escapes)",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration",
+            "tests/unit/test_edit_slang_symbol.py::test_replacement_must_be_a_whole_declaration_of_the_same_kind"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 6.1,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task"
+          ],
+          "pytest_tail": [
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task t(); $display(\"endtask\");]",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task t(); /* endtask]",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task t(); $display(\"endtask);\\nendtask]",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M17",
+          "title": "slang_symbol scope-escape check after the candidate build removed",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/application/edit.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.application.edit": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 5.3,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved",
+            "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:466: AssertionError: assert 'slang_symbol_scope_escape' in []",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape"
+          ]
+        },
+        {
+          "id": "M18",
+          "title": "slang_symbol base-span shape check removed (extern / prototype / odd span)",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_m18_non_declaration_span_is_refused_with_the_specific_reason",
+            "tests/unit/test_edit_slang_symbol.py::test_extern_prototype_span_is_refused"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 4.4,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_m18_non_declaration_span_is_refused_with_the_specific_reason",
+            "tests/unit/test_edit_slang_symbol.py::test_extern_prototype_span_is_refused"
+          ],
+          "pytest_tail": [
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:59: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_m18_non_declaration_span_is_refused_with_the_specific_reason",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_extern_prototype_span_is_refused"
+          ]
+        },
+        {
+          "id": "M19",
+          "title": "slang_symbol accepts a symbol_id that is not a task or function",
+          "plan": "ADR-013 (beyond 20.5); EDT-03",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 3.8,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused"
+          ],
+          "pytest_tail": [
+            "      + unexpected_declaration_shape)",
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:195: AssertionError: assert (<ErrorCode.POLICY_DENIED: 'POLICY_DENIED'> is <ErrorCode.POLICY_DENIED: 'POLICY_DENIED'> and 'unexpected_declaration_shape' == 'not_a_subroutine'",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused"
+          ]
+        },
+        {
+          "id": "M20",
+          "title": "slang_symbol replacement may contain preprocessor directives / pasting / any macro",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_macro_end_task_escape_on_a_module_task_is_refused",
+            "tests/unit/test_edit_slang_symbol.py::test_r2_macro_redefinition_cannot_change_later_code",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_macro_invocation_rules"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 6.0,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task",
+            "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task"
+          ],
+          "pytest_tail": [
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task t();\\n      $display(\"task hello\");\\n`define SVW_E end``task\\n    `SVW_E\\n    rand int injected_prop;\\n`define SVW_Z endtask]",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task t(); endtask `define X 1]",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused[task t();\\n`ifdef NEVER\\n$display(1);\\n`endif\\nendtask]",
+            "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          ]
+        },
+        {
+          "id": "M21",
+          "title": "slang_symbol candidate target span is not required to equal the replacement",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 4.3,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs"
+          ],
+          "pytest_tail": [
+            "     +  where False = any(<generator object test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs.<locals>.<genexpr> at 0x7f4d0ad5d3c0>)",
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:589: assert False",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs"
+          ]
+        },
+        {
+          "id": "M22",
+          "title": "slang_symbol macro-body walk ignores state-changing directives (include / undef / define)",
+          "plan": "ADR-013 (beyond 20.5); EDT-06",
+          "files": [
+            "src/svweave/editing/plan.py"
+          ],
+          "tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused"
+          ],
+          "baseline_rc": 0,
+          "import_proof": {
+            "svweave.editing.plan": {
+              "origin_in_copy": true,
+              "marker_present": true
+            }
+          },
+          "status": "KILLED",
+          "pytest_rc": 1,
+          "seconds": 3.9,
+          "failing_tests": [
+            "tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused"
+          ],
+          "pytest_tail": [
+            "E   Failed: DID NOT RAISE SvwError",
+            "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:59: Failed: DID NOT RAISE SvwError",
+            "=========================== short test summary info ============================",
+            "FAILED tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused"
+          ]
+        }
+      ]
+    }
+  },
+  "benchmark": {
+    "cmd": "${REPO}/.venv/bin/python scripts/benchmark.py --scale 1.0 --out-dir ${REPO}/.svweave/qualification/bench",
+    "rc": 0,
+    "seconds": 188.1,
+    "log": ".svweave/qualification/logs/benchmark.log",
+    "tail": "[bench] corpus 500 files / 100374 lines (scale 1.0)\n[bench] cold builds ...\n[bench] hot queries ...\n[bench] search ...\n[bench] wrote ${REPO}/.svweave/qualification/bench/20261013T162122Z-s1.0.json\n  PASS     cold semantic build (median of runs): 24.3131 s (<= 120.0 s) \n  PASS     cold semantic build (max of runs): 25.6623 s (<= 120.0 s) \n  PASS     HDL worker peak RSS (max): 0.0588 GiB (<= 8.0 GiB) \n  PASS     hot symbol query p95: 0.0442 s (<= 1.0 s) \n  PASS     hot hierarchy query p95: 0.0242 s (<= 1.0 s) \n  PASS     hot references query p95: 0.1693 s (<= 1.0 s) \n  PASS     hot repository search p95 (text fallback): 0.0705 s (<= 2.0 s) \n  PASS     hot repository search p95 (graph): 0.6584 s (<= 2.0 s)",
+    "result_file": ".svweave/qualification/bench/20261013T162122Z-s1.0.json",
+    "result": {
+      "benchmark": "PERF-01",
+      "started_utc": "2026-10-13T16:21:22+00:00",
+      "host": {
+        "cpu_model": "Intel(R) Xeon(R) Gold 6138 CPU @ 2.00GHz",
+        "logical_cpus": 16,
+        "ram_total_gib": 19.33,
+        "ram_available_gib_at_start": 5.12,
+        "swap_total_gib": 7.88,
+        "os": "Linux-4.18.0-553.74.1.el8_10.x86_64-x86_64-with-glibc2.28",
+        "kernel": "4.18.0-553.74.1.el8_10.x86_64",
+        "python": "3.12.4",
+        "filesystem": {
+          "mount": "/home",
+          "device": "/dev/mapper/rl_op--sinopac-home",
+          "fstype": "xfs"
+        },
+        "page_cache": "warm (not dropped: no privilege)",
+        "loadavg_at_start": [
+          5.24,
+          6.26,
+          6.4
+        ]
+      },
+      "toolchain_lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+      "source_identity": {
+        "git_head": "NONE",
+        "src_tree_sha256": "cf30168deead688356f56ccdd323f75846dd6714ab508d0566fd807c768a1c5e"
+      },
+      "svweave_version": "0.1.0",
+      "corpus": {
+        "scale": 1.0,
+        "seed": 1,
+        "files": 500,
+        "lines": 100374,
+        "bytes": 2278538,
+        "content_sha256": "53eb6a07632b85f282e94d36c1b31f7d3f46f86a2416a4445d6f2d19f6d69883",
+        "packages": 30,
+        "interfaces": 40,
+        "modules": 429
+      },
+      "corpus_dir": "(local path omitted)",
+      "uvm_in_loc": false,
+      "targets_plan_22_3": {
+        "cold_build_s": 120.0,
+        "worker_peak_gib": 8.0,
+        "hot_query_p95_s": 1.0,
+        "hot_search_p95_s": 2.0
+      },
+      "reference_host_met": false,
+      "tool_startup": {
+        "command": "svweave --help",
+        "median_s": 1.2184632373973727,
+        "max_s": 1.279621065594256,
+        "raw_s": [
+          1.2796,
+          1.2368,
+          1.2045,
+          1.2185,
+          1.2109
+        ]
+      },
+      "cold_build": {
+        "runs": [
+          {
+            "run": 1,
+            "exit": 0,
+            "total_wall_s": 24.03259869106114,
+            "tree_rss_peak_kib_sampled": 571780,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.787,
+              "peak_rss_kib": 60840,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.01,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 2,
+            "exit": 0,
+            "total_wall_s": 24.058343609794974,
+            "tree_rss_peak_kib_sampled": 571628,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.88,
+              "peak_rss_kib": 61220,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.009,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 3,
+            "exit": 0,
+            "total_wall_s": 24.896242818795145,
+            "tree_rss_peak_kib_sampled": 571392,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.954,
+              "peak_rss_kib": 61308,
+              "user_cpu_s": 0.002,
+              "sys_cpu_s": 0.004,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 4,
+            "exit": 0,
+            "total_wall_s": 25.6622585169971,
+            "tree_rss_peak_kib_sampled": 571392,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 9.764,
+              "peak_rss_kib": 61312,
+              "user_cpu_s": 0.003,
+              "sys_cpu_s": 0.008,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 5,
+            "exit": 0,
+            "total_wall_s": 24.313126086257398,
+            "tree_rss_peak_kib_sampled": 571496,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.961,
+              "peak_rss_kib": 61644,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.009,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          }
+        ],
+        "ok_runs": 5,
+        "total_wall_s": {
+          "median": 24.313126086257398,
+          "max": 25.6622585169971,
+          "min": 24.03259869106114
+        },
+        "worker_wall_s": {
+          "median": 8.954,
+          "max": 9.764
+        },
+        "worker_peak_rss_kib": {
+          "median": 61308,
+          "max": 61644
+        },
+        "process_tree_rss_peak_kib_sampled": {
+          "median": 571496,
+          "max": 571780
+        },
+        "definition": "total_wall_s = whole `svweave build` process (tool startup included, separately measured below); worker_wall_s = slang worker only",
+        "fresh_state_each_run": true
+      },
+      "hot_queries": {
+        "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+        "limit": 100,
+        "symbol": {
+          "n": 30,
+          "p50_s": 0.0437197545543313,
+          "p95_s": 0.04424626789987087,
+          "max_s": 0.04535387642681599,
+          "min_s": 0.04265239927917719,
+          "raw_s": [
+            0.043595,
+            0.043559,
+            0.043898,
+            0.044242,
+            0.043891,
+            0.043589,
+            0.045354,
+            0.043833,
+            0.043571,
+            0.043623,
+            0.042738,
+            0.043429,
+            0.043505,
+            0.044009,
+            0.043774,
+            0.04398,
+            0.04425,
+            0.043767,
+            0.043697,
+            0.043547,
+            0.044072,
+            0.042959,
+            0.043214,
+            0.043743,
+            0.042674,
+            0.042652,
+            0.043783,
+            0.044148,
+            0.043594,
+            0.044039
+          ],
+          "query_set": {
+            "names": [
+              "pkg_000::agent_a",
+              "pkg_000::agent_b",
+              "pkg_000::base_agent",
+              "pkg_001::agent_a",
+              "pkg_001::agent_b",
+              "pkg_001::base_agent",
+              "pkg_002::agent_a",
+              "pkg_002::agent_b",
+              "pkg_002::base_agent",
+              "pkg_003::agent_a",
+              "pkg_003::agent_b",
+              "pkg_003::base_agent",
+              "ifc_000.mix_0",
+              "ifc_000.mix_1",
+              "ifc_000.mix_10",
+              "ifc_000.mix_11",
+              "ifc_000.mix_12",
+              "ifc_000.mix_13",
+              "ifc_000.mix_14",
+              "ifc_000.mix_15",
+              "ifc_000.mix_16",
+              "ifc_000.mix_17",
+              "ifc_000.mix_18",
+              "ifc_000.mix_19"
+            ]
+          },
+          "limit": 100
+        },
+        "hierarchy": {
+          "n": 30,
+          "p50_s": 0.014450798276811838,
+          "p95_s": 0.024208875466138115,
+          "max_s": 0.03095820266753435,
+          "min_s": 0.011668660677969456,
+          "raw_s": [
+            0.012423,
+            0.014399,
+            0.019932,
+            0.012592,
+            0.013631,
+            0.025876,
+            0.018387,
+            0.016571,
+            0.019321,
+            0.012129,
+            0.013652,
+            0.022171,
+            0.012545,
+            0.013908,
+            0.019038,
+            0.01236,
+            0.014463,
+            0.01932,
+            0.011669,
+            0.01944,
+            0.030958,
+            0.012656,
+            0.014409,
+            0.019715,
+            0.012546,
+            0.014613,
+            0.019785,
+            0.012689,
+            0.014438,
+            0.019645
+          ],
+          "query_set": {
+            "top": "bench_top",
+            "depth": "2..4",
+            "limit": 100
+          },
+          "limit": 100
+        },
+        "references": {
+          "n": 30,
+          "p50_s": 0.1580983204767108,
+          "p95_s": 0.16932729207910596,
+          "max_s": 0.17461492214351892,
+          "min_s": 0.15523200202733278,
+          "raw_s": [
+            0.167493,
+            0.166247,
+            0.15864,
+            0.158519,
+            0.170828,
+            0.174615,
+            0.161824,
+            0.158646,
+            0.158739,
+            0.159359,
+            0.158273,
+            0.156325,
+            0.159508,
+            0.163408,
+            0.157235,
+            0.157839,
+            0.155486,
+            0.156315,
+            0.156905,
+            0.157176,
+            0.15535,
+            0.155522,
+            0.158382,
+            0.158785,
+            0.156065,
+            0.157923,
+            0.156774,
+            0.155232,
+            0.155978,
+            0.157432
+          ],
+          "query_set": {
+            "symbols_by_reference_count_desc": [
+              99,
+              99,
+              99,
+              99,
+              99,
+              99,
+              99,
+              99
+            ],
+            "limit": 100
+          },
+          "limit": 100
+        },
+        "definition": "in-process application services (what the MCP server calls), SQLite warm, 3 warm-up calls not counted"
+      },
+      "hot_search": {
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49",
+        "text": {
+          "n": 30,
+          "p50_s": 0.06888153543695807,
+          "p95_s": 0.07046279804781079,
+          "max_s": 0.07065892778337002,
+          "min_s": 0.04871626105159521,
+          "raw_s": [
+            0.069853,
+            0.069123,
+            0.052823,
+            0.068697,
+            0.048716,
+            0.054875,
+            0.070269,
+            0.070597,
+            0.069823,
+            0.069615,
+            0.069066,
+            0.070299,
+            0.051819,
+            0.070659,
+            0.05068,
+            0.055047,
+            0.069915,
+            0.066566,
+            0.067445,
+            0.068634,
+            0.068025,
+            0.069353,
+            0.050258,
+            0.069727,
+            0.049985,
+            0.05299,
+            0.069093,
+            0.068328,
+            0.069717,
+            0.070221
+          ],
+          "query_type": "literal text (text_fallback)",
+          "graph_state": "not used",
+          "backend_used": "text_fallback",
+          "queries": [
+            "mod_0007",
+            "agent_a",
+            "fn_3",
+            "pkg_001",
+            "stage",
+            "g_stage",
+            "base_agent",
+            "bench_top",
+            "ifc_002",
+            "w_ge_nothing_matches_this"
+          ],
+          "limit": 100
+        },
+        "graph": {
+          "n": 30,
+          "p50_s": 0.5982232755050063,
+          "p95_s": 0.6583619572687894,
+          "max_s": 0.6606605183333158,
+          "min_s": 0.5735550364479423,
+          "raw_s": [
+            0.580551,
+            0.624795,
+            0.584168,
+            0.611964,
+            0.63887,
+            0.597764,
+            0.655631,
+            0.604848,
+            0.603076,
+            0.605845,
+            0.629545,
+            0.608608,
+            0.584275,
+            0.585841,
+            0.591432,
+            0.583626,
+            0.586635,
+            0.573555,
+            0.594627,
+            0.591457,
+            0.660661,
+            0.660596,
+            0.59611,
+            0.5953,
+            0.635903,
+            0.591603,
+            0.592536,
+            0.601677,
+            0.598682,
+            0.607406
+          ],
+          "query_type": "graph (cbm search_graph)",
+          "graph_state": "DEGRADED",
+          "graph_state_reasons": [
+            "started; no fixture probe has run yet"
+          ],
+          "first_call_incl_index_s": 26.359668808057904,
+          "queries": [
+            "mod_0007",
+            "agent_a",
+            "bench_top",
+            "mod_0123",
+            "ifc_002",
+            "pkg_001"
+          ],
+          "limit": 100,
+          "cbm_rss_kib_after_queries": 19824,
+          "items_found_first": 3
+        }
+      },
+      "disk_usage": {
+        "bytes": {
+          "backends": 26306673,
+          "bundles": 0,
+          "candidates": 0,
+          "journal": 0,
+          "manifests": 363378,
+          "recovery": 0,
+          "runs": 1031376,
+          "snapshots": 2547967,
+          "semantic_db(svweave.db*)": 147578880,
+          "logs(events.jsonl,*.log; subset of runs)": 1220,
+          "other": 0
+        },
+        "total_state_bytes": 177828274,
+        "source_corpus_bytes": 2289780,
+        "note": "candidates/journal are empty here (no edit); graph state lives in backends/"
+      },
+      "compare_plan_22_3": {
+        "rows": [
+          {
+            "target": "cold semantic build (median of runs)",
+            "budget": "<= 120.0 s",
+            "measured": 24.3131,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "cold semantic build (max of runs)",
+            "budget": "<= 120.0 s",
+            "measured": 25.6623,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "HDL worker peak RSS (max)",
+            "budget": "<= 8.0 GiB",
+            "measured": 0.0588,
+            "unit": "GiB",
+            "status": "PASS"
+          },
+          {
+            "target": "hot symbol query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.0442,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot hierarchy query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.0242,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot references query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.1693,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot repository search p95 (text fallback)",
+            "budget": "<= 2.0 s",
+            "measured": 0.0705,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot repository search p95 (graph)",
+            "budget": "<= 2.0 s",
+            "measured": 0.6584,
+            "unit": "s",
+            "status": "PASS"
+          }
+        ],
+        "all_measured_targets_pass": true,
+        "reference_corpus": true,
+        "caveat": null
+      },
+      "leaked_backend_processes_after_run": [],
+      "finished_utc": "2026-10-13T16:24:29+00:00"
+    }
+  },
+  "docs": {
+    "schema_emit_check": {
+      "cmd": "${REPO}/.venv/bin/svweave schema emit --check",
+      "rc": 0,
+      "seconds": 1.5,
+      "log": ".svweave/qualification/logs/schema.log",
+      "tail": "{\n  \"schema_version\": \"1.0\",\n  \"request_id\": \"req-060a9d0e9c88\",\n  \"outcome\": \"OK\",\n  \"workspace_id\": null,\n  \"snapshot_id\": null,\n  \"build_id\": null,\n  \"profile\": null,\n  \"freshness\": \"UNKNOWN\",\n  \"analysis_coverage\": {\n    \"completeness\": \"COMPLETE\",\n    \"scope\": null,\n    \"basis\": null,\n    \"unresolved_count\": 0,\n    \"limitations\": []\n  },\n  \"provenance\": {\n    \"backend\": null,\n    \"toolchain_id\": null,\n    \"evidence_kind\": null\n  },\n  \"data\": {\n    \"out_of_sync\": []\n  },\n  \"pagination\": {\n    \"limit\": 100,\n    \"next_cursor\": null,\n    \"truncated\": false\n  },\n  \"warnings\": [],\n  \"error\": null\n}"
+    },
+    "doc_tests": {
+      "cmd": "${REPO}/.venv/bin/python -m pytest tests/unit/test_gateway_cli.py tests/unit/test_gateway_evidence.py -k DOC or docs --no-cov ...",
+      "rc": 0,
+      "seconds": 1.8,
+      "log": ".svweave/qualification/logs/docs.log",
+      "tail": "...                                                                      [100%]",
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "modules": {
+        "test_gateway_cli": {
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "test_gateway_evidence": {
+          "passed": 1,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      },
+      "failed_tests": [],
+      "skipped_tests": []
+    },
+    "required_files_missing": [],
+    "readme_claims_mit_for_svweave": false,
+    "readme_mentions_license_tbd": true
+  },
+  "benchmark_ref": [
+    ".svweave/qualification/bench/20261013T162122Z-s1.0.json",
+    {
+      "benchmark": "PERF-01",
+      "started_utc": "2026-10-13T16:21:22+00:00",
+      "host": {
+        "cpu_model": "Intel(R) Xeon(R) Gold 6138 CPU @ 2.00GHz",
+        "logical_cpus": 16,
+        "ram_total_gib": 19.33,
+        "ram_available_gib_at_start": 5.12,
+        "swap_total_gib": 7.88,
+        "os": "Linux-4.18.0-553.74.1.el8_10.x86_64-x86_64-with-glibc2.28",
+        "kernel": "4.18.0-553.74.1.el8_10.x86_64",
+        "python": "3.12.4",
+        "filesystem": {
+          "mount": "/home",
+          "device": "/dev/mapper/rl_op--sinopac-home",
+          "fstype": "xfs"
+        },
+        "page_cache": "warm (not dropped: no privilege)",
+        "loadavg_at_start": [
+          5.24,
+          6.26,
+          6.4
+        ]
+      },
+      "toolchain_lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+      "source_identity": {
+        "git_head": "NONE",
+        "src_tree_sha256": "cf30168deead688356f56ccdd323f75846dd6714ab508d0566fd807c768a1c5e"
+      },
+      "svweave_version": "0.1.0",
+      "corpus": {
+        "scale": 1.0,
+        "seed": 1,
+        "files": 500,
+        "lines": 100374,
+        "bytes": 2278538,
+        "content_sha256": "53eb6a07632b85f282e94d36c1b31f7d3f46f86a2416a4445d6f2d19f6d69883",
+        "packages": 30,
+        "interfaces": 40,
+        "modules": 429
+      },
+      "corpus_dir": "(local path omitted)",
+      "uvm_in_loc": false,
+      "targets_plan_22_3": {
+        "cold_build_s": 120.0,
+        "worker_peak_gib": 8.0,
+        "hot_query_p95_s": 1.0,
+        "hot_search_p95_s": 2.0
+      },
+      "reference_host_met": false,
+      "tool_startup": {
+        "command": "svweave --help",
+        "median_s": 1.2184632373973727,
+        "max_s": 1.279621065594256,
+        "raw_s": [
+          1.2796,
+          1.2368,
+          1.2045,
+          1.2185,
+          1.2109
+        ]
+      },
+      "cold_build": {
+        "runs": [
+          {
+            "run": 1,
+            "exit": 0,
+            "total_wall_s": 24.03259869106114,
+            "tree_rss_peak_kib_sampled": 571780,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.787,
+              "peak_rss_kib": 60840,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.01,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 2,
+            "exit": 0,
+            "total_wall_s": 24.058343609794974,
+            "tree_rss_peak_kib_sampled": 571628,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.88,
+              "peak_rss_kib": 61220,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.009,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 3,
+            "exit": 0,
+            "total_wall_s": 24.896242818795145,
+            "tree_rss_peak_kib_sampled": 571392,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.954,
+              "peak_rss_kib": 61308,
+              "user_cpu_s": 0.002,
+              "sys_cpu_s": 0.004,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 4,
+            "exit": 0,
+            "total_wall_s": 25.6622585169971,
+            "tree_rss_peak_kib_sampled": 571392,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 9.764,
+              "peak_rss_kib": 61312,
+              "user_cpu_s": 0.003,
+              "sys_cpu_s": 0.008,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          },
+          {
+            "run": 5,
+            "exit": 0,
+            "total_wall_s": 24.313126086257398,
+            "tree_rss_peak_kib_sampled": 571496,
+            "outcome": "OK",
+            "completeness": "COMPLETE",
+            "reused": false,
+            "counts": {
+              "declarations": 51732,
+              "references": 74202,
+              "instances": 573,
+              "port_bindings": 1859,
+              "assertions": 0,
+              "diagnostics": 0,
+              "errors": 0,
+              "warnings": 0,
+              "specializations": 0,
+              "unresolved": 0,
+              "dynamic_unresolved": 0
+            },
+            "worker": {
+              "wall_s": 8.961,
+              "peak_rss_kib": 61644,
+              "user_cpu_s": 0.001,
+              "sys_cpu_s": 0.009,
+              "memory_limit_mib": 8192,
+              "timeout_s": 600.0,
+              "isolation": "bwrap",
+              "isolation_warnings": []
+            },
+            "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+            "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+          }
+        ],
+        "ok_runs": 5,
+        "total_wall_s": {
+          "median": 24.313126086257398,
+          "max": 25.6622585169971,
+          "min": 24.03259869106114
+        },
+        "worker_wall_s": {
+          "median": 8.954,
+          "max": 9.764
+        },
+        "worker_peak_rss_kib": {
+          "median": 61308,
+          "max": 61644
+        },
+        "process_tree_rss_peak_kib_sampled": {
+          "median": 571496,
+          "max": 571780
+        },
+        "definition": "total_wall_s = whole `svweave build` process (tool startup included, separately measured below); worker_wall_s = slang worker only",
+        "fresh_state_each_run": true
+      },
+      "hot_queries": {
+        "build_id": "242e37d2253885b27787f73263e9882f07cceca431c70f02230388efe2a0623e",
+        "limit": 100,
+        "symbol": {
+          "n": 30,
+          "p50_s": 0.0437197545543313,
+          "p95_s": 0.04424626789987087,
+          "max_s": 0.04535387642681599,
+          "min_s": 0.04265239927917719,
+          "raw_s": [
+            0.043595,
+            0.043559,
+            0.043898,
+            0.044242,
+            0.043891,
+            0.043589,
+            0.045354,
+            0.043833,
+            0.043571,
+            0.043623,
+            0.042738,
+            0.043429,
+            0.043505,
+            0.044009,
+            0.043774,
+            0.04398,
+            0.04425,
+            0.043767,
+            0.043697,
+            0.043547,
+            0.044072,
+            0.042959,
+            0.043214,
+            0.043743,
+            0.042674,
+            0.042652,
+            0.043783,
+            0.044148,
+            0.043594,
+            0.044039
+          ],
+          "query_set": {
+            "names": [
+              "pkg_000::agent_a",
+              "pkg_000::agent_b",
+              "pkg_000::base_agent",
+              "pkg_001::agent_a",
+              "pkg_001::agent_b",
+              "pkg_001::base_agent",
+              "pkg_002::agent_a",
+              "pkg_002::agent_b",
+              "pkg_002::base_agent",
+              "pkg_003::agent_a",
+              "pkg_003::agent_b",
+              "pkg_003::base_agent",
+              "ifc_000.mix_0",
+              "ifc_000.mix_1",
+              "ifc_000.mix_10",
+              "ifc_000.mix_11",
+              "ifc_000.mix_12",
+              "ifc_000.mix_13",
+              "ifc_000.mix_14",
+              "ifc_000.mix_15",
+              "ifc_000.mix_16",
+              "ifc_000.mix_17",
+              "ifc_000.mix_18",
+              "ifc_000.mix_19"
+            ]
+          },
+          "limit": 100
+        },
+        "hierarchy": {
+          "n": 30,
+          "p50_s": 0.014450798276811838,
+          "p95_s": 0.024208875466138115,
+          "max_s": 0.03095820266753435,
+          "min_s": 0.011668660677969456,
+          "raw_s": [
+            0.012423,
+            0.014399,
+            0.019932,
+            0.012592,
+            0.013631,
+            0.025876,
+            0.018387,
+            0.016571,
+            0.019321,
+            0.012129,
+            0.013652,
+            0.022171,
+            0.012545,
+            0.013908,
+            0.019038,
+            0.01236,
+            0.014463,
+            0.01932,
+            0.011669,
+            0.01944,
+            0.030958,
+            0.012656,
+            0.014409,
+            0.019715,
+            0.012546,
+            0.014613,
+            0.019785,
+            0.012689,
+            0.014438,
+            0.019645
+          ],
+          "query_set": {
+            "top": "bench_top",
+            "depth": "2..4",
+            "limit": 100
+          },
+          "limit": 100
+        },
+        "references": {
+          "n": 30,
+          "p50_s": 0.1580983204767108,
+          "p95_s": 0.16932729207910596,
+          "max_s": 0.17461492214351892,
+          "min_s": 0.15523200202733278,
+          "raw_s": [
+            0.167493,
+            0.166247,
+            0.15864,
+            0.158519,
+            0.170828,
+            0.174615,
+            0.161824,
+            0.158646,
+            0.158739,
+            0.159359,
+            0.158273,
+            0.156325,
+            0.159508,
+            0.163408,
+            0.157235,
+            0.157839,
+            0.155486,
+            0.156315,
+            0.156905,
+            0.157176,
+            0.15535,
+            0.155522,
+            0.158382,
+            0.158785,
+            0.156065,
+            0.157923,
+            0.156774,
+            0.155232,
+            0.155978,
+            0.157432
+          ],
+          "query_set": {
+            "symbols_by_reference_count_desc": [
+              99,
+              99,
+              99,
+              99,
+              99,
+              99,
+              99,
+              99
+            ],
+            "limit": 100
+          },
+          "limit": 100
+        },
+        "definition": "in-process application services (what the MCP server calls), SQLite warm, 3 warm-up calls not counted"
+      },
+      "hot_search": {
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49",
+        "text": {
+          "n": 30,
+          "p50_s": 0.06888153543695807,
+          "p95_s": 0.07046279804781079,
+          "max_s": 0.07065892778337002,
+          "min_s": 0.04871626105159521,
+          "raw_s": [
+            0.069853,
+            0.069123,
+            0.052823,
+            0.068697,
+            0.048716,
+            0.054875,
+            0.070269,
+            0.070597,
+            0.069823,
+            0.069615,
+            0.069066,
+            0.070299,
+            0.051819,
+            0.070659,
+            0.05068,
+            0.055047,
+            0.069915,
+            0.066566,
+            0.067445,
+            0.068634,
+            0.068025,
+            0.069353,
+            0.050258,
+            0.069727,
+            0.049985,
+            0.05299,
+            0.069093,
+            0.068328,
+            0.069717,
+            0.070221
+          ],
+          "query_type": "literal text (text_fallback)",
+          "graph_state": "not used",
+          "backend_used": "text_fallback",
+          "queries": [
+            "mod_0007",
+            "agent_a",
+            "fn_3",
+            "pkg_001",
+            "stage",
+            "g_stage",
+            "base_agent",
+            "bench_top",
+            "ifc_002",
+            "w_ge_nothing_matches_this"
+          ],
+          "limit": 100
+        },
+        "graph": {
+          "n": 30,
+          "p50_s": 0.5982232755050063,
+          "p95_s": 0.6583619572687894,
+          "max_s": 0.6606605183333158,
+          "min_s": 0.5735550364479423,
+          "raw_s": [
+            0.580551,
+            0.624795,
+            0.584168,
+            0.611964,
+            0.63887,
+            0.597764,
+            0.655631,
+            0.604848,
+            0.603076,
+            0.605845,
+            0.629545,
+            0.608608,
+            0.584275,
+            0.585841,
+            0.591432,
+            0.583626,
+            0.586635,
+            0.573555,
+            0.594627,
+            0.591457,
+            0.660661,
+            0.660596,
+            0.59611,
+            0.5953,
+            0.635903,
+            0.591603,
+            0.592536,
+            0.601677,
+            0.598682,
+            0.607406
+          ],
+          "query_type": "graph (cbm search_graph)",
+          "graph_state": "DEGRADED",
+          "graph_state_reasons": [
+            "started; no fixture probe has run yet"
+          ],
+          "first_call_incl_index_s": 26.359668808057904,
+          "queries": [
+            "mod_0007",
+            "agent_a",
+            "bench_top",
+            "mod_0123",
+            "ifc_002",
+            "pkg_001"
+          ],
+          "limit": 100,
+          "cbm_rss_kib_after_queries": 19824,
+          "items_found_first": 3
+        }
+      },
+      "disk_usage": {
+        "bytes": {
+          "backends": 26306673,
+          "bundles": 0,
+          "candidates": 0,
+          "journal": 0,
+          "manifests": 363378,
+          "recovery": 0,
+          "runs": 1031376,
+          "snapshots": 2547967,
+          "semantic_db(svweave.db*)": 147578880,
+          "logs(events.jsonl,*.log; subset of runs)": 1220,
+          "other": 0
+        },
+        "total_state_bytes": 177828274,
+        "source_corpus_bytes": 2289780,
+        "note": "candidates/journal are empty here (no edit); graph state lives in backends/"
+      },
+      "compare_plan_22_3": {
+        "rows": [
+          {
+            "target": "cold semantic build (median of runs)",
+            "budget": "<= 120.0 s",
+            "measured": 24.3131,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "cold semantic build (max of runs)",
+            "budget": "<= 120.0 s",
+            "measured": 25.6623,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "HDL worker peak RSS (max)",
+            "budget": "<= 8.0 GiB",
+            "measured": 0.0588,
+            "unit": "GiB",
+            "status": "PASS"
+          },
+          {
+            "target": "hot symbol query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.0442,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot hierarchy query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.0242,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot references query p95",
+            "budget": "<= 1.0 s",
+            "measured": 0.1693,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot repository search p95 (text fallback)",
+            "budget": "<= 2.0 s",
+            "measured": 0.0705,
+            "unit": "s",
+            "status": "PASS"
+          },
+          {
+            "target": "hot repository search p95 (graph)",
+            "budget": "<= 2.0 s",
+            "measured": 0.6584,
+            "unit": "s",
+            "status": "PASS"
+          }
+        ],
+        "all_measured_targets_pass": true,
+        "reference_corpus": true,
+        "caveat": null
+      },
+      "leaked_backend_processes_after_run": [],
+      "finished_utc": "2026-10-13T16:24:29+00:00"
+    }
+  ],
+  "eda": {
+    "eda_compile": {
+      "state": "NOT_RUN",
+      "records": []
+    },
+    "simulation": {
+      "state": "NOT_RUN",
+      "records": []
+    },
+    "formal": {
+      "state": "NOT_RUN",
+      "records": []
+    }
+  },
+  "license_review": "NOT_DONE",
+  "owner_items": [
+    {
+      "id": "g0_waiver",
+      "title": "G0 waiver: cbm/Serena are DEGRADED (not READY) within the declared qualified subset",
+      "state": "OPEN",
+      "detail": "not signed in evidence/owner_signoff.json"
+    },
+    {
+      "id": "adr_012",
+      "title": "ADR-012 owner acceptance (Serena symbol edits limited to function bodies)",
+      "state": "OPEN",
+      "detail": "not signed in evidence/owner_signoff.json"
+    },
+    {
+      "id": "license_review",
+      "title": "license / third-party notices legal review (license_manifest.json legal_review_status)",
+      "state": "OPEN",
+      "detail": "not signed in evidence/owner_signoff.json; license_manifest legal_review_status=NOT_DONE"
+    }
+  ],
+  "gates": {
+    "G0": {
+      "status": "PASS_WITH_OWNER_WAIVER_OPEN",
+      "reasons": [
+        "cbm/Serena are DEGRADED within the declared qualified subset; the G0 waiver (owner item g0_waiver) is not signed, so G0 is not a plain PASS"
+      ],
+      "probe_summary": {
+        "pyslang": "READY",
+        "slang_cli": "READY",
+        "cbm": "DEGRADED",
+        "serena": "DEGRADED"
+      },
+      "degraded": {
+        "cbm": {
+          "classification": "DEGRADED_WITHIN_DECLARED_SUBSET",
+          "failed_checks": [
+            "search_graph finds class svw_driver",
+            "two run_phase methods extracted",
+            "no fixture file parse_unusable"
+          ],
+          "scope": "recorded cbm SystemVerilog extraction gaps (docs/limitations.md, graph backend)",
+          "declared_in": "docs/limitations.md"
+        },
+        "serena": {
+          "classification": "DEGRADED_WITHIN_DECLARED_SUBSET",
+          "failed_checks": [
+            "find_symbol svw_driver/run_phase (task method)"
+          ],
+          "scope": "ADR-012: Serena symbol edits are qualified for SystemVerilog `function` bodies only",
+          "declared_in": "docs/adr/ADR-012-serena-sv-edit-subset.md"
+        }
+      }
+    },
+    "G1": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "G2": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "G3": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "G4": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "G5": {
+      "status": "PASS",
+      "reasons": [],
+      "p0_counts": {
+        "passed": 908,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "blockers": [
+    "OPEN owner item g0_waiver: G0 waiver: cbm/Serena are DEGRADED (not READY) within the declared qualified subset (not signed in evidence/owner_signoff.json)",
+    "OPEN owner item adr_012: ADR-012 owner acceptance (Serena symbol edits limited to function bodies) (not signed in evidence/owner_signoff.json)",
+    "OPEN owner item license_review: license / third-party notices legal review (license_manifest.json legal_review_status) (not signed in evidence/owner_signoff.json; license_manifest legal_review_status=NOT_DONE)"
+  ],
+  "decision_reasons": [
+    "G0 PASS_WITH_OWNER_WAIVER_OPEN: cbm/Serena are DEGRADED within the declared qualified subset; the G0 waiver (owner item g0_waiver) is not signed, so G0 is not a plain PASS",
+    "OPEN owner item g0_waiver: G0 waiver: cbm/Serena are DEGRADED (not READY) within the declared qualified subset (not signed in evidence/owner_signoff.json)",
+    "OPEN owner item adr_012: ADR-012 owner acceptance (Serena symbol edits limited to function bodies) (not signed in evidence/owner_signoff.json)",
+    "OPEN owner item license_review: license / third-party notices legal review (license_manifest.json legal_review_status) (not signed in evidence/owner_signoff.json; license_manifest legal_review_status=NOT_DONE)"
+  ],
+  "release_decision": "BLOCKED",
+  "evidence_paths": [
+    ".svweave/qualification/report.json",
+    ".svweave/qualification/report.md",
+    ".svweave/qualification/coverage.json",
+    ".svweave/qualification/mutation.json",
+    ".svweave/qualification/capability_report.json",
+    ".svweave/qualification/bench/20261013T162122Z-s1.0.json",
+    "evidence/m0/"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "topic": "sem07_errors",
+  "fixture_dir": "language/sem07_errors",
+  "top": "err_top",
+  "diagnostics": [
+    {
+      "code": "NoImplicitConversion",
+      "severity": "error",
+      "file": "good.sv",
+      "ctx": "initial n = s;",
+      "nth": 0,
+      "text": "n = s",
+      "start": 84,
+      "end": 89
+    },
+    {
+      "code": "UndeclaredIdentifier",
+      "severity": "error",
+      "file": "good.sv",
+      "ctx": "initial x = missing_sym;",
+      "nth": 0,
+      "text": "missing_sym",
+      "start": 105,
+      "end": 116
+    },
+    {
+      "code": "ExpectedToken",
+      "severity": "error",
+      "file": "bad_syntax.sv",
+      "ctx": "logic [7:0 broken_decl;",
+      "nth": 0,
+      "text": "[7:0",
+      "start": 24,
+      "end": 28
+    }
+  ],
+  "expect": {
+    "job": "SUCCEEDED",
+    "completeness": "PARTIAL",
+    "diagnostic_outcome": "HAS_ERRORS",
+    "published": false,
+    "errors": 3
+  },
+  "unresolved": [
+    {
+      "name": "missing_sym",
+      "reason": "UndeclaredIdentifier",
+      "file": "good.sv",
+      "ctx": "initial x = missing_sym;",
+      "nth": 0,
+      "text": "missing_sym",
+      "start": 105,
+      "end": 116
+    }
+  ]
+}

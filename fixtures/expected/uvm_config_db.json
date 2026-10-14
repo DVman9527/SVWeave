@@ -1,0 +1,88 @@
+{
+  "topic": "uvm_config_db",
+  "fixture_dir": "uvm/",
+  "top": "svw_uvm_ext_top",
+  "calls": [
+    {
+      "op": "set",
+      "type": "int unsigned",
+      "inst": "\"env*\"",
+      "field": "\"width\"",
+      "value": "32",
+      "wildcard": true,
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(int unsigned)::set(this, \"env*\"",
+      "nth": 0,
+      "text": "set",
+      "start": 1020,
+      "end": 1023
+    },
+    {
+      "op": "set",
+      "type": "int unsigned",
+      "inst": "\"env\"",
+      "field": "\"width\"",
+      "value": "16",
+      "wildcard": false,
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(int unsigned)::set(this, \"env\", \"width\", 16)",
+      "nth": 0,
+      "text": "set",
+      "start": 1088,
+      "end": 1091
+    },
+    {
+      "op": "set",
+      "type": "int",
+      "inst": "\"env\"",
+      "field": "\"width\"",
+      "value": "7",
+      "wildcard": false,
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(int)::set(this",
+      "nth": 0,
+      "text": "set",
+      "start": 1146,
+      "end": 1149
+    },
+    {
+      "op": "set",
+      "type": "string",
+      "inst": "\"*\"",
+      "field": "\"tag\"",
+      "value": "\"alpha\"",
+      "wildcard": true,
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(string)::set(this",
+      "nth": 0,
+      "text": "set",
+      "start": 1206,
+      "end": 1209
+    },
+    {
+      "op": "get",
+      "type": "int unsigned",
+      "inst": "\"\"",
+      "field": "\"width\"",
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(int unsigned)::get(this",
+      "nth": 0,
+      "text": "get",
+      "start": 444,
+      "end": 447
+    },
+    {
+      "op": "get",
+      "type": "string",
+      "inst": "\"\"",
+      "field": "\"tag\"",
+      "file": "svw_uvm_cfgdb_pkg.sv",
+      "ctx": "uvm_config_db#(string)::get(this",
+      "nth": 0,
+      "text": "get",
+      "start": 565,
+      "end": 568
+    }
+  ],
+  "not_claimed": "that any get matches any set (precedence/type/wildcard matching is runtime)"
+}

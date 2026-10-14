@@ -1,0 +1,19 @@
+# SVWeave runtime state (snapshots, candidates, DB, logs) — never commit
+.svweave/
+# Pinned backend installs / downloaded artifacts (reproduced by scripts/bootstrap_locked.py)
+.toolchain/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+.*.swp
+# Host-specific root mappings
+svweave.local.yaml
+.claude/

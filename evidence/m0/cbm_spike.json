@@ -1,0 +1,4194 @@
+{
+  "backend": "codebase-memory-mcp",
+  "binary": "${REPO}/.toolchain/cbm/codebase-memory-mcp",
+  "binary_sha256": "ce11c141431aeadd788506c3a7e6942db8fd438dec369d0707a39ec9fd8c6510",
+  "repo_path": "${REPO}/.svweave/spike/snapshot/fixtures",
+  "snapshot_manifest": {
+    "demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+    "demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+    "demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+    "demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+    "demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+    "demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+    "uvm/svw_demo_uvm_pkg.sv": "de4075a37f90472f0c4c1efd7286726e8b88c21f183b351e9ad4bfb096541a6d",
+    "uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97"
+  },
+  "index_mode": "fast",
+  "server_args": [],
+  "env": {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "${REPO}/.toolchain/state/cbm/home",
+    "XDG_CONFIG_HOME": "${REPO}/.toolchain/state/cbm/home/.config",
+    "XDG_CACHE_HOME": "${REPO}/.toolchain/state/cbm/cache",
+    "CBM_CACHE_DIR": "${REPO}/.toolchain/state/cbm/cache",
+    "CBM_RUNTIME_DIR": "${REPO}/.toolchain/state/cbm/runtime",
+    "LANG": "C.UTF-8"
+  },
+  "state_config": {
+    "ui_enabled": {
+      "rc": 0,
+      "stdout": "ui_enabled = false\n  (restart the daemon for this to take effect)"
+    },
+    "auto_watch": {
+      "rc": 0,
+      "stdout": "auto_watch = false"
+    },
+    "watcher_enabled": {
+      "rc": 0,
+      "stdout": "watcher_enabled = false"
+    },
+    "auto_index": {
+      "rc": 0,
+      "stdout": "auto_index = false"
+    },
+    "config_list": "Configuration:\n  auto_index                = false     \n  auto_index_limit          = 50000     \n  auto_watch                = false     \n  watcher_enabled           = false     \n  ui-lang                   = auto      \n  ui_enabled                = false     \n  ui_port                   = 9749      \n"
+  },
+  "initialize": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {
+      "prompts": {
+        "listChanged": false
+      },
+      "tools": {
+        "listChanged": false
+      }
+    },
+    "serverInfo": {
+      "name": "codebase-memory-mcp",
+      "version": "0.11.0"
+    },
+    "instructions": "Graph first: search_graph for symbols, trace_path for relationships, get_code_snippet for source, query_graph for multi-hop, and get_architecture for overview. Use search_code/grep for literals or coverage gaps. Indexes auto-refresh. Check cited-path coverage; paginate."
+  },
+  "timings": {
+    "initialize_s": 8.164
+  },
+  "tools": [
+    {
+      "name": "index_repository",
+      "description": "Index a repository. full/moderate add semantics; fast omits them; cross-repo-intelligence links services. Reports coverage gaps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "repo_path": {
+            "type": "string",
+            "description": "Repository path"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "full",
+              "moderate",
+              "fast",
+              "cross-repo-intelligence"
+            ],
+            "default": "full",
+            "description": "full: all+semantic; moderate: filtered+semantic; fast: filtered only; cross-repo-intelligence: link services."
+          },
+          "target_projects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Cross-repo targets; [\"*\"] means all."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name override; Non-ASCII bytes are encoded; unsafe characters normalized."
+          },
+          "persistence": {
+            "type": "boolean",
+            "default": false,
+            "description": "Write .codebase-memory/graph.db.zst."
+          }
+        },
+        "required": [
+          "repo_path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_graph",
+      "description": "Find symbols via BM25 query, regex name/qn filters, or semantic_query. Rows keep qn/file/lines and in/out over CALLS/USAGE/CALL_REFERENCE/INHERITS/IMPLEMENTS.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "name_pattern": {
+            "type": "string"
+          },
+          "qn_pattern": {
+            "type": "string"
+          },
+          "file_pattern": {
+            "type": "string"
+          },
+          "relationship": {
+            "type": "string"
+          },
+          "min_degree": {
+            "type": "integer"
+          },
+          "max_degree": {
+            "type": "integer"
+          },
+          "exclude_entry_points": {
+            "type": "boolean"
+          },
+          "include_connected": {
+            "type": "boolean"
+          },
+          "semantic_query": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Not with query."
+          },
+          "semantic_limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 0,
+            "maximum": 500
+          },
+          "semantic_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 99998
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "default": 3200,
+            "minimum": 128,
+            "maximum": 1000000
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "detail": {
+            "type": "string",
+            "enum": [
+              "ids",
+              "default"
+            ],
+            "default": "default"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "query_graph",
+      "description": "Read-only Cypher for multi-hop, aggregation, complexity, or cross-service analysis. Default: 200 visible rows with exact/lower-bound totals and truncation; continue safely with next_cursor. graph=missed is a file tree of flagged coverage gaps; absence is not proof of completeness. Use get_graph_schema(diagnostics=full) for properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Cypher query"
+          },
+          "project": {
+            "type": "string"
+          },
+          "graph": {
+            "type": "string",
+            "enum": [
+              "code",
+              "missed"
+            ],
+            "default": "code",
+            "description": "code graph (default) or missed coverage-gap file tree."
+          },
+          "max_rows": {
+            "type": "integer",
+            "description": "Visible rows (default 200; max 99998); 0 uses the legacy maximum. Evaluation is unchanged.",
+            "minimum": 0,
+            "default": 200
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Live compatibility paging; cannot be combined with cursor."
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Snapshot continuation; keep query/project/graph. Format, budget, and max_rows may change."
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 1000000,
+            "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token. Rows stay whole."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree",
+            "description": "tree may use local @N+suffix prefix refs; json uses direct strings."
+          }
+        },
+        "required": [
+          "query",
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "trace_path",
+      "description": "Trace callers/callees, data flow, or cross-service paths. Defaults exclude tests and resolver evidence. Rows keep qn/hop with explicit totals, relations, and continuations.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "function_name": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ],
+            "default": "both"
+          },
+          "depth": {
+            "type": "integer",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 15
+          },
+          "limit": {
+            "type": "integer",
+            "default": 100,
+            "minimum": 1,
+            "maximum": 5000,
+            "description": "Rows/page; gte flags the 5000-node engine ceiling."
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "default": 3200,
+            "minimum": 128,
+            "maximum": 1000000,
+            "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token. Evidence/args yield before nearest graph rows."
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Pass next/next_cursor with traversal args unchanged; budget may increase."
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "calls",
+              "data_flow",
+              "cross_service"
+            ],
+            "default": "calls",
+            "description": "calls, argument-aware data_flow, or service edges."
+          },
+          "parameter_name": {
+            "type": "string",
+            "description": "data_flow parameter filter."
+          },
+          "edge_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risk_labels": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add hop-risk labels."
+          },
+          "include_tests": {
+            "type": "boolean",
+            "default": false
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree",
+            "description": "tree chooses smaller complete direct/grouped output; json uses stable grouped tables."
+          },
+          "include_evidence": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add resolver class and confidence."
+          }
+        },
+        "required": [
+          "function_name",
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_code_snippet",
+      "description": "Read a search_graph symbol. auto bounds source and outlines large containers; full restores up to 500 lines. Source/outline pages continue; coverage_note marks gaps.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "qualified_name": {
+            "type": "string",
+            "description": "search_graph qn, or short name."
+          },
+          "project": {
+            "type": "string"
+          },
+          "include_neighbors": {
+            "type": "boolean",
+            "default": false
+          },
+          "source_mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "full",
+              "outline"
+            ],
+            "default": "auto",
+            "description": "auto outlines 200+ line containers; full returns source; outline lists members."
+          },
+          "member_limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "member_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "start_line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_lines": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 1000000,
+            "description": "auto/outline sizing hint (default 2500), hard ceiling 4 UTF-8 bytes/token. Lines stay whole; explicit full is uncapped unless set."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "qualified_name",
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_file_outline",
+      "description": "Declaration outline of one exact repository-relative file: optional exact label filter, source order, exact total/offset/limit paging; file/folder/container nodes excluded.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "Exact repository-relative file path"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "description": "Optional exact node-label filter"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 100
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "file_path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_graph_schema",
+      "description": "Get node-label and edge-type counts. diagnostics=full also lists queryable properties.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          },
+          "diagnostics": {
+            "type": "string",
+            "enum": [
+              "none",
+              "full"
+            ],
+            "default": "none"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "compare_graphs",
+      "description": "Compare two indexed snapshots: deterministic target-only additions and base-only removals of stable node/edge identities; each set capped by limit and a 512 KiB budget with exact totals and truncation reasons.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "base_project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 200
+          },
+          "scan_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000000,
+            "default": 2000000
+          }
+        },
+        "required": [
+          "base_project",
+          "target_project"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_architecture",
+      "description": "Compact counts, languages, packages, entry points. Request structure, dependencies, routes, hotspots, boundaries, layers, clusters, cycles, or file_tree; path scopes a directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "description": "Directory prefix (for example apps/hoa)."
+          },
+          "aspects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "all",
+                "overview",
+                "structure",
+                "dependencies",
+                "routes",
+                "languages",
+                "packages",
+                "entry_points",
+                "hotspots",
+                "boundaries",
+                "layers",
+                "file_tree",
+                "clusters",
+                "cycles"
+              ]
+            },
+            "description": "all=everything; overview=compact except file_tree; omitted=languages/packages/entry_points; cycles is opt-in."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_code",
+      "description": "Graph-ranked text search: compact symbols, full bounded source, or file paths.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          },
+          "file_pattern": {
+            "type": "string"
+          },
+          "path_filter": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "compact",
+              "full",
+              "files"
+            ],
+            "default": "compact"
+          },
+          "context": {
+            "type": "integer"
+          },
+          "regex": {
+            "type": "boolean",
+            "default": false
+          },
+          "debug": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add scope_ms/scan_ms/enrich_ms phase timings."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "result_limit": {
+            "type": "integer",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "result_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "raw_limit": {
+            "type": "integer",
+            "default": 5,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "raw_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "raw_content_offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Raw-line byte offset; omit for match-centered preview."
+          },
+          "directory_limit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 0,
+            "maximum": 64
+          },
+          "directory_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "match_limit": {
+            "type": "integer",
+            "default": 8,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "source_max_lines": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 200
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 1000000
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "pattern",
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_projects",
+      "description": "List projects with stable paging. Identity is lean; stats adds graph sizes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          },
+          "detail": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "stats"
+            ],
+            "default": "identity",
+            "description": "stats adds node/edge/database-size counts."
+          },
+          "include_details": {
+            "type": "boolean",
+            "default": false,
+            "description": "Alias for detail=stats: include branch, node/edge counts and database size. Slower."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "metadata_only": {
+            "type": "boolean",
+            "default": false,
+            "description": "Compatibility: omit counts, size, and branch."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_project",
+      "description": "Delete a project from the index",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "index_status",
+      "description": "Project readiness, counts, root, and coverage gaps. diagnostics adds coverage rows; verbose adds Git paths. Best-effort only; verify cited paths with check_index_coverage.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "verbose": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add worktree/shadow Git paths for index-location debugging."
+          },
+          "diagnostics": {
+            "type": "string",
+            "enum": [
+              "none",
+              "summary",
+              "full"
+            ],
+            "default": "none",
+            "description": "Coverage rows: counts, five samples, or up to 500."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "check_index_coverage",
+      "description": "Best-effort exact-path/scope coverage and freshness, paged separately. full diagnostics adds raw detail. Clean is not proof of completeness.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 128
+          },
+          "path_limit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 128
+          },
+          "path_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 32
+          },
+          "scope_limit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "scope_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "diagnostics": {
+            "type": "string",
+            "enum": [
+              "none",
+              "full"
+            ],
+            "default": "none"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "detect_changes",
+      "description": "Map a Git diff to files and impact. Page with snapshot cursors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "files",
+              "impact"
+            ],
+            "default": "impact"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ],
+            "default": "inbound",
+            "description": "inbound=callers; outbound=dependencies; both=union."
+          },
+          "depth": {
+            "type": "integer",
+            "default": 2
+          },
+          "limit": {
+            "type": "integer",
+            "default": 200,
+            "maximum": 5000
+          },
+          "impact_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "impact_cursor": {
+            "type": "string"
+          },
+          "changed_limit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 0,
+            "maximum": 5000
+          },
+          "changed_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "changed_cursor": {
+            "type": "string"
+          },
+          "module_limit": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 0,
+            "maximum": 256
+          },
+          "module_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "module_cursor": {
+            "type": "string"
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "default": 3200,
+            "minimum": 128,
+            "maximum": 1000000,
+            "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token."
+          },
+          "base_branch": {
+            "type": "string",
+            "default": "main"
+          },
+          "since": {
+            "type": "string"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "manage_adr",
+      "description": "Outline an ADR by default; get reads it; update replaces it",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "project": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "outline",
+              "get",
+              "update",
+              "set_sections",
+              "sections"
+            ],
+            "default": "outline",
+            "description": "outline pages headings; get reads; update replaces the whole document; set_sections rewrites only the named sections and leaves every other byte untouched (an identical repeated write is byte-identical, so retrying is safe); sections is legacy."
+          },
+          "content": {
+            "type": "string",
+            "description": "Whole document for update"
+          },
+          "section_updates": {
+            "type": "object",
+            "description": "set_sections: section name -> new body. Any heading name works; names match exactly, including case.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "section_limit": {
+            "type": "integer",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          },
+          "section_offset": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "tree",
+              "json"
+            ],
+            "default": "tree"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ingest_traces",
+      "description": "Validate and count traces; graph edge creation is not implemented",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "caller": {
+                  "type": "string"
+                },
+                "callee": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "project": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "traces",
+          "project"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    }
+  ],
+  "tools_digest": {
+    "tools_list_sha256": "f8e127dc64775bb0977e9acdb3a2e128e0b6d60a2994241aac16dabd32e00eec",
+    "per_tool_schema_sha256": {
+      "index_repository": "6bc4a37dca36ffe00caef563811eb4461241721802255ccf1cc10409b336d63b",
+      "search_graph": "da3b6f9893a747db20db0cbbd38171748ac071df550813805bf90e98dc913199",
+      "query_graph": "73cbbe7c61d878db7d3d95f91914e932005ee6afe96e98004065ad3fcee360a3",
+      "trace_path": "e7a15a39d841b9a5ea84a872ab24de6ef69a6ef1afebbe2e28bd06c1b8d512f7",
+      "get_code_snippet": "c6044821d59c2cf09c4ed98264f332a53986d950b651097465a3306708624c74",
+      "get_file_outline": "3576b302c94097e70567acb579f28828ccde1e69e9f0630466987c6596566ac7",
+      "get_graph_schema": "65256bf0c43d4aa95bdd0586444a75d9a46557294d31bbf831451da71e072696",
+      "compare_graphs": "4f9270f71a894dd03acadee4fafad4416d64ceb8035511d3fb409a873d35effa",
+      "get_architecture": "3bbfc8acb0c94f7e20ab96379f9fdb1dc2c151dab17cb274698d51463d326bbd",
+      "search_code": "226fc27a4744bed00a3d4948721aada6349f5da29651bd52900a2546602e73d6",
+      "list_projects": "c866268d53240f77825f43a4617dc269599a9ba9f1058b9f717b4fc37c72ec9c",
+      "delete_project": "1379040bafe1ff0ad862456c608f3765d908badc3d06738d2cd84e97d3be07ca",
+      "index_status": "0b086d1399e158d1aee61ab1edc3709a85200b283ccec738cc90a8ecc94c06a1",
+      "check_index_coverage": "3c738ccb4c19c5d3de1f637cee78974b4fa95aaa11459de39682d21a513d566c",
+      "detect_changes": "219ddf505ce27ba599706b0e1bd212a55a02e7065305ddabbc5e96e33c5f3939",
+      "manage_adr": "7ca174cbc8144745d6ce866524ee33e60fb1e1a4351a166f11cc918fb440fe57",
+      "ingest_traces": "473760bd684592c9f778e3b8e9a2dd4d1d8c40d7408b499ca00273e653ce2429"
+    }
+  },
+  "calls": [
+    {
+      "tool": "index_repository",
+      "arguments": {
+        "repo_path": "${REPO}/.svweave/spike/snapshot/fixtures",
+        "mode": "fast"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 3.044,
+      "text": "{\"project\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures\",\"not_indexed_files_count\":0,\"skipped_count\":0,\"parse_partial_count\":2,\"parse_partial\":{\"files\":[{\"path\":\"demo/sva/demo_bind.sv\",\"error_ranges\":\"7-7\"},{\"path\":\"uvm/svw_uvm_top.sv\",\"error_ranges\":\"4-4\"}],\"count\":2,\"truncated\":false,\"note\":\"Indexed, but constructs in these line ranges may be missing (best-effort signal); examples only — full list via index_status or 'logfile'.\"},\"parse_unusable_count\":1,\"parse_unusable\":{\"files\":[{\"path\":\"uvm/svw_demo_uvm_pkg.sv\",\"whole_file\":true,\"range_end\":50}],\"count\":1,\"truncated\":false,\"note\":\"Indexed, but the parse failed across nearly the whole file, so line ranges are not useful here — read the source directly.\"},\"nodes\":27,\"edges\":36,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.\",\"artifact_present\":false,\"status\":\"indexed\"}",
+      "json": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "not_indexed_files_count": 0,
+        "skipped_count": 0,
+        "parse_partial_count": 2,
+        "parse_partial": {
+          "files": [
+            {
+              "path": "demo/sva/demo_bind.sv",
+              "error_ranges": "7-7"
+            },
+            {
+              "path": "uvm/svw_uvm_top.sv",
+              "error_ranges": "4-4"
+            }
+          ],
+          "count": 2,
+          "truncated": false,
+          "note": "Indexed, but constructs in these line ranges may be missing (best-effort signal); examples only — full list via index_status or 'logfile'."
+        },
+        "parse_unusable_count": 1,
+        "parse_unusable": {
+          "files": [
+            {
+              "path": "uvm/svw_demo_uvm_pkg.sv",
+              "whole_file": true,
+              "range_end": 50
+            }
+          ],
+          "count": 1,
+          "truncated": false,
+          "note": "Indexed, but the parse failed across nearly the whole file, so line ranges are not useful here — read the source directly."
+        },
+        "nodes": 27,
+        "edges": 36,
+        "adr_present": false,
+        "adr_hint": "Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.",
+        "artifact_present": false,
+        "status": "indexed"
+      },
+      "structured": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "not_indexed_files_count": 0,
+        "skipped_count": 0,
+        "parse_partial_count": 2,
+        "parse_partial": {
+          "files": [
+            {
+              "path": "demo/sva/demo_bind.sv",
+              "error_ranges": "7-7"
+            },
+            {
+              "path": "uvm/svw_uvm_top.sv",
+              "error_ranges": "4-4"
+            }
+          ],
+          "count": 2,
+          "truncated": false,
+          "note": "Indexed, but constructs in these line ranges may be missing (best-effort signal); examples only — full list via index_status or 'logfile'."
+        },
+        "parse_unusable_count": 1,
+        "parse_unusable": {
+          "files": [
+            {
+              "path": "uvm/svw_demo_uvm_pkg.sv",
+              "whole_file": true,
+              "range_end": 50
+            }
+          ],
+          "count": 1,
+          "truncated": false,
+          "note": "Indexed, but the parse failed across nearly the whole file, so line ranges are not useful here — read the source directly."
+        },
+        "nodes": 27,
+        "edges": 36,
+        "adr_present": false,
+        "adr_hint": "Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.",
+        "artifact_present": false,
+        "status": "indexed"
+      }
+    },
+    {
+      "tool": "get_graph_schema",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "format": "json",
+        "diagnostics": "full"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.018,
+      "text": "{\"node_labels\":[{\"label\":\"Class\",\"count\":7,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\",\"complexity\",\"importance\",\"is_entry_point\",\"is_exported\",\"is_test\",\"lines\"]},{\"label\":\"File\",\"count\":6,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\",\"extension\"]},{\"label\":\"Module\",\"count\":6,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\",\"complexity\",\"is_entry_point\",\"is_exported\",\"is_test\",\"lines\"]},{\"label\":\"Folder\",\"count\":4,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\"]},{\"label\":\"Function\",\"count\":2,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\",\"alloc_in_loop\",\"cognitive\",\"complexity\",\"importance\",\"is_entry_point\",\"is_exported\",\"is_test\",\"linear_scan_in_loop\",\"lines\",\"loop_count\",\"loop_depth\",\"max_access_depth\",\"param_count\",\"recursion_in_loop\",\"recursive\",\"self_recursive\",\"transitive_loop_depth\",\"unguarded_recursion\"]},{\"label\":\"Branch\",\"count\":1,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\",\"base_sha\",\"branch\",\"canonical_root\",\"git_common_dir\",\"head_sha\",\"is_detached\",\"is_git\",\"is_worktree\",\"root_exists\",\"worktree_root\"]},{\"label\":\"Project\",\"count\":1,\"properties\":[\"name\",\"qualified_name\",\"file_path\",\"start_line\",\"end_line\"]}],\"edge_types\":[{\"type\":\"DEFINES\",\"count\":15,\"properties\":[\"source_id\",\"target_id\"]},{\"type\":\"USAGE\",\"count\":10,\"properties\":[\"source_id\",\"target_id\",\"callee\"]},{\"type\":\"CONTAINS_FILE\",\"count\":6,\"properties\":[\"source_id\",\"target_id\"]},{\"type\":\"CONTAINS_FOLDER\",\"count\":3,\"properties\":[\"source_id\",\"target_id\"]},{\"type\":\"CALLS\",\"count\":1,\"properties\":[\"source_id\",\"target_id\",\"callee\",\"candidates\",\"confidence\",\"line\",\"strategy\"]},{\"type\":\"HAS_BRANCH\",\"count\":1,\"properties\":[\"source_id\",\"target_id\",\"base_sha\",\"branch\",\"canonical_root\",\"git_common_dir\",\"head_sha\",\"is_detached\",\"is_git\",\"is_worktree\",\"root_exists\",\"worktree_root\"]}],\"total\":13,\"returned\":13,\"has_more\":false,\"adr_present\":false,\"adr_hint\":\"No ADR found. Use manage_adr(mode='update') to persist architectural decisions across sessions. Run get_architecture(aspects=['all']) first.\"}",
+      "json": {
+        "node_labels": [
+          {
+            "label": "Class",
+            "count": 7,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "complexity",
+              "importance",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "lines"
+            ]
+          },
+          {
+            "label": "File",
+            "count": 6,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "extension"
+            ]
+          },
+          {
+            "label": "Module",
+            "count": 6,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "complexity",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "lines"
+            ]
+          },
+          {
+            "label": "Folder",
+            "count": 4,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line"
+            ]
+          },
+          {
+            "label": "Function",
+            "count": 2,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "alloc_in_loop",
+              "cognitive",
+              "complexity",
+              "importance",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "linear_scan_in_loop",
+              "lines",
+              "loop_count",
+              "loop_depth",
+              "max_access_depth",
+              "param_count",
+              "recursion_in_loop",
+              "recursive",
+              "self_recursive",
+              "transitive_loop_depth",
+              "unguarded_recursion"
+            ]
+          },
+          {
+            "label": "Branch",
+            "count": 1,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "base_sha",
+              "branch",
+              "canonical_root",
+              "git_common_dir",
+              "head_sha",
+              "is_detached",
+              "is_git",
+              "is_worktree",
+              "root_exists",
+              "worktree_root"
+            ]
+          },
+          {
+            "label": "Project",
+            "count": 1,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line"
+            ]
+          }
+        ],
+        "edge_types": [
+          {
+            "type": "DEFINES",
+            "count": 15,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "USAGE",
+            "count": 10,
+            "properties": [
+              "source_id",
+              "target_id",
+              "callee"
+            ]
+          },
+          {
+            "type": "CONTAINS_FILE",
+            "count": 6,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "CONTAINS_FOLDER",
+            "count": 3,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "CALLS",
+            "count": 1,
+            "properties": [
+              "source_id",
+              "target_id",
+              "callee",
+              "candidates",
+              "confidence",
+              "line",
+              "strategy"
+            ]
+          },
+          {
+            "type": "HAS_BRANCH",
+            "count": 1,
+            "properties": [
+              "source_id",
+              "target_id",
+              "base_sha",
+              "branch",
+              "canonical_root",
+              "git_common_dir",
+              "head_sha",
+              "is_detached",
+              "is_git",
+              "is_worktree",
+              "root_exists",
+              "worktree_root"
+            ]
+          }
+        ],
+        "total": 13,
+        "returned": 13,
+        "has_more": false,
+        "adr_present": false,
+        "adr_hint": "No ADR found. Use manage_adr(mode='update') to persist architectural decisions across sessions. Run get_architecture(aspects=['all']) first."
+      },
+      "structured": {
+        "node_labels": [
+          {
+            "label": "Class",
+            "count": 7,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "complexity",
+              "importance",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "lines"
+            ]
+          },
+          {
+            "label": "File",
+            "count": 6,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "extension"
+            ]
+          },
+          {
+            "label": "Module",
+            "count": 6,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "complexity",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "lines"
+            ]
+          },
+          {
+            "label": "Folder",
+            "count": 4,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line"
+            ]
+          },
+          {
+            "label": "Function",
+            "count": 2,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "alloc_in_loop",
+              "cognitive",
+              "complexity",
+              "importance",
+              "is_entry_point",
+              "is_exported",
+              "is_test",
+              "linear_scan_in_loop",
+              "lines",
+              "loop_count",
+              "loop_depth",
+              "max_access_depth",
+              "param_count",
+              "recursion_in_loop",
+              "recursive",
+              "self_recursive",
+              "transitive_loop_depth",
+              "unguarded_recursion"
+            ]
+          },
+          {
+            "label": "Branch",
+            "count": 1,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line",
+              "base_sha",
+              "branch",
+              "canonical_root",
+              "git_common_dir",
+              "head_sha",
+              "is_detached",
+              "is_git",
+              "is_worktree",
+              "root_exists",
+              "worktree_root"
+            ]
+          },
+          {
+            "label": "Project",
+            "count": 1,
+            "properties": [
+              "name",
+              "qualified_name",
+              "file_path",
+              "start_line",
+              "end_line"
+            ]
+          }
+        ],
+        "edge_types": [
+          {
+            "type": "DEFINES",
+            "count": 15,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "USAGE",
+            "count": 10,
+            "properties": [
+              "source_id",
+              "target_id",
+              "callee"
+            ]
+          },
+          {
+            "type": "CONTAINS_FILE",
+            "count": 6,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "CONTAINS_FOLDER",
+            "count": 3,
+            "properties": [
+              "source_id",
+              "target_id"
+            ]
+          },
+          {
+            "type": "CALLS",
+            "count": 1,
+            "properties": [
+              "source_id",
+              "target_id",
+              "callee",
+              "candidates",
+              "confidence",
+              "line",
+              "strategy"
+            ]
+          },
+          {
+            "type": "HAS_BRANCH",
+            "count": 1,
+            "properties": [
+              "source_id",
+              "target_id",
+              "base_sha",
+              "branch",
+              "canonical_root",
+              "git_common_dir",
+              "head_sha",
+              "is_detached",
+              "is_git",
+              "is_worktree",
+              "root_exists",
+              "worktree_root"
+            ]
+          }
+        ],
+        "total": 13,
+        "returned": 13,
+        "has_more": false,
+        "adr_present": false,
+        "adr_hint": "No ADR found. Use manage_adr(mode='update') to persist architectural decisions across sessions. Run get_architecture(aspects=['all']) first."
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "demo_lane",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.034,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane\",\"Class\",\"demo/rtl/demo_lane.sv\",\"2-17\",-8.87608209060415],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane\",\"Module\",\"demo/rtl/demo_lane.sv\",\"1-19\",-3.586330690224844]],\"total\":2,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":2,\"count\":2,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane",
+            "Class",
+            "demo/rtl/demo_lane.sv",
+            "2-17",
+            -8.87608209060415
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane",
+            "Module",
+            "demo/rtl/demo_lane.sv",
+            "1-19",
+            -3.586330690224844
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane",
+            "Class",
+            "demo/rtl/demo_lane.sv",
+            "2-17",
+            -8.87608209060415
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane",
+            "Module",
+            "demo/rtl/demo_lane.sv",
+            "1-19",
+            -3.586330690224844
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "demo_lane",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.013,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl\",\"file\":\"demo/rtl/demo_lane.sv\",\"rows\":[[\"demo_lane\",\"Module\",\"1-19\",0,1]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane\",\"file\":\"demo/rtl/demo_lane.sv\",\"rows\":[[\"demo_lane\",\"Class\",\"2-17\",3,0]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.sv\",\"file\":\"demo/rtl/demo_lane.sv\",\"rows\":[[\"__file__\",\"File\",\"\",0,0]]}],\"total\":3,\"returned\":3,\"count\":3,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "demo_lane",
+                "Module",
+                "1-19",
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "demo_lane",
+                "Class",
+                "2-17",
+                3,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.sv",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "demo_lane",
+                "Module",
+                "1-19",
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "demo_lane",
+                "Class",
+                "2-17",
+                3,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.sv",
+            "file": "demo/rtl/demo_lane.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "demo_top",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.014,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top\",\"Class\",\"demo/rtl/demo_top.sv\",\"3-28\",-8.87608209060415],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top\",\"Module\",\"demo/rtl/demo_top.sv\",\"1-30\",-3.586330690224844]],\"total\":2,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":2,\"count\":2,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top",
+            "Class",
+            "demo/rtl/demo_top.sv",
+            "3-28",
+            -8.87608209060415
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top",
+            "Module",
+            "demo/rtl/demo_top.sv",
+            "1-30",
+            -3.586330690224844
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top",
+            "Class",
+            "demo/rtl/demo_top.sv",
+            "3-28",
+            -8.87608209060415
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top",
+            "Module",
+            "demo/rtl/demo_top.sv",
+            "1-30",
+            -3.586330690224844
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "demo_top",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.015,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl\",\"file\":\"demo/rtl/demo_top.sv\",\"rows\":[[\"demo_top\",\"Module\",\"1-30\",0,2]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top\",\"file\":\"demo/rtl/demo_top.sv\",\"rows\":[[\"demo_top\",\"Class\",\"3-28\",1,0]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.sv\",\"file\":\"demo/rtl/demo_top.sv\",\"rows\":[[\"__file__\",\"File\",\"\",0,0]]}],\"total\":3,\"returned\":3,\"count\":3,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "demo_top",
+                "Module",
+                "1-30",
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "demo_top",
+                "Class",
+                "3-28",
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.sv",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "demo_top",
+                "Module",
+                "1-30",
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "demo_top",
+                "Class",
+                "3-28",
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.sv",
+            "file": "demo/rtl/demo_top.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "stream_hold_sva",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.019,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva\",\"Class\",\"demo/sva/stream_hold_sva.sv\",\"2-17\",-8.758599462211663],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva\",\"Module\",\"demo/sva/stream_hold_sva.sv\",\"1-19\",-3.485527678195652]],\"total\":2,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":2,\"count\":2,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva",
+            "Class",
+            "demo/sva/stream_hold_sva.sv",
+            "2-17",
+            -8.758599462211663
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva",
+            "Module",
+            "demo/sva/stream_hold_sva.sv",
+            "1-19",
+            -3.485527678195652
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva",
+            "Class",
+            "demo/sva/stream_hold_sva.sv",
+            "2-17",
+            -8.758599462211663
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva",
+            "Module",
+            "demo/sva/stream_hold_sva.sv",
+            "1-19",
+            -3.485527678195652
+          ]
+        ],
+        "total": 2,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 2,
+        "count": 2,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "stream_hold_sva",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.017,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva\",\"file\":\"demo/sva/stream_hold_sva.sv\",\"rows\":[[\"stream_hold_sva\",\"Module\",\"1-19\",0,1]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva\",\"file\":\"demo/sva/stream_hold_sva.sv\",\"rows\":[[\"stream_hold_sva\",\"Class\",\"2-17\",2,0]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.sv\",\"file\":\"demo/sva/stream_hold_sva.sv\",\"rows\":[[\"__file__\",\"File\",\"\",0,0]]}],\"total\":3,\"returned\":3,\"count\":3,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "stream_hold_sva",
+                "Module",
+                "1-19",
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "stream_hold_sva",
+                "Class",
+                "2-17",
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.sv",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "stream_hold_sva",
+                "Module",
+                "1-19",
+                0,
+                1
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "stream_hold_sva",
+                "Class",
+                "2-17",
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.sv",
+            "file": "demo/sva/stream_hold_sva.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "svw_driver",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.014,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[],\"total\":0,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "svw_driver",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.017,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[],\"hint\":\"No nodes match; check spelling or broaden the regex.\",\"total\":0,\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "svw_monitor",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.014,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[],\"total\":0,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "svw_monitor",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.03,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[],\"hint\":\"No nodes match; check spelling or broaden the regex.\",\"total\":0,\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "run_phase",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.016,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase\",\"Function\",\"uvm/svw_demo_uvm_pkg.sv\",\"20-20\",-14.752547825957627]],\"total\":1,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":1,\"count\":1,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "20-20",
+            -14.752547825957627
+          ]
+        ],
+        "total": 1,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 1,
+        "count": 1,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "20-20",
+            -14.752547825957627
+          ]
+        ],
+        "total": 1,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 1,
+        "count": 1,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "run_phase",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.016,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg\",\"file\":\"uvm/svw_demo_uvm_pkg.sv\",\"rows\":[[\"run_phase\",\"Function\",\"20-20\",0,0]]}],\"total\":1,\"returned\":1,\"count\":1,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "run_phase",
+                "Function",
+                "20-20",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 1,
+        "returned": 1,
+        "count": 1,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "run_phase",
+                "Function",
+                "20-20",
+                0,
+                0
+              ]
+            ]
+          }
+        ],
+        "total": 1,
+        "returned": 1,
+        "count": 1,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "p_stall_holds",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.018,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[],\"total\":0,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [],
+        "total": 0,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "p_stall_holds",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.018,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[],\"hint\":\"No nodes match; check spelling or broaden the regex.\",\"total\":0,\"returned\":0,\"count\":0,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [],
+        "hint": "No nodes match; check spelling or broaden the regex.",
+        "total": 0,
+        "returned": 0,
+        "count": 0,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "svw_demo_uvm_pkg",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.019,
+      "text": "{\"cols\":[\"qn\",\"label\",\"file\",\"lines\",\"rank\"],\"rows\":[[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase\",\"Function\",\"uvm/svw_demo_uvm_pkg.sv\",\"20-20\",-11.50992633079807],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase\",\"Function\",\"uvm/svw_demo_uvm_pkg.sv\",\"45-48\",-11.50992633079807],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg\",\"Class\",\"uvm/svw_demo_uvm_pkg.sv\",\"1-2\",-6.910359252018045],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env\",\"Class\",\"uvm/svw_demo_uvm_pkg.sv\",\"25-37\",-6.50992633079807],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test\",\"Class\",\"uvm/svw_demo_uvm_pkg.sv\",\"39-49\",-6.458453481020038],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg\",\"Module\",\"uvm/svw_demo_uvm_pkg.sv\",\"1-51\",-1.803784131645743]],\"total\":6,\"total_relation\":\"eq\",\"search_mode\":\"bm25\",\"returned\":6,\"count\":6,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "20-20",
+            -11.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "45-48",
+            -11.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "1-2",
+            -6.910359252018045
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "25-37",
+            -6.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "39-49",
+            -6.458453481020038
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "Module",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "1-51",
+            -1.803784131645743
+          ]
+        ],
+        "total": 6,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 6,
+        "count": 6,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "cols": [
+          "qn",
+          "label",
+          "file",
+          "lines",
+          "rank"
+        ],
+        "rows": [
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "20-20",
+            -11.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase",
+            "Function",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "45-48",
+            -11.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "1-2",
+            -6.910359252018045
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "25-37",
+            -6.50992633079807
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test",
+            "Class",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "39-49",
+            -6.458453481020038
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "Module",
+            "uvm/svw_demo_uvm_pkg.sv",
+            "1-51",
+            -1.803784131645743
+          ]
+        ],
+        "total": 6,
+        "total_relation": "eq",
+        "search_mode": "bm25",
+        "returned": 6,
+        "count": 6,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "name_pattern": "svw_demo_uvm_pkg",
+        "limit": 20,
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.015,
+      "text": "{\"qn_rule\":\"qn = qn_prefix == \\\"\\\" ? name : qn_prefix + \\\".\\\" + name\",\"cols\":[\"name\",\"label\",\"lines\",\"in\",\"out\"],\"groups\":[{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg\",\"file\":\"uvm/svw_demo_uvm_pkg.sv\",\"rows\":[[\"svw_demo_uvm_pkg\",\"Class\",\"1-2\",1,0]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.sv\",\"file\":\"uvm/svw_demo_uvm_pkg.sv\",\"rows\":[[\"__file__\",\"File\",\"\",0,0]]},{\"qn_prefix\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm\",\"file\":\"uvm/svw_demo_uvm_pkg.sv\",\"rows\":[[\"svw_demo_uvm_pkg\",\"Module\",\"1-51\",0,3]]}],\"total\":3,\"returned\":3,\"count\":3,\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "svw_demo_uvm_pkg",
+                "Class",
+                "1-2",
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.sv",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "svw_demo_uvm_pkg",
+                "Module",
+                "1-51",
+                0,
+                3
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "qn_rule": "qn = qn_prefix == \"\" ? name : qn_prefix + \".\" + name",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "in",
+          "out"
+        ],
+        "groups": [
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "svw_demo_uvm_pkg",
+                "Class",
+                "1-2",
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.sv",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "__file__",
+                "File",
+                "",
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "qn_prefix": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm",
+            "file": "uvm/svw_demo_uvm_pkg.sv",
+            "rows": [
+              [
+                "svw_demo_uvm_pkg",
+                "Module",
+                "1-51",
+                0,
+                3
+              ]
+            ]
+          }
+        ],
+        "total": 3,
+        "returned": 3,
+        "count": 3,
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "demo/rtl/demo_top.sv",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.013,
+      "text": "{\"file_path\":\"demo/rtl/demo_top.sv\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[[\"demo_top\",\"Class\",\"3-28\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top\"]],\"total\":1,\"offset\":0,\"limit\":100,\"returned\":1,\"has_more\":false}",
+      "json": {
+        "file_path": "demo/rtl/demo_top.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "demo_top",
+            "Class",
+            "3-28",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "demo/rtl/demo_top.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "demo_top",
+            "Class",
+            "3-28",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_top.demo_top"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "demo/rtl/demo_lane.sv",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.023,
+      "text": "{\"file_path\":\"demo/rtl/demo_lane.sv\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[[\"demo_lane\",\"Class\",\"2-17\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane\"]],\"total\":1,\"offset\":0,\"limit\":100,\"returned\":1,\"has_more\":false}",
+      "json": {
+        "file_path": "demo/rtl/demo_lane.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "demo_lane",
+            "Class",
+            "2-17",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "demo/rtl/demo_lane.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "demo_lane",
+            "Class",
+            "2-17",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "demo/sva/stream_hold_sva.sv",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.017,
+      "text": "{\"file_path\":\"demo/sva/stream_hold_sva.sv\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[[\"stream_hold_sva\",\"Class\",\"2-17\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva\"]],\"total\":1,\"offset\":0,\"limit\":100,\"returned\":1,\"has_more\":false}",
+      "json": {
+        "file_path": "demo/sva/stream_hold_sva.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "stream_hold_sva",
+            "Class",
+            "2-17",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "demo/sva/stream_hold_sva.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "stream_hold_sva",
+            "Class",
+            "2-17",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.sva.stream_hold_sva.stream_hold_sva"
+          ]
+        ],
+        "total": 1,
+        "offset": 0,
+        "limit": 100,
+        "returned": 1,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "demo/sva/demo_bind.sv",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.015,
+      "text": "{\"file_path\":\"demo/sva/demo_bind.sv\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[],\"total\":0,\"offset\":0,\"limit\":100,\"returned\":0,\"has_more\":false}",
+      "json": {
+        "file_path": "demo/sva/demo_bind.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 100,
+        "returned": 0,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "demo/sva/demo_bind.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 100,
+        "returned": 0,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "uvm/svw_demo_uvm_pkg.sv",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.013,
+      "text": "{\"file_path\":\"uvm/svw_demo_uvm_pkg.sv\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[[\"svw_demo_uvm_pkg\",\"Class\",\"1-2\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg\"],[\"run_phase\",\"Function\",\"20-20\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase\"],[\"svw_env\",\"Class\",\"25-37\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env\"],[\"svw_smoke_test\",\"Class\",\"39-49\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test\"],[\"build_phase\",\"Function\",\"45-48\",\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase\"]],\"total\":5,\"offset\":0,\"limit\":100,\"returned\":5,\"has_more\":false}",
+      "json": {
+        "file_path": "uvm/svw_demo_uvm_pkg.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "svw_demo_uvm_pkg",
+            "Class",
+            "1-2",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg"
+          ],
+          [
+            "run_phase",
+            "Function",
+            "20-20",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase"
+          ],
+          [
+            "svw_env",
+            "Class",
+            "25-37",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env"
+          ],
+          [
+            "svw_smoke_test",
+            "Class",
+            "39-49",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test"
+          ],
+          [
+            "build_phase",
+            "Function",
+            "45-48",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase"
+          ]
+        ],
+        "total": 5,
+        "offset": 0,
+        "limit": 100,
+        "returned": 5,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "uvm/svw_demo_uvm_pkg.sv",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [
+          [
+            "svw_demo_uvm_pkg",
+            "Class",
+            "1-2",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_demo_uvm_pkg"
+          ],
+          [
+            "run_phase",
+            "Function",
+            "20-20",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase"
+          ],
+          [
+            "svw_env",
+            "Class",
+            "25-37",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_env"
+          ],
+          [
+            "svw_smoke_test",
+            "Class",
+            "39-49",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.svw_smoke_test"
+          ],
+          [
+            "build_phase",
+            "Function",
+            "45-48",
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.build_phase"
+          ]
+        ],
+        "total": 5,
+        "offset": 0,
+        "limit": 100,
+        "returned": 5,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "get_file_outline",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "file_path": "demo/include/demo_defs.svh",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.014,
+      "text": "{\"file_path\":\"demo/include/demo_defs.svh\",\"cols\":[\"name\",\"label\",\"lines\",\"qn\"],\"rows\":[],\"total\":0,\"offset\":0,\"limit\":100,\"returned\":0,\"has_more\":false}",
+      "json": {
+        "file_path": "demo/include/demo_defs.svh",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 100,
+        "returned": 0,
+        "has_more": false
+      },
+      "structured": {
+        "file_path": "demo/include/demo_defs.svh",
+        "cols": [
+          "name",
+          "label",
+          "lines",
+          "qn"
+        ],
+        "rows": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 100,
+        "returned": 0,
+        "has_more": false
+      }
+    },
+    {
+      "tool": "check_index_coverage",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "format": "json",
+        "diagnostics": "full",
+        "paths": [
+          "demo/filelists/rtl.f",
+          "demo/include/demo_defs.svh",
+          "demo/rtl/demo_lane.sv",
+          "demo/rtl/demo_top.sv",
+          "demo/sva/demo_bind.sv",
+          "demo/sva/stream_hold_sva.sv",
+          "uvm/svw_demo_uvm_pkg.sv",
+          "uvm/svw_uvm_top.sv"
+        ]
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.018,
+      "text": "{\"project\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures\",\"signal\":\"best_effort\",\"indexed_at\":\"2026-10-13T05:15:54Z\",\"metadata\":{\"generation\":\"2026-10-13T05:15:54Z\",\"index_mode\":\"full\",\"recorded_at\":\"2026-10-13T05:15:54Z\",\"recording_status\":\"complete\",\"ignored_files_stored\":0,\"ignored_files_total\":0,\"hash_records_complete\":true,\"coverage_version\":3,\"generation_matches\":true},\"paths\":[{\"requested_path\":\"demo/filelists/rtl.f\",\"path\":\"demo/filelists/rtl.f\",\"status\":\"no_recorded_issue\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"demo/include/demo_defs.svh\",\"path\":\"demo/include/demo_defs.svh\",\"status\":\"no_recorded_issue\",\"freshness\":\"not_tracked\",\"recommended_action\":\"read_source_and_reindex\",\"coverage\":[]},{\"requested_path\":\"demo/rtl/demo_lane.sv\",\"path\":\"demo/rtl/demo_lane.sv\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_match\",\"recommended_action\":\"use_graph_with_best_effort_caveat\",\"coverage\":[]},{\"requested_path\":\"demo/rtl/demo_top.sv\",\"path\":\"demo/rtl/demo_top.sv\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_match\",\"recommended_action\":\"use_graph_with_best_effort_caveat\",\"coverage\":[]},{\"requested_path\":\"demo/sva/demo_bind.sv\",\"path\":\"demo/sva/demo_bind.sv\",\"status\":\"partial\",\"freshness\":\"metadata_match\",\"recommended_action\":\"read_ranges_and_verify_scope\",\"coverage\":[{\"path\":\"demo/sva/demo_bind.sv\",\"kind\":\"parse_partial\",\"match\":\"exact\",\"ranges\":[{\"start\":7,\"end\":7}],\"detail\":\"7-7\"}]},{\"requested_path\":\"demo/sva/stream_hold_sva.sv\",\"path\":\"demo/sva/stream_hold_sva.sv\",\"status\":\"no_recorded_issue\",\"freshness\":\"metadata_match\",\"recommended_action\":\"use_graph_with_best_effort_caveat\",\"coverage\":[]},{\"requested_path\":\"uvm/svw_demo_uvm_pkg.sv\",\"path\":\"uvm/svw_demo_uvm_pkg.sv\",\"status\":\"unusable\",\"freshness\":\"metadata_match\",\"recommended_action\":\"read_source_directly\",\"coverage\":[{\"path\":\"uvm/svw_demo_uvm_pkg.sv\",\"kind\":\"parse_unusable\",\"match\":\"exact\",\"ranges\":[{\"start\":1,\"end\":50}],\"detail\":\"1-50\"}]},{\"requested_path\":\"uvm/svw_uvm_top.sv\",\"path\":\"uvm/svw_uvm_top.sv\",\"status\":\"partial\",\"freshness\":\"metadata_match\",\"recommended_action\":\"read_ranges_and_verify_scope\",\"coverage\":[{\"path\":\"uvm/svw_uvm_top.sv\",\"kind\":\"parse_partial\",\"match\":\"exact\",\"ranges\":[{\"start\":4,\"end\":4}],\"detail\":\"4-4\"}]}],\"path_total\":8,\"path_returned\":8,\"path_has_more\":false,\"scopes\":[],\"scope_total\":0,\"scope_returned\":0,\"scope_truncated\":false,\"has_more\":false,\"caveat\":\"Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable.\"}",
+      "json": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "signal": "best_effort",
+        "indexed_at": "2026-10-13T05:15:54Z",
+        "metadata": {
+          "generation": "2026-10-13T05:15:54Z",
+          "index_mode": "full",
+          "recorded_at": "2026-10-13T05:15:54Z",
+          "recording_status": "complete",
+          "ignored_files_stored": 0,
+          "ignored_files_total": 0,
+          "hash_records_complete": true,
+          "coverage_version": 3,
+          "generation_matches": true
+        },
+        "paths": [
+          {
+            "requested_path": "demo/filelists/rtl.f",
+            "path": "demo/filelists/rtl.f",
+            "status": "no_recorded_issue",
+            "freshness": "not_tracked",
+            "recommended_action": "read_source_and_reindex",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/include/demo_defs.svh",
+            "path": "demo/include/demo_defs.svh",
+            "status": "no_recorded_issue",
+            "freshness": "not_tracked",
+            "recommended_action": "read_source_and_reindex",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/rtl/demo_lane.sv",
+            "path": "demo/rtl/demo_lane.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/rtl/demo_top.sv",
+            "path": "demo/rtl/demo_top.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/sva/demo_bind.sv",
+            "path": "demo/sva/demo_bind.sv",
+            "status": "partial",
+            "freshness": "metadata_match",
+            "recommended_action": "read_ranges_and_verify_scope",
+            "coverage": [
+              {
+                "path": "demo/sva/demo_bind.sv",
+                "kind": "parse_partial",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 7,
+                    "end": 7
+                  }
+                ],
+                "detail": "7-7"
+              }
+            ]
+          },
+          {
+            "requested_path": "demo/sva/stream_hold_sva.sv",
+            "path": "demo/sva/stream_hold_sva.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "uvm/svw_demo_uvm_pkg.sv",
+            "path": "uvm/svw_demo_uvm_pkg.sv",
+            "status": "unusable",
+            "freshness": "metadata_match",
+            "recommended_action": "read_source_directly",
+            "coverage": [
+              {
+                "path": "uvm/svw_demo_uvm_pkg.sv",
+                "kind": "parse_unusable",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 1,
+                    "end": 50
+                  }
+                ],
+                "detail": "1-50"
+              }
+            ]
+          },
+          {
+            "requested_path": "uvm/svw_uvm_top.sv",
+            "path": "uvm/svw_uvm_top.sv",
+            "status": "partial",
+            "freshness": "metadata_match",
+            "recommended_action": "read_ranges_and_verify_scope",
+            "coverage": [
+              {
+                "path": "uvm/svw_uvm_top.sv",
+                "kind": "parse_partial",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 4,
+                    "end": 4
+                  }
+                ],
+                "detail": "4-4"
+              }
+            ]
+          }
+        ],
+        "path_total": 8,
+        "path_returned": 8,
+        "path_has_more": false,
+        "scopes": [],
+        "scope_total": 0,
+        "scope_returned": 0,
+        "scope_truncated": false,
+        "has_more": false,
+        "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+      },
+      "structured": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "signal": "best_effort",
+        "indexed_at": "2026-10-13T05:15:54Z",
+        "metadata": {
+          "generation": "2026-10-13T05:15:54Z",
+          "index_mode": "full",
+          "recorded_at": "2026-10-13T05:15:54Z",
+          "recording_status": "complete",
+          "ignored_files_stored": 0,
+          "ignored_files_total": 0,
+          "hash_records_complete": true,
+          "coverage_version": 3,
+          "generation_matches": true
+        },
+        "paths": [
+          {
+            "requested_path": "demo/filelists/rtl.f",
+            "path": "demo/filelists/rtl.f",
+            "status": "no_recorded_issue",
+            "freshness": "not_tracked",
+            "recommended_action": "read_source_and_reindex",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/include/demo_defs.svh",
+            "path": "demo/include/demo_defs.svh",
+            "status": "no_recorded_issue",
+            "freshness": "not_tracked",
+            "recommended_action": "read_source_and_reindex",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/rtl/demo_lane.sv",
+            "path": "demo/rtl/demo_lane.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/rtl/demo_top.sv",
+            "path": "demo/rtl/demo_top.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "demo/sva/demo_bind.sv",
+            "path": "demo/sva/demo_bind.sv",
+            "status": "partial",
+            "freshness": "metadata_match",
+            "recommended_action": "read_ranges_and_verify_scope",
+            "coverage": [
+              {
+                "path": "demo/sva/demo_bind.sv",
+                "kind": "parse_partial",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 7,
+                    "end": 7
+                  }
+                ],
+                "detail": "7-7"
+              }
+            ]
+          },
+          {
+            "requested_path": "demo/sva/stream_hold_sva.sv",
+            "path": "demo/sva/stream_hold_sva.sv",
+            "status": "no_recorded_issue",
+            "freshness": "metadata_match",
+            "recommended_action": "use_graph_with_best_effort_caveat",
+            "coverage": []
+          },
+          {
+            "requested_path": "uvm/svw_demo_uvm_pkg.sv",
+            "path": "uvm/svw_demo_uvm_pkg.sv",
+            "status": "unusable",
+            "freshness": "metadata_match",
+            "recommended_action": "read_source_directly",
+            "coverage": [
+              {
+                "path": "uvm/svw_demo_uvm_pkg.sv",
+                "kind": "parse_unusable",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 1,
+                    "end": 50
+                  }
+                ],
+                "detail": "1-50"
+              }
+            ]
+          },
+          {
+            "requested_path": "uvm/svw_uvm_top.sv",
+            "path": "uvm/svw_uvm_top.sv",
+            "status": "partial",
+            "freshness": "metadata_match",
+            "recommended_action": "read_ranges_and_verify_scope",
+            "coverage": [
+              {
+                "path": "uvm/svw_uvm_top.sv",
+                "kind": "parse_partial",
+                "match": "exact",
+                "ranges": [
+                  {
+                    "start": 4,
+                    "end": 4
+                  }
+                ],
+                "detail": "4-4"
+              }
+            ]
+          }
+        ],
+        "path_total": 8,
+        "path_returned": 8,
+        "path_has_more": false,
+        "scopes": [],
+        "scope_total": 0,
+        "scope_returned": 0,
+        "scope_truncated": false,
+        "has_more": false,
+        "caveat": "Best-effort signal only. No recorded issue does not prove graph or source completeness; read flagged source and qualify claims when metadata is changed or unavailable."
+      }
+    },
+    {
+      "tool": "get_code_snippet",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "qualified_name": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane",
+        "source_mode": "full"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.016,
+      "text": "name: demo_lane\nqualified_name: home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.demo.rtl.demo_lane.demo_lane\nlabel: Class\nfile_path: ${REPO}/.svweave/spike/snapshot/fixtures/demo/rtl/demo_lane.sv\nstart_line: 2\nend_line: 17\nsource_mode: full\nsource: |\n  module demo_lane #(\n    parameter int unsigned DATA_W = 32\n  ) (\n    input  logic              clk,\n    input  logic              rst_n,\n    input  logic              valid_i,\n    output logic              ready_o,\n    input  logic [DATA_W-1:0] data_i,\n    output logic              valid_o,\n    input  logic              ready_i,\n    output logic [DATA_W-1:0] data_o\n  );\n    assign valid_o = valid_i;\n    assign ready_o = ready_i;\n    assign data_o  = data_i;\n  endmodule\ncallers: 0\ncallees: 0\n",
+      "json": null,
+      "structured": null
+    },
+    {
+      "tool": "get_code_snippet",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "qualified_name": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase",
+        "source_mode": "full"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.017,
+      "text": "name: run_phase\nqualified_name: home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase\nlabel: Function\nfile_path: ${REPO}/.svweave/spike/snapshot/fixtures/uvm/svw_demo_uvm_pkg.sv\nstart_line: 20\nend_line: 20\nsource_mode: full\nsource: |\n      virtual task run_phase(uvm_phase phase);\ncallers: 0\ncallees: 0\ncoverage_note: \"The parse of this file failed across nearly the whole of it, so most constructs are missing from the graph and naming line ranges would not help. Read the source directly — the source above is ground truth. (best-effort signal)\"\n",
+      "json": null,
+      "structured": null
+    },
+    {
+      "tool": "query_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "MATCH (n) RETURN labels(n) AS label, count(*) AS c",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.103,
+      "text": "{\"columns\":[\"label\",\"c\"],\"rows\":[[\"[\\\"Folder\\\"]\",\"4\"],[\"[\\\"File\\\"]\",\"6\"],[\"[\\\"Module\\\"]\",\"6\"],[\"[\\\"Class\\\"]\",\"7\"],[\"[\\\"Function\\\"]\",\"2\"],[\"[\\\"Project\\\"]\",\"1\"],[\"[\\\"Branch\\\"]\",\"1\"]],\"returned\":7,\"total\":7,\"total_relation\":\"eq\",\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "columns": [
+          "label",
+          "c"
+        ],
+        "rows": [
+          [
+            "[\"Folder\"]",
+            "4"
+          ],
+          [
+            "[\"File\"]",
+            "6"
+          ],
+          [
+            "[\"Module\"]",
+            "6"
+          ],
+          [
+            "[\"Class\"]",
+            "7"
+          ],
+          [
+            "[\"Function\"]",
+            "2"
+          ],
+          [
+            "[\"Project\"]",
+            "1"
+          ],
+          [
+            "[\"Branch\"]",
+            "1"
+          ]
+        ],
+        "returned": 7,
+        "total": 7,
+        "total_relation": "eq",
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "columns": [
+          "label",
+          "c"
+        ],
+        "rows": [
+          [
+            "[\"Folder\"]",
+            "4"
+          ],
+          [
+            "[\"File\"]",
+            "6"
+          ],
+          [
+            "[\"Module\"]",
+            "6"
+          ],
+          [
+            "[\"Class\"]",
+            "7"
+          ],
+          [
+            "[\"Function\"]",
+            "2"
+          ],
+          [
+            "[\"Project\"]",
+            "1"
+          ],
+          [
+            "[\"Branch\"]",
+            "1"
+          ]
+        ],
+        "returned": 7,
+        "total": 7,
+        "total_relation": "eq",
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "query_graph",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "query": "MATCH (n) RETURN n.name, labels(n), n.file_path LIMIT 200",
+        "format": "json"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.015,
+      "text": "{\"columns\":[\"n.name\",\"labels(n)\",\"n.file_path\"],\"rows\":[[\"demo\",\"[\\\"Folder\\\"]\",\"demo\"],[\"rtl\",\"[\\\"Folder\\\"]\",\"demo/rtl\"],[\"demo_lane.sv\",\"[\\\"File\\\"]\",\"demo/rtl/demo_lane.sv\"],[\"demo/rtl/demo_lane.sv\",\"[\\\"Module\\\"]\",\"demo/rtl/demo_lane.sv\"],[\"demo_lane\",\"[\\\"Class\\\"]\",\"demo/rtl/demo_lane.sv\"],[\"demo_top.sv\",\"[\\\"File\\\"]\",\"demo/rtl/demo_top.sv\"],[\"demo/rtl/demo_top.sv\",\"[\\\"Module\\\"]\",\"demo/rtl/demo_top.sv\"],[\"demo_top\",\"[\\\"Class\\\"]\",\"demo/rtl/demo_top.sv\"],[\"sva\",\"[\\\"Folder\\\"]\",\"demo/sva\"],[\"demo_bind.sv\",\"[\\\"File\\\"]\",\"demo/sva/demo_bind.sv\"],[\"demo/sva/demo_bind.sv\",\"[\\\"Module\\\"]\",\"demo/sva/demo_bind.sv\"],[\"stream_hold_sva.sv\",\"[\\\"File\\\"]\",\"demo/sva/stream_hold_sva.sv\"],[\"demo/sva/stream_hold_sva.sv\",\"[\\\"Module\\\"]\",\"demo/sva/stream_hold_sva.sv\"],[\"stream_hold_sva\",\"[\\\"Class\\\"]\",\"demo/sva/stream_hold_sva.sv\"],[\"uvm\",\"[\\\"Folder\\\"]\",\"uvm\"],[\"svw_demo_uvm_pkg.sv\",\"[\\\"File\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"uvm/svw_demo_uvm_pkg.sv\",\"[\\\"Module\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"svw_demo_uvm_pkg\",\"[\\\"Class\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"run_phase\",\"[\\\"Function\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"svw_env\",\"[\\\"Class\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"build_phase\",\"[\\\"Function\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"svw_smoke_test\",\"[\\\"Class\\\"]\",\"uvm/svw_demo_uvm_pkg.sv\"],[\"svw_uvm_top.sv\",\"[\\\"File\\\"]\",\"uvm/svw_uvm_top.sv\"],[\"uvm/svw_uvm_top.sv\",\"[\\\"Module\\\"]\",\"uvm/svw_uvm_top.sv\"],[\"svw_uvm_top\",\"[\\\"Class\\\"]\",\"uvm/svw_uvm_top.sv\"],[\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures\",\"[\\\"Project\\\"]\",\"{}\"],[\"main\",\"[\\\"Branch\\\"]\",\"{}\"]],\"returned\":27,\"total\":27,\"total_relation\":\"eq\",\"has_more\":false,\"truncated\":false}",
+      "json": {
+        "columns": [
+          "n.name",
+          "labels(n)",
+          "n.file_path"
+        ],
+        "rows": [
+          [
+            "demo",
+            "[\"Folder\"]",
+            "demo"
+          ],
+          [
+            "rtl",
+            "[\"Folder\"]",
+            "demo/rtl"
+          ],
+          [
+            "demo_lane.sv",
+            "[\"File\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo/rtl/demo_lane.sv",
+            "[\"Module\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo_lane",
+            "[\"Class\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo_top.sv",
+            "[\"File\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "demo/rtl/demo_top.sv",
+            "[\"Module\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "demo_top",
+            "[\"Class\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "sva",
+            "[\"Folder\"]",
+            "demo/sva"
+          ],
+          [
+            "demo_bind.sv",
+            "[\"File\"]",
+            "demo/sva/demo_bind.sv"
+          ],
+          [
+            "demo/sva/demo_bind.sv",
+            "[\"Module\"]",
+            "demo/sva/demo_bind.sv"
+          ],
+          [
+            "stream_hold_sva.sv",
+            "[\"File\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "demo/sva/stream_hold_sva.sv",
+            "[\"Module\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "stream_hold_sva",
+            "[\"Class\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "uvm",
+            "[\"Folder\"]",
+            "uvm"
+          ],
+          [
+            "svw_demo_uvm_pkg.sv",
+            "[\"File\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "uvm/svw_demo_uvm_pkg.sv",
+            "[\"Module\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_demo_uvm_pkg",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "run_phase",
+            "[\"Function\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_env",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "build_phase",
+            "[\"Function\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_smoke_test",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_uvm_top.sv",
+            "[\"File\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "uvm/svw_uvm_top.sv",
+            "[\"Module\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "svw_uvm_top",
+            "[\"Class\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+            "[\"Project\"]",
+            "{}"
+          ],
+          [
+            "main",
+            "[\"Branch\"]",
+            "{}"
+          ]
+        ],
+        "returned": 27,
+        "total": 27,
+        "total_relation": "eq",
+        "has_more": false,
+        "truncated": false
+      },
+      "structured": {
+        "columns": [
+          "n.name",
+          "labels(n)",
+          "n.file_path"
+        ],
+        "rows": [
+          [
+            "demo",
+            "[\"Folder\"]",
+            "demo"
+          ],
+          [
+            "rtl",
+            "[\"Folder\"]",
+            "demo/rtl"
+          ],
+          [
+            "demo_lane.sv",
+            "[\"File\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo/rtl/demo_lane.sv",
+            "[\"Module\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo_lane",
+            "[\"Class\"]",
+            "demo/rtl/demo_lane.sv"
+          ],
+          [
+            "demo_top.sv",
+            "[\"File\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "demo/rtl/demo_top.sv",
+            "[\"Module\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "demo_top",
+            "[\"Class\"]",
+            "demo/rtl/demo_top.sv"
+          ],
+          [
+            "sva",
+            "[\"Folder\"]",
+            "demo/sva"
+          ],
+          [
+            "demo_bind.sv",
+            "[\"File\"]",
+            "demo/sva/demo_bind.sv"
+          ],
+          [
+            "demo/sva/demo_bind.sv",
+            "[\"Module\"]",
+            "demo/sva/demo_bind.sv"
+          ],
+          [
+            "stream_hold_sva.sv",
+            "[\"File\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "demo/sva/stream_hold_sva.sv",
+            "[\"Module\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "stream_hold_sva",
+            "[\"Class\"]",
+            "demo/sva/stream_hold_sva.sv"
+          ],
+          [
+            "uvm",
+            "[\"Folder\"]",
+            "uvm"
+          ],
+          [
+            "svw_demo_uvm_pkg.sv",
+            "[\"File\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "uvm/svw_demo_uvm_pkg.sv",
+            "[\"Module\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_demo_uvm_pkg",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "run_phase",
+            "[\"Function\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_env",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "build_phase",
+            "[\"Function\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_smoke_test",
+            "[\"Class\"]",
+            "uvm/svw_demo_uvm_pkg.sv"
+          ],
+          [
+            "svw_uvm_top.sv",
+            "[\"File\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "uvm/svw_uvm_top.sv",
+            "[\"Module\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "svw_uvm_top",
+            "[\"Class\"]",
+            "uvm/svw_uvm_top.sv"
+          ],
+          [
+            "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+            "[\"Project\"]",
+            "{}"
+          ],
+          [
+            "main",
+            "[\"Branch\"]",
+            "{}"
+          ]
+        ],
+        "returned": 27,
+        "total": 27,
+        "total_relation": "eq",
+        "has_more": false,
+        "truncated": false
+      }
+    },
+    {
+      "tool": "search_code",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "pattern": "run_phase",
+        "mode": "compact"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.242,
+      "text": "results: 2  (cols: qn label file lines matches matches_omitted in out)\n  home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg.run_phase Function uvm/svw_demo_uvm_pkg.sv 20-20 \"20\" 0 0 0\n  home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures.uvm.svw_demo_uvm_pkg Module uvm/svw_demo_uvm_pkg.sv 1-51 \"10\" 0 0 0\ndirectories: 1  (cols: dir hits)\n  uvm/ 2\ntotal_grep_matches: 2\ntotal_results: 2\nraw_match_count: 0\ntotal_relation: eq\nresult_offset: 0\nresults_returned: 2\nhas_more: false\nraw_returned: 0\nraw_has_more: false\ndirectories_total: 1\ndirectories_returned: 1\ndirectories_has_more: false\ntruncated: false\nelapsed_ms: 230\n",
+      "json": null,
+      "structured": null
+    }
+  ],
+  "index_call_s": 3.044,
+  "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+  "index_status_history": [
+    {
+      "tool": "index_status",
+      "arguments": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "format": "json",
+        "diagnostics": "summary"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.016,
+      "text": "{\"project\":\"home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures\",\"nodes\":27,\"edges\":36,\"status\":\"ready\",\"root_path\":\"${REPO}/.svweave/spike/snapshot/fixtures\",\"indexed_at\":\"2026-10-13T05:15:54Z\",\"parse_partial\":{\"files\":[{\"path\":\"demo/sva/demo_bind.sv\",\"error_ranges\":\"7-7\"},{\"path\":\"uvm/svw_uvm_top.sv\",\"error_ranges\":\"4-4\"}],\"count\":2,\"truncated\":false},\"parse_unusable\":{\"files\":[{\"path\":\"uvm/svw_demo_uvm_pkg.sv\",\"whole_file\":true,\"range_end\":50}],\"count\":1,\"truncated\":false},\"skipped\":{\"files\":[],\"count\":0,\"truncated\":false},\"not_indexed\":{\"dirs\":[],\"dirs_count\":0,\"files\":[],\"files_count\":0,\"truncated\":false},\"coverage_note\":\"Best-effort signal, not a completeness guarantee: parse_partial files WERE indexed, but constructs inside the listed line ranges (1-based) MAY be missing from the graph (tree-sitter error recovery still salvages some). skipped files were not indexed at all. Prefer text search (grep) for flagged files/ranges. Files absent from this list are NOT guaranteed to be fully indexed. (not_indexed entries are a separate, BY-DESIGN class — deliberate ignore rules, not failures.)\"}",
+      "json": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "nodes": 27,
+        "edges": 36,
+        "status": "ready",
+        "root_path": "${REPO}/.svweave/spike/snapshot/fixtures",
+        "indexed_at": "2026-10-13T05:15:54Z",
+        "parse_partial": {
+          "files": [
+            {
+              "path": "demo/sva/demo_bind.sv",
+              "error_ranges": "7-7"
+            },
+            {
+              "path": "uvm/svw_uvm_top.sv",
+              "error_ranges": "4-4"
+            }
+          ],
+          "count": 2,
+          "truncated": false
+        },
+        "parse_unusable": {
+          "files": [
+            {
+              "path": "uvm/svw_demo_uvm_pkg.sv",
+              "whole_file": true,
+              "range_end": 50
+            }
+          ],
+          "count": 1,
+          "truncated": false
+        },
+        "skipped": {
+          "files": [],
+          "count": 0,
+          "truncated": false
+        },
+        "not_indexed": {
+          "dirs": [],
+          "dirs_count": 0,
+          "files": [],
+          "files_count": 0,
+          "truncated": false
+        },
+        "coverage_note": "Best-effort signal, not a completeness guarantee: parse_partial files WERE indexed, but constructs inside the listed line ranges (1-based) MAY be missing from the graph (tree-sitter error recovery still salvages some). skipped files were not indexed at all. Prefer text search (grep) for flagged files/ranges. Files absent from this list are NOT guaranteed to be fully indexed. (not_indexed entries are a separate, BY-DESIGN class — deliberate ignore rules, not failures.)"
+      },
+      "structured": {
+        "project": "home-tim-projects-SVWeave-.svweave-spike-snapshot-fixtures",
+        "nodes": 27,
+        "edges": 36,
+        "status": "ready",
+        "root_path": "${REPO}/.svweave/spike/snapshot/fixtures",
+        "indexed_at": "2026-10-13T05:15:54Z",
+        "parse_partial": {
+          "files": [
+            {
+              "path": "demo/sva/demo_bind.sv",
+              "error_ranges": "7-7"
+            },
+            {
+              "path": "uvm/svw_uvm_top.sv",
+              "error_ranges": "4-4"
+            }
+          ],
+          "count": 2,
+          "truncated": false
+        },
+        "parse_unusable": {
+          "files": [
+            {
+              "path": "uvm/svw_demo_uvm_pkg.sv",
+              "whole_file": true,
+              "range_end": 50
+            }
+          ],
+          "count": 1,
+          "truncated": false
+        },
+        "skipped": {
+          "files": [],
+          "count": 0,
+          "truncated": false
+        },
+        "not_indexed": {
+          "dirs": [],
+          "dirs_count": 0,
+          "files": [],
+          "files_count": 0,
+          "truncated": false
+        },
+        "coverage_note": "Best-effort signal, not a completeness guarantee: parse_partial files WERE indexed, but constructs inside the listed line ranges (1-based) MAY be missing from the graph (tree-sitter error recovery still salvages some). skipped files were not indexed at all. Prefer text search (grep) for flagged files/ranges. Files absent from this list are NOT guaranteed to be fully indexed. (not_indexed entries are a separate, BY-DESIGN class — deliberate ignore rules, not failures.)"
+      }
+    }
+  ],
+  "index_total_s": 3.061,
+  "backend_process_tree_peak_rss": [
+    {
+      "pid": 4041575,
+      "ppid": 4040971,
+      "vm_hwm_kib": 7544,
+      "cmd": "${REPO}/.toolchain/cbm/codebase-memory-mcp "
+    }
+  ],
+  "peak_rss_kib_children": 64420,
+  "snapshot_manifest_after": {
+    "demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+    "demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+    "demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+    "demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+    "demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+    "demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+    "uvm/svw_demo_uvm_pkg.sv": "de4075a37f90472f0c4c1efd7286726e8b88c21f183b351e9ad4bfb096541a6d",
+    "uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97"
+  },
+  "snapshot_unchanged": true,
+  "status": "completed",
+  "wall_s": 28.747
+}

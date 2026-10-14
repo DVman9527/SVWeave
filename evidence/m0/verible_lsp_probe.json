@@ -1,0 +1,346 @@
+{
+  "verible_ls_version": "Version\tv0.0-4296-g0f262651\nCommit-Timestamp\t2026-09-23T08:15:19Z\nBuilt\t2026-09-23T08:18:08Z",
+  "initialize_result": {
+    "capabilities": {
+      "codeActionProvider": true,
+      "definitionProvider": true,
+      "diagnosticProvider": {
+        "interFileDependencies": false,
+        "workspaceDiagnostics": false
+      },
+      "documentFormattingProvider": true,
+      "documentHighlightProvider": true,
+      "documentRangeFormattingProvider": true,
+      "documentSymbolProvider": true,
+      "hoverProvider": false,
+      "referencesProvider": true,
+      "renameProvider": true,
+      "textDocumentSync": {
+        "change": 2,
+        "openClose": true
+      }
+    },
+    "serverInfo": {
+      "name": "Verible Verilog language server.",
+      "version": "v0.0-4296-g0f262651"
+    }
+  },
+  "documentSymbol": {
+    "fixtures/uvm/svw_demo_uvm_pkg.sv": [
+      {
+        "depth": 0,
+        "kind": 4,
+        "name": "svw_demo_uvm_pkg",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 49
+          },
+          "start": {
+            "character": 0,
+            "line": 0
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 24,
+            "line": 0
+          },
+          "start": {
+            "character": 8,
+            "line": 0
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 5,
+        "name": "svw_driver",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 12
+          },
+          "start": {
+            "character": 2,
+            "line": 4
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 18,
+            "line": 4
+          },
+          "start": {
+            "character": 8,
+            "line": 4
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 5,
+        "name": "svw_monitor",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 22
+          },
+          "start": {
+            "character": 2,
+            "line": 14
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 19,
+            "line": 14
+          },
+          "start": {
+            "character": 8,
+            "line": 14
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 5,
+        "name": "svw_env",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 36
+          },
+          "start": {
+            "character": 2,
+            "line": 24
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 15,
+            "line": 24
+          },
+          "start": {
+            "character": 8,
+            "line": 24
+          }
+        }
+      },
+      {
+        "depth": 2,
+        "kind": 12,
+        "name": "build_phase",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 35
+          },
+          "start": {
+            "character": 4,
+            "line": 31
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 37,
+            "line": 31
+          },
+          "start": {
+            "character": 26,
+            "line": 31
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 5,
+        "name": "svw_smoke_test",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 48
+          },
+          "start": {
+            "character": 2,
+            "line": 38
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 22,
+            "line": 38
+          },
+          "start": {
+            "character": 8,
+            "line": 38
+          }
+        }
+      },
+      {
+        "depth": 2,
+        "kind": 12,
+        "name": "build_phase",
+        "range": {
+          "end": {
+            "character": 15,
+            "line": 47
+          },
+          "start": {
+            "character": 4,
+            "line": 44
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 37,
+            "line": 44
+          },
+          "start": {
+            "character": 26,
+            "line": 44
+          }
+        }
+      }
+    ],
+    "mini_task_function.sv": [
+      {
+        "depth": 0,
+        "kind": 4,
+        "name": "p",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 8
+          },
+          "start": {
+            "character": 0,
+            "line": 0
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 9,
+            "line": 0
+          },
+          "start": {
+            "character": 8,
+            "line": 0
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 5,
+        "name": "c1",
+        "range": {
+          "end": {
+            "character": 10,
+            "line": 7
+          },
+          "start": {
+            "character": 2,
+            "line": 1
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 10,
+            "line": 1
+          },
+          "start": {
+            "character": 8,
+            "line": 1
+          }
+        }
+      },
+      {
+        "depth": 2,
+        "kind": 12,
+        "name": "f1",
+        "range": {
+          "end": {
+            "character": 35,
+            "line": 2
+          },
+          "start": {
+            "character": 4,
+            "line": 2
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 20,
+            "line": 2
+          },
+          "start": {
+            "character": 18,
+            "line": 2
+          }
+        }
+      },
+      {
+        "depth": 0,
+        "kind": 6,
+        "name": "m",
+        "range": {
+          "end": {
+            "character": 70,
+            "line": 9
+          },
+          "start": {
+            "character": 0,
+            "line": 9
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 8,
+            "line": 9
+          },
+          "start": {
+            "character": 7,
+            "line": 9
+          }
+        }
+      },
+      {
+        "depth": 1,
+        "kind": 12,
+        "name": "mf",
+        "range": {
+          "end": {
+            "character": 60,
+            "line": 9
+          },
+          "start": {
+            "character": 29,
+            "line": 9
+          }
+        },
+        "selectionRange": {
+          "end": {
+            "character": 45,
+            "line": 9
+          },
+          "start": {
+            "character": 43,
+            "line": 9
+          }
+        }
+      }
+    ]
+  },
+  "mini_source": "package p;\n  class c1;\n    function void f1(); endfunction\n    task t1(); endtask\n    virtual task run_phase(int phase);\n      $display(\"x\");\n    endtask\n  endclass\nendpackage\nmodule m; task mt(); endtask function void mf(); endfunction endmodule\n",
+  "facts": {
+    "mini_symbols": [
+      "p",
+      "c1",
+      "f1",
+      "m",
+      "mf"
+    ],
+    "task_symbols_reported": false,
+    "function_symbols_reported": true
+  }
+}

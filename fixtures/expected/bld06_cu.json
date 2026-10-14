@@ -1,0 +1,22 @@
+{
+  "topic": "bld06_cu",
+  "fixture_dir": "language/bld06_cu",
+  "top": "mod_b",
+  "expect": {
+    "single": {
+      "errors": 0,
+      "completeness": "COMPLETE"
+    },
+    "per_file": {
+      "errors": 1,
+      "code": "UnknownDirective",
+      "completeness": "PARTIAL",
+      "file": "macro_use.sv",
+      "ctx": "logic [`SHARED_W-1:0] x;",
+      "nth": 0,
+      "text": "`SHARED_W",
+      "start": 23,
+      "end": 32
+    }
+  }
+}

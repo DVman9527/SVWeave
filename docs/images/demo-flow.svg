@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 990" width="100%" role="img" aria-labelledby="t d">
+<title id="t">How a change flows, end to end</title>
+<desc id="d">Eleven-step demo flow from loading a profile to the post-apply build, showing which backend each step uses, the command that runs it and the evidence kind it yields.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="990" class="bg"/>
+<text x="40" y="32" class="tx b s16">How a change flows: the end-to-end demo, step by step</text>
+<rect x="40" y="48" width="16" height="12" rx="3" class="n"/>
+<text x="62" y="59" class="tx s12">read-only analysis</text>
+<rect x="200" y="48" width="16" height="12" rx="3" class="a"/>
+<text x="222" y="59" class="tx s12">controlled edit loop (editing is disabled by default)</text>
+<circle cx="560" cy="54" r="6" class="fa"/>
+<text x="572" y="59" class="tx s12">backend does the work</text>
+<circle cx="720" cy="54" r="5" class="chip"/>
+<text x="732" y="59" class="tx s12">gateway orchestrates only</text>
+<text x="540" y="102" class="mu b s12" text-anchor="middle">gateway</text>
+<text x="620" y="102" class="mu b s12" text-anchor="middle">graph</text>
+<text x="700" y="102" class="mu b s12" text-anchor="middle">slang</text>
+<text x="780" y="102" class="mu b s12" text-anchor="middle">Serena</text>
+<text x="860" y="102" class="mu b s12" text-anchor="middle">human</text>
+<text x="40" y="102" class="mu b s12">step and command</text>
+<text x="915" y="102" class="mu b s12">evidence kind and note</text>
+<rect x="30" y="112" width="1140" height="68" rx="8" class="n"/>
+<circle cx="56" cy="146" r="11" class="chip"/>
+<text x="56" y="150.5" class="tx b s12" text-anchor="middle">1</text>
+<text x="80" y="140" class="tx b s14">Load profile</text>
+<text x="80" y="162" class="mu s12 mono">svweave manifest resolve --profile rtl_demo</text>
+<circle cx="540" cy="146" r="5" class="chip"/>
+<text x="915" y="140" class="tx b s12 mono">config_id</text>
+<text x="915" y="160" class="mu s12">normalized manifest + argument ledger</text>
+<path d="M56,157 L56,211" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="188" width="1140" height="68" rx="8" class="n"/>
+<circle cx="56" cy="222" r="11" class="chip"/>
+<text x="56" y="226.5" class="tx b s12" text-anchor="middle">2</text>
+<text x="80" y="216" class="tx b s14">Immutable snapshot + slang build</text>
+<text x="80" y="238" class="mu s12 mono">svweave build --profile rtl_demo</text>
+<circle cx="540" cy="222" r="5" class="chip"/>
+<text x="915" y="216" class="tx b s12 mono">snapshot_id</text>
+<text x="915" y="236" class="mu s12">inventory + bytes + lookup space</text>
+<path d="M56,233 L56,287" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="264" width="1140" height="68" rx="8" class="n"/>
+<circle cx="56" cy="298" r="11" class="chip"/>
+<text x="56" y="302.5" class="tx b s12" text-anchor="middle">3</text>
+<text x="80" y="292" class="tx b s14">Backend health probe</text>
+<text x="80" y="314" class="mu s12 mono">svweave doctor --probe</text>
+<circle cx="540" cy="298" r="8" class="fn"/>
+<circle cx="620" cy="298" r="8" class="fn"/>
+<circle cx="700" cy="298" r="8" class="fn"/>
+<circle cx="780" cy="298" r="8" class="fn"/>
+<line x1="540" y1="298" x2="780" y2="298" class="l"/>
+<circle cx="540" cy="298" r="5" class="chip"/>
+<circle cx="620" cy="298" r="8" class="fn"/>
+<circle cx="700" cy="298" r="8" class="fn"/>
+<circle cx="780" cy="298" r="8" class="fn"/>
+<text x="915" y="292" class="tx b s12 mono">READY / DEGRADED</text>
+<text x="915" y="312" class="mu s12">real fixture query per backend</text>
+<path d="M56,309 L56,363" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="340" width="1140" height="68" rx="8" class="n"/>
+<circle cx="56" cy="374" r="11" class="chip"/>
+<text x="56" y="378.5" class="tx b s12" text-anchor="middle">4</text>
+<text x="80" y="368" class="tx b s14">Graph finds candidate files</text>
+<text x="80" y="390" class="mu s12 mono">svweave query search --snapshot S --query Q</text>
+<circle cx="620" cy="374" r="8" class="fn"/>
+<text x="915" y="368" class="tx b s12 mono">SOURCE_CANDIDATE</text>
+<text x="915" y="388" class="mu s12">candidates only, never facts</text>
+<path d="M56,385 L56,439" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="416" width="1140" height="68" rx="8" class="n"/>
+<circle cx="56" cy="450" r="11" class="chip"/>
+<text x="56" y="454.5" class="tx b s12" text-anchor="middle">5</text>
+<text x="80" y="444" class="tx b s14">slang: symbol, hierarchy, references</text>
+<text x="80" y="466" class="mu s12 mono">svweave query symbol | hierarchy | references</text>
+<circle cx="700" cy="450" r="8" class="fn"/>
+<text x="915" y="444" class="tx b s12 mono">HDL_STATIC_RESOLVED</text>
+<text x="915" y="464" class="mu s12">named build, scope stated</text>
+<path d="M56,461 L56,515" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="492" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="526" r="11" class="chip"/>
+<text x="56" y="530.5" class="ta b s12" text-anchor="middle">6</text>
+<text x="80" y="520" class="ta b s14">Serena edits the candidate copy</text>
+<text x="80" y="542" class="mu s12 mono">svweave edit prepare --spec spec.json</text>
+<circle cx="780" cy="526" r="8" class="fa"/>
+<text x="915" y="520" class="ta b s12 mono">LSP_RESOLVED</text>
+<text x="915" y="540" class="mu s12">function bodies; else patch</text>
+<path d="M56,537 L56,591" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="568" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="602" r="11" class="chip"/>
+<text x="56" y="606.5" class="ta b s12" text-anchor="middle">7</text>
+<text x="80" y="596" class="ta b s14">slang re-validates the candidate</text>
+<text x="80" y="618" class="mu s12 mono">svweave edit validate --transaction T</text>
+<circle cx="700" cy="602" r="8" class="fa"/>
+<text x="915" y="596" class="ta b s12 mono">HDL_STATIC_RESOLVED</text>
+<text x="915" y="616" class="mu s12">baseline + candidate both clean</text>
+<path d="M56,613 L56,667" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="644" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="678" r="11" class="chip"/>
+<text x="56" y="682.5" class="ta b s12" text-anchor="middle">8</text>
+<text x="80" y="672" class="ta b s14">Diff, impact and open limitations</text>
+<text x="80" y="694" class="mu s12 mono">same call returns patch_hash and diff</text>
+<circle cx="540" cy="678" r="5" class="chip"/>
+<text x="915" y="672" class="ta b s12 mono">EDA / sim / formal</text>
+<text x="915" y="692" class="mu s12">reported as NOT_RUN</text>
+<path d="M56,689 L56,743" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="720" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="754" r="11" class="chip"/>
+<text x="56" y="758.5" class="ta b s12" text-anchor="middle">9</text>
+<text x="80" y="748" class="ta b s14">Human approval (TTY, hash prefix)</text>
+<text x="80" y="770" class="mu s12 mono">svweave edit approve --transaction T --patch-hash H</text>
+<circle cx="540" cy="754" r="8" class="fa"/>
+<circle cx="860" cy="754" r="8" class="fa"/>
+<line x1="540" y1="754" x2="860" y2="754" class="la"/>
+<circle cx="860" cy="754" r="8" class="fa"/>
+<circle cx="540" cy="754" r="5" class="chip"/>
+<text x="915" y="748" class="ta b s12 mono">HMAC approval record</text>
+<text x="915" y="768" class="mu s12">no MCP approve tool; expiry 30 min</text>
+<path d="M56,765 L56,819" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="796" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="830" r="11" class="chip"/>
+<text x="56" y="834.5" class="ta b s12" text-anchor="middle">10</text>
+<text x="80" y="824" class="ta b s14">Compare-and-set commit with journal</text>
+<text x="80" y="846" class="mu s12 mono">svweave edit commit --transaction T --patch-hash H</text>
+<circle cx="540" cy="830" r="5" class="chip"/>
+<text x="915" y="824" class="ta b s12 mono">journal fsync</text>
+<text x="915" y="844" class="mu s12">per-file hash check, atomic</text>
+<path d="M56,841 L56,895" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="872" width="1140" height="68" rx="8" class="a"/>
+<circle cx="56" cy="906" r="11" class="chip"/>
+<text x="56" y="910.5" class="ta b s12" text-anchor="middle">11</text>
+<text x="80" y="900" class="ta b s14">Post-apply snapshot + build</text>
+<text x="80" y="922" class="mu s12 mono">runs inside svweave edit commit</text>
+<circle cx="540" cy="906" r="8" class="fa"/>
+<circle cx="700" cy="906" r="8" class="fa"/>
+<line x1="540" y1="906" x2="700" y2="906" class="la"/>
+<circle cx="540" cy="906" r="5" class="chip"/>
+<circle cx="700" cy="906" r="8" class="fa"/>
+<text x="915" y="900" class="ta b s12 mono">HDL_STATIC_RESOLVED</text>
+<text x="915" y="920" class="mu s12">old build becomes HISTORICAL</text>
+<text x="40" y="974" class="mu s12">Every result carries snapshot_id, build_id, provenance, completeness and limitations. Evidence kinds are not a ranking: see the evidence diagram.</text>
+</svg>

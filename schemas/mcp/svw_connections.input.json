@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "instance_id"
+      ]
+    },
+    {
+      "required": [
+        "instance_path"
+      ]
+    }
+  ],
+  "properties": {
+    "build_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "cursor": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+$",
+      "type": "string"
+    },
+    "instance_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "instance_path": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+      "type": "string"
+    },
+    "limit": {
+      "default": 100,
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "port": {
+      "maxLength": 256,
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "build_id"
+  ],
+  "type": "object"
+}

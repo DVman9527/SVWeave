@@ -1,0 +1,613 @@
+{
+  "benchmark": "PERF-01",
+  "started_utc": "2026-10-13T08:05:23+00:00",
+  "host": {
+    "cpu_model": "Intel(R) Xeon(R) Gold 6138 CPU @ 2.00GHz",
+    "logical_cpus": 16,
+    "ram_total_gib": 19.33,
+    "ram_available_gib_at_start": 4.38,
+    "swap_total_gib": 7.88,
+    "os": "Linux-4.18.0-553.74.1.el8_10.x86_64-x86_64-with-glibc2.28",
+    "kernel": "4.18.0-553.74.1.el8_10.x86_64",
+    "python": "3.12.4",
+    "filesystem": {
+      "mount": "/home",
+      "device": "/dev/mapper/rl_op--sinopac-home",
+      "fstype": "xfs"
+    },
+    "page_cache": "warm (not dropped: no privilege)",
+    "loadavg_at_start": [
+      9.78,
+      12.32,
+      10.69
+    ]
+  },
+  "toolchain_lock_sha256": "dbcb971a30a5a0026b2ba7f2a3b824fc82bbedd8d117a16f6465d80c47eecd08",
+  "svweave_version": "0.1.0",
+  "corpus": {
+    "scale": 1.0,
+    "seed": 1,
+    "files": 500,
+    "lines": 100374,
+    "bytes": 2278538,
+    "content_sha256": "53eb6a07632b85f282e94d36c1b31f7d3f46f86a2416a4445d6f2d19f6d69883",
+    "packages": 30,
+    "interfaces": 40,
+    "modules": 429
+  },
+  "corpus_dir": "(local path omitted)",
+  "uvm_in_loc": false,
+  "targets_plan_22_3": {
+    "cold_build_s": 120.0,
+    "worker_peak_gib": 8.0,
+    "hot_query_p95_s": 1.0,
+    "hot_search_p95_s": 2.0
+  },
+  "reference_host_met": false,
+  "tool_startup": {
+    "command": "svweave --help",
+    "median_s": 1.230550884269178,
+    "max_s": 1.2395979082211852,
+    "raw_s": [
+      1.2306,
+      1.1766,
+      1.2029,
+      1.2396,
+      1.2331
+    ]
+  },
+  "cold_build": {
+    "runs": [
+      {
+        "run": 1,
+        "exit": 0,
+        "total_wall_s": 24.330244375392795,
+        "tree_rss_peak_kib_sampled": 556116,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 51732,
+          "references": 74202,
+          "instances": 573,
+          "port_bindings": 1859,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 8.905,
+          "peak_rss_kib": 416256,
+          "user_cpu_s": 8.447,
+          "sys_cpu_s": 0.42,
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0
+        },
+        "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+      },
+      {
+        "run": 2,
+        "exit": 0,
+        "total_wall_s": 23.878193682059646,
+        "tree_rss_peak_kib_sampled": 555912,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 51732,
+          "references": 74202,
+          "instances": 573,
+          "port_bindings": 1859,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 8.908,
+          "peak_rss_kib": 416656,
+          "user_cpu_s": 8.478,
+          "sys_cpu_s": 0.396,
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0
+        },
+        "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+      },
+      {
+        "run": 3,
+        "exit": 0,
+        "total_wall_s": 24.045749195851386,
+        "tree_rss_peak_kib_sampled": 556020,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 51732,
+          "references": 74202,
+          "instances": 573,
+          "port_bindings": 1859,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 9.052,
+          "peak_rss_kib": 420848,
+          "user_cpu_s": 8.601,
+          "sys_cpu_s": 0.431,
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0
+        },
+        "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+      },
+      {
+        "run": 4,
+        "exit": 0,
+        "total_wall_s": 24.008020264096558,
+        "tree_rss_peak_kib_sampled": 556996,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 51732,
+          "references": 74202,
+          "instances": 573,
+          "port_bindings": 1859,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 8.84,
+          "peak_rss_kib": 420540,
+          "user_cpu_s": 8.45,
+          "sys_cpu_s": 0.387,
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0
+        },
+        "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+      },
+      {
+        "run": 5,
+        "exit": 0,
+        "total_wall_s": 24.213338686153293,
+        "tree_rss_peak_kib_sampled": 555476,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 51732,
+          "references": 74202,
+          "instances": 573,
+          "port_bindings": 1859,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 8.863,
+          "peak_rss_kib": 418488,
+          "user_cpu_s": 8.437,
+          "sys_cpu_s": 0.431,
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0
+        },
+        "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+        "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49"
+      }
+    ],
+    "ok_runs": 5,
+    "total_wall_s": {
+      "median": 24.045749195851386,
+      "max": 24.330244375392795,
+      "min": 23.878193682059646
+    },
+    "worker_wall_s": {
+      "median": 8.905,
+      "max": 9.052
+    },
+    "worker_peak_rss_kib": {
+      "median": 418488,
+      "max": 420848
+    },
+    "process_tree_rss_peak_kib_sampled": {
+      "median": 556020,
+      "max": 556996
+    },
+    "definition": "total_wall_s = whole `svweave build` process (tool startup included, separately measured below); worker_wall_s = slang worker only",
+    "fresh_state_each_run": true
+  },
+  "hot_queries": {
+    "build_id": "6dfe79f08643feb15350b6066a9b94f65e2fe8a8f28830eb9b44db8eaeb431ba",
+    "limit": 100,
+    "symbol": {
+      "n": 30,
+      "p50_s": 0.7205478814430535,
+      "p95_s": 0.8762923856731502,
+      "max_s": 0.9507920974865556,
+      "min_s": 0.7056101392954588,
+      "raw_s": [
+        0.728017,
+        0.794819,
+        0.709871,
+        0.723632,
+        0.733929,
+        0.741314,
+        0.766384,
+        0.71119,
+        0.717464,
+        0.706787,
+        0.715025,
+        0.715129,
+        0.715779,
+        0.832734,
+        0.950792,
+        0.911931,
+        0.747626,
+        0.70561,
+        0.706874,
+        0.705716,
+        0.709079,
+        0.716863,
+        0.707813,
+        0.759082,
+        0.74306,
+        0.708033,
+        0.714663,
+        0.726264,
+        0.728374,
+        0.738003
+      ],
+      "query_set": {
+        "names": [
+          "pkg_000::agent_a",
+          "pkg_000::agent_b",
+          "pkg_000::base_agent",
+          "pkg_001::agent_a",
+          "pkg_001::agent_b",
+          "pkg_001::base_agent",
+          "pkg_002::agent_a",
+          "pkg_002::agent_b",
+          "pkg_002::base_agent",
+          "pkg_003::agent_a",
+          "pkg_003::agent_b",
+          "pkg_003::base_agent",
+          "ifc_000.mix_0",
+          "ifc_000.mix_1",
+          "ifc_000.mix_10",
+          "ifc_000.mix_11",
+          "ifc_000.mix_12",
+          "ifc_000.mix_13",
+          "ifc_000.mix_14",
+          "ifc_000.mix_15",
+          "ifc_000.mix_16",
+          "ifc_000.mix_17",
+          "ifc_000.mix_18",
+          "ifc_000.mix_19"
+        ]
+      },
+      "limit": 100
+    },
+    "hierarchy": {
+      "n": 30,
+      "p50_s": 1.375479538924992,
+      "p95_s": 1.4962108904961495,
+      "max_s": 1.518332746811211,
+      "min_s": 1.3544447161257267,
+      "raw_s": [
+        1.391572,
+        1.388506,
+        1.366251,
+        1.363253,
+        1.388647,
+        1.357553,
+        1.382379,
+        1.445411,
+        1.375073,
+        1.375886,
+        1.364018,
+        1.363081,
+        1.387904,
+        1.363229,
+        1.377724,
+        1.518333,
+        1.354664,
+        1.391924,
+        1.371502,
+        1.384211,
+        1.477988,
+        1.374086,
+        1.422637,
+        1.366347,
+        1.356872,
+        1.511121,
+        1.366351,
+        1.354445,
+        1.37201,
+        1.379232
+      ],
+      "query_set": {
+        "top": "bench_top",
+        "depth": "2..4",
+        "limit": 100
+      },
+      "limit": 100
+    },
+    "references": {
+      "n": 30,
+      "p50_s": 1.5230031586252153,
+      "p95_s": 1.618175092851743,
+      "max_s": 1.6829588459804654,
+      "min_s": 1.4838884817436337,
+      "raw_s": [
+        1.512796,
+        1.51817,
+        1.521465,
+        1.510547,
+        1.682959,
+        1.513666,
+        1.540546,
+        1.519775,
+        1.587267,
+        1.527778,
+        1.5146,
+        1.535392,
+        1.497266,
+        1.524541,
+        1.496014,
+        1.592389,
+        1.625842,
+        1.483888,
+        1.53258,
+        1.506247,
+        1.542773,
+        1.513255,
+        1.552618,
+        1.608805,
+        1.600553,
+        1.496266,
+        1.566663,
+        1.524913,
+        1.498203,
+        1.505208
+      ],
+      "query_set": {
+        "symbols_by_reference_count_desc": [
+          99,
+          99,
+          99,
+          99,
+          99,
+          99,
+          99,
+          99
+        ],
+        "limit": 100
+      },
+      "limit": 100
+    },
+    "definition": "in-process application services (what the MCP server calls), SQLite warm, 3 warm-up calls not counted"
+  },
+  "hot_search": {
+    "snapshot_id": "ae302f5d86ff084458b312a9f18db447aae657612f21a13f2f3b2cb8785a7e49",
+    "text": {
+      "n": 30,
+      "p50_s": 0.07043967535719275,
+      "p95_s": 0.08553978903219102,
+      "max_s": 0.10223823133856058,
+      "min_s": 0.05055781826376915,
+      "raw_s": [
+        0.069858,
+        0.07024,
+        0.05327,
+        0.069619,
+        0.050558,
+        0.054542,
+        0.070472,
+        0.070774,
+        0.070586,
+        0.07138,
+        0.069618,
+        0.082581,
+        0.052538,
+        0.070588,
+        0.051386,
+        0.054343,
+        0.082167,
+        0.072921,
+        0.08796,
+        0.102238,
+        0.073188,
+        0.076814,
+        0.052985,
+        0.070408,
+        0.051485,
+        0.055325,
+        0.070538,
+        0.070251,
+        0.071061,
+        0.071315
+      ],
+      "query_type": "literal text (text_fallback)",
+      "graph_state": "not used",
+      "backend_used": "text_fallback",
+      "queries": [
+        "mod_0007",
+        "agent_a",
+        "fn_3",
+        "pkg_001",
+        "stage",
+        "g_stage",
+        "base_agent",
+        "bench_top",
+        "ifc_002",
+        "w_ge_nothing_matches_this"
+      ],
+      "limit": 100
+    },
+    "graph": {
+      "n": 30,
+      "p50_s": 0.6059950422495604,
+      "p95_s": 0.6946754721459001,
+      "max_s": 0.7331413133069873,
+      "min_s": 0.5844875490292907,
+      "raw_s": [
+        0.677088,
+        0.586204,
+        0.609666,
+        0.709065,
+        0.592717,
+        0.594875,
+        0.624278,
+        0.666891,
+        0.597535,
+        0.590962,
+        0.617197,
+        0.607099,
+        0.626572,
+        0.584488,
+        0.647153,
+        0.600914,
+        0.653362,
+        0.586166,
+        0.629641,
+        0.672772,
+        0.593292,
+        0.601163,
+        0.733141,
+        0.676478,
+        0.604891,
+        0.58572,
+        0.598686,
+        0.661331,
+        0.600526,
+        0.584528
+      ],
+      "query_type": "graph (cbm search_graph)",
+      "graph_state": "DEGRADED",
+      "graph_state_reasons": [
+        "started; no fixture probe has run yet"
+      ],
+      "first_call_incl_index_s": 27.54619351774454,
+      "queries": [
+        "mod_0007",
+        "agent_a",
+        "bench_top",
+        "mod_0123",
+        "ifc_002",
+        "pkg_001"
+      ],
+      "limit": 100,
+      "cbm_rss_kib_after_queries": 14284,
+      "items_found_first": 3
+    }
+  },
+  "disk_usage": {
+    "bytes": {
+      "backends": 25847786,
+      "bundles": 0,
+      "candidates": 0,
+      "journal": 0,
+      "manifests": 363176,
+      "recovery": 0,
+      "runs": 1017029,
+      "snapshots": 2543422,
+      "semantic_db(svweave.db*)": 147648512,
+      "logs(events.jsonl,*.log; subset of runs)": 1158,
+      "other": 0
+    },
+    "total_state_bytes": 177419925,
+    "source_corpus_bytes": 2289780,
+    "note": "candidates/journal are empty here (no edit); graph state lives in backends/"
+  },
+  "compare_plan_22_3": {
+    "rows": [
+      {
+        "target": "cold semantic build (median of runs)",
+        "budget": "<= 120.0 s",
+        "measured": 24.0457,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "cold semantic build (max of runs)",
+        "budget": "<= 120.0 s",
+        "measured": 24.3302,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "HDL worker peak RSS (max)",
+        "budget": "<= 8.0 GiB",
+        "measured": 0.4014,
+        "unit": "GiB",
+        "status": "PASS"
+      },
+      {
+        "target": "hot symbol query p95",
+        "budget": "<= 1.0 s",
+        "measured": 0.8763,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot hierarchy query p95",
+        "budget": "<= 1.0 s",
+        "measured": 1.4962,
+        "unit": "s",
+        "status": "FAIL",
+        "reason": "1.496 s exceeds 1.0 s"
+      },
+      {
+        "target": "hot references query p95",
+        "budget": "<= 1.0 s",
+        "measured": 1.6182,
+        "unit": "s",
+        "status": "FAIL",
+        "reason": "1.618 s exceeds 1.0 s"
+      },
+      {
+        "target": "hot repository search p95 (text fallback)",
+        "budget": "<= 2.0 s",
+        "measured": 0.0855,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot repository search p95 (graph)",
+        "budget": "<= 2.0 s",
+        "measured": 0.6947,
+        "unit": "s",
+        "status": "PASS"
+      }
+    ],
+    "all_measured_targets_pass": false,
+    "reference_corpus": true,
+    "caveat": null
+  },
+  "leaked_backend_processes_after_run": [],
+  "finished_utc": "2026-10-13T08:10:26+00:00"
+}

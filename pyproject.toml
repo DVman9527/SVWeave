@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling==1.29.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "svweave"
+version = "0.1.0"
+description = "Build-aware SystemVerilog/UVM analysis and controlled-edit gateway"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic==2.14.1",
+    "pyyaml==6.0.3",
+    "jsonschema==4.26.0",
+    "click==8.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "hypothesis==6.169.0",
+    "ruff==0.17.0",
+    "mypy==2.4.0",
+    "types-PyYAML==6.0.12.20260906",
+    "types-jsonschema==4.26.0.20261006",
+]
+
+[project.scripts]
+svweave = "svweave.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/svweave"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+# Owned by the M0 spike work; not linted by M1 config.
+extend-exclude = ["scripts/spikes", "scripts/probe_backends.py", "scripts/bootstrap_locked.py", ".toolchain", ".svweave", "evidence", "fixtures/demo", "fixtures/uvm"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src/svweave"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=svweave --cov-report=term-missing:skip-covered"
+markers = ["integration: uses the real pinned backends (pyslang worker, UVM library, ...)"]
+
+[tool.coverage.run]
+source = ["svweave"]
+branch = false

@@ -1,0 +1,161 @@
+{
+  "topic": "sem05_ports",
+  "fixture_dir": "language/sem05_ports",
+  "top": "sem05_top",
+  "ports": [
+    "a",
+    "b",
+    "y",
+    "c",
+    "d",
+    "e"
+  ],
+  "directions": {
+    "a": "in",
+    "b": "in",
+    "y": "out",
+    "c": "in",
+    "d": "in",
+    "e": "in"
+  },
+  "bindings": {
+    "sem05_top.u_named": {
+      "style": {
+        "a": "named",
+        "b": "named",
+        "y": "named",
+        "c": "named",
+        "d": "named",
+        "e": "named"
+      },
+      "actual": {
+        "a": "a",
+        "b": "b",
+        "y": "y1",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      }
+    },
+    "sem05_top.u_pos": {
+      "style": {
+        "a": "positional",
+        "b": "positional",
+        "y": "positional",
+        "c": "positional",
+        "d": "positional",
+        "e": "positional"
+      },
+      "actual": {
+        "a": "a",
+        "b": "b",
+        "y": "y2",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      }
+    },
+    "sem05_top.u_star": {
+      "style": {
+        "a": "wildcard",
+        "b": "wildcard",
+        "y": "named",
+        "c": "wildcard",
+        "d": "named",
+        "e": "wildcard"
+      },
+      "actual": {
+        "a": "a",
+        "b": "b",
+        "y": "y3",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      }
+    },
+    "sem05_top.u_const": {
+      "style": {
+        "a": "named",
+        "b": "named",
+        "y": "named",
+        "c": "named",
+        "d": "named",
+        "e": "named"
+      },
+      "actual": {
+        "a": "1'b1",
+        "b": "2'b01",
+        "y": "y4",
+        "c": "c",
+        "d": "4'hF",
+        "e": "e"
+      },
+      "constant": [
+        "a",
+        "b",
+        "d"
+      ]
+    },
+    "sem05_top.u_concat": {
+      "style": {
+        "a": "named",
+        "b": "named",
+        "y": "named",
+        "c": "named",
+        "d": "named",
+        "e": "named"
+      },
+      "actual": {
+        "a": "a",
+        "b": "b",
+        "y": "y5",
+        "c": "c",
+        "d": "{hi, lo}",
+        "e": "e"
+      },
+      "concat": {
+        "port": "d",
+        "parts": [
+          "hi",
+          "lo"
+        ],
+        "file": "top.sv",
+        "ctx": ".d({hi, lo})",
+        "nth": 0,
+        "text": "{hi, lo}",
+        "start": 708,
+        "end": 716
+      }
+    },
+    "sem05_top.u_open": {
+      "style": {
+        "a": "named",
+        "b": "named",
+        "y": "open",
+        "c": "named",
+        "d": "named",
+        "e": "open"
+      },
+      "actual": {
+        "a": "a",
+        "b": "b",
+        "y": null,
+        "c": "c",
+        "d": "d",
+        "e": null
+      },
+      "open": [
+        "y",
+        "e"
+      ]
+    }
+  },
+  "star_span": {
+    "file": "top.sv",
+    "ctx": "sub u_star   (.*, .y(y3)",
+    "nth": 0,
+    "text": ".*",
+    "start": 570,
+    "end": 572
+  }
+}

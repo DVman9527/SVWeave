@@ -1,0 +1,111 @@
+{
+  "topic": "sem06_iface",
+  "fixture_dir": "language/sem06_iface",
+  "top": "sem06_top",
+  "declarations": [
+    {
+      "kind": "interface",
+      "qualified_name": "bus_if",
+      "file": "top.sv",
+      "ctx": "interface bus_if;",
+      "nth": 0,
+      "text": "bus_if",
+      "start": 10,
+      "end": 16
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "bus_if.data",
+      "file": "top.sv",
+      "ctx": "logic [7:0] data;",
+      "nth": 0,
+      "text": "data",
+      "start": 32,
+      "end": 36
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "bus_if.valid",
+      "file": "top.sv",
+      "ctx": "logic       valid;",
+      "nth": 0,
+      "text": "valid",
+      "start": 52,
+      "end": 57
+    },
+    {
+      "kind": "modport",
+      "qualified_name": "bus_if.mp_src",
+      "file": "top.sv",
+      "ctx": "modport mp_src(",
+      "nth": 0,
+      "text": "mp_src",
+      "start": 69,
+      "end": 75
+    },
+    {
+      "kind": "modport",
+      "qualified_name": "bus_if.mp_dst",
+      "file": "top.sv",
+      "ctx": "modport mp_dst(",
+      "nth": 0,
+      "text": "mp_dst",
+      "start": 107,
+      "end": 113
+    },
+    {
+      "kind": "field",
+      "qualified_name": "sem06_top.vif_drv::vif",
+      "file": "top.sv",
+      "ctx": "virtual bus_if.mp_src vif;",
+      "nth": 0,
+      "text": "vif",
+      "start": 727,
+      "end": 730
+    }
+  ],
+  "instances": [
+    "sem06_top",
+    "sem06_top.u_bus_a",
+    "sem06_top.u_bus_b",
+    "sem06_top.u_src_a",
+    "sem06_top.u_src_b",
+    "sem06_top.u_dst_a",
+    "sem06_top.u_dst_b"
+  ],
+  "interface_bindings": {
+    "sem06_top.u_src_a": {
+      "b": [
+        "sem06_top.u_bus_a",
+        "mp_src"
+      ]
+    },
+    "sem06_top.u_src_b": {
+      "b": [
+        "sem06_top.u_bus_b",
+        "mp_src"
+      ]
+    },
+    "sem06_top.u_dst_a": {
+      "b": [
+        "sem06_top.u_bus_a",
+        "mp_dst"
+      ]
+    },
+    "sem06_top.u_dst_b": {
+      "b": [
+        "sem06_top.u_bus_b",
+        "mp_dst"
+      ]
+    }
+  },
+  "virtual_interface": {
+    "field": "sem06_top.vif_drv::vif",
+    "bound_to_instance": null
+  },
+  "same_name_signal": {
+    "declaration": "bus_if.data",
+    "interface_instances": 2,
+    "declaration_count": 1
+  }
+}

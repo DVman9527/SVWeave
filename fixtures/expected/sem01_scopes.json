@@ -1,0 +1,413 @@
+{
+  "topic": "sem01_scopes",
+  "fixture_dir": "language/sem01_scopes",
+  "top": "sem01_top",
+  "declarations": [
+    {
+      "kind": "package",
+      "qualified_name": "pkg_a",
+      "file": "pkg_a.sv",
+      "ctx": "package pkg_a;",
+      "nth": 0,
+      "text": "pkg_a",
+      "start": 8,
+      "end": 13
+    },
+    {
+      "kind": "class",
+      "qualified_name": "pkg_a::agent",
+      "file": "pkg_a.sv",
+      "ctx": "class agent;",
+      "nth": 0,
+      "text": "agent",
+      "start": 23,
+      "end": 28
+    },
+    {
+      "kind": "field",
+      "qualified_name": "pkg_a::agent::count",
+      "file": "pkg_a.sv",
+      "ctx": "int count;",
+      "nth": 0,
+      "text": "count",
+      "start": 38,
+      "end": 43
+    },
+    {
+      "kind": "task",
+      "qualified_name": "pkg_a::agent::run_phase",
+      "file": "pkg_a.sv",
+      "ctx": "virtual task run_phase();",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 62,
+      "end": 71,
+      "virtual": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "pkg_a::agent::write",
+      "file": "pkg_a.sv",
+      "ctx": "function void write(int v);",
+      "nth": 0,
+      "text": "write",
+      "start": 120,
+      "end": 125,
+      "virtual": false
+    },
+    {
+      "kind": "argument",
+      "qualified_name": "pkg_a::agent::write.v",
+      "file": "pkg_a.sv",
+      "ctx": "int v);",
+      "nth": 0,
+      "text": "v",
+      "start": 130,
+      "end": 131
+    },
+    {
+      "kind": "package",
+      "qualified_name": "pkg_b",
+      "file": "pkg_b.sv",
+      "ctx": "package pkg_b;",
+      "nth": 0,
+      "text": "pkg_b",
+      "start": 8,
+      "end": 13
+    },
+    {
+      "kind": "class",
+      "qualified_name": "pkg_b::agent",
+      "file": "pkg_b.sv",
+      "ctx": "class agent;",
+      "nth": 0,
+      "text": "agent",
+      "start": 23,
+      "end": 28
+    },
+    {
+      "kind": "field",
+      "qualified_name": "pkg_b::agent::total",
+      "file": "pkg_b.sv",
+      "ctx": "int total;",
+      "nth": 0,
+      "text": "total",
+      "start": 38,
+      "end": 43
+    },
+    {
+      "kind": "task",
+      "qualified_name": "pkg_b::agent::run_phase",
+      "file": "pkg_b.sv",
+      "ctx": "virtual task run_phase();",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 62,
+      "end": 71,
+      "virtual": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "pkg_b::agent::write",
+      "file": "pkg_b.sv",
+      "ctx": "function void write(int v);",
+      "nth": 0,
+      "text": "write",
+      "start": 120,
+      "end": 125,
+      "virtual": false
+    },
+    {
+      "kind": "argument",
+      "qualified_name": "pkg_b::agent::write.v",
+      "file": "pkg_b.sv",
+      "ctx": "int v);",
+      "nth": 0,
+      "text": "v",
+      "start": 130,
+      "end": 131
+    },
+    {
+      "kind": "module",
+      "qualified_name": "sem01_top",
+      "file": "top.sv",
+      "ctx": "module sem01_top;",
+      "nth": 0,
+      "text": "sem01_top",
+      "start": 7,
+      "end": 16
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem01_top.a",
+      "file": "top.sv",
+      "ctx": "pkg_a::agent a;",
+      "nth": 0,
+      "text": "a",
+      "start": 33,
+      "end": 34
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem01_top.b",
+      "file": "top.sv",
+      "ctx": "pkg_b::agent b;",
+      "nth": 0,
+      "text": "b",
+      "start": 51,
+      "end": 52
+    }
+  ],
+  "references": [
+    {
+      "kind": "call",
+      "target": "pkg_a::agent::write",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a.write(1)",
+      "nth": 0,
+      "text": "write",
+      "start": 106,
+      "end": 111
+    },
+    {
+      "kind": "call",
+      "target": "pkg_b::agent::write",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b.write(2)",
+      "nth": 0,
+      "text": "write",
+      "start": 122,
+      "end": 127
+    },
+    {
+      "kind": "call",
+      "target": "pkg_a::agent::run_phase",
+      "status": "dynamic_unresolved",
+      "file": "top.sv",
+      "ctx": "a.run_phase()",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 138,
+      "end": 147
+    },
+    {
+      "kind": "call",
+      "target": "pkg_b::agent::run_phase",
+      "status": "dynamic_unresolved",
+      "file": "top.sv",
+      "ctx": "b.run_phase()",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 157,
+      "end": 166
+    },
+    {
+      "kind": "value",
+      "target": "pkg_a::agent::count",
+      "status": "resolved_static",
+      "file": "pkg_a.sv",
+      "ctx": "count++",
+      "nth": 0,
+      "text": "count",
+      "start": 81,
+      "end": 86
+    },
+    {
+      "kind": "value",
+      "target": "pkg_a::agent::count",
+      "status": "resolved_static",
+      "file": "pkg_a.sv",
+      "ctx": "count += v",
+      "nth": 0,
+      "text": "count",
+      "start": 140,
+      "end": 145
+    },
+    {
+      "kind": "value",
+      "target": "pkg_b::agent::total",
+      "status": "resolved_static",
+      "file": "pkg_b.sv",
+      "ctx": "total--",
+      "nth": 0,
+      "text": "total",
+      "start": 81,
+      "end": 86
+    },
+    {
+      "kind": "value",
+      "target": "pkg_b::agent::total",
+      "status": "resolved_static",
+      "file": "pkg_b.sv",
+      "ctx": "total -= v",
+      "nth": 0,
+      "text": "total",
+      "start": 140,
+      "end": 145
+    },
+    {
+      "kind": "type",
+      "target": "pkg_a::agent",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "pkg_a::agent a;",
+      "nth": 0,
+      "text": "pkg_a::agent",
+      "start": 20,
+      "end": 32
+    },
+    {
+      "kind": "type",
+      "target": "pkg_b::agent",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "pkg_b::agent b;",
+      "nth": 0,
+      "text": "pkg_b::agent",
+      "start": 38,
+      "end": 50
+    },
+    {
+      "kind": "value",
+      "target": "pkg_a::agent::write.v",
+      "status": "resolved_static",
+      "file": "pkg_a.sv",
+      "ctx": "count += v",
+      "nth": 0,
+      "text": "v",
+      "start": 149,
+      "end": 150
+    },
+    {
+      "kind": "value",
+      "target": "pkg_b::agent::write.v",
+      "status": "resolved_static",
+      "file": "pkg_b.sv",
+      "ctx": "total -= v",
+      "nth": 0,
+      "text": "v",
+      "start": 149,
+      "end": 150
+    },
+    {
+      "kind": "new",
+      "target": "pkg_a::agent",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 78,
+      "end": 83
+    },
+    {
+      "kind": "new",
+      "target": "pkg_b::agent",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 93,
+      "end": 98
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = new();",
+      "nth": 0,
+      "text": "a",
+      "start": 74,
+      "end": 75
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.b",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b = new();",
+      "nth": 0,
+      "text": "b",
+      "start": 89,
+      "end": 90
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a.write(1)",
+      "nth": 0,
+      "text": "a",
+      "start": 104,
+      "end": 105
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.b",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b.write(2)",
+      "nth": 0,
+      "text": "b",
+      "start": 120,
+      "end": 121
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a.run_phase()",
+      "nth": 0,
+      "text": "a",
+      "start": 136,
+      "end": 137
+    },
+    {
+      "kind": "value",
+      "target": "sem01_top.b",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b.run_phase()",
+      "nth": 0,
+      "text": "b",
+      "start": 155,
+      "end": 156
+    }
+  ],
+  "counts": {
+    "run_phase_declarations": 2,
+    "write_declarations": 2,
+    "instances": 1
+  },
+  "closed_scope": {
+    "declaration_files": [
+      "pkg_a.sv",
+      "pkg_b.sv",
+      "top.sv"
+    ],
+    "reference_files": [
+      "pkg_a.sv",
+      "pkg_b.sv",
+      "top.sv"
+    ],
+    "exclude_declarations": [
+      {
+        "kind": "instance",
+        "qualified_name": "sem01_top",
+        "file": "top.sv",
+        "ctx": "module sem01_top;",
+        "nth": 0,
+        "text": "sem01_top",
+        "start": 7,
+        "end": 16,
+        "reason": "the hierarchy root is modelled as an `instance` row spanning the same bytes as its module declaration; the module row is the golden entry"
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "description": "policy.json: trusted, created by the CLI; a repository profile can only tighten it.",
+  "properties": {
+    "allow_test_approvals": {
+      "default": false,
+      "title": "Allow Test Approvals",
+      "type": "boolean"
+    },
+    "allowed_roots": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Allowed Roots",
+      "type": "array"
+    },
+    "approval_required": {
+      "default": true,
+      "title": "Approval Required",
+      "type": "boolean"
+    },
+    "editing_enabled": {
+      "default": false,
+      "title": "Editing Enabled",
+      "type": "boolean"
+    },
+    "network_enabled": {
+      "default": false,
+      "title": "Network Enabled",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "writable_paths": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Writable Paths",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "allowed_roots"
+  ],
+  "title": "Policy",
+  "type": "object"
+}

@@ -1,0 +1,118 @@
+# SVWeave example configuration (plan section 8.2). Data only; nothing here is executed.
+schema_version: "1.0"
+project:
+  id: "svweave-demo"
+  root: "."
+  default_profile: "rtl_demo"
+
+source_roots:
+  - id: "project"
+    path: "."
+    include: ["fixtures/**"]
+    exclude: ["**/out/**", "**/waves/**"]
+    writable: false
+  # External root: no path here; the host mapping lives in svweave.local.yaml (not in Git).
+  - id: "uvm"
+    include: ["**"]
+    exclude: []
+    writable: false
+
+profiles:
+  rtl_demo:
+    cwd: "."
+    language_mode: "systemverilog"
+    source_inputs:
+      - kind: "filelist"
+        path: "fixtures/demo/filelists/rtl.f"
+        dialect: "svweave-filelist-v1"
+        path_mode: "cwd"
+    compilation_units:
+      mode: "single"
+    top_modules: ["demo_top"]
+    defines:
+      - name: "SVW_DEMO"
+        value: "1"
+    include_dirs: ["fixtures/demo/include"]
+    top_parameters:
+      - top: "demo_top"
+        name: "DATA_W"
+        value: "32"
+      - top: "demo_top"
+        name: "LANES"
+        value: "2"
+    library_dirs: []
+    library_files: []
+    library_extensions: [".v", ".sv"]
+    environment_allowlist: []
+    generated_inputs: []
+    diagnostic_policy: "no_errors"
+
+  # Same sources and defines, different elaboration parameters: different config_id.
+  rtl_demo_l4:
+    cwd: "."
+    language_mode: "systemverilog"
+    source_inputs:
+      - kind: "filelist"
+        path: "fixtures/demo/filelists/rtl.f"
+        dialect: "svweave-filelist-v1"
+        path_mode: "cwd"
+    compilation_units:
+      mode: "single"
+    top_modules: ["demo_top"]
+    defines:
+      - name: "SVW_DEMO"
+        value: "1"
+    include_dirs: ["fixtures/demo/include"]
+    top_parameters:
+      - top: "demo_top"
+        name: "DATA_W"
+        value: "32"
+      - top: "demo_top"
+        name: "LANES"
+        value: "4"
+    library_dirs: []
+    library_files: []
+    library_extensions: [".v", ".sv"]
+    environment_allowlist: []
+    generated_inputs: []
+    diagnostic_policy: "no_errors"
+
+  # Placeholder: needs root mapping "uvm" in svweave.local.yaml
+  # (id: uvm, path: .toolchain/uvm-core/src). BLOCKED (MISSING_INPUT) until mapped.
+  uvm_smoke:
+    cwd: "."
+    language_mode: "systemverilog"
+    source_inputs:
+      - kind: "file"
+        path: "@uvm/uvm_pkg.sv"
+      - kind: "file"
+        path: "fixtures/uvm/svw_demo_uvm_pkg.sv"
+      - kind: "file"
+        path: "fixtures/uvm/svw_uvm_top.sv"
+    compilation_units:
+      mode: "single"
+    top_modules: ["svw_uvm_top"]
+    defines: []
+    include_dirs: ["@uvm"]
+    top_parameters: []
+    library_dirs: []
+    library_files: []
+    library_extensions: [".v", ".sv"]
+    environment_allowlist: []
+    generated_inputs: []
+    diagnostic_policy: "no_errors"
+
+analysis:
+  missing_input_policy: "block"
+  unsupported_option_policy: "block"
+  stub_policy: "explicit_only"
+  max_build_seconds: 120
+  max_worker_memory_mib: 8192
+
+editing:
+  enabled: false
+  allowed_paths: ["fixtures/demo/**"]
+  max_files_per_patch: 5
+  max_changed_lines: 200
+  require_human_approval: true
+  validate_profiles: ["rtl_demo"]

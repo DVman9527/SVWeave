@@ -1,0 +1,3253 @@
+{
+  "tool": "pyslang_spike",
+  "python": "3.12.4",
+  "builds": {
+    "demo_L2": {
+      "returncode": 0,
+      "wall_s": 0.144,
+      "peak_rss_kib_children_max": 34528,
+      "peak_rss_note": "exact for this build",
+      "stderr_tail": "",
+      "result": {
+        "argv": [
+          "-f",
+          "fixtures/demo/filelists/rtl.f",
+          "-I",
+          "fixtures/demo/include",
+          "-DSVW_DEMO=1",
+          "--top",
+          "demo_top",
+          "-G",
+          "LANES=2"
+        ],
+        "cwd": "${REPO}",
+        "status": {
+          "parseCommandLine": true,
+          "processOptions": true,
+          "parseAllSources": true,
+          "pyslang_version": "12.0.0"
+        },
+        "diagnostics": [],
+        "diagnostics_including_ignored_count": 0,
+        "top_instances": [
+          "demo_top"
+        ],
+        "demo_lane_instance_count": 2,
+        "demo_lane_instances": [
+          {
+            "path": "demo_top.g_lane[0].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 5,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 5,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          }
+        ],
+        "port_connections_g_lane0_u_lane": {
+          "lookup": "demo_top.g_lane[0].u_lane",
+          "found": "demo_top.g_lane[0].u_lane",
+          "connections": [
+            {
+              "port": "clk",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 111,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 111,
+                "line": 5,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.NamedValue",
+              "actual_syntax_text": "clk",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 670,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 670,
+                  "line": 18,
+                  "column": 17
+                },
+                "end_offset": 673,
+                "text": "clk"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.clk",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 670,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 670,
+                      "line": 18,
+                      "column": 17
+                    },
+                    "end_offset": 673,
+                    "text": "clk"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "rst_n",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 144,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 144,
+                "line": 6,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.NamedValue",
+              "actual_syntax_text": "rst_n",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 692,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 692,
+                  "line": 19,
+                  "column": 17
+                },
+                "end_offset": 697,
+                "text": "rst_n"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.rst_n",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 692,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 692,
+                      "line": 19,
+                      "column": 17
+                    },
+                    "end_offset": 697,
+                    "text": "rst_n"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "valid_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 179,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 179,
+                "line": 7,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "valid_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 716,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 716,
+                  "line": 20,
+                  "column": 17
+                },
+                "end_offset": 729,
+                "text": "valid_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.valid_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 716,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 716,
+                      "line": 20,
+                      "column": 17
+                    },
+                    "end_offset": 723,
+                    "text": "valid_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 724,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 724,
+                      "line": 20,
+                      "column": 25
+                    },
+                    "end_offset": 728,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "ready_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 216,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 216,
+                "line": 8,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "ready_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 748,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 748,
+                  "line": 21,
+                  "column": 17
+                },
+                "end_offset": 761,
+                "text": "ready_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.ready_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 748,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 748,
+                      "line": 21,
+                      "column": 17
+                    },
+                    "end_offset": 755,
+                    "text": "ready_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 756,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 756,
+                      "line": 21,
+                      "column": 25
+                    },
+                    "end_offset": 760,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "data_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic[31:0]",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 253,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 253,
+                "line": 9,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "data_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 780,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 780,
+                  "line": 22,
+                  "column": 17
+                },
+                "end_offset": 792,
+                "text": "data_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic[31:0]",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.data_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 780,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 780,
+                      "line": 22,
+                      "column": 17
+                    },
+                    "end_offset": 786,
+                    "text": "data_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 787,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 787,
+                      "line": 22,
+                      "column": 24
+                    },
+                    "end_offset": 791,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "valid_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 289,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 289,
+                "line": 10,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "valid_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 811,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 811,
+                  "line": 23,
+                  "column": 17
+                },
+                "end_offset": 824,
+                "text": "valid_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.valid_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 811,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 811,
+                      "line": 23,
+                      "column": 17
+                    },
+                    "end_offset": 818,
+                    "text": "valid_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 819,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 819,
+                      "line": 23,
+                      "column": 25
+                    },
+                    "end_offset": 823,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "ready_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 326,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 326,
+                "line": 11,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "ready_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 843,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 843,
+                  "line": 24,
+                  "column": 17
+                },
+                "end_offset": 856,
+                "text": "ready_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.ready_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 843,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 843,
+                      "line": 24,
+                      "column": 17
+                    },
+                    "end_offset": 850,
+                    "text": "ready_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 851,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 851,
+                      "line": 24,
+                      "column": 25
+                    },
+                    "end_offset": 855,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "data_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic[31:0]",
+              "port_decl_loc": {
+                "buffer_id": 3,
+                "offset": 363,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 363,
+                "line": 12,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "data_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 5,
+                  "offset": 875,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 875,
+                  "line": 25,
+                  "column": 17
+                },
+                "end_offset": 887,
+                "text": "data_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic[31:0]",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.data_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 875,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 875,
+                      "line": 25,
+                      "column": 17
+                    },
+                    "end_offset": 881,
+                    "text": "data_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 5,
+                      "offset": 882,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 882,
+                      "line": 25,
+                      "column": 24
+                    },
+                    "end_offset": 886,
+                    "text": "lane"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "bound_checkers": [
+          {
+            "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 2,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 2,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 2,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 2,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          }
+        ],
+        "properties": [
+          {
+            "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          }
+        ],
+        "assertions": [
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          },
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          }
+        ],
+        "lookup_ap_stall_holds": {
+          "kind": "SymbolKind.StatementBlock",
+          "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva.ap_stall_holds",
+          "loc": {
+            "buffer_id": 8,
+            "offset": 395,
+            "is_macro_loc": false,
+            "file": "fixtures/demo/sva/stream_hold_sva.sv",
+            "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+            "file_offset": 395,
+            "line": 16,
+            "column": 3
+          }
+        },
+        "dependencies": {
+          "files": [
+            {
+              "buffer_id": 1,
+              "raw_name": "fixtures/demo/filelists/rtl.f",
+              "full_path": "${REPO}/fixtures/demo/filelists/rtl.f",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 2,
+              "raw_name": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 3,
+              "raw_name": "fixtures/demo/rtl/demo_lane.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 5,
+              "raw_name": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 8,
+              "raw_name": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 10,
+              "raw_name": "fixtures/demo/include/demo_defs.svh",
+              "full_path": "${REPO}/fixtures/demo/include/demo_defs.svh",
+              "kind": "BufferKind.IncludeFile",
+              "included_from": {
+                "file": "fixtures/demo/rtl/demo_top.sv",
+                "offset": 0
+              }
+            }
+          ],
+          "include_directives": [
+            {
+              "path": "demo_defs.svh",
+              "resolved_buffer": "BufferID(10)",
+              "directive_loc": {
+                "buffer_id": 5,
+                "offset": 0,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_top.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                "file_offset": 0,
+                "line": 1,
+                "column": 1
+              }
+            }
+          ],
+          "total_buffers": 19,
+          "unnamed_buffers": 12
+        }
+      }
+    },
+    "demo_L4": {
+      "returncode": 0,
+      "wall_s": 0.123,
+      "peak_rss_kib_children_max": 34528,
+      "peak_rss_note": "<= previous child max (ru_maxrss is a running max)",
+      "stderr_tail": "",
+      "result": {
+        "argv": [
+          "-f",
+          "fixtures/demo/filelists/rtl.f",
+          "-I",
+          "fixtures/demo/include",
+          "-DSVW_DEMO=1",
+          "--top",
+          "demo_top",
+          "-G",
+          "LANES=4"
+        ],
+        "cwd": "${REPO}",
+        "status": {
+          "parseCommandLine": true,
+          "processOptions": true,
+          "parseAllSources": true,
+          "pyslang_version": "12.0.0"
+        },
+        "diagnostics": [],
+        "diagnostics_including_ignored_count": 0,
+        "top_instances": [
+          "demo_top"
+        ],
+        "demo_lane_instance_count": 4,
+        "demo_lane_instances": [
+          {
+            "path": "demo_top.g_lane[0].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 4,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 4,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          },
+          {
+            "path": "demo_top.g_lane[2].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 4,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          },
+          {
+            "path": "demo_top.g_lane[3].u_lane",
+            "params": {
+              "DATA_W": "32'd32"
+            },
+            "loc": {
+              "buffer_id": 4,
+              "offset": 645,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "file_offset": 645,
+              "line": 17,
+              "column": 34
+            }
+          }
+        ],
+        "port_connections_g_lane0_u_lane": {
+          "lookup": "demo_top.g_lane[0].u_lane",
+          "found": "demo_top.g_lane[0].u_lane",
+          "connections": [
+            {
+              "port": "clk",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 111,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 111,
+                "line": 5,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.NamedValue",
+              "actual_syntax_text": "clk",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 670,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 670,
+                  "line": 18,
+                  "column": 17
+                },
+                "end_offset": 673,
+                "text": "clk"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.clk",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 670,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 670,
+                      "line": 18,
+                      "column": 17
+                    },
+                    "end_offset": 673,
+                    "text": "clk"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "rst_n",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 144,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 144,
+                "line": 6,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.NamedValue",
+              "actual_syntax_text": "rst_n",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 692,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 692,
+                  "line": 19,
+                  "column": 17
+                },
+                "end_offset": 697,
+                "text": "rst_n"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.rst_n",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 692,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 692,
+                      "line": 19,
+                      "column": 17
+                    },
+                    "end_offset": 697,
+                    "text": "rst_n"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "valid_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 179,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 179,
+                "line": 7,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "valid_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 716,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 716,
+                  "line": 20,
+                  "column": 17
+                },
+                "end_offset": 729,
+                "text": "valid_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.valid_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 716,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 716,
+                      "line": 20,
+                      "column": 17
+                    },
+                    "end_offset": 723,
+                    "text": "valid_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 724,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 724,
+                      "line": 20,
+                      "column": 25
+                    },
+                    "end_offset": 728,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "ready_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 216,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 216,
+                "line": 8,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "ready_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 748,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 748,
+                  "line": 21,
+                  "column": 17
+                },
+                "end_offset": 761,
+                "text": "ready_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.ready_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 748,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 748,
+                      "line": 21,
+                      "column": 17
+                    },
+                    "end_offset": 755,
+                    "text": "ready_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 756,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 756,
+                      "line": 21,
+                      "column": 25
+                    },
+                    "end_offset": 760,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "data_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic[31:0]",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 253,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 253,
+                "line": 9,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "data_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 780,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 780,
+                  "line": 22,
+                  "column": 17
+                },
+                "end_offset": 792,
+                "text": "data_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic[31:0]",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.data_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 780,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 780,
+                      "line": 22,
+                      "column": 17
+                    },
+                    "end_offset": 786,
+                    "text": "data_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 787,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 787,
+                      "line": 22,
+                      "column": 24
+                    },
+                    "end_offset": 791,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "valid_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 289,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 289,
+                "line": 10,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "valid_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 811,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 811,
+                  "line": 23,
+                  "column": 17
+                },
+                "end_offset": 824,
+                "text": "valid_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.valid_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 811,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 811,
+                      "line": 23,
+                      "column": 17
+                    },
+                    "end_offset": 818,
+                    "text": "valid_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 819,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 819,
+                      "line": 23,
+                      "column": 25
+                    },
+                    "end_offset": 823,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "ready_i",
+              "direction": "ArgumentDirection.In",
+              "port_type": "logic",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 326,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 326,
+                "line": 11,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.ElementSelect",
+              "actual_syntax_text": "ready_i[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 843,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 843,
+                  "line": 24,
+                  "column": 17
+                },
+                "end_offset": 856,
+                "text": "ready_i[lane]"
+              },
+              "is_output_assignment_wrapper": false,
+              "expr_type": "logic",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.ready_i",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 843,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 843,
+                      "line": 24,
+                      "column": 17
+                    },
+                    "end_offset": 850,
+                    "text": "ready_i"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 851,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 851,
+                      "line": 24,
+                      "column": 25
+                    },
+                    "end_offset": 855,
+                    "text": "lane"
+                  }
+                }
+              ]
+            },
+            {
+              "port": "data_o",
+              "direction": "ArgumentDirection.Out",
+              "port_type": "logic[31:0]",
+              "port_decl_loc": {
+                "buffer_id": 2,
+                "offset": 363,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_lane.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+                "file_offset": 363,
+                "line": 12,
+                "column": 29
+              },
+              "expr_kind": "ExpressionKind.Assignment",
+              "actual_syntax_text": "data_o[lane]",
+              "actual_range": {
+                "start": {
+                  "buffer_id": 4,
+                  "offset": 875,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/rtl/demo_top.sv",
+                  "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                  "file_offset": 875,
+                  "line": 25,
+                  "column": 17
+                },
+                "end_offset": 887,
+                "text": "data_o[lane]"
+              },
+              "is_output_assignment_wrapper": true,
+              "expr_type": "logic[31:0]",
+              "referenced_symbols": [
+                {
+                  "symbol": "demo_top.data_o",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 875,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 875,
+                      "line": 25,
+                      "column": 17
+                    },
+                    "end_offset": 881,
+                    "text": "data_o"
+                  }
+                },
+                {
+                  "symbol": "demo_top.g_lane[0].lane",
+                  "range": {
+                    "start": {
+                      "buffer_id": 4,
+                      "offset": 882,
+                      "is_macro_loc": false,
+                      "file": "fixtures/demo/rtl/demo_top.sv",
+                      "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                      "file_offset": 882,
+                      "line": 25,
+                      "column": 24
+                    },
+                    "end_offset": 886,
+                    "text": "lane"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "bound_checkers": [
+          {
+            "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 10,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 10,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 10,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 10,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          },
+          {
+            "path": "demo_top.g_lane[2].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 10,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 10,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          },
+          {
+            "path": "demo_top.g_lane[3].u_lane.u_stream_hold_sva",
+            "decl_loc": {
+              "buffer_id": 10,
+              "offset": 50,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "file_offset": 50,
+              "line": 1,
+              "column": 51
+            },
+            "bind": {
+              "bind_directive": {
+                "start": {
+                  "buffer_id": 10,
+                  "offset": 0,
+                  "is_macro_loc": false,
+                  "file": "fixtures/demo/sva/demo_bind.sv",
+                  "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+                  "file_offset": 0,
+                  "line": 1,
+                  "column": 1
+                },
+                "end_offset": 164,
+                "text": "bind demo_lane stream_hold_sva #(.DATA_W(DATA_W)) u_stream_hold_sva (\n  .clk   (clk),\n  .rst_n (rst_n),\n  .valid (valid_o),\n  .ready (ready_i),\n  .data  (data_o)\n);"
+              },
+              "bind_target_text": "demo_lane"
+            }
+          }
+        ],
+        "properties": [
+          {
+            "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          },
+          {
+            "path": "demo_top.g_lane[1].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          },
+          {
+            "path": "demo_top.g_lane[2].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          },
+          {
+            "path": "demo_top.g_lane[3].u_lane.u_stream_hold_sva.p_stall_holds",
+            "loc": {
+              "buffer_id": 8,
+              "offset": 269,
+              "is_macro_loc": false,
+              "file": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "file_offset": 269,
+              "line": 11,
+              "column": 12
+            }
+          }
+        ],
+        "assertions": [
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          },
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          },
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          },
+          {
+            "kind": "AssertionKind.Assert",
+            "label": "ap_stall_holds",
+            "syntax_kind": "SyntaxKind.AssertPropertyStatement",
+            "range": {
+              "start": {
+                "buffer_id": 8,
+                "offset": 395,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/sva/stream_hold_sva.sv",
+                "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+                "file_offset": 395,
+                "line": 16,
+                "column": 3
+              },
+              "end_offset": 443,
+              "text": "ap_stall_holds: assert property (p_stall_holds);"
+            }
+          }
+        ],
+        "lookup_ap_stall_holds": {
+          "kind": "SymbolKind.StatementBlock",
+          "path": "demo_top.g_lane[0].u_lane.u_stream_hold_sva.ap_stall_holds",
+          "loc": {
+            "buffer_id": 8,
+            "offset": 395,
+            "is_macro_loc": false,
+            "file": "fixtures/demo/sva/stream_hold_sva.sv",
+            "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+            "file_offset": 395,
+            "line": 16,
+            "column": 3
+          }
+        },
+        "dependencies": {
+          "files": [
+            {
+              "buffer_id": 1,
+              "raw_name": "fixtures/demo/filelists/rtl.f",
+              "full_path": "${REPO}/fixtures/demo/filelists/rtl.f",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 2,
+              "raw_name": "fixtures/demo/rtl/demo_lane.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_lane.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 4,
+              "raw_name": "fixtures/demo/rtl/demo_top.sv",
+              "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 6,
+              "raw_name": "fixtures/demo/include/demo_defs.svh",
+              "full_path": "${REPO}/fixtures/demo/include/demo_defs.svh",
+              "kind": "BufferKind.IncludeFile",
+              "included_from": {
+                "file": "fixtures/demo/rtl/demo_top.sv",
+                "offset": 0
+              }
+            },
+            {
+              "buffer_id": 8,
+              "raw_name": "fixtures/demo/sva/stream_hold_sva.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/stream_hold_sva.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 10,
+              "raw_name": "fixtures/demo/sva/demo_bind.sv",
+              "full_path": "${REPO}/fixtures/demo/sva/demo_bind.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            }
+          ],
+          "include_directives": [
+            {
+              "path": "demo_defs.svh",
+              "resolved_buffer": "BufferID(6)",
+              "directive_loc": {
+                "buffer_id": 4,
+                "offset": 0,
+                "is_macro_loc": false,
+                "file": "fixtures/demo/rtl/demo_top.sv",
+                "full_path": "${REPO}/fixtures/demo/rtl/demo_top.sv",
+                "file_offset": 0,
+                "line": 1,
+                "column": 1
+              }
+            }
+          ],
+          "total_buffers": 19,
+          "unnamed_buffers": 12
+        }
+      }
+    },
+    "uvm": {
+      "returncode": 0,
+      "wall_s": 0.768,
+      "peak_rss_kib_children_max": 129196,
+      "peak_rss_note": "exact for this build",
+      "stderr_tail": "",
+      "result": {
+        "argv": [
+          "+incdir+${REPO}/.toolchain/uvm-core/src",
+          "${REPO}/.toolchain/uvm-core/src/uvm_pkg.sv",
+          "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+          "${REPO}/fixtures/uvm/svw_uvm_top.sv",
+          "--top",
+          "svw_uvm_top"
+        ],
+        "cwd": "${REPO}",
+        "status": {
+          "parseCommandLine": true,
+          "processOptions": true,
+          "parseAllSources": true,
+          "pyslang_version": "12.0.0"
+        },
+        "diagnostics_count": 1,
+        "diagnostics_including_ignored_count": 1098,
+        "diagnostics_errors": [],
+        "diagnostics_in_fixture": [],
+        "diagnostics_sample": [
+          {
+            "code": "DiagCode(UnknownEscapeCode)",
+            "severity": "DiagnosticSeverity.Warning",
+            "is_error": false,
+            "message": "unknown character escape sequence '\\.'",
+            "location": {
+              "buffer_id": 676,
+              "offset": 11704,
+              "is_macro_loc": false,
+              "file": ".toolchain/uvm-core/src/base/uvm_config_db_implementation.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/base/uvm_config_db_implementation.svh",
+              "file_offset": 11704,
+              "line": 375,
+              "column": 26
+            },
+            "option_name": "unknown-escape-code"
+          }
+        ],
+        "run_phase_methods": [
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_driver#(uvm_sequence_item,uvm_sequence_item)",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::run_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 312,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 312,
+              "line": 10,
+              "column": 18
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 307,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 307,
+                "line": 10,
+                "column": 13
+              },
+              "end_offset": 405,
+              "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_DRV\", \"driver fixture\", UVM_LOW)\n    endtask"
+            }
+          },
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_monitor",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::run_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 637,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 637,
+              "line": 20,
+              "column": 18
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 632,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 632,
+                "line": 20,
+                "column": 13
+              },
+              "end_offset": 731,
+              "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_MON\", \"monitor fixture\", UVM_LOW)\n    endtask"
+            }
+          }
+        ],
+        "same_name_methods": [
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_driver#(uvm_sequence_item,uvm_sequence_item)",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_driver::run_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::run_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 312,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 312,
+              "line": 10,
+              "column": 18
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 307,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 307,
+                "line": 10,
+                "column": 13
+              },
+              "end_offset": 405,
+              "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_DRV\", \"driver fixture\", UVM_LOW)\n    endtask"
+            }
+          },
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_monitor",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::run_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 637,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 637,
+              "line": 20,
+              "column": 18
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 632,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 632,
+                "line": 20,
+                "column": 13
+              },
+              "end_offset": 731,
+              "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_MON\", \"monitor fixture\", UVM_LOW)\n    endtask"
+            }
+          },
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_env::build_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_env",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_env::build_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_env::build_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::build_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 997,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 997,
+              "line": 32,
+              "column": 27
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 983,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 983,
+                "line": 32,
+                "column": 13
+              },
+              "end_offset": 1183,
+              "text": "function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv = svw_driver::type_id::create(\"drv\", this);\n      mon = svw_monitor::type_id::create(\"mon\", this);\n    endfunction"
+            }
+          },
+          {
+            "qualified": "svw_demo_uvm_pkg::svw_smoke_test::build_phase",
+            "class_kind": "SymbolKind.ClassType",
+            "class_base": "uvm_test",
+            "symbol_kind": "SymbolKind.Subroutine",
+            "hierarchicalPath": "svw_demo_uvm_pkg::svw_smoke_test::build_phase",
+            "lexicalPath": "svw_demo_uvm_pkg::svw_smoke_test::build_phase",
+            "is_virtual": true,
+            "overrides": "uvm_pkg::uvm_component::build_phase",
+            "name_loc": {
+              "buffer_id": 18472,
+              "offset": 1447,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1447,
+              "line": 45,
+              "column": 27
+            },
+            "decl_range": {
+              "start": {
+                "buffer_id": 18472,
+                "offset": 1433,
+                "is_macro_loc": false,
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "file_offset": 1433,
+                "line": 45,
+                "column": 13
+              },
+              "end_offset": 1575,
+              "text": "function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      env = svw_env::type_id::create(\"env\", this);\n    endfunction"
+            }
+          }
+        ],
+        "references_in_fixture": [
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_driver,\"svw_driver\")::get",
+            "at": {
+              "buffer_id": 18495,
+              "offset": 111,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 140,
+                "line": 6,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 22970,
+              "line": 612,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_driver,\"svw_driver\")::get",
+            "at": {
+              "buffer_id": 18495,
+              "offset": 218,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 140,
+                "line": 6,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 23077,
+              "line": 615,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "new",
+            "target": "uvm_pkg::uvm_driver#(uvm_sequence_item,uvm_sequence_item)::new",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 254,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 254,
+              "line": 8,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_driver::new.name",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 264,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 264,
+              "line": 8,
+              "column": 17
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_driver::new.parent",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 270,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 270,
+              "line": 8,
+              "column": 23
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_driver::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 74,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4624,
+              "line": 133,
+              "column": 6
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_get_report_object",
+            "target": "uvm_pkg::uvm_report_object::uvm_get_report_object",
+            "at": {
+              "buffer_id": 18508,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4525,
+              "line": 130,
+              "column": 54
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_get_report_object",
+            "target": "uvm_pkg::uvm_report_object::uvm_get_report_object",
+            "at": {
+              "buffer_id": 18508,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4525,
+              "line": 130,
+              "column": 54
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get_report_verbosity_level",
+            "target": "uvm_pkg::uvm_report_object::get_report_verbosity_level",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 139,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4689,
+              "line": 134,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_driver::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 139,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4689,
+              "line": 134,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_severity.UVM_INFO",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18509,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5486,
+              "line": 156,
+              "column": 21
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_verbosity.UVM_LOW",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18511,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 385,
+              "line": 11,
+              "column": 46
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get_report_action",
+            "target": "uvm_pkg::uvm_report_object::get_report_action",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 231,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4781,
+              "line": 135,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_driver::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 231,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4781,
+              "line": 135,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_severity.UVM_INFO",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18512,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5486,
+              "line": 156,
+              "column": 21
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_action_type.UVM_NO_ACTION",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18507,
+              "offset": 288,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4838,
+              "line": 135,
+              "column": 68
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_report_info",
+            "target": "uvm_pkg::uvm_report_object::uvm_report_info",
+            "at": {
+              "buffer_id": 18501,
+              "offset": 60,
+              "is_macro_loc": true,
+              "macro_name": "uvm_info",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5524,
+              "line": 157,
+              "column": 3
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_verbosity.UVM_LOW",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18506,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_info",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 346,
+                "line": 11,
+                "column": 7
+              },
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 385,
+              "line": 11,
+              "column": 46
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_monitor,\"svw_monitor\")::get",
+            "at": {
+              "buffer_id": 18525,
+              "offset": 111,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 463,
+                "line": 16,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 22970,
+              "line": 612,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_monitor,\"svw_monitor\")::get",
+            "at": {
+              "buffer_id": 18525,
+              "offset": 218,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 463,
+                "line": 16,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 23077,
+              "line": 615,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "new",
+            "target": "uvm_pkg::uvm_monitor::new",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 579,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 579,
+              "line": 18,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_monitor::new.name",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 589,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 589,
+              "line": 18,
+              "column": 17
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_monitor::new.parent",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 595,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 595,
+              "line": 18,
+              "column": 23
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_monitor::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 74,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4624,
+              "line": 133,
+              "column": 6
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_get_report_object",
+            "target": "uvm_pkg::uvm_report_object::uvm_get_report_object",
+            "at": {
+              "buffer_id": 18538,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4525,
+              "line": 130,
+              "column": 54
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_get_report_object",
+            "target": "uvm_pkg::uvm_report_object::uvm_get_report_object",
+            "at": {
+              "buffer_id": 18538,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4525,
+              "line": 130,
+              "column": 54
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get_report_verbosity_level",
+            "target": "uvm_pkg::uvm_report_object::get_report_verbosity_level",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 139,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4689,
+              "line": 134,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_monitor::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 139,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4689,
+              "line": 134,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_severity.UVM_INFO",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18539,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5486,
+              "line": 156,
+              "column": 21
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_verbosity.UVM_LOW",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18541,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 711,
+              "line": 21,
+              "column": 47
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get_report_action",
+            "target": "uvm_pkg::uvm_report_object::get_report_action",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 231,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4781,
+              "line": 135,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_monitor::run_phase._local_report_object_",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 231,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4781,
+              "line": 135,
+              "column": 11
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_severity.UVM_INFO",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18542,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5486,
+              "line": 156,
+              "column": 21
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_action_type.UVM_NO_ACTION",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18537,
+              "offset": 288,
+              "is_macro_loc": true,
+              "macro_name": "uvm_report_begin",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 4838,
+              "line": 135,
+              "column": 68
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "uvm_report_info",
+            "target": "uvm_pkg::uvm_report_object::uvm_report_info",
+            "at": {
+              "buffer_id": 18531,
+              "offset": 60,
+              "is_macro_loc": true,
+              "macro_name": "uvm_info",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+              "file_offset": 5524,
+              "line": 157,
+              "column": 3
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "uvm_pkg::uvm_verbosity.UVM_LOW",
+            "target_kind": "SymbolKind.EnumValue",
+            "at": {
+              "buffer_id": 18536,
+              "offset": 0,
+              "is_macro_loc": true,
+              "macro_name": "uvm_info",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 671,
+                "line": 21,
+                "column": 7
+              },
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 711,
+              "line": 21,
+              "column": 47
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_env,\"svw_env\")::get",
+            "at": {
+              "buffer_id": 18555,
+              "offset": 111,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 781,
+                "line": 26,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 22970,
+              "line": 612,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_env,\"svw_env\")::get",
+            "at": {
+              "buffer_id": 18555,
+              "offset": 218,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 781,
+                "line": 26,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 23077,
+              "line": 615,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "new",
+            "target": "uvm_pkg::uvm_env::new",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 930,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 930,
+              "line": 30,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::new.name",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 940,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 940,
+              "line": 30,
+              "column": 17
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::new.parent",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 946,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 946,
+              "line": 30,
+              "column": 23
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "build_phase",
+            "target": "uvm_pkg::uvm_component::build_phase",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1033,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1033,
+              "line": 33,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::build_phase.phase",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1051,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1051,
+              "line": 33,
+              "column": 25
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::drv",
+            "target_kind": "SymbolKind.ClassProperty",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1065,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1065,
+              "line": 34,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "create",
+            "target": "uvm_pkg::uvm_component_registry#(svw_driver,\"svw_driver\")::create",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1071,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1071,
+              "line": 34,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::build_phase.this",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1106,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1106,
+              "line": 34,
+              "column": 48
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::mon",
+            "target_kind": "SymbolKind.ClassProperty",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1119,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1119,
+              "line": 35,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "create",
+            "target": "uvm_pkg::uvm_component_registry#(svw_monitor,\"svw_monitor\")::create",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1125,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1125,
+              "line": 35,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_env::build_phase.this",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1161,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1161,
+              "line": 35,
+              "column": 49
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_smoke_test,\"svw_smoke_test\")::get",
+            "at": {
+              "buffer_id": 18565,
+              "offset": 111,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 1241,
+                "line": 40,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 22970,
+              "line": 612,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "get",
+            "target": "uvm_pkg::uvm_component_registry#(svw_smoke_test,\"svw_smoke_test\")::get",
+            "at": {
+              "buffer_id": 18565,
+              "offset": 218,
+              "is_macro_loc": true,
+              "macro_name": "m_uvm_component_registry_internal",
+              "expansion_loc": {
+                "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+                "offset": 1241,
+                "line": 40,
+                "column": 5
+              },
+              "file": ".toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "full_path": "${REPO}/.toolchain/uvm-core/src/macros/uvm_object_defines.svh",
+              "file_offset": 23077,
+              "line": 615,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "new",
+            "target": "uvm_pkg::uvm_test::new",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1380,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1380,
+              "line": 43,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_smoke_test::new.name",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1390,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1390,
+              "line": 43,
+              "column": 17
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_smoke_test::new.parent",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1396,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1396,
+              "line": 43,
+              "column": 23
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "build_phase",
+            "target": "uvm_pkg::uvm_component::build_phase",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1483,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1483,
+              "line": 46,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_smoke_test::build_phase.phase",
+            "target_kind": "SymbolKind.FormalArgument",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1501,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1501,
+              "line": 46,
+              "column": 25
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_smoke_test::env",
+            "target_kind": "SymbolKind.ClassProperty",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1515,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1515,
+              "line": 47,
+              "column": 7
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "create",
+            "target": "uvm_pkg::uvm_component_registry#(svw_env,\"svw_env\")::create",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1521,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1521,
+              "line": 47,
+              "column": 13
+            }
+          },
+          {
+            "ref_kind": "NamedValue",
+            "target": "svw_demo_uvm_pkg::svw_smoke_test::build_phase.this",
+            "target_kind": "SymbolKind.Variable",
+            "at": {
+              "buffer_id": 18472,
+              "offset": 1553,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "file_offset": 1553,
+              "line": 47,
+              "column": 45
+            }
+          },
+          {
+            "ref_kind": "Call",
+            "system": false,
+            "name": "run_test",
+            "target": "uvm_pkg::run_test",
+            "at": {
+              "buffer_id": 18571,
+              "offset": 81,
+              "is_macro_loc": false,
+              "file": "fixtures/uvm/svw_uvm_top.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_uvm_top.sv",
+              "file_offset": 81,
+              "line": 4,
+              "column": 11
+            }
+          }
+        ],
+        "dependencies_summary": {
+          "file_count": 169,
+          "fixture_files": [
+            {
+              "buffer_id": 18472,
+              "raw_name": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            },
+            {
+              "buffer_id": 18571,
+              "raw_name": "fixtures/uvm/svw_uvm_top.sv",
+              "full_path": "${REPO}/fixtures/uvm/svw_uvm_top.sv",
+              "kind": "BufferKind.DesignFile",
+              "included_from": null
+            }
+          ],
+          "first_uvm_files": [
+            ".toolchain/uvm-core/src/uvm_pkg.sv",
+            ".toolchain/uvm-core/src/uvm_macros.svh",
+            ".toolchain/uvm-core/src/macros/uvm_version_defines.svh",
+            ".toolchain/uvm-core/src/macros/uvm_global_defines.svh",
+            ".toolchain/uvm-core/src/macros/uvm_message_defines.svh",
+            ".toolchain/uvm-core/src/macros/uvm_phase_defines.svh",
+            ".toolchain/uvm-core/src/macros/uvm_printer_defines.svh",
+            ".toolchain/uvm-core/src/macros/uvm_comparer_defines.svh"
+          ],
+          "unnamed_buffers": 1,
+          "total_buffers": 18572
+        }
+      }
+    }
+  },
+  "summary": {
+    "demo_L2_lane_count": 2,
+    "demo_L2_diag_count": 0,
+    "g_lane0_data_i_actual_text": "data_i[lane]",
+    "bound_checker_paths_L2": [
+      "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+      "demo_top.g_lane[1].u_lane.u_stream_hold_sva"
+    ],
+    "demo_L4_lane_count": 4,
+    "demo_L4_diag_count": 0,
+    "demo_L4_lane_paths": [
+      "demo_top.g_lane[0].u_lane",
+      "demo_top.g_lane[1].u_lane",
+      "demo_top.g_lane[2].u_lane",
+      "demo_top.g_lane[3].u_lane"
+    ],
+    "uvm_error_count": 0,
+    "uvm_diag_count": 1,
+    "run_phase": [
+      {
+        "q": "svw_demo_uvm_pkg::svw_driver::run_phase",
+        "hier": "svw_demo_uvm_pkg::svw_driver::run_phase",
+        "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+        "offset": 312
+      },
+      {
+        "q": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+        "hier": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+        "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+        "offset": 637
+      }
+    ]
+  }
+}

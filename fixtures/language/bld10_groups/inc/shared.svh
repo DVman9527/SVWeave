@@ -1,0 +1,1 @@
+localparam int WIDTH = `W;

@@ -1,0 +1,59 @@
+{
+  "topic": "uvm_factory",
+  "fixture_dir": "uvm/",
+  "top": "svw_uvm_ext_top",
+  "declarations": [
+    {
+      "kind": "class",
+      "qualified_name": "svw_uvm_override_pkg::svw_test_ov_a",
+      "file": "svw_uvm_override_pkg.sv",
+      "ctx": "class svw_test_ov_a extends",
+      "nth": 0,
+      "text": "svw_test_ov_a",
+      "start": 827,
+      "end": 840
+    },
+    {
+      "kind": "class",
+      "qualified_name": "svw_uvm_override_pkg::svw_test_ov_b",
+      "file": "svw_uvm_override_pkg.sv",
+      "ctx": "class svw_test_ov_b extends",
+      "nth": 0,
+      "text": "svw_test_ov_b",
+      "start": 1306,
+      "end": 1319
+    }
+  ],
+  "override_calls": [
+    {
+      "callee": "set_type_override_by_type",
+      "in_class": "svw_uvm_override_pkg::svw_test_ov_a",
+      "args": [
+        "svw_base_item::get_type()",
+        "svw_item_a::get_type()"
+      ],
+      "file": "svw_uvm_override_pkg.sv",
+      "ctx": "set_type_override_by_type(svw_base_item",
+      "nth": 0,
+      "text": "set_type_override_by_type",
+      "start": 1138,
+      "end": 1163
+    },
+    {
+      "callee": "set_inst_override_by_type",
+      "in_class": "svw_uvm_override_pkg::svw_test_ov_b",
+      "args": [
+        "\"env.*\"",
+        "svw_base_item::get_type()",
+        "svw_item_b::get_type()"
+      ],
+      "file": "svw_uvm_override_pkg.sv",
+      "ctx": "set_inst_override_by_type(\"env.*\"",
+      "nth": 0,
+      "text": "set_inst_override_by_type",
+      "start": 1617,
+      "end": 1642
+    }
+  ],
+  "not_claimed": "the effective runtime topology / which override wins"
+}

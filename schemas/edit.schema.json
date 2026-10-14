@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "ExactRange": {
+      "additionalProperties": false,
+      "description": "Replace ``[start_byte, end_byte)`` of a snapshot file, but only if those bytes hash to\n``expected_sha256`` (compare-and-set on the original slice).",
+      "properties": {
+        "end_byte": {
+          "minimum": 0,
+          "title": "End Byte",
+          "type": "integer"
+        },
+        "expected_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "exact_range",
+          "title": "Kind",
+          "type": "string"
+        },
+        "logical_path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Logical Path",
+          "type": "string"
+        },
+        "replacement": {
+          "maxLength": 60000,
+          "title": "Replacement",
+          "type": "string"
+        },
+        "start_byte": {
+          "minimum": 0,
+          "title": "Start Byte",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "logical_path",
+        "start_byte",
+        "end_byte",
+        "expected_sha256",
+        "replacement"
+      ],
+      "title": "ExactRange",
+      "type": "object"
+    },
+    "SlangSymbolEdit": {
+      "additionalProperties": false,
+      "description": "Replace the whole declaration of ONE task / function / constructor, located BY NAME with\nslang's semantic database (ADR-013). Give exactly one of ``qualified_name`` (for example\n``pkg::cls::run_phase``; a suffix such as ``cls::run_phase`` is accepted but a bare name that\nmatches several declarations is ``AMBIGUOUS_SYMBOL``) or ``symbol_id``. ``replacement`` is the\nfull declaration text, from the ``task`` / ``function`` keyword to ``endtask`` /\n``endfunction``. ``expected_sha256`` (optional) must match the current declaration bytes.",
+      "properties": {
+        "expected_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Sha256"
+        },
+        "kind": {
+          "const": "slang_symbol",
+          "title": "Kind",
+          "type": "string"
+        },
+        "qualified_name": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qualified Name"
+        },
+        "replacement": {
+          "maxLength": 60000,
+          "title": "Replacement",
+          "type": "string"
+        },
+        "symbol_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Symbol Id"
+        }
+      },
+      "required": [
+        "kind",
+        "replacement"
+      ],
+      "title": "SlangSymbolEdit",
+      "type": "object"
+    },
+    "SymbolReplacement": {
+      "additionalProperties": false,
+      "description": "Replace the whole text of ONE declaration (identified by its declaration id in the base\nbuild) with ``new_body``. A bare name is never accepted (EDT-03).",
+      "properties": {
+        "declaration_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Declaration Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "symbol_replacement",
+          "title": "Kind",
+          "type": "string"
+        },
+        "new_body": {
+          "maxLength": 60000,
+          "title": "New Body",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "declaration_id",
+        "new_body"
+      ],
+      "title": "SymbolReplacement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "base_build_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Base Build Id",
+      "type": "string"
+    },
+    "edits": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "exact_range": "#/$defs/ExactRange",
+            "slang_symbol": "#/$defs/SlangSymbolEdit",
+            "symbol_replacement": "#/$defs/SymbolReplacement"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/SymbolReplacement"
+          },
+          {
+            "$ref": "#/$defs/ExactRange"
+          },
+          {
+            "$ref": "#/$defs/SlangSymbolEdit"
+          }
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "title": "Edits",
+      "type": "array"
+    },
+    "request_key": {
+      "pattern": "^[A-Za-z0-9._:-]{8,128}$",
+      "title": "Request Key",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "validate_profiles": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Validate Profiles",
+      "type": "array"
+    }
+  },
+  "required": [
+    "base_build_id",
+    "snapshot_id",
+    "edits",
+    "request_key"
+  ],
+  "title": "PrepareRequest",
+  "type": "object"
+}
