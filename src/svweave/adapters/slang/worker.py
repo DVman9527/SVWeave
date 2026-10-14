@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import resource
 import shlex
 import signal
 import subprocess
@@ -17,7 +18,12 @@ import tempfile
 import time
 from typing import Any
 
-from svweave.adapters.slang.protocol import DTO_SCHEMA, EXTRACTOR_VERSION, WorkerRequest
+from svweave.adapters.slang.protocol import (
+    DTO_SCHEMA,
+    EXTRACTOR_VERSION,
+    RUSAGE_MARKER,
+    WorkerRequest,
+)
 
 
 def _inject_fault(kind: str) -> None:
@@ -101,6 +107,17 @@ def build_and_extract(req: WorkerRequest) -> dict[str, Any]:
     return result
 
 
+def _rusage_line() -> str:
+    me = resource.getrusage(resource.RUSAGE_SELF)
+    ch = resource.getrusage(resource.RUSAGE_CHILDREN)
+    doc = {
+        "maxrss_kib": max(me.ru_maxrss, ch.ru_maxrss),  # KiB on Linux
+        "user_s": round(me.ru_utime + ch.ru_utime, 3),
+        "sys_s": round(me.ru_stime + ch.ru_stime, 3),
+    }
+    return RUSAGE_MARKER + json.dumps(doc, separators=(",", ":"))
+
+
 def main() -> int:
     raw = sys.stdin.read()
     req = WorkerRequest.model_validate_json(raw)
@@ -112,6 +129,7 @@ def main() -> int:
     sys.stdout.write(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     sys.stdout.flush()
     print(f"worker done: {result['stats']}", file=sys.stderr)
+    print(_rusage_line(), file=sys.stderr)
     return 0
 
 

@@ -120,6 +120,73 @@ repeated file (`["a.f", "lists/b.f", "a.f"]`). Maximum nesting depth is 32 filel
 (`reason: filelist_depth_exceeded`). Missing sources, filelists, include/library directories and
 library files are `MISSING_INPUT`.
 
+## 2b. Using a project that lives elsewhere
+
+To analyse a design kept outside this repository, keep `svweave.yaml` in a separate workspace
+directory and attach the project as an **external root**. Steps, in order:
+
+1. `svweave.yaml`: declare the root without a `path`, and address it as `@<id>`. A profile `cwd` of `"."`
+   is the workspace directory, which is not inside any declared source root; use `cwd: "@<id>"`.
+
+   ```yaml
+   source_roots:
+     - {id: "proj", include: ["**"], exclude: ["**/regression_result_*/**"], writable: false}
+   profiles:
+     rtl:
+       cwd: "@proj"
+       source_inputs: [{kind: "filelist", path: "@proj/filelist/top.f", dialect: "svweave-filelist-v1", path_mode: "cwd"}]
+       environment_allowlist: ["project_home"]   # only if the filelist uses $project_home
+       # ...
+   ```
+2. `svweave.local.yaml` next to it (see `svweave.local.example.yaml`; `schema_version` is required):
+   `root_mappings: [{id: proj, path: /abs/path/to/project}]`.
+3. **Trusted policy**: every mapped directory must also be added, as an absolute path, to `allowed_roots`
+   in the trusted `policy.json` (`$XDG_CONFIG_HOME/svweave/workspaces/<workspace_key>/policy.json`, created
+   by `svweave init`, outside the repository). There is deliberately no way to do this from
+   `svweave.yaml` or `svweave.local.yaml`, and no CLI command: edit the file yourself. Skipping it gives
+   `PATH_NOT_ALLOWED ... outside policy allowed_roots` (the error's `hint` names the file).
+4. Export any environment variable a filelist uses (`export project_home=...`) before running `svweave`.
+
+Things that differ from a simulator command line:
+
+* **Filelists are strict.** A `+incdir+` (or `-y`/`-v`) naming a directory that does not exist is
+  `MISSING_INPUT`, where VCS silently ignores it. Remove stale entries from the filelist.
+* **Simulator options are not accepted.** `-ntb_opts`, `-timescale=`, `+lint=` and the like are
+  `UNSUPPORTED_OPTION`; express defines, include dirs and tops in the profile. Two profile fields cover
+  the common cases:
+  * `language_options: {timescale: "1ns/1ps"}` is the equivalent of the simulator's default timescale.
+    Without it, any design where some files carry a `` `timescale `` and others do not reports one
+    `MissingTimeScale` error per file lacking it (hundreds, burying real problems).
+  * `ignored_options` declares simulator run-time options that do not affect elaboration:
+
+    ```yaml
+    ignored_options:
+      - {option: "+notimingcheck", reason: "simulation-only; no effect on static elaboration"}
+    ```
+
+    This is an explicit, reviewable decision; the option still appears in the manifest's
+    `ignored_options` ledger (classification `profile_declared`). `option` is the exact token; `args`
+    (default 0) is the number of following tokens it consumes. Options that change what is analysed
+    (`-f -F -v -y -l -q`, `+incdir+`, `+define+`, `+libext+`, `-D`, `-I`) cannot be declared.
+* **Several tops.** A testbench may be two top-level modules that refer to each other by hierarchical
+  name (`tb` using `system.x.y`, with `system` a module of its own): list both in `top_modules`, or
+  `CouldNotResolveHierarchicalPath` errors appear for every such reference.
+* **Encrypted IP** (`` `pragma protect `` envelopes): slang skips the envelope, so the module's body,
+  parameters and ports are unknown. Each envelope is a `protected_envelope` gap (the build is at most
+  `PARTIAL`), and a `ParameterDoesNotExist` error naming a module with an envelope in its text is called
+  out in the build's reasons as a likely artifact of the encryption. The hierarchy below an encrypted
+  module is not available.
+* **UVM**: map the Accellera library that the installer provides (`.toolchain/uvm-core/src`), not the one
+  bundled with a simulator. VCS's copy has `` `protected `` regions and `snps_macros.svp`, which slang
+  cannot read, so a build fails inside UVM with errors unrelated to your code.
+* **Strictness**: slang follows IEEE 1800. Constructs a simulator tolerates (a class used with `#(...)`
+  that has no parameters, an unspecialized `Class::member` on a parameterized class) are errors here.
+* A `PARTIAL` build still answers queries, but the `query` commands exit 3 for it unless you pass
+  `--allow-partial`.
+* In Verilog, `output reg x` yields two symbols (a port and a variable). `query symbol --name` is
+  `AMBIGUOUS_SYMBOL`; pick the `symbol_id`. References are attached to the variable, so the port
+  symbol shows none: that is not evidence the signal is unused.
+
 ## 3. Compilation units and profile-level inputs
 
 * Effective order: profile-declared `include_dirs`/`defines`/`library_*` first, then those found in

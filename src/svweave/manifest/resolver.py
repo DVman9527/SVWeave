@@ -71,6 +71,7 @@ class _Resolver:
         self.profile = profile
         self.environ = environ
         self.allow = set(profile.environment_allowlist)
+        self.declared_ignores = {d.option: d.args for d in profile.ignored_options}
         self.ledger: list[LedgerEntry] = []
         self.issues: list[dict[str, Any]] = []
         self.ignored: list[IgnoredOption] = []
@@ -483,15 +484,20 @@ class _Resolver:
                     )
                 for ext in exts:
                     self._add_ext(scope, unquote(ext), raw, o, chain)
-            elif raw in IGNORED_OPTIONS:
+            elif raw in IGNORED_OPTIONS or raw in self.declared_ignores:
+                # built-in output-only options, or ones the profile explicitly declares ignorable
+                # (never dropped silently: either way the option lands in the ignored_options ledger)
+                builtin = raw in IGNORED_OPTIONS
+                nargs = IGNORED_OPTIONS[raw] if builtin else self.declared_ignores[raw]
+                cls = "output_only" if builtin else "profile_declared"
                 args: list[str] = []
-                for _ in range(IGNORED_OPTIONS[raw]):
+                for _ in range(nargs):
                     args.append(arg(t).raw)
                 self.ignored.append(
                     IgnoredOption(
                         option=raw,
                         args=args,
-                        classification="output_only",
+                        classification=cls,
                         origin=o,
                         chain=list(chain),
                     )
@@ -502,7 +508,7 @@ class _Resolver:
                     o,
                     chain,
                     scope.id,
-                    classification="output_only",
+                    classification=cls,
                 )
             elif raw.startswith(("-", "+")):
                 self._issue(

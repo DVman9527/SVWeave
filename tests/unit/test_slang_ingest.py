@@ -471,3 +471,44 @@ def test_M1_dropped_reference_occurrences_make_project_builds_partial() -> None:
         "1765 reference occurrence(s) dropped in external files" in x for x in ext.limitations
     )
     assert ext.summary["dropped_refs_external"] == 1765 and ext.summary["dropped_refs_project"] == 0
+
+
+def diag(code: str, message: str = "m", *, error: bool = True, at: int = 0) -> dict[str, Any]:
+    return {
+        "severity": "error" if error else "warning",
+        "code": code,
+        "is_error": error,
+        "message": message,
+        "option": None,
+        "loc": loc(start=at, end=at),
+        "ranges": [],
+        "macro_notes": [],
+    }
+
+
+def test_missing_timescale_verdict_names_the_profile_knob() -> None:
+    r = run(dto(diagnostics=[diag("MissingTimeScale"), diag("MissingTimeScale")]))
+    assert r.completeness == Completeness.PARTIAL
+    assert any("2 MissingTimeScale" in x and "language_options.timescale" in x for x in r.reasons)
+    assert not any("MissingTimeScale" in x for x in run(dto()).reasons)
+
+
+def test_parameter_errors_on_a_protected_module_are_attributed_to_the_envelope() -> None:
+    result = dto(
+        declarations=[
+            decl(0, "prot", loc=loc(start=7, end=11)),
+            decl(1, "plain", loc=loc(start=246, end=251)),
+        ],
+        diagnostics=[
+            diag("ProtectedEnvelope", error=False, at=162),
+            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'prot'", at=300),
+            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'prot'", at=310),
+            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'plain'", at=320),
+        ],
+    )
+    r = run(result)
+    (line,) = [x for x in r.reasons if "ParameterDoesNotExist" in x]
+    assert line.startswith("2 ParameterDoesNotExist") and "(prot)" in line and "plain" not in line
+    # without an envelope in the module's text there is no attribution
+    result["diagnostics"] = [d for d in result["diagnostics"] if d["code"] != "ProtectedEnvelope"]
+    assert not any("ParameterDoesNotExist" in x for x in run(result).reasons)

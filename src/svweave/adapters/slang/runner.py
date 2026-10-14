@@ -7,7 +7,9 @@
 * ``RLIMIT_AS`` from ``analysis.max_worker_memory_mib``; core dumps disabled;
 * a native crash, a signal or a non-zero exit yields a structured ``WorkerOutcome`` and never
   an exception into the gateway;
-* peak RSS comes from ``wait4``'s rusage of exactly this child;
+* peak RSS and CPU time come from the worker's own last stderr line (``SVW_RUSAGE``): ``wait4`` on the
+  launcher only sees the bwrap process. When the line is absent (killed, crashed) the launcher's
+  ``wait4`` rusage is used and ``rusage_source`` says ``launcher`` (a lower bound);
 * the worker runs INSIDE the bwrap sandbox of ``security/sandbox.py`` (plan 6.4, 23.1): it sees
   only a read-only system, the Python runtime / venv / svweave sources, the immutable snapshot
   and the adapter's group files (all read-only), a private tmpfs ``/tmp``, and no network. An
@@ -33,7 +35,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import svweave
-from svweave.adapters.slang.protocol import WorkerRequest
+from svweave.adapters.slang.protocol import WorkerRequest, parse_rusage_line
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.security.sandbox import IsolationMode, SandboxRunner, SandboxSpec
 
@@ -251,7 +253,7 @@ def run_worker(
                 f.close()
     wall = time.monotonic() - t0
     stdout = b"".join(out_chunks)
-    err_bytes = bytes(err_buf)[-STDERR_KEEP:]
+    err_bytes, self_usage = parse_rusage_line(bytes(err_buf)[-STDERR_KEEP:])
     out = WorkerOutcome(
         kind="ok",
         isolation=wrapped.isolation.value,
@@ -260,15 +262,22 @@ def run_worker(
         stderr_tail=err_bytes.decode("utf-8", "replace"),
         wall_s=round(wall, 3),
     )
+    rusage_source = "launcher"
     if rusage is not None:
         out.peak_rss_kib = int(rusage.ru_maxrss)  # KiB on Linux
         out.user_cpu_s = round(rusage.ru_utime, 3)
         out.sys_cpu_s = round(rusage.ru_stime, 3)
+    if self_usage is not None:  # the worker's own figures; the launcher's cover only bwrap itself
+        out.peak_rss_kib = int(self_usage["maxrss_kib"])
+        out.user_cpu_s = round(self_usage["user_s"], 3)
+        out.sys_cpu_s = round(self_usage["sys_s"], 3)
+        rusage_source = "worker"
     out.resource_usage = {
         "wall_s": out.wall_s,
         "peak_rss_kib": out.peak_rss_kib,
         "user_cpu_s": out.user_cpu_s,
         "sys_cpu_s": out.sys_cpu_s,
+        "rusage_source": rusage_source,
         "memory_limit_mib": memory_mib,
         "timeout_s": timeout_s,
         "isolation": wrapped.isolation.value,

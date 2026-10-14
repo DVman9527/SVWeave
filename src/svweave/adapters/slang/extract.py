@@ -892,7 +892,11 @@ class Extractor:
                 {
                     "severity": _SEV.get(str(sev), str(sev)),
                     "code": code,
-                    "is_error": bool(dg.isError()),
+                    # isError() only says the code is an error by nature; a warning-option diagnostic
+                    # (e.g. format-too-many-args) can still be *effectively* an error. slang's own
+                    # error count follows the effective severity, so do the same.
+                    "is_error": bool(dg.isError())
+                    or sev in (pyslang.DiagnosticSeverity.Error, pyslang.DiagnosticSeverity.Fatal),
                     "message": eng.formatMessage(dg),
                     "option": eng.getOptionName(dg.code) or None,
                     "loc": loc,

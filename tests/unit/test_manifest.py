@@ -677,3 +677,55 @@ def test_example_svweave_yaml_profiles_resolve_against_demo_fixtures(tmp_path: P
     with pytest.raises(SvwError) as ei:  # external root "uvm" is not mapped
         resolve_profile(ctx, "uvm_smoke", {})
     assert ei.value.code == ErrorCode.MISSING_INPUT
+
+
+# --------------------------------------------------------------------------- profile ignored_options
+def _neg(ws: Ws, name: str) -> Ws:
+    n = Ws(ws.root.parent / name)
+    shutil.copytree(FIXTURES / "negative" / "proj_neg", n.root)
+    n.policy()
+    return n
+
+
+DECL = [{"option": "+notimingcheck", "reason": "simulation-only; no effect on elaboration"}]
+
+
+def test_profile_declared_ignored_option_resolves_and_is_recorded(ws: Ws) -> None:
+    n = _neg(ws, "decl_ok")
+    nm = resolve(n, source_inputs=fl("lists/unsupported_plus.f"), ignored_options=DECL)
+    ig = [i for i in nm.ignored_options if i.option == "+notimingcheck"]
+    assert len(ig) == 1 and ig[0].classification == "profile_declared"
+    assert ig[0].origin.file == "lists/unsupported_plus.f" and ig[0].args == []
+
+
+def test_an_undeclared_option_still_blocks_when_others_are_declared(ws: Ws) -> None:
+    n = _neg(ws, "decl_other")
+    e = blocked(
+        n, ErrorCode.UNSUPPORTED_OPTION, source_inputs=fl("lists/unsupported_dash.f"), ignored_options=DECL
+    )
+    assert e.details["issues"][0]["option"] == "-vendor_magic"
+
+
+@pytest.mark.parametrize(
+    "opt", ["-f", "-F", "-v", "-y", "-l", "-q", "+incdir+x", "+define+A", "+libext+.v", "-DA", "-Idir"]
+)
+def test_options_that_change_the_analysis_cannot_be_declared_ignorable(opt: str) -> None:
+    from pydantic import ValidationError
+
+    from svweave.config.models import IgnoredOptionDecl
+
+    with pytest.raises(ValidationError):
+        IgnoredOptionDecl(option=opt, reason="no")
+
+
+def test_ignored_option_declaration_needs_a_reason_and_no_duplicates() -> None:
+    from pydantic import ValidationError
+
+    from svweave.config.models import IgnoredOptionDecl, Profile
+
+    with pytest.raises(ValidationError):
+        IgnoredOptionDecl.model_validate({"option": "+notimingcheck"})
+    base = profile(source_inputs=[{"kind": "file", "path": "a.sv"}])
+    base["ignored_options"] = DECL + DECL
+    with pytest.raises(ValidationError):
+        Profile.model_validate(base)

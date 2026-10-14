@@ -251,6 +251,35 @@
       "title": "GeneratedInput",
       "type": "object"
     },
+    "IgnoredOptionDecl": {
+      "additionalProperties": false,
+      "description": "A simulator option the profile explicitly declares irrelevant to static analysis.\n\nFilelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that\nSVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an\nexplicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger\n(classification ``profile_declared``). Options the resolver interprets (include dirs, defines,\nlibraries, nested filelists) cannot be declared here.",
+      "properties": {
+        "args": {
+          "default": 0,
+          "maximum": 4,
+          "minimum": 0,
+          "title": "Args",
+          "type": "integer"
+        },
+        "option": {
+          "pattern": "^[-+][A-Za-z0-9_.:=+-]+$",
+          "title": "Option",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "option",
+        "reason"
+      ],
+      "title": "IgnoredOptionDecl",
+      "type": "object"
+    },
     "LanguageOptions": {
       "additionalProperties": false,
       "description": "Allowlisted slang language knobs (plan 8.3 'unsupported options block'): ``timescale`` ->\n``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``. Recorded in config_id and\nin the build's semantic_deviations. Nothing else can be passed through to slang.",
@@ -328,6 +357,13 @@
             "$ref": "#/$defs/GeneratedInput"
           },
           "title": "Generated Inputs",
+          "type": "array"
+        },
+        "ignored_options": {
+          "items": {
+            "$ref": "#/$defs/IgnoredOptionDecl"
+          },
+          "title": "Ignored Options",
           "type": "array"
         },
         "include_dirs": {

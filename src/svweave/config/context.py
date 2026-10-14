@@ -15,7 +15,13 @@ from pathlib import Path
 from svweave.config.loader import load_local_config, load_manifest
 from svweave.config.models import LocalConfig, Manifest, Policy
 from svweave.config.paths import PathPolicy, glob_match, is_within, lexical_join
-from svweave.config.policy import EffectivePolicy, check_policy_tightening, policy_roots
+from svweave.config.policy import (
+    ROOT_HINT,
+    SOURCE_ROOT_HINT,
+    EffectivePolicy,
+    check_policy_tightening,
+    policy_roots,
+)
 from svweave.config.trusted import check_state_dir, load_trusted_policy, trusted_dir
 from svweave.domain.errors import ErrorCode, SvwError
 
@@ -92,7 +98,7 @@ class WorkspaceContext:
             raise SvwError(
                 ErrorCode.PATH_NOT_ALLOWED,
                 "project root is outside policy allowed_roots",
-                {"project_root": str(self.project_root)},
+                {"project_root": str(self.project_root), "hint": ROOT_HINT},
             )
         self.effective: EffectivePolicy = check_policy_tightening(
             manifest, local, policy, self.project_root
@@ -111,7 +117,7 @@ class WorkspaceContext:
                 raise SvwError(
                     ErrorCode.PATH_NOT_ALLOWED,
                     f"source root {sr.id!r} is outside policy allowed_roots",
-                    {"root": sr.id},
+                    {"root": sr.id, "hint": ROOT_HINT},
                 )
             internal = sr.path is not None and is_within(absr, self.project_root)
             roots.append(
@@ -211,7 +217,7 @@ class WorkspaceContext:
         lexical, real = self.path_policy.check(raw_abs, base)
         root = self._governing_root(lexical)
         if root is None or root.abs is None:
-            raise PathPolicy.deny(shown, "not inside any declared source root")
+            raise PathPolicy.deny(shown, "not inside any declared source root", SOURCE_ROOT_HINT)
         if not any(r.abs is not None and is_within(real, r.abs) for r in self.roots):
             raise PathPolicy.deny(shown, "symlink target is outside every source root")
         return lexical, real, root
@@ -273,5 +279,5 @@ class WorkspaceContext:
     def logical_of(self, lexical: Path) -> str:
         root = self._governing_root(lexical)
         if root is None:
-            raise PathPolicy.deny(str(lexical), "not inside any declared source root")
+            raise PathPolicy.deny(str(lexical), "not inside any declared source root", SOURCE_ROOT_HINT)
         return self._logical(lexical, root)

@@ -87,9 +87,12 @@ class PathPolicy:
         return lexical, real_lex
 
     @staticmethod
-    def deny(raw: str, reason: str) -> SvwError:
+    def deny(raw: str, reason: str, hint: str | None = None) -> SvwError:
+        details = {"path": raw, "reason": reason}
+        if hint is not None:
+            details["hint"] = hint
         return SvwError(
             ErrorCode.PATH_NOT_ALLOWED,
             f"path not allowed: {raw!r} ({reason})",
-            {"path": raw, "reason": reason},
+            details,
         )

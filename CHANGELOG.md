@@ -7,6 +7,26 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 ### Fixed
 
+* **Installer usability** (found by installing as a new user): `scripts/bootstrap_locked.py` no longer
+  defaults `--uv` to a `.venv/bin/uv` that `uv venv` never creates; it uses `.venv/bin/uv` if present, else
+  `uv` on `PATH`, and stops before downloading when there is none. `--fetch-only` now also materializes
+  the pinned Serena checkout and warms the uv cache (the documentation already claimed this), so an
+  offline host needs no `--serena-source`. `--offline` links the svweave source tree into the gateway
+  venv (`.pth` plus `bin/svweave`) because the hash-locked wheelhouse has no build backend. A bad
+  `--serena-source` now says so instead of `exit status 128`.
+* **Effective error severity**: a slang diagnostic reported at error severity through a warning option
+  (for example `format-too-many-args`) had `is_error: false`, was not counted in `errors` and could leave
+  a build `NO_ERRORS`. `is_error` now follows the effective severity, like slang's own error count.
+  Builds with such diagnostics become `HAS_ERRORS`/`PARTIAL`.
+* **Resource figures were the launcher's**: `resource_usage.peak_rss_kib`, `user_cpu_s` and `sys_cpu_s`
+  came from `wait4` on the bwrap launcher (about 60 MB and 0 s for every build). On a build whose worker
+  peaked near 3.1 GB and ran 136 s they said 62 MB and 0.002 s, which misleads anyone tuning
+  `analysis.max_worker_memory_mib`. The worker now reports its own `getrusage` on its last stderr line and
+  the runner uses it (`resource_usage.rusage_source` is `worker`; `launcher`, a lower bound, when the
+  worker was killed before reporting).
+* **Policy errors say what to change**: errors about a root outside the trusted policy now carry a `hint`
+  (edit `allowed_roots` in the trusted `policy.json`), and `not inside any declared source root` points
+  at declaring a root or using an external `@id` root.
 * **Installer-independent pyslang pin**: `record_sha256` in `toolchain.lock.json` was the hash of the
   raw dist-info `RECORD`, which differs between pip, uv and hosts (`INSTALLER`, `REQUESTED`,
   `uv_cache.json`, `direct_url.json`, compiled `.pyc` entries), so a correct install failed with
@@ -18,6 +38,15 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 ### Added
 
+* **Profile `ignored_options`**: declare simulator run-time options (for example `+notimingcheck`) that
+  do not affect elaboration. Previously any unknown filelist option blocked the build and the only
+  workaround was to edit a copy of the filelist. Recorded in the `ignored_options` ledger as
+  `profile_declared`; options that change what is analysed cannot be declared.
+* The build verdict now links `ParameterDoesNotExist` errors on encrypted (`pragma protect`) modules to
+  the envelope instead of presenting them as plain design errors.
+* `svweave.local.example.yaml` and a "Using a project that lives elsewhere" section in
+  `docs/manifest.md` (external roots, trusted-policy `allowed_roots`, `@id` cwd, filelist strictness,
+  vendor UVM).
 * **M0 toolchain pinning**: `toolchain.lock.json` (pyslang 12.0.0, slang v12.0, codebase-memory-mcp
   v0.11.0 portable, Serena v1.7.0 + Verible v0.0-4296, MCP SDK 2.3.0, UVM 2020.3.1) with SHA-256
   for every artifact, `scripts/bootstrap_locked.py` (install and `--verify-only`),
