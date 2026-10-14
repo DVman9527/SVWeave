@@ -5,6 +5,17 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 ## [0.1.0-dev] - unreleased (developer preview, UNQUALIFIED)
 
+### Fixed
+
+* **Installer-independent pyslang pin**: `record_sha256` in `toolchain.lock.json` was the hash of the
+  raw dist-info `RECORD`, which differs between pip, uv and hosts (`INSTALLER`, `REQUESTED`,
+  `uv_cache.json`, `direct_url.json`, compiled `.pyc` entries), so a correct install failed with
+  `CAPABILITY_MISMATCH: installed pyslang RECORD differs from the lock`. It is now the hash of a
+  canonical RECORD (`canonical_record_sha256`: installer-added entries removed, lines sorted); the
+  wheel's own RECORD, a pip install and a uv install all give `52a97ff1...`. Every installed file is
+  still verified against its RECORD hash. **`toolchain_id` (and therefore `build_id`) values change**
+  versus builds made with the previous algorithm; rebuild instead of reusing old builds.
+
 ### Added
 
 * **M0 toolchain pinning**: `toolchain.lock.json` (pyslang 12.0.0, slang v12.0, codebase-memory-mcp

@@ -15,11 +15,11 @@ runtime behaviour (factory resolution, `config_db` matching, phase scheduling), 
 `svweave build --profile P`:
 
 1. resolve manifest (M1) and capture an immutable snapshot (M1);
-2. `toolchain_id` = H(pyslang version + wheel sha256 + RECORD sha256, slang commit + binary
+2. `toolchain_id` = H(pyslang version + wheel sha256 + canonical RECORD sha256, slang commit + binary
    sha256, extractor version + sha256 of the extractor sources, DTO schema) from
    `toolchain.lock.json` (found via `SVWEAVE_TOOLCHAIN_ROOT` or the installed tool only); the
    installed pyslang must equal the lock and its files must match its dist-info `RECORD`
-   (`CAPABILITY_MISMATCH` otherwise); `build_id` = H(snapshot, config, toolchain, schema);
+   (`CAPABILITY_MISMATCH` otherwise). The pinned `record_sha256` is the sha256 of the sorted RECORD lines without installer-added entries (`INSTALLER`, `REQUESTED`, `direct_url.json`, `uv_cache.json`, `RECORD`, compiled `__pycache__`/`.pyc`), so pip, uv and the wheel's own RECORD give the same value; `build_id` = H(snapshot, config, toolchain, schema);
 3. a COMPLETE build with that id is **reused** (no new job); anything else runs a job
    (`QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED/TIMED_OUT`);
 4. the HDL worker (`python -I -m svweave.adapters.slang.worker`, own process group, cwd = snapshot

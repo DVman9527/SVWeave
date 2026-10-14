@@ -57,6 +57,10 @@ def test_B1b_extractor_source_change_changes_toolchain_id(monkeypatch: pytest.Mo
     assert T.compute_toolchain(tmp_path)[0] != before
 
 
+def _b64(data: bytes) -> str:
+    return base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+
+
 def _fake_dist(tmp_path: Path, content: bytes = b"x = 1\n") -> tuple[metadata.Distribution, str]:
     sp = tmp_path / "sp"
     (sp / "pyslang").mkdir(parents=True)
@@ -66,7 +70,7 @@ def _fake_dist(tmp_path: Path, content: bytes = b"x = 1\n") -> tuple[metadata.Di
     h = base64.urlsafe_b64encode(hashlib.sha256(b"x = 1\n").digest()).rstrip(b"=").decode()
     rec = f"pyslang/m.py,sha256={h},{len(b'x = 1' + bytes([10]))}\npyslang-12.0.0.dist-info/RECORD,,\n"
     (di / "RECORD").write_text(rec)
-    return metadata.PathDistribution(di), hashlib.sha256(rec.encode()).hexdigest()
+    return metadata.PathDistribution(di), T.canonical_record_sha256(rec)
 
 
 def test_B1c_pyslang_content_verified_against_record_and_lock(
@@ -98,3 +102,47 @@ def test_B1c_unlisted_file_in_package_is_rejected(monkeypatch: pytest.MonkeyPatc
 def test_B1c_real_install_matches_lock() -> None:
     parts = T.compute_toolchain(REPO)[1]
     assert parts["pyslang"]["record_sha256"] and parts["extractor_source_sha256"]
+
+
+def test_B1c_pin_is_installer_independent(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """pip and uv add INSTALLER/REQUESTED/direct_url.json/uv_cache.json and compiled .pyc to RECORD
+    (pip also with CRLF); none of that may change the pin, and the install must still verify."""
+    dist, pin = _fake_dist(tmp_path)
+    di = tmp_path / "sp" / "pyslang-12.0.0.dist-info"
+    pyc = tmp_path / "sp" / "pyslang" / "__pycache__"
+    pyc.mkdir()
+    (pyc / "m.cpython-312.pyc").write_bytes(b"\0")
+    lines = []
+    for name in ("INSTALLER", "REQUESTED", "uv_cache.json", "direct_url.json"):
+        (di / name).write_text("x")
+        lines.append(f"pyslang-12.0.0.dist-info/{name},sha256={_b64(b'x')},1")
+    lines.append(f"pyslang/__pycache__/m.cpython-312.pyc,sha256={_b64(bytes(1))},1")
+    rec = (di / "RECORD").read_text()
+    (di / "RECORD").write_text("".join(ln + "\r\n" for ln in rec.splitlines() + lines))
+    monkeypatch.setattr(T.metadata, "distribution", lambda name: dist)
+    assert T.canonical_record_sha256((di / "RECORD").read_text()) == pin
+    assert T.verify_pyslang_install(pin) == pin
+
+
+def test_B1c_tampered_record_entry_changes_pin(tmp_path: Path) -> None:
+    _, pin = _fake_dist(tmp_path)
+    rec = (tmp_path / "sp" / "pyslang-12.0.0.dist-info" / "RECORD").read_text()
+    assert T.canonical_record_sha256(rec) == pin
+    evil = rec.replace("pyslang/m.py,sha256=", "pyslang/m.py,sha256=A")  # altered hash of a wheel file
+    assert T.canonical_record_sha256(evil) != pin
+    extra_file = rec + "pyslang/evil.py,sha256=AAAA,1\n"  # a wheel-provided path added to RECORD
+    assert T.canonical_record_sha256(extra_file) != pin
+    renamed = rec.replace("pyslang/m.py", "pyslang/n.py")
+    assert T.canonical_record_sha256(renamed) != pin
+
+
+def test_B1c_tampered_record_on_disk_is_rejected(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    dist, pin = _fake_dist(tmp_path)
+    monkeypatch.setattr(T.metadata, "distribution", lambda name: dist)
+    rp = tmp_path / "sp" / "pyslang-12.0.0.dist-info" / "RECORD"
+    h = base64.urlsafe_b64encode(hashlib.sha256(b"x = 2\n").digest()).rstrip(b"=").decode()
+    (tmp_path / "sp" / "pyslang" / "m.py").write_bytes(b"x = 2\n")  # file and RECORD both re-written
+    rp.write_text(f"pyslang/m.py,sha256={h},6\npyslang-12.0.0.dist-info/RECORD,,\n")
+    with pytest.raises(SvwError) as ei:
+        T.verify_pyslang_install(pin)
+    assert ei.value.code is ErrorCode.CAPABILITY_MISMATCH and "differs from the lock" in ei.value.message

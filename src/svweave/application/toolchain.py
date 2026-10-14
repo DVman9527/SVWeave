@@ -29,6 +29,7 @@ __all__ = [
     "extractor_source_hash",
     "find_lock",
     "toolchain_parts",
+    "canonical_record_sha256",
     "verify_pyslang_install",
 ]
 
@@ -77,10 +78,35 @@ def _mismatch(msg: str, **details: Any) -> SvwError:
     return SvwError(ErrorCode.CAPABILITY_MISMATCH, msg, details)
 
 
+#: dist-info files that an installer (pip, uv, ...) adds or rewrites; they are not part of the wheel
+#: and differ between installers, so they are excluded from the pinned RECORD identity.
+_INSTALLER_DIST_INFO_FILES = frozenset({"RECORD", "INSTALLER", "REQUESTED", "direct_url.json", "uv_cache.json"})
+
+
+def canonical_record_sha256(record_text: str) -> str:
+    """Installer-independent identity of a wheel's file set: sha256 of the sorted RECORD lines
+    (path,hash,size) with the installer-added entries removed (`*.dist-info/{RECORD,INSTALLER,REQUESTED,direct_url.json,uv_cache.json}` and compiled `__pycache__`/`.pyc` files). A wheel's own RECORD
+    and the RECORD written by pip or uv for the same wheel yield the same value; changing any
+    wheel-provided file, hash or size changes it."""
+    keep: list[str] = []
+    for line in record_text.splitlines():
+        if not line.strip():
+            continue
+        path = line.split(",", 1)[0].strip('"')
+        parts = path.split("/")
+        if "__pycache__" in parts or path.endswith(".pyc"):  # bytecode compiled at install time
+            continue
+        if len(parts) == 2 and parts[0].endswith(".dist-info") and parts[1] in _INSTALLER_DIST_INFO_FILES:
+            continue
+        keep.append(line.rstrip("\r"))
+    return hashlib.sha256(("\n".join(sorted(keep)) + "\n").encode("utf-8")).hexdigest()
+
+
 def verify_pyslang_install(locked_record_sha256: str | None) -> str:
     """Check the installed pyslang files against its dist-info RECORD hashes (and for unlisted
-    files in its package directories) and that the RECORD equals the lock's pin. Returns the RECORD
-    sha256. The result is cached by a stat fingerprint of every file. Raises CAPABILITY_MISMATCH."""
+    files in its package directories) and that the canonical RECORD (`canonical_record_sha256`,
+    installer-independent) equals the lock's pin. Returns that sha256. The result is cached by a
+    stat fingerprint of every file. Raises CAPABILITY_MISMATCH."""
     try:
         dist = metadata.distribution("pyslang")
     except metadata.PackageNotFoundError as e:
@@ -102,12 +128,12 @@ def verify_pyslang_install(locked_record_sha256: str | None) -> str:
     hit = _PYSLANG_CACHE.get(fp)
     if hit is not None:
         return hit
-    record_sha = hashlib.sha256(rec_path.read_bytes()).hexdigest()
+    record_sha = canonical_record_sha256(rec_path.read_text(encoding="utf-8"))
     if not locked_record_sha256:
         raise _mismatch("toolchain.lock.json pins no pyslang record_sha256", record_sha256=record_sha)
     if record_sha != locked_record_sha256:
         raise _mismatch(
-            "installed pyslang RECORD differs from the lock",
+            "installed pyslang canonical RECORD differs from the lock",
             installed=record_sha,
             locked=locked_record_sha256,
         )
