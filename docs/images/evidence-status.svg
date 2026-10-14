@@ -104,7 +104,7 @@ svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif
 <line x1="40" y1="462" x2="1170" y2="462" class="lf"/>
 <text x="40" y="490" class="tx b s16">Release status: static preview gates are kept apart from EDA evidence</text>
 <rect x="40" y="504" width="1130" height="46" rx="8" class="n"/>
-<text x="52" y="524" class="tx s12">Snapshot of the qualification run of 2026-10-14, not a timeless claim. Source tree sha256 1ff91022... (git HEAD 9784de3, +dirty),</text>
+<text x="52" y="524" class="tx s12">Snapshot of the qualification run of 2026-10-14, not a timeless claim. Source tree sha256 21a97d0c... (git HEAD b6ba45c, +dirty),</text>
 <text x="52" y="541" class="tx s12">toolchain lock 5c02676b..., host class Linux x86_64 py3.12.4. Re-run scripts/qualify.py for the current state.</text>
 <text x="40" y="584" class="tx b s13">Static preview gates (scripts/qualify.py)</text>
 <rect x="40" y="596" width="330" height="40" rx="8" class="dash"/>
@@ -123,16 +123,16 @@ svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif
 <text x="40" y="726" class="mu s12">backends and MCP contract. G4 edit safety and critical mutations. G5 P0 suites, acceptance,</text>
 <text x="40" y="742" class="mu s12">coverage, docs, benchmark.</text>
 <rect x="40" y="760" width="324" height="72" rx="8" class="chip"/>
-<text x="52" y="790" class="tx b s16 mono">916 / 0 / 0 / 0</text>
+<text x="52" y="790" class="tx b s16 mono">920 / 0 / 0 / 0</text>
 <text x="52" y="814" class="mu s12">P0 tests passed / failed / blocked / skipped</text>
 <rect x="380" y="760" width="324" height="72" rx="8" class="chip"/>
 <text x="392" y="790" class="tx b s16 mono">22 of 22</text>
 <text x="392" y="814" class="mu s12">critical mutations killed, none survived</text>
 <rect x="40" y="844" width="324" height="72" rx="8" class="chip"/>
-<text x="52" y="874" class="tx b s16 mono">93.57% / 87.67%</text>
+<text x="52" y="874" class="tx b s16 mono">93.58% / 87.71%</text>
 <text x="52" y="898" class="mu s12">statement / branch coverage (SVWeave code, not RTL)</text>
 <rect x="380" y="844" width="324" height="72" rx="8" class="chip"/>
-<text x="392" y="874" class="tx b s16 mono">24.2 s</text>
+<text x="392" y="874" class="tx b s16 mono">24.3 s</text>
 <text x="392" y="898" class="mu s12">median cold build, 500 files (budget 120 s)</text>
 <line x1="715" y1="584" x2="715" y2="940" class="lt"/>
 <text x="730" y="584" class="tx b s13">EDA evidence (separate, never merged into the gates)</text>
@@ -154,5 +154,5 @@ svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif
 <text x="742" y="850" class="tx s12">adr_012 (Serena edits limited to function bodies)</text>
 <text x="742" y="870" class="tx s12">license_review (legal review NOT_DONE)</text>
 <text x="742" y="900" class="mu s12">ACCEPTED_STATIC_PREVIEW: all gates PASS, no open blocker.</text>
-<text x="40" y="964" class="mu s12">Copies: evidence/qualification/report.md and report.json; benchmark evidence/bench/20261014T042010Z-s1.0.json (host differs from the plan reference host).</text>
+<text x="40" y="964" class="mu s12">Copies: evidence/qualification/report.md and report.json; benchmark evidence/bench/20261014T085609Z-s1.0.json (host differs from the plan reference host).</text>
 </svg>

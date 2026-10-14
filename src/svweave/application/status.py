@@ -21,16 +21,29 @@ from svweave.storage.db import Database
 CLIENT_BOUNDARY_MESSAGE = (
     "client boundary not qualified: SVWeave only controls operations that pass through its "
     "gateway; an MCP client with its own shell or file tools can still write the source tree. "
-    "Editing stays disabled until a filesystem/process-isolated client boundary is qualified "
-    "(plan 23.2)."
+    "Controlled editing exists but is disabled by default; it runs only when both svweave.yaml "
+    "and the trusted policy enable it, and the client boundary stays not qualified either way "
+    "until a filesystem/process-isolated client is qualified (plan 23.2)."
 )
 
 
-def client_boundary() -> dict[str, Any]:
-    """M3 never qualifies a client boundary; M4 adds the qualification procedure."""
+def editing_capability(editing_enabled: bool) -> str:
+    """Human-readable editing state for ``svw_status`` capabilities."""
+    if editing_enabled:
+        return "enabled (svweave.yaml and trusted policy); client boundary not qualified"
+    return "disabled by default (needs svweave.yaml and trusted policy); client boundary not qualified"
+
+
+def client_boundary(editing_enabled: bool = False) -> dict[str, Any]:
+    """No client boundary is qualified in this release (``qualified`` is always False).
+    ``editing_enabled`` is the EFFECTIVE setting, ``ctx.effective.editing_enabled``: svweave.yaml
+    ``editing.enabled`` AND the trusted policy (config/policy.py), the value that
+    ``editing.plan.require_editing_enabled`` enforces; never the raw ``ctx.policy`` field. It is
+    a separate fact from ``qualified``: editing may be enabled while the boundary is still not
+    qualified."""
     return {
         "qualified": False,
-        "editing_enabled": False,
+        "editing_enabled": bool(editing_enabled),
         "message": CLIENT_BOUNDARY_MESSAGE,
         "tool_annotations_are_not_isolation": True,
     }
@@ -191,13 +204,13 @@ def status(
         "search": "graph candidates when the graph backend is READY, else literal text fallback",
         "text_fallback": True,
         "graph_backend_state": (graph or {}).get("status", "NOT_PROBED"),
-        "editing": "disabled (not implemented before M4; client boundary not qualified)",
+        "editing": editing_capability(bool(ctx.effective.editing_enabled)),
         "eda_compile_simulation_formal": "NOT_RUN unless external evidence was imported",
     }
     freshness = Freshness.UNKNOWN
     if profile and builds and builds[0]["current_build"]:
         freshness = Freshness(builds[0]["current_build"]["freshness"])
-    boundary = client_boundary()
+    boundary = client_boundary(bool(ctx.effective.editing_enabled))
     warnings = [boundary["message"]]
     if any(b["current_build"] is None for b in builds):
         warnings.append("some profiles have no published COMPLETE build")

@@ -233,7 +233,8 @@ def run_doctor(options: WorkspaceOptions, request_id: str, *, probe: bool = Fals
             limitations=[
                 "Backends are only proven by a real fixture probe (--probe); without it they are "
                 "reported as SKIP, never READY.",
-                "Editing stays disabled while the client boundary is not qualified.",
+                "Editing is disabled by default and runs only when svweave.yaml and the trusted policy "
+                "both enable it; the client boundary is never qualified by this check.",
             ],
         ),
         data={"checks": [r.model_dump() for r in results]},

@@ -195,6 +195,7 @@ def test_status_does_not_probe_by_default(built: Built) -> None:
         d["client_boundary"]["qualified"] is False
         and d["client_boundary"]["editing_enabled"] is False
     )
+    assert d["capabilities"]["editing"].startswith("disabled by default")
     assert d["isolation"]["mode"] in ("bwrap", "degraded_no_isolation")
     prof = d["profiles"][0]
     assert prof["current_build"]["build_id"] == built.build_id
@@ -469,3 +470,39 @@ def test_M8_evidence_responses_stay_under_the_cap_over_mcp(built: Built) -> None
     assert set(ids) <= set(seen)
     by_id, err = call(gw, "svw_evidence", {"evidence_id": ids[0]})
     assert not err and len(json.dumps(by_id, separators=(",", ":")).encode()) <= MAX_RESPONSE_BYTES
+
+
+def test_status_reports_effective_editing_when_enabled_in_yaml_and_policy(
+    tmp_path: Path,
+) -> None:
+    """client_boundary.editing_enabled is the effective setting (svweave.yaml AND trusted policy),
+    not a constant: with both on it must be true while `qualified` stays false (docs/mcp_contract
+    'Honest state'); a constant False would claim editing is off while svw_edit works."""
+    from tests.unit._edit_fx import make_ws
+
+    ew = make_ws(tmp_path, enabled=True)
+    gw = make_gateway(WorkspaceOptions(root=ew.root))
+    env, err = call(gw, "svw_status", {})
+    assert not err, env.get("error")
+    validate_output("svw_status", env)
+    d = env["data"]
+    assert d["client_boundary"]["editing_enabled"] is True
+    assert d["client_boundary"]["qualified"] is False
+    assert d["capabilities"]["editing"].startswith("enabled (svweave.yaml and trusted policy)")
+    assert "not qualified" in d["capabilities"]["editing"]
+
+
+def test_status_editing_is_off_when_policy_on_but_svweave_yaml_off(tmp_path: Path) -> None:
+    """Effective editing = svweave.yaml editing.enabled AND trusted policy (config/policy.py,
+    checked by editing.plan.require_editing_enabled). Reading the raw trusted policy would claim
+    editing is on while every svw_edit call is refused with POLICY_DENIED."""
+    from tests.unit._edit_fx import make_ws
+
+    ew = make_ws(tmp_path, enabled=True, editing={"enabled": False})
+    assert ew.w.policy_path.is_file()  # the trusted policy says editing_enabled: true
+    gw = make_gateway(WorkspaceOptions(root=ew.root))
+    env, err = call(gw, "svw_status", {})
+    assert not err, env.get("error")
+    d = env["data"]
+    assert d["client_boundary"]["editing_enabled"] is False
+    assert d["capabilities"]["editing"].startswith("disabled")

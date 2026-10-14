@@ -1,6 +1,6 @@
 {
   "suite": "critical-mutations (plan 20.5)",
-  "date": "2026-10-14T04:20:10+00:00",
+  "date": "2026-10-14T08:56:09+00:00",
   "import_proof": {
     "svweave_origin_under_python_I": "${REPO}/.svweave/mutation/repo/src/svweave/__init__.py",
     "inside_scratch_copy": true
@@ -20,42 +20,42 @@
     },
     "tests/unit/test_slang_args.py tests/integration/test_build_identity.py -k BLD_07 or include or incdir or slang_args or args": {
       "rc": 0,
-      "seconds": 6.2,
+      "seconds": 6.4,
       "tail": [
         "....                                                                     [100%]"
       ]
     },
     "tests/integration/test_uvm.py tests/integration/test_sem.py tests/integration/test_edt_flow.py::test_bare_method_name_is_ambiguous_even_with_real_serena": {
       "rc": 0,
-      "seconds": 60.8,
+      "seconds": 61.0,
       "tail": [
         "...............                                                          [100%]"
       ]
     },
     "tests/integration/test_sem.py tests/integration/test_sva.py tests/integration/test_cli_semantic.py": {
       "rc": 0,
-      "seconds": 21.2,
+      "seconds": 21.8,
       "tail": [
         "....................                                                     [100%]"
       ]
     },
     "tests/unit/test_edit_prepare.py tests/unit/test_edit_commit.py tests/fault_injection/test_edit_crash.py": {
       "rc": 0,
-      "seconds": 84.4,
+      "seconds": 83.5,
       "tail": [
         "...................................................................      [100%]"
       ]
     },
     "tests/unit/test_edit_commit.py tests/unit/test_edit_machine.py tests/unit/test_edit_validate.py": {
       "rc": 0,
-      "seconds": 65.8,
+      "seconds": 64.6,
       "tail": [
         "..............................................................           [100%]"
       ]
     },
     "tests/unit/test_edit_prepare.py tests/unit/test_edit_validate.py tests/unit/test_adapters_serena.py": {
       "rc": 0,
-      "seconds": 51.8,
+      "seconds": 52.0,
       "tail": [
         "........................................................................ [ 84%]",
         ".............                                                            [100%]"
@@ -63,21 +63,21 @@
     },
     "tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable tests/unit/test_sandbox.py": {
       "rc": 0,
-      "seconds": 4.1,
+      "seconds": 4.5,
       "tail": [
         ".....................                                                    [100%]"
       ]
     },
     "tests/fault_injection/test_edit_crash.py tests/unit/test_edit_commit.py": {
       "rc": 0,
-      "seconds": 60.8,
+      "seconds": 59.3,
       "tail": [
         "....................................                                     [100%]"
       ]
     },
     "tests/unit/test_manifest.py tests/unit/test_slang_args.py tests/unit/test_config.py": {
       "rc": 0,
-      "seconds": 6.5,
+      "seconds": 6.4,
       "tail": [
         "........................................................................ [ 94%]",
         "....                                                                     [100%]"
@@ -85,21 +85,21 @@
     },
     "tests/unit/test_gateway_evidence.py tests/unit/test_gateway_status_report.py tests/contract": {
       "rc": 0,
-      "seconds": 23.8,
+      "seconds": 25.3,
       "tail": [
-        "............................................................             [100%]"
+        "................................................................         [100%]"
       ]
     },
     "tests/fault_injection/test_recover_gates.py": {
       "rc": 0,
-      "seconds": 12.5,
+      "seconds": 12.4,
       "tail": [
         "........                                                                 [100%]"
       ]
     },
     "tests/unit/test_edit_final_a.py tests/fault_injection/test_recover_gates.py tests/unit/test_edit_review_fixes.py::test_f10_m12_commit_time_policy_narrowing_is_policy_denied tests/unit/test_edit_review_fixes.py::test_m12_precommit_path_check_is_independent_of_the_freeze_check": {
       "rc": 0,
-      "seconds": 24.9,
+      "seconds": 24.7,
       "tail": [
         "....................................                                     [100%]"
       ]
@@ -120,14 +120,14 @@
     },
     "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration tests/unit/test_edit_slang_symbol.py::test_replacement_must_be_a_whole_declaration_of_the_same_kind": {
       "rc": 0,
-      "seconds": 10.9,
+      "seconds": 10.8,
       "tail": [
         "..............                                                           [100%]"
       ]
     },
     "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape": {
       "rc": 0,
-      "seconds": 5.6,
+      "seconds": 5.4,
       "tail": [
         "..                                                                       [100%]"
       ]
@@ -141,21 +141,21 @@
     },
     "tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused": {
       "rc": 0,
-      "seconds": 4.0,
+      "seconds": 3.8,
       "tail": [
         ".                                                                        [100%]"
       ]
     },
     "tests/unit/test_edit_slang_symbol.py::test_r1_directives_pasting_and_stringification_are_refused tests/unit/test_edit_slang_symbol.py::test_r1_macro_end_task_escape_on_a_module_task_is_refused tests/unit/test_edit_slang_symbol.py::test_r2_macro_redefinition_cannot_change_later_code tests/unit/test_edit_slang_symbol.py::test_r1_macro_invocation_rules": {
       "rc": 0,
-      "seconds": 11.3,
+      "seconds": 11.4,
       "tail": [
         "...............                                                          [100%]"
       ]
     },
     "tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs": {
       "rc": 0,
-      "seconds": 4.4,
+      "seconds": 4.3,
       "tail": [
         ".                                                                        [100%]"
       ]
@@ -191,7 +191,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 5.4,
+      "seconds": 5.2,
       "failing_tests": [
         "tests/unit/test_snapshot.py::test_SNP_01_modified_included_header_makes_snapshot_stale",
         "tests/unit/test_snapshot.py::test_SNP_02_new_higher_priority_header_invalidates_even_if_original_unchanged",
@@ -228,7 +228,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 5.6,
+      "seconds": 5.7,
       "failing_tests": [
         "tests/integration/test_build_identity.py::test_BLD_07_include_dir_order_changes_selected_header_and_build_id"
       ],
@@ -296,7 +296,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 21.0,
+      "seconds": 20.1,
       "failing_tests": [
         "tests/integration/test_sem.py::test_SEM_07_errors_give_precise_diagnostics_and_partial",
         "tests/integration/test_sva.py::test_SVA_02_unknown_signal_and_unresolvable_bind_are_not_a_valid_inventory",
@@ -341,7 +341,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 83.7,
+      "seconds": 84.9,
       "failing_tests": [
         "tests/unit/test_edit_commit.py::test_edt02_stale_expected_hash_check_protects_the_target_even_if_snapshot_check_passes",
         "tests/fault_injection/test_edit_crash.py::test_failure_during_apply_after_some_files_requires_recovery"
@@ -374,7 +374,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 64.9,
+      "seconds": 64.7,
       "failing_tests": [
         "tests/unit/test_edit_commit.py::test_sec06_forged_approval_files_are_refused"
       ],
@@ -406,7 +406,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 28.3,
+      "seconds": 29.6,
       "failing_tests": [
         "tests/unit/test_edit_prepare.py::test_prepare_creates_independent_byte_copy_and_never_touches_the_original",
         "tests/unit/test_edit_prepare.py::test_edit_path_is_recorded_per_edit_and_serena_edit_is_labelled",
@@ -441,7 +441,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 4.2,
+      "seconds": 4.1,
       "failing_tests": [
         "tests/integration/test_int_sandbox.py::test_sec05_cannot_make_original_writable",
         "tests/unit/test_sandbox.py::test_protected_original_cannot_be_exposed_writable",
@@ -479,7 +479,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 59.5,
+      "seconds": 59.0,
       "failing_tests": [
         "tests/fault_injection/test_edit_crash.py::test_edt08_human_edit_after_crash_is_never_overwritten",
         "tests/fault_injection/test_edit_crash.py::test_edt08_unrelated_third_state_is_a_conflict_not_a_guess"
@@ -512,7 +512,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 6.9,
+      "seconds": 6.4,
       "failing_tests": [
         "tests/unit/test_manifest.py::test_BLD_03_unsupported_options_reported_with_origin",
         "tests/unit/test_manifest.py::test_BLD_03_all_unsupported_options_collected_not_dropped"
@@ -545,7 +545,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 20.1,
+      "seconds": 21.5,
       "failing_tests": [
         "tests/unit/test_gateway_evidence.py::test_UVM_04_unlinked_evidence_is_never_attached_to_a_build",
         "tests/unit/test_gateway_evidence.py::test_REL_01_states_are_separate_and_never_merged",
@@ -578,7 +578,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 9.6,
+      "seconds": 9.1,
       "failing_tests": [
         "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_without_a_valid_approval_is_refused",
         "tests/fault_injection/test_recover_gates.py::test_a3_roll_forward_with_editing_disabled_is_refused",
@@ -616,7 +616,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 25.1,
+      "seconds": 24.5,
       "failing_tests": [
         "tests/unit/test_edit_final_a.py::test_a4_newly_mandatory_validate_profile_refuses_the_commit",
         "tests/unit/test_edit_final_a.py::test_a4_source_root_made_read_only_after_approval_refuses_the_commit",
@@ -716,7 +716,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 6.2,
+      "seconds": 6.1,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
         "tests/unit/test_edit_slang_symbol.py::test_b3_replacement_must_be_exactly_one_declaration[task",
@@ -751,7 +751,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 5.4,
+      "seconds": 5.3,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_constructor_is_a_scope_escape_and_cannot_be_approved",
         "tests/unit/test_edit_slang_symbol.py::test_b3_renamed_task_is_a_scope_escape"
@@ -783,7 +783,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 4.3,
+      "seconds": 4.6,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_m18_non_declaration_span_is_refused_with_the_specific_reason",
         "tests/unit/test_edit_slang_symbol.py::test_extern_prototype_span_is_refused"
@@ -814,7 +814,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 4.1,
+      "seconds": 3.8,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_symbol_id_of_a_non_subroutine_is_refused"
       ],
@@ -881,12 +881,12 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 4.3,
+      "seconds": 4.5,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs"
       ],
       "pytest_tail": [
-        "     +  where False = any(<generator object test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs.<locals>.<genexpr> at 0x7f52d4a653c0>)",
+        "     +  where False = any(<generator object test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs.<locals>.<genexpr> at 0x7f8b3c8693c0>)",
         "${REPO}/.svweave/mutation/repo/tests/unit/test_edit_slang_symbol.py:589: assert False",
         "=========================== short test summary info ============================",
         "FAILED tests/unit/test_edit_slang_symbol.py::test_r1_span_equality_backstop_rejects_a_candidate_whose_target_span_differs"
@@ -911,7 +911,7 @@
       },
       "status": "KILLED",
       "pytest_rc": 1,
-      "seconds": 3.9,
+      "seconds": 4.0,
       "failing_tests": [
         "tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused"
       ],

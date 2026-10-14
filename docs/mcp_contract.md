@@ -139,8 +139,10 @@ marked `FAILED` ("orphaned") at the next status call.
 * `svw_status` never launches a heavy probe by default; backends read `NOT_PROBED` unless a probe ran
   in this session, a runtime failure was observed, or `svweave doctor --probe` stored a record.
 * Editing exists but is disabled by default (both `svweave.yaml` `editing.enabled` and the trusted
-  policy must enable it); `pending_edits` is read from `edit_transactions` and
-  `client_boundary.qualified=false` (plan 23.2).
+  policy must enable it); `pending_edits` is read from `edit_transactions`.
+  `client_boundary.qualified` is always `false` (plan 23.2), and `client_boundary.editing_enabled`
+  and `capabilities.editing` report the effective setting (`svweave.yaml` AND trusted policy), so
+  `editing_enabled: true` means `svw_edit` can work while the boundary is still not qualified.
 * Evidence: static analysis is recorded automatically; EDA compile, simulation, formal and SVA
   execution are `NOT_RUN` unless imported evidence exists, and imported evidence is only ever
   `EXTERNAL_DECLARED` (no trusted runner exists in v1). Unlinked records are never shown as a

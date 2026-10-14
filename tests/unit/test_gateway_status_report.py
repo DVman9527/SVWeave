@@ -248,3 +248,25 @@ def test_doctor_probe_uses_the_registry_once_stores_result_and_shuts_down(
     # a later status call shows that record as "last_doctor_probe", not as live health
     st = services.status(Session(opts, use_graph=False), "r")
     assert st.data["backends"]["serena"]["source"] == "last_doctor_probe"
+
+
+def test_report_editing_enabled_is_effective_not_the_raw_policy(ws: Ws) -> None:
+    """policy on + svweave.yaml off: editing is refused, so the report must say enabled: false."""
+    opts, bid, _ = stub_build(ws)
+    ws.policy(editing_enabled=True)
+    rep = build_report(Session(opts, use_graph=False), "r", bid).data["report"]
+    assert rep["editing"]["enabled"] is False
+    assert rep["editing"]["client_boundary"]["editing_enabled"] is False
+
+
+def test_doctor_reports_editing_false_when_policy_tightening_fails(tmp_path: Path) -> None:
+    """yaml and policy both enable editing, but allowed_paths are not covered by the policy's
+    writable_paths: every command fails at load, so the doctor must not say editing is enabled."""
+    from tests.unit._edit_fx import make_ws
+
+    ew = make_ws(tmp_path, enabled=True, writable_paths=["rtl/**"])
+    env = run_doctor(WorkspaceOptions(root=ew.root), "r")
+    checks = {c["name"]: c for c in env.data["checks"]}
+    assert checks["policy_tightening"]["status"] == "FAIL"
+    assert checks["client_boundary"]["details"]["editing_enabled"] is False
+    assert "editing is enabled" not in checks.get("editing", {}).get("message", "")

@@ -69,7 +69,7 @@ JSON shape used by most MCP clients; adapt names to your client):
 {
   "mcpServers": {
     "svweave": {
-      "command": "svweave",
+      "command": "/ABS/PATH/.venv/bin/svweave",
       "args": ["--root", "/ABSOLUTE/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
     }
   }

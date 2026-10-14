@@ -16,20 +16,22 @@ endpoint and no model training.
 3. [What it is not](#what-it-is-not-plan-43-non-goals)
 4. [Repository layout](#repository-layout)
 5. [Quickstart](#quickstart)
-6. [How a change flows](#how-a-change-flows)
-7. [Build identity and states](#build-identity-and-states)
-8. [Configuration](#configuration)
-9. [CLI reference](#cli-reference)
-10. [MCP tool reference](#mcp-tool-reference)
-11. [Controlled edit workflow](#controlled-edit-workflow)
-12. [Toolchain and backends](#toolchain-and-backends)
-13. [Testing and qualification](#testing-and-qualification-verification)
-14. [Security model](#security-model)
-15. [Known limitations](#known-limitations)
-16. [Troubleshooting](#troubleshooting)
-17. [Documentation](#documentation)
-18. [Contributing](#contributing)
-19. [License](#license)
+6. [Using SVWeave with Claude Code and Codex](#using-svweave-with-claude-code-and-codex)
+7. [How a change flows](#how-a-change-flows)
+8. [Build flow](#build-flow)
+9. [Build identity and states](#build-identity-and-states)
+10. [Configuration](#configuration)
+11. [CLI reference](#cli-reference)
+12. [MCP tool reference](#mcp-tool-reference)
+13. [Controlled edit workflow](#controlled-edit-workflow)
+14. [Toolchain and backends](#toolchain-and-backends)
+15. [Testing and qualification](#testing-and-qualification-verification)
+16. [Security model](#security-model)
+17. [Known limitations](#known-limitations)
+18. [Troubleshooting](#troubleshooting)
+19. [Documentation](#documentation)
+20. [Contributing](#contributing)
+21. [License](#license)
 
 ## Architecture at a glance
 
@@ -52,22 +54,22 @@ simulation, formal or EDA result: `eda_compile`, `simulation` and `formal` are `
 import your own evidence, and imported evidence is `EXTERNAL_DECLARED`, never verified by SVWeave.
 Read `docs/limitations.md` before relying on any result.
 
-**Latest recorded qualification run (2026-10-14, source tree sha256 `1ff91022...`, git HEAD `9784de3` plus uncommitted changes,
+**Latest recorded qualification run (2026-10-14, source tree sha256 `21a97d0c...`, git HEAD `b6ba45c` plus uncommitted changes,
 Linux x86_64, this host only):**
 
 | Item | Result |
 |---|---|
 | Gates | G0 `PASS_WITH_OWNER_WAIVER_OPEN`, G1 to G5 `PASS` |
-| P0 tests (passed / failed / blocked / skipped) | 916 / 0 / 0 / 0 |
+| P0 tests (passed / failed / blocked / skipped) | 920 / 0 / 0 / 0 |
 | Critical mutations | 22 of 22 killed, none survived |
-| Coverage of SVWeave's own code | 93.57% statements / 87.67% branches (software QA, not RTL coverage) |
+| Coverage of SVWeave's own code | 93.58% statements / 87.71% branches (software QA, not RTL coverage) |
 | EDA compile, simulation, formal | `NOT_RUN` |
 | Release decision | **BLOCKED**, only on three open owner sign-offs: `g0_waiver`, `adr_012`, `license_review` |
 
 G0 is not a plain PASS because codebase-memory-mcp and Serena probe as `DEGRADED` (inside the
 declared subset) and the owner has not signed the waiver. Copies of the evidence are in
 `evidence/qualification/` (`report.md`, `report.json`, `mutation.json`) and
-`evidence/bench/20261014T042010Z-s1.0.json`. This is a snapshot of one run, not a standing claim;
+`evidence/bench/20261014T085609Z-s1.0.json`. This is a snapshot of one run, not a standing claim;
 re-run `scripts/qualify.py` for the state of your tree.
 
 | Backend (pinned in `toolchain.lock.json`) | Role |
@@ -170,7 +172,7 @@ SVWeave never edits a client's configuration. Add an entry like the following to
 {
   "mcpServers": {
     "svweave": {
-      "command": "svweave",
+      "command": "/ABS/PATH/.venv/bin/svweave",
       "args": ["--root", "/ABSOLUTE/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
     }
   }
@@ -181,6 +183,107 @@ Register only this server; do not also register the raw codebase-memory-mcp or S
 Add `--no-graph` to `args` on small hosts (search then uses the literal-text fallback only).
 Local indexing is not end-to-end offline: snippets returned to a cloud-model client leave the
 machine.
+
+## Using SVWeave with Claude Code and Codex
+
+SVWeave speaks MCP over stdio, so any MCP client can launch it. The two setups below follow the
+clients' documented syntax (`claude mcp add --help` and `codex mcp add --help` accept these forms
+on the versions the author has installed: Claude Code 2.1.299, Codex CLI 0.162.1). **They are not
+exercised by SVWeave's test suite**: the tests drive the gateway through the Python MCP client
+only, so there is no qualification evidence for a specific client. SVWeave never edits a client's
+configuration; you run these commands yourself.
+
+Use absolute paths: the client starts the process from its own working directory.
+
+### Claude Code
+
+```bash
+claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
+```
+
+The default scope is `local` (private to you, this project). `-s project` (`--scope project`)
+writes a `.mcp.json` at the project root that can be shared through Git; `-s user` makes the
+server available in all your projects. The equivalent `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "svweave": {
+      "command": "/ABS/PATH/.venv/bin/svweave",
+      "args": ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+Inside Claude Code, `/mcp` shows the server and its connection status.
+
+### Codex
+
+Add a table to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.svweave]
+command = "/ABS/PATH/.venv/bin/svweave"
+args = ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
+```
+
+Recent Codex CLI versions also have `codex mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root
+/ABS/PATH/TO/PROJECT serve --transport stdio`, which writes the same table. `codex mcp list` shows
+the registered servers.
+
+### Using both at once
+
+Each client starts **its own gateway process** on the same workspace. What is and is not shared:
+
+| Aspect | Behaviour | Evidence |
+|---|---|---|
+| Reads | Two gateways answer concurrent read queries against the same published build identically | `tests/integration/test_api_parallel_reads.py` (API-PAR-03; run with `--no-graph`, so it does not cover the graph backend) |
+| Builds | One build at a time per workspace, enforced by a non-blocking `build.lock` across processes. Inside one gateway, a second `svw_build` for the **same** profile joins the running job (`already_running: true`). Anything else is refused with `RESOURCE_LIMIT`, not joined. Which detail you get depends on the cause: a build holding `build.lock` (the other gateway's worker, `svweave build` in a shell) gives `details.reason: build_in_progress`; a different profile in the same gateway, or a queued or running job of another gateway recorded in the database, gives `details.active_job_id` (and `active_profile` for the same gateway) without a reason. Retry later. Narrow race: if a CLI build takes the lock between `svw_build`'s lock probe and the job start, the job ends `FAILED` with `RESOURCE_LIMIT` | `src/svweave/application/jobs.py`, `src/svweave/storage/lock.py` (`build_lock`); `tests/unit/test_m3b_fixes.py::test_B4_*` (the race is read from code, not tested) |
+| Edit commits | Serialised by the exclusive workspace lock (`.svweave/lock`); a commit backs off (non-blocking) if another process holds the lock, including while any build runs, because builds hold it shared | `src/svweave/storage/lock.py`, `src/svweave/application/edit.py` (read, not tested across two gateways) |
+| Memory | Each gateway can start its own Serena and graph backends (they start lazily), so memory can be multiplied | `src/svweave/orchestration/registry.py`; host limits in `AGENTS.md` |
+
+On a small host add `--no-graph` to the `args` of at least one client (search then uses the
+literal-text fallback). Register **only** this server in each client; do not also register the raw
+codebase-memory-mcp or Serena servers (plan 6.1), which would bypass snapshot binding and the
+envelope. Local indexing is not end-to-end offline: snippets returned to a cloud-model client
+leave the machine.
+
+### What an agent can and cannot do
+
+| Through the gateway | Agent |
+|---|---|
+| `svw_status`, `svw_search`, `svw_symbol`, `svw_references`, `svw_hierarchy`, `svw_connections`, `svw_assertions`, `svw_evidence` | can read |
+| `svw_build`, `svw_job` | can start and poll a build (runtime state under `.svweave/`) |
+| `svw_edit` `prepare` / `validate` / `abort` | can propose and validate a candidate, **only if** editing is enabled in `svweave.yaml` **and** in the trusted policy (off by default) |
+| Approval | **cannot**: there is no approve tool and no approval field. A human runs `svweave edit approve` on a real terminal |
+| `svw_edit` `commit` | refused without a valid approval record for that exact patch, snapshot and policy |
+
+**Client boundary.** Claude Code and Codex have their own shell and file tools. Those tools can
+modify the source tree outside SVWeave, and an agent running as your UID can read `approval.key`
+and forge an approval. SVWeave's guarantees (compare-and-set, approval binding, journal) cover
+operations **through the gateway only**; `svweave doctor` always reports `client_boundary: not
+qualified`. For a binding approval, run the agent under a separate UID or with OS restrictions that
+deny it the source tree and the trusted directory; see `docs/security.md` section 4.
+
+### Recommended agent workflow
+
+1. `svw_status` to see backend health and, per profile, the current build and its freshness.
+2. `svw_build {profile}` returns a `job_id` immediately. Poll `svw_job {job_id}` until
+   `lifecycle` is `SUCCEEDED` (or `FAILED`, `TIMED_OUT`, `CANCELLED`), then read `data.result`:
+   `completeness` (`COMPLETE`, `PARTIAL`, `BLOCKED`), `diagnostic_outcome`, `freshness`,
+   `published`. A succeeded job on a design with errors is still `PARTIAL`; do not treat it as a
+   clean build. A `PARTIAL` build has a `build_id` you can query; a `BLOCKED` job that failed before
+   a build was stored (missing input, unsupported option) has none (see [Build flow](#build-flow)).
+3. Query with the `build_id` from the result (`svw_symbol`, `svw_references`, `svw_hierarchy`, ...).
+   Honour `analysis_coverage` and `freshness`; absence from a PARTIAL, STALE or truncated result is
+   not proof of absence.
+4. Optional: `svw_edit` `prepare`, then `validate`, which returns the diff and a `patch_hash`.
+5. A human reviews and runs `svweave edit approve --transaction T --patch-hash H` on a real
+   terminal. Then `svweave edit commit --transaction T --patch-hash H` applies it (the same commit
+   is available as `svw_edit` `commit`, which still needs the approval record). The flags are
+   those of `svweave edit approve --help` and `svweave edit commit --help`; the full flow is in
+   [Controlled edit workflow](#controlled-edit-workflow).
 
 ## How a change flows
 
@@ -209,6 +312,155 @@ journal was written but before `COMMITTING` was recorded; `COMMITTING` can only 
 each transition (approval HMAC and expiry, `config_id` recheck, workspace compare-and-set, per-file
 before-hash, journal fsync). The command walkthrough is in [Controlled edit
 workflow](#controlled-edit-workflow).*
+
+## Build flow
+
+`svweave build --profile P` and the MCP tool `svw_build` run the same use case
+(`src/svweave/application/build.py`, `run_build`). The CLI runs it in the foreground; the gateway
+runs it in one background thread and returns a `job_id`.
+
+<p align="center"><img src="docs/images/build-flow.svg" alt="Ten stages of svweave build: load and validate configuration, resolve the manifest to a config_id, capture an immutable snapshot to a snapshot_id, compute identities and check for reuse, run the pyslang worker inside bwrap, extract semantic facts, check for dependency leaks, ingest into staging and judge completeness, publish the pointer last, and report the envelope. Below, three outcome boxes: COMPLETE with NO_ERRORS is stored and moves the pointer; PARTIAL, or BLOCKED from a dependency leak, is stored by build_id without moving the pointer and exits 3, while missing input or an unsupported option is BLOCKED with nothing stored; a worker timeout, crash or memory kill stores no rows, exits 4 by error code and keeps the old build." width="100%"></p>
+
+*Stages 5 and 6 (blue) run in the sandboxed pyslang worker; everything else is the gateway use
+case. The published pointer is written last, in the same transaction as the build rows.*
+
+### Step by step
+
+The whole build runs under an exclusive, non-blocking `build.lock` in `.svweave/`. A second build
+in the same workspace fails at once with `RESOURCE_LIMIT` (`details.reason: build_in_progress`),
+exit 4. The numbers below match the diagram.
+
+1. **Load and validate** `svweave.yaml`, the optional local override file (host root mappings, not
+   in Git) and the trusted `policy.json` that lives outside the repository. Bad input is
+   `INVALID_CONFIG`, exit 2, before anything else happens.
+2. **Resolve the manifest** (`src/svweave/manifest/resolver.py`): expand filelists, include
+   directories, defines, top modules and top parameters into one normalised manifest and an
+   argument ledger recording where every slang argument came from. Its hash is `config_id`.
+   Options the adapter cannot honour are refused (`UNSUPPORTED_OPTION`), never ignored.
+3. **Capture an immutable snapshot** (`src/svweave/snapshot/capture.py`) under a shared workspace
+   lock: enumerate every input, hash its bytes (sha256), copy it to
+   `.svweave/snapshots/<snapshot_id>/files`, and record the include/library search space (so that
+   adding a file that changes which header would be selected also changes the id). The workspace is
+   re-checked during capture; if it keeps changing the build stops with `WORKSPACE_UNSTABLE`
+   (exit 5). With `expected_snapshot_id` (MCP) a mismatch stops with `STALE_SNAPSHOT`.
+4. **Compute identities and check for reuse.** `toolchain_id` comes from the pinned lock;
+   `build_id = SHA-256(snapshot_id : config_id : toolchain_id : schema version)`. If a COMPLETE
+   build with this `build_id` exists and `--no-reuse` was not given, the stored result is returned
+   (`reused: true`) and the pointer is moved to it only if the build is still CURRENT. With
+   `--no-reuse` and an existing COMPLETE build, the stored build is immutable: the worker runs
+   again and its rows, completeness and diagnostic outcome are compared with the stored ones. A
+   match returns the stored build with `verified_rerun: true` and publishes nothing new; a
+   mismatch is `INTERNAL` (exit 4) and the stored build is not replaced.
+5. **Run the pyslang worker** (`src/svweave/adapters/slang/runner.py`) inside bubblewrap: a
+   read-only view of the snapshot, a private `/tmp`, no network, `RLIMIT_AS` from
+   `analysis.max_worker_memory_mib`, a wall-clock timeout (`analysis.max_build_seconds`) and its
+   own process group so a timeout or cancel kills the whole tree. Without bwrap the build fails
+   closed (`BACKEND_UNAVAILABLE`) unless you opt into the degraded mode, which is reported.
+6. **Extract** declarations, references, instances, port bindings, SVA inventory and diagnostics.
+   The worker prints one JSON document that the gateway validates against a schema.
+7. **Dependency-leak check.** If slang read anything outside the snapshot and the adapter's own
+   files, the build is `BLOCKED`: the verdict is stored, every semantic row is withheld and
+   nothing is published.
+8. **Ingest** into staging and decide the outcome (`src/svweave/adapters/slang/ingest.py`). The
+   build is `PARTIAL` when anything weakens the claim: diagnostics with errors, unresolved or
+   unsupported references, declared stub or blackbox boundaries, unsupported nodes in project
+   files, port associations slang did not expose. Otherwise it is `COMPLETE`. The diagnostic
+   outcome (`NO_ERRORS`, `HAS_ERRORS`, ...) is reported separately.
+9. **Publish.** Build rows and counts are written in one transaction and validated (staged rows
+    must match the counts ingested); the "current build" pointer for the profile moves last, and
+    **only for a COMPLETE build**. A `PARTIAL` build, and a `BLOCKED` one from a dependency leak, is
+    stored and addressable by `build_id` but never becomes current. A failed worker (timeout,
+    crash, cancel, memory kill, bad output) stores no semantic rows, and a build that fails before
+    analysis (`MISSING_INPUT`, `UNSUPPORTED_OPTION`) stores nothing and has no `build_id`. In every
+    failure case the last usable build stays current.
+10. **Report.** The envelope carries `outcome`, `analysis_coverage` (completeness, scope,
+    limitations), `freshness`, `provenance`, counts and a `run_dir`
+    (`.svweave/runs/<job_id>/`) holding `argument_ledger.json`, `snapshot_inventory.json`,
+    `dependency_report.json`, `diagnostics.json`, `semantic_summary.json`, `result.json` and more.
+
+### Outcomes and exit codes
+
+| Result | Completeness / outcome | Pointer | CLI exit |
+|---|---|---|---|
+| Clean design | `COMPLETE`, `NO_ERRORS`, outcome `OK` | moved (or already current) | 0 |
+| Design with errors, or declared boundaries | `PARTIAL` (job still `SUCCEEDED`), error `PARTIAL_ANALYSIS` | not moved | 3 |
+| Dependency leak | `BLOCKED`; verdict stored under its `build_id`, semantic rows withheld | not moved | 3 |
+| Missing input or unsupported option (`MISSING_INPUT`, `UNSUPPORTED_OPTION`) | outcome `BLOCKED`; nothing stored, no `build_id` | not moved | 3 |
+| Worker timeout, crash, bad output, no sandbox | job `TIMED_OUT` or `FAILED`; build result has outcome `ERROR` with completeness `BLOCKED`; no rows stored | not moved | 4 (by error code) |
+| Worker killed for memory | `RESOURCE_LIMIT`; retrying with the same limit will not help | not moved | 4 |
+| Another build running | `RESOURCE_LIMIT` (details as in [Using both at once](#using-both-at-once)) | not moved | 4 |
+| Cancelled (MCP only) | job `CANCELLED`; the job envelope's top-level `outcome` is `BLOCKED`, `data.result.outcome` is `ERROR`. The CLI has no cancel path: Ctrl-C aborts the process | not moved | n/a |
+| Workspace changed during capture or `expected_snapshot_id` mismatch | `WORKSPACE_UNSTABLE` / `STALE_SNAPSHOT` | not moved | 5 |
+| Bad configuration | `INVALID_CONFIG` | not moved | 2 |
+
+Exit 0 means the command succeeded, not that the design is "PASS". A PARTIAL result is usable but
+its absences are not proof: read `analysis_coverage.limitations` and `data.reasons`.
+
+### MCP variant
+
+`svw_build {profile}` validates the profile synchronously, registers a `QUEUED` job and returns its
+`job_id` at once (`already_running: true` if the same profile is already building in this gateway).
+Poll `svw_job {job_id}`; `lifecycle` moves `QUEUED`, `RUNNING`, then `SUCCEEDED`, `FAILED`,
+`TIMED_OUT` or `CANCELLED`, and the finished job carries the result summary in `data.result`
+(`outcome`, `build_id`, `completeness`, `diagnostic_outcome`, `freshness`, `published`, `reused`,
+`counts`, `error`). A `SUCCEEDED` job can still be `PARTIAL`. `svw_job` with `action: cancel` kills
+the worker tree. There is no queue and no retry: a build requested while another is active
+(different profile, or started by another process) is refused with `RESOURCE_LIMIT`
+(`details.reason: build_in_progress` only when `build.lock` is held; see [Using both at
+once](#using-both-at-once)).
+
+### Worked example: the shipped demo
+
+Run in a throw-away copy of the repository's `svweave.yaml`, `fixtures/` and `toolchain.lock.json`
+(not in the repository itself), with `svweave init` and `svweave manifest resolve --profile
+rtl_demo` run first. The JSON is abbreviated (lists cut, some fields dropped); the values are real
+output of that run, and ids, timings and RSS differ per host and checkout.
+
+```bash
+svweave build --profile rtl_demo                 # exit 0
+```
+
+```json
+{
+  "outcome": "OK",
+  "workspace_id": "svweave-demo",
+  "snapshot_id": "7688bc870db468eab4dd2acbbb54579ddd49c5c09dcd4e81f331f75c5cdbedfa",
+  "build_id": "e7bb45de61cf31a20626abb0c9c50cb04d77133bc0cd464f6d87a97bee0ebb13",
+  "profile": "rtl_demo",
+  "freshness": "CURRENT",
+  "analysis_coverage": {
+    "completeness": "COMPLETE",
+    "scope": "demo_top",
+    "basis": "qualified_static_subset",
+    "unresolved_count": 0,
+    "limitations": ["Static elaboration of the selected tops only; no runtime, simulation or formal result is represented.", "..."]
+  },
+  "provenance": { "backend": "slang", "evidence_kind": "HDL_STATIC_RESOLVED" },
+  "data": {
+    "reused": false,
+    "published": true,
+    "config_id": "7e5c0b93b6a10549fe398104de0afde38ae5d2111ac67894f9b633c5713d69dc",
+    "completeness": "COMPLETE",
+    "diagnostic_outcome": "NO_ERRORS",
+    "job_lifecycle": "SUCCEEDED",
+    "counts": { "declarations": 56, "references": 36, "instances": 5, "port_bindings": 26,
+                "assertions": 5, "diagnostics": 0, "errors": 0, "warnings": 0, "unresolved": 0 },
+    "resource_usage": { "wall_s": 0.355, "peak_rss_kib": 55120, "memory_limit_mib": 8192,
+                        "timeout_s": 120.0, "isolation": "bwrap" },
+    "run_dir": ".svweave/runs/652ce8a7-9a38-49c8-bbd9-60e8cb5d8365"
+  },
+  "error": null
+}
+```
+
+Running the same command again, unchanged, did no new analysis: the output reported
+`"reused": true` and `"published": true` and exited 0 (stage 4 of the diagram).
+`--no-reuse` does not replace an existing COMPLETE build: it re-runs the worker and compares.
+Measured on the same demo copy, `svweave build --profile rtl_demo --no-reuse` exited 0 with
+`verified_rerun: true`, `reused: false`, `published: true` and the same `build_id` (behaviour in
+`_verified_rerun`, `src/svweave/application/build.py`). The identities in the output are the ones
+in [Build identity and states](#build-identity-and-states). Take `build_id` into the queries of the
+[Quickstart](#quickstart), for example `svweave query hierarchy --build BUILD_ID`.
 
 ## Build identity and states
 
@@ -658,23 +910,23 @@ a reduced scale is labelled as such.
 
 | Target (plan 22.3) | Budget | Measured (scale 1.0, 5 cold runs, 30 hot runs) |
 |---|---|---|
-| cold semantic build | 120 s | median 24.2 s, max 24.6 s |
+| cold semantic build | 120 s | median 24.3 s, max 24.5 s |
 | HDL worker peak memory | 8 GiB | 0.059 GiB |
-| hot symbol query p95 | 1 s | 0.044 s |
+| hot symbol query p95 | 1 s | 0.045 s |
 | hot hierarchy query p95 | 1 s | 0.020 s |
-| hot references query p95 | 1 s | 0.162 s |
-| hot search p95, text fallback / graph | 2 s | 0.070 s / 0.651 s |
+| hot references query p95 | 1 s | 0.164 s |
+| hot search p95, text fallback / graph | 2 s | 0.070 s / 0.689 s |
 
-These come from `evidence/bench/20261014T042010Z-s1.0.json`: 500 files, 100,374 lines, on an Intel
+These come from `evidence/bench/20261014T085609Z-s1.0.json`: 500 files, 100,374 lines, on an Intel
 Xeon Gold 6138 host with 16 logical CPUs and 19.3 GiB RAM, which is **not** the plan's reference
 host (`reference_host_met: false`). They say nothing about other hosts or real projects. No token or
 time saving is claimed: plan 22.4 has not been run.
 
-<p align="center"><img src="docs/images/evidence-status.svg" alt="Left: the six evidence kinds SOURCE_CANDIDATE, LSP_RESOLVED, HDL_STATIC_RESOLVED, RUNTIME_OBSERVED, EXTERNAL_DECLARED and UNRESOLVED, each with what it can and cannot support. Right: a snapshot of the 2026-10-14 qualification run: G0 PASS_WITH_OWNER_WAIVER_OPEN, G1 to G5 PASS, 916 P0 tests passed with 0 failed, blocked or skipped, 22 of 22 mutations killed, coverage 93.57 percent statements and 87.67 percent branches, EDA compile, simulation and formal NOT_RUN, and release decision BLOCKED pending the owner sign-offs g0_waiver, adr_012 and license_review." width="100%"></p>
+<p align="center"><img src="docs/images/evidence-status.svg" alt="Left: the six evidence kinds SOURCE_CANDIDATE, LSP_RESOLVED, HDL_STATIC_RESOLVED, RUNTIME_OBSERVED, EXTERNAL_DECLARED and UNRESOLVED, each with what it can and cannot support. Right: a snapshot of the 2026-10-14 qualification run: G0 PASS_WITH_OWNER_WAIVER_OPEN, G1 to G5 PASS, 920 P0 tests passed with 0 failed, blocked or skipped, 22 of 22 mutations killed, coverage 93.58 percent statements and 87.71 percent branches, EDA compile, simulation and formal NOT_RUN, and release decision BLOCKED pending the owner sign-offs g0_waiver, adr_012 and license_review." width="100%"></p>
 
 *The table of evidence kinds is not a ranking: runtime evidence proves one run, static analysis
 covers code that never ran, and neither replaces the other. The lower panel is a dated snapshot of
-the 2026-10-14 qualification run (source tree sha256 `1ff91022...`), not a standing claim. The
+the 2026-10-14 qualification run (source tree sha256 `21a97d0c...`), not a standing claim. The
 static preview gates G0 to G5 are kept apart from EDA compile, simulation and formal, which stay
 `NOT_RUN` unless the user imports evidence, stored as `EXTERNAL_DECLARED`. The release decision is
 `BLOCKED` only because three owner sign-offs are open.*

@@ -103,14 +103,14 @@ def build_report(session: Session, request_id: str, build_id: str) -> Envelope:
             "real_integration": _integration(session, ctx.trusted_dir),
             "editing": {
                 "isolation": isolation_info(),
-                "enabled": bool(ctx.policy.editing_enabled),
+                "enabled": bool(ctx.effective.editing_enabled),
                 "enabled_note": "editing exists but is disabled unless svweave.yaml editing.enabled "
                 "AND the trusted policy editing_enabled are both true",
                 "approval": "IMPLEMENTED (human approval bound to the patch hash; "
                 "qualification " + NOT_EVALUATED + ")",
                 "recovery": "IMPLEMENTED (write journal + recovery state machine; "
                 "qualification " + NOT_EVALUATED + ")",
-                "client_boundary": client_boundary(),
+                "client_boundary": client_boundary(bool(ctx.effective.editing_enabled)),
             },
             "statement_branch_coverage": NOT_EVALUATED,
             "critical_mutation_results": NOT_EVALUATED,

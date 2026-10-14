@@ -36,13 +36,16 @@ def backend_section(dc: DoctorContext) -> list[CheckResult]:
 
 @register_check
 def client_boundary(dc: DoctorContext) -> list[CheckResult]:
+    # effective editing (policy AND yaml, after the tightening checks) exists only when the
+    # workspace loaded; if loading failed every command is refused, so editing is off
+    effective = bool(dc.workspace is not None and dc.workspace.effective.editing_enabled)
     out = [
         CheckResult(
             name="client_boundary",
             status="WARN",
             code=ErrorCode.POLICY_DENIED.value,
             message=CLIENT_BOUNDARY_MESSAGE,
-            details={"qualified": False, "editing_enabled": False},
+            details={"qualified": False, "editing_enabled": effective},
         )
     ]
     if dc.policy is not None and getattr(dc.policy, "editing_enabled", False):
@@ -51,8 +54,14 @@ def client_boundary(dc: DoctorContext) -> list[CheckResult]:
                 name="editing",
                 status="WARN",
                 code=ErrorCode.POLICY_DENIED.value,
-                message="policy.editing_enabled is set but editing stays disabled: it is not "
-                "implemented before M4 and the client boundary is not qualified",
+                message=(
+                    "editing is enabled (trusted policy and svweave.yaml) but the client "
+                    "boundary is not qualified: an agent with its own shell can bypass the gateway"
+                    if effective
+                    else "the trusted policy allows editing but it is not effective (svweave.yaml "
+                    "editing.enabled is false, or the workspace or policy tightening failed to "
+                    "load); the client boundary is not qualified"
+                ),
             )
         )
     return out

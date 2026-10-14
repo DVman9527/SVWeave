@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Build flow, from profile to published build</title>
+<desc id="d">Ten stages of svweave build: load configuration, resolve manifest, capture snapshot, compute identities and check reuse, run the pyslang worker in a sandbox, extract facts, check dependency leaks, ingest and judge completeness, publish the pointer only if COMPLETE, and report the envelope. Three outcome boxes show that COMPLETE moves the pointer, PARTIAL, or BLOCKED from a dependency leak, is stored but not published, missing input or an unsupported option is BLOCKED with nothing stored, and a failed worker (timeout, crash, memory kill) stores no rows and exits 4 by error code. Cancel exists only over MCP.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="1000" class="bg"/>
+<text x="40" y="32" class="tx b s16">Build flow: svweave build --profile P (and MCP svw_build)</text>
+<rect x="40" y="48" width="16" height="12" rx="3" class="n"/><text x="62" y="59" class="tx s12">gateway / use case</text>
+<rect x="190" y="48" width="16" height="12" rx="3" class="a"/><text x="212" y="59" class="tx s12">sandboxed pyslang worker</text>
+<text x="40" y="94" class="mu b s12">stage</text><text x="860" y="94" class="mu b s12">result / identity</text>
+<rect x="30" y="104" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="136" r="11" class="chip"/><text x="56" y="140.5" class="tx b s12" text-anchor="middle">1</text>
+<text x="80" y="130" class="tx b s14">Load and validate configuration</text>
+<text x="80" y="151" class="mu s12">svweave.yaml, svweave.local.yaml (host paths), trusted policy.json outside the repo</text>
+<text x="860" y="141" class="tx b s12 mono">validated config + policy</text>
+<path d="M56,168 L56,180" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="180" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="212" r="11" class="chip"/><text x="56" y="216.5" class="tx b s12" text-anchor="middle">2</text>
+<text x="80" y="206" class="tx b s14">Resolve the manifest</text>
+<text x="80" y="227" class="mu s12">filelists, include dirs, defines, tops, parameters; argument ledger; unknown options refused</text>
+<text x="860" y="217" class="tx b s12 mono">config_id</text>
+<path d="M56,244 L56,256" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="256" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="288" r="11" class="chip"/><text x="56" y="292.5" class="tx b s12" text-anchor="middle">3</text>
+<text x="80" y="282" class="tx b s14">Capture an immutable snapshot</text>
+<text x="80" y="303" class="mu s12">inventory + sha256 + byte copy of every input and the include/library lookup space</text>
+<text x="860" y="293" class="tx b s12 mono">snapshot_id</text>
+<path d="M56,320 L56,332" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="332" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="364" r="11" class="chip"/><text x="56" y="368.5" class="tx b s12" text-anchor="middle">4</text>
+<text x="80" y="358" class="tx b s14">Compute identities, check for reuse</text>
+<text x="80" y="379" class="mu s12">toolchain_id from the lock; build_id = hash(snapshot, config, toolchain, schema)</text>
+<text x="860" y="369" class="tx b s12 mono">build_id</text>
+<path d="M56,396 L56,408" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="408" width="1140" height="64" rx="8" class="a"/>
+<circle cx="56" cy="440" r="11" class="chip"/><text x="56" y="444.5" class="ta b s12" text-anchor="middle">5</text>
+<text x="80" y="434" class="ta b s14">Run the pyslang worker in bwrap</text>
+<text x="80" y="455" class="mu s12">read-only snapshot, no network, memory limit, timeout, own process group</text>
+<text x="860" y="445" class="ta b s12 mono">job_id, run dir</text>
+<path d="M56,472 L56,484" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="484" width="1140" height="64" rx="8" class="a"/>
+<circle cx="56" cy="516" r="11" class="chip"/><text x="56" y="520.5" class="ta b s12" text-anchor="middle">6</text>
+<text x="80" y="510" class="ta b s14">Extract semantic facts</text>
+<text x="80" y="531" class="mu s12">declarations, references, instances, port bindings, SVA inventory, diagnostics</text>
+<text x="860" y="521" class="ta b s12 mono">JSON on stdout</text>
+<path d="M56,548 L56,560" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="560" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="592" r="11" class="chip"/><text x="56" y="596.5" class="tx b s12" text-anchor="middle">7</text>
+<text x="80" y="586" class="tx b s14">Dependency-leak check</text>
+<text x="80" y="607" class="mu s12">did slang read anything outside the snapshot or adapter files? yes: BLOCKED</text>
+<text x="860" y="597" class="tx b s12 mono">dependency_report</text>
+<path d="M56,624 L56,636" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="636" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="668" r="11" class="chip"/><text x="56" y="672.5" class="tx b s12" text-anchor="middle">8</text>
+<text x="80" y="662" class="tx b s14">Ingest into staging, then judge</text>
+<text x="80" y="683" class="mu s12">staging rows from the facts; completeness (COMPLETE or PARTIAL) and diagnostic outcome</text>
+<text x="860" y="673" class="tx b s12 mono">COMPLETE | PARTIAL</text>
+<path d="M56,700 L56,712" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="712" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="744" r="11" class="chip"/><text x="56" y="748.5" class="tx b s12" text-anchor="middle">9</text>
+<text x="80" y="738" class="tx b s14">Publish the pointer last</text>
+<text x="80" y="759" class="mu s12">one validated transaction; only a COMPLETE build moves the pointer, others are not current</text>
+<text x="860" y="749" class="tx b s12 mono">published true/false</text>
+<path d="M56,776 L56,788" class="l" marker-end="url(#mg)"/>
+<rect x="30" y="788" width="1140" height="64" rx="8" class="n"/>
+<circle cx="56" cy="820" r="11" class="chip"/><text x="56" y="824.5" class="tx b s12" text-anchor="middle">10</text>
+<text x="80" y="814" class="tx b s14">Report the envelope</text>
+<text x="80" y="835" class="mu s12">outcome, analysis_coverage, freshness, counts, limitations; CLI exit code</text>
+<text x="860" y="825" class="tx b s12 mono">envelope + result.json</text>
+<text x="860" y="388" class="mu s12">reuse: a COMPLETE build with this id skips 5 to 8</text>
+<text x="40" y="882" class="tx b s14">What the outcome means</text>
+<rect x="30" y="894" width="366" height="84" rx="8" class="a"/>
+<text x="44" y="918" class="ta b s14">COMPLETE + NO_ERRORS</text>
+<text x="44" y="942" class="tx s12">stored, pointer moves</text>
+<text x="44" y="962" class="mu s12">outcome OK, exit 0</text>
+<rect x="417" y="894" width="366" height="84" rx="8" class="w"/>
+<text x="431" y="918" class="tw b s14">PARTIAL, or BLOCKED by leak</text>
+<text x="431" y="942" class="tx s12">stored by build_id, pointer NOT moved</text>
+<text x="431" y="962" class="mu s12">exit 3; missing input: BLOCKED, nothing stored</text>
+<rect x="804" y="894" width="366" height="84" rx="8" class="w"/>
+<text x="818" y="918" class="tw b s14">Worker timeout, crash, memory kill</text>
+<text x="818" y="942" class="tx s12">job FAILED or TIMED_OUT, no rows stored</text>
+<text x="818" y="962" class="mu s12">exit 4 (by error code); old build stays</text>
+</svg>
