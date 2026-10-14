@@ -24,6 +24,9 @@ uv pip install --python .venv/bin/python -e '.[dev]'     # this package and its 
 .venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network; compare installed state with the lock
 ```
 
+`bootstrap_locked.py` finds `uv` as `--uv PATH`, else `.venv/bin/uv`, else `uv` on `PATH`, and stops
+before downloading anything if there is none. (`uv venv` does not put `uv` inside the venv.)
+
 `bootstrap_locked.py` downloads each archive or wheel named in `toolchain.lock.json`, verifies its
 SHA-256 **before** use, extracts with path-traversal protection, verifies the extracted binaries
 again, checks out the pinned Serena commit and builds its venv from the locked `uv.lock`
@@ -42,6 +45,9 @@ Pinned components (details and hashes: `toolchain.lock.json`):
 | MCP Python SDK | 2.3.0 |
 | Accellera UVM (`uvm-core`) | 2020.3.1 |
 
+The `svweave` command lives in the venv. Either `source .venv/bin/activate` once per shell or call
+`.venv/bin/svweave`; the examples elsewhere in the documentation write plain `svweave`.
+
 Then run the first checks:
 
 ```bash
@@ -55,24 +61,46 @@ Then run the first checks:
 The installer reuses any artifact already present with the right hash, so a machine without
 internet access can be provisioned from a prepared `.toolchain/` directory:
 
-1. On a connected machine fill the artifact cache without installing anything:
-   `.venv/bin/python scripts/bootstrap_locked.py --fetch-only`. This stores every archive named in
-   the lock plus the hash-pinned gateway wheelhouse (`gateway_wheelhouse` in the lock, 31 wheels
-   including pyslang and mcp) under `.toolchain/downloads/` (change with `--artifact-dir`), and the
-   pinned Serena checkout plus its uv cache under `.toolchain/`.
-2. Copy the repository and that cache to the offline machine (same architecture).
-3. There run
-   `.venv/bin/python scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`
-   (add `--artifact-dir`, `--serena-source <local checkout>` and `--uv-cache-dir` if the cache lives
-   elsewhere). `--offline` never touches the network: every artifact must already be cached and is
-   verified against the lock sha256 before use, and the gateway venv installs only from the
-   wheelhouse. Finish with `--verify-only`.
+1. On a connected machine fill the cache without installing anything:
+   `python3.12 scripts/bootstrap_locked.py --fetch-only` (needs `uv` and `git`; no venv is needed).
+   This stores, inside the repository directory,
+   * every archive named in the lock plus the hash-pinned gateway wheelhouse (`gateway_wheelhouse`
+     in the lock, 31 wheels including pyslang and mcp) under `.toolchain/downloads/`
+     (change with `--artifact-dir`),
+   * the pinned Serena checkout under `.toolchain/serena-src`, and
+   * the uv cache holding Serena's locked dependencies under `.toolchain/state/uv-cache`
+     (change with `--uv-cache-dir`).
+
+   About 180 MB in total. Nothing is installed.
+2. Copy the whole repository directory, `.toolchain/` included, to the offline machine (same
+   architecture; `.venv` is not copied).
+3. There run `python3.12 scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`.
+   `--offline` never touches the network: every artifact must already be cached and is verified
+   against the lock sha256 before use, Serena is taken from the existing checkout, and the gateway
+   venv installs only from the wheelhouse. It then links the svweave source tree into that venv
+   (a `.pth` file and a `bin/svweave` launcher, like an editable install) because the wheelhouse has
+   no build backend: `uv pip install -e .` cannot run offline. Finish with `--verify-only`.
+
+   If the cache lives elsewhere, add `--artifact-dir`, `--uv-cache-dir` and, for a Serena checkout
+   that is not at `.toolchain/serena-src`, `--serena-source <local git checkout>`.
+
+   Notes for sandboxed or restricted hosts:
+   * uv writes its cache and a lock file under `UV_CACHE_DIR` (default `~/.cache/uv`); point it at a
+     writable directory if the default is read-only (`Could not acquire lock`).
+   * `--serena-source` is cloned with `git clone --no-local file://...`, so the path must be visible
+     to the process; the error for a bad path names it.
 
 Status of this procedure: DEP-01 is exercised by `tests/integration/test_dep01_cleanroom.py`, which
 bootstraps into an empty directory with `--offline` under `bwrap --unshare-net` (no network
 namespace) and then probes all three backends from the fresh install. Evidence:
 `evidence/dep01/cleanroom.json`. That is a network-isolated clean-room run on the build host, not a
 run on a separate physical air-gapped machine.
+
+What DEP-01 does not cover: its clean room holds `scripts/`, `fixtures/` and the lock only, so it does
+not exercise the `--fetch-only` Serena cache or the offline linking of the svweave package itself.
+Those were run by hand end to end (fetch-only, then `--offline` under `bwrap --unshare-net` with no extra
+flags, then `svweave doctor --probe` and `svweave build`); the linking is unit-tested in
+`tests/unit/test_bootstrap_locked.py`.
 
 Never let the gateway venv or the Serena venv resolve dependencies from the network at run time;
 `uv sync --frozen` and the lock hashes exist to prevent that.
