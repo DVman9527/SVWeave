@@ -117,7 +117,16 @@ class NormalizedManifest(_M):
     config_id: str = ""
 
     def semantics(self) -> dict[str, Any]:
-        """Order-preserving semantic projection (no origins, no ledger, no ignored options)."""
+        """Order-preserving semantic projection (no origins, no ledger). Built-in output-only ignored
+        options are left out; options the profile DECLARED ignorable are an explicit analysis decision
+        and are included, but only when present so that existing identities do not change."""
+        sem = self._semantics()
+        declared = sorted({i.option for i in self.ignored_options if i.classification == "profile_declared"})
+        if declared:
+            sem["declared_ignored_options"] = declared
+        return sem
+
+    def _semantics(self) -> dict[str, Any]:
         return {
             "dialect": self.dialect,
             "language_mode": self.language_mode,

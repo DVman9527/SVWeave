@@ -707,7 +707,9 @@ def test_an_undeclared_option_still_blocks_when_others_are_declared(ws: Ws) -> N
 
 
 @pytest.mark.parametrize(
-    "opt", ["-f", "-F", "-v", "-y", "-l", "-q", "+incdir+x", "+define+A", "+libext+.v", "-DA", "-Idir"]
+    "opt",
+    ["-f", "-F", "-v", "-y", "-l", "-q", "+incdir+x", "+define+A", "+libext+.v", "-DA", "-Idir"]
+    + ["-G", "-Gtop.W=1", "--top", "--std", "--timescale", "--single-unit"],
 )
 def test_options_that_change_the_analysis_cannot_be_declared_ignorable(opt: str) -> None:
     from pydantic import ValidationError
@@ -716,6 +718,33 @@ def test_options_that_change_the_analysis_cannot_be_declared_ignorable(opt: str)
 
     with pytest.raises(ValidationError):
         IgnoredOptionDecl(option=opt, reason="no")
+
+
+def test_a_declared_ignore_takes_no_arguments_so_it_cannot_swallow_a_source() -> None:
+    """An argument-taking declaration would eat the next token, which may be a source file."""
+    from pydantic import ValidationError
+
+    from svweave.config.models import IgnoredOptionDecl
+
+    with pytest.raises(ValidationError):
+        IgnoredOptionDecl.model_validate({"option": "+runopt", "args": 1, "reason": "x"})
+
+
+def test_a_token_after_a_declared_ignore_is_still_read_as_a_source(ws: Ws, tmp_path: Path) -> None:
+    n = _neg(ws, "decl_next_token")
+    (n.root / "lists" / "swallow.f").write_text("+notimingcheck\nrtl/a.sv\n")
+    nm = resolve(n, source_inputs=fl("lists/swallow.f"), ignored_options=DECL)
+    assert [s.path for s in nm.units[0].sources] == ["rtl/a.sv"]
+
+
+def test_declared_ignores_are_part_of_the_config_identity_but_only_when_present(ws: Ws) -> None:
+    n = _neg(ws, "decl_identity")
+    with_decl = resolve(n, source_inputs=fl("lists/unsupported_plus.f"), ignored_options=DECL)
+    assert with_decl.semantics()["declared_ignored_options"] == ["+notimingcheck"]
+    plain = resolve(ws, source_inputs=fl("lists/main.f"))
+    assert "declared_ignored_options" not in plain.semantics()  # existing identities unchanged
+    # built-in output-only options (-l) never enter the identity
+    assert plain.ignored_options and plain.ignored_options[0].classification == "output_only"
 
 
 def test_ignored_option_declaration_needs_a_reason_and_no_duplicates() -> None:

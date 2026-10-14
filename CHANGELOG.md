@@ -40,10 +40,14 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 * **Profile `ignored_options`**: declare simulator run-time options (for example `+notimingcheck`) that
   do not affect elaboration. Previously any unknown filelist option blocked the build and the only
-  workaround was to edit a copy of the filelist. Recorded in the `ignored_options` ledger as
-  `profile_declared`; options that change what is analysed cannot be declared.
+  workaround was to edit a copy of the filelist. Zero-argument options only (an argument would swallow
+  the next token); recorded in the `ignored_options` ledger as `profile_declared` and included in
+  `config_id` when present; options that change what is analysed (`-f -F -v -y`, `+incdir+ +define+
+  +libext+`, `-D -I -G`, any `--long` slang option) cannot be declared.
 * The build verdict now links `ParameterDoesNotExist` errors on encrypted (`pragma protect`) modules to
-  the envelope instead of presenting them as plain design errors.
+  the envelope instead of presenting them as plain design errors. The envelope must lie inside the
+  module's own `full` source span and the module name must be unique; otherwise nothing is attributed.
+  The line only adds text to `reasons`, it never changes completeness or the diagnostics.
 * `svweave.local.example.yaml` and a "Using a project that lives elsewhere" section in
   `docs/manifest.md` (external roots, trusted-policy `allowed_roots`, `@id` cwd, filelist strictness,
   vendor UVM).

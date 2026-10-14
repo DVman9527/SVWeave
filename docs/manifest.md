@@ -164,10 +164,12 @@ Things that differ from a simulator command line:
       - {option: "+notimingcheck", reason: "simulation-only; no effect on static elaboration"}
     ```
 
-    This is an explicit, reviewable decision; the option still appears in the manifest's
-    `ignored_options` ledger (classification `profile_declared`). `option` is the exact token; `args`
-    (default 0) is the number of following tokens it consumes. Options that change what is analysed
-    (`-f -F -v -y -l -q`, `+incdir+`, `+define+`, `+libext+`, `-D`, `-I`) cannot be declared.
+    This is an explicit, reviewable decision: `option` is the exact token and takes **no argument** (a
+    declaration that consumed the next token could swallow a source file); the option still appears in
+    the manifest's `ignored_options` ledger (classification `profile_declared`) and the declared names
+    are part of the build's `config_id`. Options that change what is analysed cannot be declared:
+    `-f -F -v -y -l -q`, `+incdir+`, `+define+`, `+libext+`, `-D`, `-I`, `-G`, and any slang `--long`
+    option.
 * **Several tops.** A testbench may be two top-level modules that refer to each other by hierarchical
   name (`tb` using `system.x.y`, with `system` a module of its own): list both in `top_modules`, or
   `CouldNotResolveHierarchicalPath` errors appear for every such reference.

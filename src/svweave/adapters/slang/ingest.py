@@ -136,11 +136,12 @@ _PARAM_MODULE = re.compile(r"parameter '[^']+' does not exist in '([^']+)'\s*$")
 
 
 def _protected_modules(result: dict[str, Any]) -> set[str]:
-    """Modules with a ``pragma protect`` envelope inside their own text.
+    """Names of modules with a ``pragma protect`` envelope inside their own source extent.
 
-    The extractor gives a module's name position, not its extent, so a module's text is taken to run
-    from its name to the next module declared in the same file. A file with one protected and one
-    ordinary module therefore flags only the protected one."""
+    The extent is the declaration's ``full`` span from the extractor. A module is reported only if
+    its name is declared exactly once in the whole result (a same-named module in another file would
+    make the diagnostic's target ambiguous), and a declaration without a ``full`` span is never
+    matched."""
     envelopes: dict[str, list[int]] = {}
     for d in result["diagnostics"]:
         loc = d.get("loc")
@@ -148,17 +149,16 @@ def _protected_modules(result: dict[str, Any]) -> set[str]:
             envelopes.setdefault(loc["file"], []).append(loc["start"])
     if not envelopes:
         return set()
-    by_file: dict[str, list[tuple[int, str]]] = {}
-    for d in result["declarations"]:
-        if d["kind"] == "module" and d["loc"]["file"] in envelopes:
-            by_file.setdefault(d["loc"]["file"], []).append((d["loc"]["start"], d["name"]))
+    modules = [d for d in result["declarations"] if d["kind"] == "module"]
+    count: dict[str, int] = {}
+    for d in modules:
+        count[d["name"]] = count.get(d["name"], 0) + 1
     out: set[str] = set()
-    for f, mods in by_file.items():
-        mods.sort()
-        for k, (start, name) in enumerate(mods):
-            end = mods[k + 1][0] if k + 1 < len(mods) else float("inf")
-            if any(start <= off < end for off in envelopes[f]):
-                out.add(name)
+    for d in modules:
+        full = d.get("full")
+        offs = envelopes.get(d["loc"]["file"], [])
+        if count[d["name"]] == 1 and full and any(full["start"] <= o < full["end"] for o in offs):
+            out.add(d["name"])
     return out
 
 

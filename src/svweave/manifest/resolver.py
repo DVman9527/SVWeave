@@ -71,7 +71,7 @@ class _Resolver:
         self.profile = profile
         self.environ = environ
         self.allow = set(profile.environment_allowlist)
-        self.declared_ignores = {d.option: d.args for d in profile.ignored_options}
+        self.declared_ignores = {d.option: 0 for d in profile.ignored_options}  # zero-arg only
         self.ledger: list[LedgerEntry] = []
         self.issues: list[dict[str, Any]] = []
         self.ignored: list[IgnoredOption] = []

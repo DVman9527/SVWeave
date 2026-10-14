@@ -493,17 +493,21 @@ def test_missing_timescale_verdict_names_the_profile_knob() -> None:
     assert not any("MissingTimeScale" in x for x in run(dto()).reasons)
 
 
+def _param_diag(mod: str, at: int) -> dict[str, Any]:
+    return diag("ParameterDoesNotExist", f"parameter 'W' does not exist in '{mod}'", at=at)
+
+
 def test_parameter_errors_on_a_protected_module_are_attributed_to_the_envelope() -> None:
     result = dto(
         declarations=[
-            decl(0, "prot", loc=loc(start=7, end=11)),
-            decl(1, "plain", loc=loc(start=246, end=251)),
+            decl(0, "prot", loc=loc(start=7, end=11), full={"start": 0, "end": 238}),
+            decl(1, "plain", loc=loc(start=246, end=251), full={"start": 239, "end": 274}),
         ],
         diagnostics=[
             diag("ProtectedEnvelope", error=False, at=162),
-            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'prot'", at=300),
-            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'prot'", at=310),
-            diag("ParameterDoesNotExist", "parameter 'W' does not exist in 'plain'", at=320),
+            _param_diag("prot", 300),
+            _param_diag("prot", 310),
+            _param_diag("plain", 320),
         ],
     )
     r = run(result)
@@ -512,3 +516,30 @@ def test_parameter_errors_on_a_protected_module_are_attributed_to_the_envelope()
     # without an envelope in the module's text there is no attribution
     result["diagnostics"] = [d for d in result["diagnostics"] if d["code"] != "ProtectedEnvelope"]
     assert not any("ParameterDoesNotExist" in x for x in run(result).reasons)
+
+
+def test_an_envelope_outside_a_modules_extent_is_not_attributed_to_it() -> None:
+    """`plain` is followed by an encrypted interface: the envelope lies after plain's extent, so a real
+    parameter error on `plain` must not be called an artifact of the encryption."""
+    result = dto(
+        declarations=[decl(0, "plain", loc=loc(start=7, end=12), full={"start": 0, "end": 40})],
+        diagnostics=[diag("ProtectedEnvelope", error=False, at=100), _param_diag("plain", 200)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(result).reasons)
+
+
+def test_ambiguous_or_extent_less_modules_get_no_attribution() -> None:
+    envelope = diag("ProtectedEnvelope", error=False, at=10)
+    twice = dto(
+        declarations=[
+            decl(0, "m", loc=loc(start=1, end=2), full={"start": 0, "end": 50}),
+            decl(1, "m", loc=loc("b.sv", 1, 2), full={"start": 0, "end": 50}),
+        ],
+        diagnostics=[envelope, _param_diag("m", 60)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(twice, "a.sv", "b.sv").reasons)
+    no_full = dto(
+        declarations=[decl(0, "m", loc=loc(start=1, end=2), full=None)],
+        diagnostics=[envelope, _param_diag("m", 60)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(no_full).reasons)

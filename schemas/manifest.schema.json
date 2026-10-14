@@ -253,15 +253,8 @@
     },
     "IgnoredOptionDecl": {
       "additionalProperties": false,
-      "description": "A simulator option the profile explicitly declares irrelevant to static analysis.\n\nFilelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that\nSVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an\nexplicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger\n(classification ``profile_declared``). Options the resolver interprets (include dirs, defines,\nlibraries, nested filelists) cannot be declared here.",
+      "description": "A simulator option the profile explicitly declares irrelevant to static analysis.\n\nFilelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that\nSVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an\nexplicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger\n(classification ``profile_declared``) and is part of the build's config identity. Only options\nthat take NO argument can be declared (an argument-taking option would swallow the next token,\nwhich may be a source file). Options the resolver interprets (include dirs, defines, libraries,\nnested filelists) and slang's own options (``--...``, ``-G``) cannot be declared.",
       "properties": {
-        "args": {
-          "default": 0,
-          "maximum": 4,
-          "minimum": 0,
-          "title": "Args",
-          "type": "integer"
-        },
         "option": {
           "pattern": "^[-+][A-Za-z0-9_.:=+-]+$",
           "title": "Option",

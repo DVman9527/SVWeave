@@ -158,7 +158,9 @@ class LanguageOptions(_Strict):
 
 #: Options the filelist resolver interprets itself (or already ignores): a profile cannot redeclare them.
 _RESERVED_OPTIONS = frozenset({"-f", "-F", "-v", "-y", "-l", "-logfile", "-nologo", "-quiet", "-q"})
-_RESERVED_OPTION_PREFIXES = ("+incdir+", "+define+", "+libext+", "-D", "-I")
+#: ``-G`` is slang's parameter override and every ``--long`` option is a slang option: both change
+#: what is elaborated, so they are never declarable.
+_RESERVED_OPTION_PREFIXES = ("+incdir+", "+define+", "+libext+", "-D", "-I", "-G", "--")
 
 
 class IgnoredOptionDecl(_Strict):
@@ -167,12 +169,13 @@ class IgnoredOptionDecl(_Strict):
     Filelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that
     SVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an
     explicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger
-    (classification ``profile_declared``). Options the resolver interprets (include dirs, defines,
-    libraries, nested filelists) cannot be declared here.
+    (classification ``profile_declared``) and is part of the build's config identity. Only options
+    that take NO argument can be declared (an argument-taking option would swallow the next token,
+    which may be a source file). Options the resolver interprets (include dirs, defines, libraries,
+    nested filelists) and slang's own options (``--...``, ``-G``) cannot be declared.
     """
 
     option: Annotated[str, StringConstraints(pattern=r"^[-+][A-Za-z0-9_.:=+-]+$")]
-    args: Annotated[int, Field(ge=0, le=4)] = 0
     reason: NonEmptyStr
 
     @model_validator(mode="after")
