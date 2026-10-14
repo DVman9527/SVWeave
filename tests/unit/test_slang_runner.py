@@ -325,3 +325,37 @@ def test_missing_timescale_is_diagnosed_per_file_without_a_default(tmp_path: Pat
 
     assert "MissingTimeScale" in codes([])
     assert "MissingTimeScale" not in codes(["--timescale", "1ns/1ps"])
+
+
+def test_an_envelope_pulled_in_by_include_is_not_attributed(tmp_path: Path) -> None:
+    """Known limitation, pinned: when the envelope is in an included file, its diagnostic is located
+    in that file, not in the module's file, so nothing is attributed (a missed label, never a wrong
+    one). Real errors must never be blamed on encryption on a guess."""
+    import json
+
+    from svweave.adapters.slang.ingest import _protected_parameter_errors
+
+    snap = tmp_path / "snap" / "files"
+    snap.mkdir(parents=True)
+    (snap / "body.svh").write_text(
+        "`pragma protect begin_protected\n"
+        '`pragma protect data_method = "aes256-cbc"\n'
+        '`pragma protect encrypt_agent = "X"\n'
+        "`pragma protect key_block\nAAAA\n"
+        "`pragma protect data_block\nBBBB\n"
+        "`pragma protect end_protected\n"
+    )
+    (snap / "t.sv").write_text(
+        'module prot (input clk);\n`include "body.svh"\nendmodule\n'
+        "module top; prot #(.W(1)) u (.clk(1'b0)); endmodule\n"
+    )
+    out = run_worker(
+        WorkerRequest(snapshot_root=str(snap), args=["--top", "top", "--timescale", "1ns/1ps", "t.sv"]),
+        timeout_s=60,
+        memory_mib=4096,
+    )
+    assert out.kind == "ok", out.stderr_tail
+    doc = json.loads(out.stdout)
+    codes = [d["code"] for d in doc["diagnostics"]]
+    assert "ProtectedEnvelope" in codes and "ParameterDoesNotExist" in codes
+    assert _protected_parameter_errors(doc) == {}

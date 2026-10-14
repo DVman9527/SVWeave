@@ -167,17 +167,20 @@ Things that differ from a simulator command line:
     This is an explicit, reviewable decision: `option` is the exact token and takes **no argument** (a
     declaration that consumed the next token could swallow a source file); the option still appears in
     the manifest's `ignored_options` ledger (classification `profile_declared`) and the declared names
-    are part of the build's `config_id`. Options that change what is analysed cannot be declared:
-    `-f -F -v -y -l -q`, `+incdir+`, `+define+`, `+libext+`, `-D`, `-I`, `-G`, and any slang `--long`
-    option.
+    are part of the build's `config_id`. Options the resolver interprets or already ignores cannot be
+    redeclared (`-f -F -v -y -l -logfile -nologo -quiet -q`, `+incdir+`, `+define+`, `+libext+`, `-D`,
+    `-I`), and neither can slang's own options (`-G` and any `--long` option), which change what is
+    elaborated.
 * **Several tops.** A testbench may be two top-level modules that refer to each other by hierarchical
   name (`tb` using `system.x.y`, with `system` a module of its own): list both in `top_modules`, or
   `CouldNotResolveHierarchicalPath` errors appear for every such reference.
 * **Encrypted IP** (`` `pragma protect `` envelopes): slang skips the envelope, so the module's body,
   parameters and ports are unknown. Each envelope is a `protected_envelope` gap (the build is at most
   `PARTIAL`), and a `ParameterDoesNotExist` error naming a module with an envelope in its text is called
-  out in the build's reasons as a likely artifact of the encryption. The hierarchy below an encrypted
-  module is not available.
+  out in the build's reasons as a likely artifact of the encryption. That attribution needs the envelope
+  to be in the same file as the module's declaration; an envelope pulled in through `` `include `` or a
+  macro is not attributed (a missed label, never a wrong one). The hierarchy below an encrypted module
+  is not available.
 * **UVM**: map the Accellera library that the installer provides (`.toolchain/uvm-core/src`), not the one
   bundled with a simulator. VCS's copy has `` `protected `` regions and `snps_macros.svp`, which slang
   cannot read, so a build fails inside UVM with errors unrelated to your code.
@@ -219,7 +222,9 @@ Things that differ from a simulator command line:
 `config_id = SHA-256(canonical JSON of NormalizedManifest.semantics())`. The projection contains
 unit boundaries, resolved logical paths, include/library order, macro name/value pairs,
 top parameters, generated-input declarations and diagnostic policy. It excludes origins, raw text,
-whitespace/comments, the profile name and ignored options. JSON object keys are sorted; arrays are
+whitespace/comments and the profile name. The built-in output-only ignored options (`-l`, `-q`, ...) are
+not part of it; the names of options the profile declared ignorable (`profile_declared`) are, as
+`declared_ignored_options`, and only when there are any. JSON object keys are sorted; arrays are
 never reordered.
 
 Snapshot and build identity: see `snapshot_id_for` (`snapshot/capture.py`) and

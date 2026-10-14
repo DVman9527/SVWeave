@@ -47,7 +47,8 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 * The build verdict now links `ParameterDoesNotExist` errors on encrypted (`pragma protect`) modules to
   the envelope instead of presenting them as plain design errors. The envelope must lie inside the
   module's own `full` source span and the module name must be unique; otherwise nothing is attributed.
-  The line only adds text to `reasons`, it never changes completeness or the diagnostics.
+  The line only adds text to `reasons`, it never changes completeness or the diagnostics. An envelope
+  that comes from an `include`d file or a macro is not attributed (documented limitation).
 * `svweave.local.example.yaml` and a "Using a project that lives elsewhere" section in
   `docs/manifest.md` (external roots, trusted-policy `allowed_roots`, `@id` cwd, filelist strictness,
   vendor UVM).
