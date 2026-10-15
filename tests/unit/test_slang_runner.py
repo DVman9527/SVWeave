@@ -196,3 +196,166 @@ def test_a2_worker_spec_is_read_only_and_networkless(tmp_path: Path) -> None:
     assert str(tmp_path / "outside") not in argv
     ro = [argv[i + 1] for i, a in enumerate(argv) if a == "--ro-bind"]
     assert r.snapshot_root in ro
+
+
+def test_effective_error_severity_counts_as_error(tmp_path: Path) -> None:
+    """format-too-many-args is a warning-option diagnostic that slang reports at error severity;
+    isError() is False for it, so the document must derive is_error from the effective severity."""
+    import json
+
+    snap = tmp_path / "snap" / "files"
+    snap.mkdir(parents=True)
+    (snap / "t.sv").write_text(
+        'module t; string s; initial s = $sformatf("done", 5); endmodule\n'
+    )
+    out = run_worker(
+        WorkerRequest(snapshot_root=str(snap), args=["--top", "t", "t.sv"]),
+        timeout_s=60,
+        memory_mib=4096,
+    )
+    assert out.kind == "ok", out.stderr_tail
+    diags = {d["code"]: d for d in json.loads(out.stdout)["diagnostics"]}
+    d = diags["FormatTooManyArgs"]
+    assert d["severity"] == "error" and d["is_error"] is True
+
+
+def test_resource_usage_is_the_workers_own_not_the_launchers(tmp_path: Path) -> None:
+    """wait4 on the launcher sees only bwrap (about 60 MB and 0 s for any build); the worker reports
+    its own getrusage on its last stderr line and the runner must use that."""
+    out = run_worker(req(tmp_path), timeout_s=60, memory_mib=4096)
+    assert out.kind == "ok", out.stderr_tail
+    assert out.resource_usage["rusage_source"] == "worker"
+    assert "SVW_RUSAGE" not in out.stderr_tail
+    # pyslang alone is tens of MB resident; the bwrap launcher is a few MB
+    assert out.peak_rss_kib and out.peak_rss_kib > 30_000
+    assert out.user_cpu_s and out.user_cpu_s > 0.05  # importing pyslang costs CPU; bwrap's is ~0
+
+
+def test_a_killed_worker_falls_back_to_the_launcher_figures(tmp_path: Path) -> None:
+    out = run_worker(req(tmp_path), timeout_s=1.0, memory_mib=4096, test_fault="hang")
+    assert out.kind == "timeout" and out.resource_usage["rusage_source"] == "launcher"
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        b'SVW_RUSAGE {"maxrss_kib":-1,"user_s":1,"sys_s":1}',
+        b'SVW_RUSAGE {"maxrss_kib":"9","user_s":1,"sys_s":1}',
+        b'SVW_RUSAGE {"maxrss_kib":true,"user_s":1,"sys_s":1}',
+        b'SVW_RUSAGE {"maxrss_kib":1e30,"user_s":1,"sys_s":1}',
+        b'SVW_RUSAGE {"maxrss_kib":1,"user_s":1}',
+        b"SVW_RUSAGE [1,2,3]",
+        b"SVW_RUSAGE not json",
+    ],
+)
+def test_rusage_line_is_validated_and_bad_lines_are_left_alone(line: bytes) -> None:
+    from svweave.adapters.slang.protocol import parse_rusage_line
+
+    err = b"before\n" + line + b"\nafter"
+    rest, usage = parse_rusage_line(err)
+    assert usage is None and rest == err
+
+
+def test_rusage_line_is_removed_and_only_the_last_marker_counts() -> None:
+    from svweave.adapters.slang.protocol import parse_rusage_line
+
+    err = (
+        b'SVW_RUSAGE {"maxrss_kib":1,"user_s":1,"sys_s":1}\nnoise\n'
+        b'SVW_RUSAGE {"maxrss_kib":5,"user_s":2.5,"sys_s":0.5}'
+    )
+    rest, usage = parse_rusage_line(err)
+    assert usage == {"maxrss_kib": 5.0, "user_s": 2.5, "sys_s": 0.5}
+    assert b"SVW_RUSAGE {" in rest and b"noise" in rest and b"maxrss_kib\":5" not in rest
+
+
+def test_parameter_errors_on_an_encrypted_module_are_linked_to_the_envelope(tmp_path: Path) -> None:
+    """A protected module's parameters live inside the envelope slang skips, so overriding one reports
+    ParameterDoesNotExist. The ingest verdict must say these are likely encryption artifacts, and must
+    NOT claim that for a missing parameter on an ordinary module."""
+    import json
+
+    from svweave.adapters.slang.ingest import _protected_parameter_errors
+
+    snap = tmp_path / "snap" / "files"
+    snap.mkdir(parents=True)
+    (snap / "t.sv").write_text(
+        "module prot (input clk);\n"
+        "`pragma protect begin_protected\n"
+        '`pragma protect data_method = "aes256-cbc"\n'
+        '`pragma protect encrypt_agent = "X"\n'
+        "`pragma protect key_block\nAAAA\n"
+        "`pragma protect data_block\nBBBB\n"
+        "`pragma protect end_protected\nendmodule\n"
+        "module plain (input clk); endmodule\n"
+        "module top;\n"
+        "  prot #(.W(1)) u1 (.clk(1'b0));\n"
+        "  plain #(.W(1)) u2 (.clk(1'b0));\n"
+        "endmodule\n"
+    )
+    out = run_worker(
+        WorkerRequest(snapshot_root=str(snap), args=["--top", "top", "--timescale", "1ns/1ps", "t.sv"]),
+        timeout_s=60,
+        memory_mib=4096,
+    )
+    assert out.kind == "ok", out.stderr_tail
+    doc = json.loads(out.stdout)
+    codes = [d["code"] for d in doc["diagnostics"]]
+    assert "ProtectedEnvelope" in codes and codes.count("ParameterDoesNotExist") == 2
+    assert _protected_parameter_errors(doc) == {"prot": 1}  # `plain` is an ordinary error
+
+
+def test_missing_timescale_is_diagnosed_per_file_without_a_default(tmp_path: Path) -> None:
+    """The ingest verdict tells the user to set language_options.timescale when this fires (and the
+    default timescale makes it go away)."""
+    import json
+
+    snap = tmp_path / "snap" / "files"
+    snap.mkdir(parents=True)
+    (snap / "a.sv").write_text("`timescale 1ns/1ps\nmodule a; endmodule\n")
+    (snap / "b.sv").write_text("module b; endmodule\n")
+
+    def codes(extra: list[str]) -> list[str]:
+        out = run_worker(
+            WorkerRequest(snapshot_root=str(snap), args=[*extra, "--top", "a", "--top", "b", "a.sv", "b.sv"]),
+            timeout_s=60,
+            memory_mib=4096,
+        )
+        assert out.kind == "ok", out.stderr_tail
+        return [d["code"] for d in json.loads(out.stdout)["diagnostics"]]
+
+    assert "MissingTimeScale" in codes([])
+    assert "MissingTimeScale" not in codes(["--timescale", "1ns/1ps"])
+
+
+def test_an_envelope_pulled_in_by_include_is_not_attributed(tmp_path: Path) -> None:
+    """Known limitation, pinned: when the envelope is in an included file, its diagnostic is located
+    in that file, not in the module's file, so nothing is attributed (a missed label, never a wrong
+    one). Real errors must never be blamed on encryption on a guess."""
+    import json
+
+    from svweave.adapters.slang.ingest import _protected_parameter_errors
+
+    snap = tmp_path / "snap" / "files"
+    snap.mkdir(parents=True)
+    (snap / "body.svh").write_text(
+        "`pragma protect begin_protected\n"
+        '`pragma protect data_method = "aes256-cbc"\n'
+        '`pragma protect encrypt_agent = "X"\n'
+        "`pragma protect key_block\nAAAA\n"
+        "`pragma protect data_block\nBBBB\n"
+        "`pragma protect end_protected\n"
+    )
+    (snap / "t.sv").write_text(
+        'module prot (input clk);\n`include "body.svh"\nendmodule\n'
+        "module top; prot #(.W(1)) u (.clk(1'b0)); endmodule\n"
+    )
+    out = run_worker(
+        WorkerRequest(snapshot_root=str(snap), args=["--top", "top", "--timescale", "1ns/1ps", "t.sv"]),
+        timeout_s=60,
+        memory_mib=4096,
+    )
+    assert out.kind == "ok", out.stderr_tail
+    doc = json.loads(out.stdout)
+    codes = [d["code"] for d in doc["diagnostics"]]
+    assert "ProtectedEnvelope" in codes and "ParameterDoesNotExist" in codes
+    assert _protected_parameter_errors(doc) == {}

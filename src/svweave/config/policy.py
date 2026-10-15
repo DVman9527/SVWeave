@@ -11,6 +11,19 @@ from svweave.config.models import LocalConfig, Manifest, Policy
 from svweave.config.paths import glob_match, is_within, lexical_join
 from svweave.domain.errors import ErrorCode, SvwError
 
+#: Added to errors about a root the trusted policy does not allow (which file to edit, and why).
+ROOT_HINT = (
+    "add the absolute host path of this root to allowed_roots in the trusted policy.json "
+    "(created outside the repository by `svweave init`; svweave.yaml and svweave.local.yaml "
+    "cannot widen it, see docs/security.md)"
+)
+#: Added to 'not inside any declared source root' errors.
+SOURCE_ROOT_HINT = (
+    "declare a source_roots entry that contains this path; a profile cwd of '.' must lie inside one. "
+    "For a project kept elsewhere use an external root (no path, mapped in svweave.local.yaml) "
+    "and address it as '@<id>' (for example cwd: \"@proj\")"
+)
+
 
 class EffectivePolicy(BaseModel):
     """What is actually allowed: the intersection of trusted policy and repo config."""
@@ -65,7 +78,7 @@ def check_policy_tightening(
                 raise SvwError(
                     ErrorCode.PATH_NOT_ALLOWED,
                     f"source root {sr.id!r} ({sr.path!r}) is outside policy allowed_roots",
-                    {"root": sr.id, "path": sr.path},
+                    {"root": sr.id, "path": sr.path, "hint": ROOT_HINT},
                 )
         if sr.writable:
             rel = _writable_location(sr.id, sr.path, local, project_root)
@@ -84,7 +97,7 @@ def check_policy_tightening(
                 raise SvwError(
                     ErrorCode.PATH_NOT_ALLOWED,
                     f"root mapping {m.id!r} points outside policy allowed_roots",
-                    {"root": m.id, "path": m.path},
+                    {"root": m.id, "path": m.path, "hint": ROOT_HINT},
                 )
 
     ed = manifest.editing

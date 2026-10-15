@@ -158,6 +158,37 @@ class LanguageOptions(_Strict):
     compat: Literal["vcs"] | None = None
 
 
+#: Options the filelist resolver interprets itself (or already ignores): a profile cannot redeclare them.
+_RESERVED_OPTIONS = frozenset({"-f", "-F", "-v", "-y", "-l", "-logfile", "-nologo", "-quiet", "-q"})
+#: ``-G`` is slang's parameter override and every ``--long`` option is a slang option: both change
+#: what is elaborated, so they are never declarable.
+_RESERVED_OPTION_PREFIXES = ("+incdir+", "+define+", "+libext+", "-D", "-I", "-G", "--")
+
+
+class IgnoredOptionDecl(_Strict):
+    """A simulator option the profile explicitly declares irrelevant to static analysis.
+
+    Filelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that
+    SVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an
+    explicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger
+    (classification ``profile_declared``) and is part of the build's config identity. Only options
+    that take NO argument can be declared (an argument-taking option would swallow the next token,
+    which may be a source file). Options the resolver interprets (include dirs, defines, libraries,
+    nested filelists) and slang's own options (``--...``, ``-G``) cannot be declared.
+    """
+
+    option: Annotated[str, StringConstraints(pattern=r"^[-+][A-Za-z0-9_.:=+-]+$")]
+    reason: NonEmptyStr
+
+    @model_validator(mode="after")
+    def _v(self) -> IgnoredOptionDecl:
+        if self.option in _RESERVED_OPTIONS or self.option.startswith(_RESERVED_OPTION_PREFIXES):
+            raise ValueError(
+                f"option {self.option!r} changes what is analysed and cannot be declared ignorable"
+            )
+        return self
+
+
 class Profile(_Strict):
     cwd: NonEmptyStr = "."
     language_mode: Literal["systemverilog"] = "systemverilog"
@@ -174,10 +205,14 @@ class Profile(_Strict):
     generated_inputs: list[GeneratedInput] = Field(default_factory=list)
     diagnostic_policy: Literal["no_errors"] = "no_errors"
     language_options: LanguageOptions = Field(default_factory=lambda: LanguageOptions())
+    ignored_options: list[IgnoredOptionDecl] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _v(self) -> Profile:
         _check_path(self.cwd)
+        names = [d.option for d in self.ignored_options]
+        if len(names) != len(set(names)):
+            raise ValueError("ignored_options lists the same option twice")
         for t in self.top_modules:
             _check_name(t, "top module")
         for e in self.environment_allowlist:

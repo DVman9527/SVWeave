@@ -11,6 +11,7 @@ Pure Python (no pyslang). Identity rules (plan 13.1):
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -129,6 +130,53 @@ def _classify_gaps(
                 }
             )
     return out
+
+
+_PARAM_MODULE = re.compile(r"parameter '[^']+' does not exist in '([^']+)'\s*$")
+
+
+def _protected_modules(result: dict[str, Any]) -> set[str]:
+    """Names of modules with a ``pragma protect`` envelope inside their own source extent.
+
+    The extent is the declaration's ``full`` span from the extractor. A module is reported only if
+    its name is declared exactly once in the whole result (a same-named module in another file would
+    make the diagnostic's target ambiguous), and a declaration without a ``full`` span is never
+    matched."""
+    envelopes: dict[str, list[int]] = {}
+    for d in result["diagnostics"]:
+        loc = d.get("loc")
+        if d.get("code") == "ProtectedEnvelope" and loc:
+            envelopes.setdefault(loc["file"], []).append(loc["start"])
+    if not envelopes:
+        return set()
+    modules = [d for d in result["declarations"] if d["kind"] == "module"]
+    count: dict[str, int] = {}
+    for d in modules:
+        count[d["name"]] = count.get(d["name"], 0) + 1
+    out: set[str] = set()
+    for d in modules:
+        full = d.get("full")
+        offs = envelopes.get(d["loc"]["file"], [])
+        if count[d["name"]] == 1 and full and any(full["start"] <= o < full["end"] for o in offs):
+            out.add(d["name"])
+    return out
+
+
+def _protected_parameter_errors(result: dict[str, Any]) -> dict[str, int]:
+    """``ParameterDoesNotExist`` errors (module name -> count) whose target module has a protected
+    envelope in its text. Both facts come straight from the extractor document (the diagnostic's
+    message, the declaration and envelope positions); nothing is guessed."""
+    protected = _protected_modules(result)
+    if not protected:
+        return {}
+    hits: dict[str, int] = {}
+    for d in result["diagnostics"]:
+        if d.get("code") != "ParameterDoesNotExist" or not d.get("is_error"):
+            continue
+        m = _PARAM_MODULE.search(d.get("message") or "")
+        if m and m.group(1) in protected:
+            hits[m.group(1)] = hits.get(m.group(1), 0) + 1
+    return hits
 
 
 def ingest(
@@ -557,6 +605,22 @@ def ingest(
         reasons.append(
             f"{len(blocking_gaps)} stub/blackbox/protected-source boundary gap(s) "
             f"({', '.join(by_kind)}): internals unknown, absence of dependencies is not proven"
+        )
+    n_ts = sum(1 for d in result["diagnostics"] if d.get("code") == "MissingTimeScale" and d.get("is_error"))
+    if n_ts:
+        reasons.append(
+            f"{n_ts} MissingTimeScale error(s): some sources have a `timescale and others do not; "
+            "set the profile's language_options.timescale (the simulator's default timescale), "
+            "for example \"1ns/1ps\""
+        )
+    protected_hits = _protected_parameter_errors(result)
+    if protected_hits:
+        n_err = sum(protected_hits.values())
+        reasons.append(
+            f"{n_err} ParameterDoesNotExist error(s) name module(s) whose body is a protected "
+            f"(encrypted) envelope ({', '.join(sorted(protected_hits))}): the parameters live inside "
+            "the envelope slang cannot read, so these are likely artifacts of the encryption, not "
+            "design errors"
         )
     if in_scope_unsupported:
         reasons.append(

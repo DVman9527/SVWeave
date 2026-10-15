@@ -138,13 +138,15 @@ SVWeave/
 Requirements and the offline procedure are in `docs/install.md`.
 
 ```bash
-# 1. install the package and the pinned backends (the only step that uses the network)
+# 1. install the package and the pinned backends (the only step that uses the network;
+#    needs `uv` on PATH, or pass --uv PATH to bootstrap_locked.py)
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -e '.[dev]'
 .venv/bin/python scripts/bootstrap_locked.py
 .venv/bin/python scripts/bootstrap_locked.py --verify-only
 
 # 2. workspace and checks (this repository ships a demo svweave.yaml and fixtures)
+#    `svweave` lives in the venv: `source .venv/bin/activate` first (or call .venv/bin/svweave)
 svweave init                       # never overwrites; creates the trusted policy outside the repo
 svweave doctor                     # includes the "client boundary not qualified" item
 svweave doctor --probe             # real fixture probe of every backend (slow)
@@ -531,6 +533,8 @@ profiles:
     # language_options:                # allowlisted slang knobs, part of config_id
     #   timescale: "1ns/1ps"
     #   std: "1800-2017"               # 1364-2005 | 1800-2017 | 1800-2023 | latest
+    # ignored_options:                 # simulator run-time options declared irrelevant to analysis
+    #   - {option: "+notimingcheck", reason: "simulation-only"}   # still recorded in the ledger
 
 analysis:
   missing_input_policy: "block"

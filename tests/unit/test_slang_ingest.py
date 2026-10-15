@@ -471,3 +471,75 @@ def test_M1_dropped_reference_occurrences_make_project_builds_partial() -> None:
         "1765 reference occurrence(s) dropped in external files" in x for x in ext.limitations
     )
     assert ext.summary["dropped_refs_external"] == 1765 and ext.summary["dropped_refs_project"] == 0
+
+
+def diag(code: str, message: str = "m", *, error: bool = True, at: int = 0) -> dict[str, Any]:
+    return {
+        "severity": "error" if error else "warning",
+        "code": code,
+        "is_error": error,
+        "message": message,
+        "option": None,
+        "loc": loc(start=at, end=at),
+        "ranges": [],
+        "macro_notes": [],
+    }
+
+
+def test_missing_timescale_verdict_names_the_profile_knob() -> None:
+    r = run(dto(diagnostics=[diag("MissingTimeScale"), diag("MissingTimeScale")]))
+    assert r.completeness == Completeness.PARTIAL
+    assert any("2 MissingTimeScale" in x and "language_options.timescale" in x for x in r.reasons)
+    assert not any("MissingTimeScale" in x for x in run(dto()).reasons)
+
+
+def _param_diag(mod: str, at: int) -> dict[str, Any]:
+    return diag("ParameterDoesNotExist", f"parameter 'W' does not exist in '{mod}'", at=at)
+
+
+def test_parameter_errors_on_a_protected_module_are_attributed_to_the_envelope() -> None:
+    result = dto(
+        declarations=[
+            decl(0, "prot", loc=loc(start=7, end=11), full={"start": 0, "end": 238}),
+            decl(1, "plain", loc=loc(start=246, end=251), full={"start": 239, "end": 274}),
+        ],
+        diagnostics=[
+            diag("ProtectedEnvelope", error=False, at=162),
+            _param_diag("prot", 300),
+            _param_diag("prot", 310),
+            _param_diag("plain", 320),
+        ],
+    )
+    r = run(result)
+    (line,) = [x for x in r.reasons if "ParameterDoesNotExist" in x]
+    assert line.startswith("2 ParameterDoesNotExist") and "(prot)" in line and "plain" not in line
+    # without an envelope in the module's text there is no attribution
+    result["diagnostics"] = [d for d in result["diagnostics"] if d["code"] != "ProtectedEnvelope"]
+    assert not any("ParameterDoesNotExist" in x for x in run(result).reasons)
+
+
+def test_an_envelope_outside_a_modules_extent_is_not_attributed_to_it() -> None:
+    """`plain` is followed by an encrypted interface: the envelope lies after plain's extent, so a real
+    parameter error on `plain` must not be called an artifact of the encryption."""
+    result = dto(
+        declarations=[decl(0, "plain", loc=loc(start=7, end=12), full={"start": 0, "end": 40})],
+        diagnostics=[diag("ProtectedEnvelope", error=False, at=100), _param_diag("plain", 200)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(result).reasons)
+
+
+def test_ambiguous_or_extent_less_modules_get_no_attribution() -> None:
+    envelope = diag("ProtectedEnvelope", error=False, at=10)
+    twice = dto(
+        declarations=[
+            decl(0, "m", loc=loc(start=1, end=2), full={"start": 0, "end": 50}),
+            decl(1, "m", loc=loc("b.sv", 1, 2), full={"start": 0, "end": 50}),
+        ],
+        diagnostics=[envelope, _param_diag("m", 60)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(twice, "a.sv", "b.sv").reasons)
+    no_full = dto(
+        declarations=[decl(0, "m", loc=loc(start=1, end=2), full=None)],
+        diagnostics=[envelope, _param_diag("m", 60)],
+    )
+    assert not any("ParameterDoesNotExist" in x for x in run(no_full).reasons)

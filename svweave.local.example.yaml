@@ -1,0 +1,15 @@
+# Example svweave.local.yaml (copy to svweave.local.yaml; the real file is not in Git).
+# It maps the external roots declared in svweave.yaml (source_roots entries WITHOUT `path`) to host
+# directories. Every mapped directory must ALSO be listed in `allowed_roots` of the trusted
+# policy.json (created outside the repository by `svweave init`); this file cannot widen the policy.
+# See docs/manifest.md, "Using a project that lives elsewhere".
+schema_version: "1.0"
+root_mappings:
+  # The Accellera UVM library that `scripts/bootstrap_locked.py` installs (used by the `uvm_smoke`
+  # profile). Do not map a simulator vendor's bundled UVM here: it carries encrypted/protected
+  # regions and vendor macro files that slang cannot read.
+  - id: "uvm"
+    path: ".toolchain/uvm-core/src"
+  # A project kept outside this repository, addressed as @proj/... in svweave.yaml:
+  # - id: "proj"
+  #   path: "/abs/path/to/the/project"
