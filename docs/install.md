@@ -102,6 +102,9 @@ Those were run by hand end to end (fetch-only, then `--offline` under `bwrap --u
 flags, then `svweave doctor --probe` and `svweave build`); the linking is unit-tested in
 `tests/unit/test_bootstrap_locked.py`.
 
+The PyPI wheels are also committed in `vendor/` (see `vendor/README.md`) for hosts that reach GitHub but not PyPI;
+GitHub-hosted components are not stored there.
+
 Never let the gateway venv or the Serena venv resolve dependencies from the network at run time;
 `uv sync --frozen` and the lock hashes exist to prevent that.
 
