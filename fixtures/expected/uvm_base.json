@@ -1,0 +1,101 @@
+{
+  "topic": "uvm_base",
+  "fixture_dir": "uvm/",
+  "top": "svw_uvm_top",
+  "declarations": [
+    {
+      "kind": "class",
+      "qualified_name": "svw_demo_uvm_pkg::svw_driver",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "class svw_driver extends",
+      "nth": 0,
+      "text": "svw_driver",
+      "start": 84,
+      "end": 94
+    },
+    {
+      "kind": "class",
+      "qualified_name": "svw_demo_uvm_pkg::svw_monitor",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "class svw_monitor extends",
+      "nth": 0,
+      "text": "svw_monitor",
+      "start": 426,
+      "end": 437
+    },
+    {
+      "kind": "class",
+      "qualified_name": "svw_demo_uvm_pkg::svw_env",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "class svw_env extends",
+      "nth": 0,
+      "text": "svw_env",
+      "start": 752,
+      "end": 759
+    },
+    {
+      "kind": "class",
+      "qualified_name": "svw_demo_uvm_pkg::svw_smoke_test",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "class svw_smoke_test extends",
+      "nth": 0,
+      "text": "svw_smoke_test",
+      "start": 1204,
+      "end": 1218
+    },
+    {
+      "kind": "task",
+      "qualified_name": "svw_demo_uvm_pkg::svw_driver::run_phase",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "virtual task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_DRV\"",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 312,
+      "end": 321,
+      "virtual": true
+    },
+    {
+      "kind": "task",
+      "qualified_name": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "virtual task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_MON\"",
+      "nth": 0,
+      "text": "run_phase",
+      "start": 637,
+      "end": 646,
+      "virtual": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "svw_demo_uvm_pkg::svw_env::build_phase",
+      "file": "svw_demo_uvm_pkg.sv",
+      "ctx": "virtual function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv",
+      "nth": 0,
+      "text": "build_phase",
+      "start": 997,
+      "end": 1008
+    }
+  ],
+  "bases": {
+    "svw_demo_uvm_pkg::svw_driver": "uvm_pkg::uvm_driver",
+    "svw_demo_uvm_pkg::svw_monitor": "uvm_pkg::uvm_monitor",
+    "svw_demo_uvm_pkg::svw_env": "uvm_pkg::uvm_env",
+    "svw_demo_uvm_pkg::svw_smoke_test": "uvm_pkg::uvm_test"
+  },
+  "run_test_call": {
+    "file": "svw_uvm_top.sv",
+    "ctx": "run_test(\"svw_smoke_test\")",
+    "nth": 0,
+    "text": "run_test",
+    "start": 81,
+    "end": 89
+  },
+  "uvm_log_edit_site": {
+    "file": "svw_demo_uvm_pkg.sv",
+    "ctx": "\"driver fixture\"",
+    "nth": 0,
+    "text": "driver fixture",
+    "start": 368,
+    "end": 382
+  }
+}

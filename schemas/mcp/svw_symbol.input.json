@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "required": [
+        "symbol_id"
+      ]
+    },
+    {
+      "required": [
+        "location"
+      ]
+    },
+    {
+      "required": [
+        "name"
+      ]
+    }
+  ],
+  "properties": {
+    "build_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "cursor": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+$",
+      "type": "string"
+    },
+    "limit": {
+      "default": 100,
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "location": {
+      "additionalProperties": false,
+      "properties": {
+        "byte": {
+          "maximum": 1099511627776,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "file": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^(?!/)(?!(.*/)?\\.\\.(/|$))[^\\u0000-\\u001f\\u007f]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "byte"
+      ],
+      "type": "object"
+    },
+    "name": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$",
+      "type": "string"
+    },
+    "symbol_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "build_id"
+  ],
+  "type": "object"
+}

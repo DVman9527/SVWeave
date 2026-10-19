@@ -1,0 +1,39 @@
+{
+  "lock": "${REPO}/toolchain.lock.json",
+  "lock_sha256": "c6217834cf544f3da4fbc56b42f79c4cfdcff13cf25485f9fd955038497cfb2d",
+  "toolchain_dir": "/tmp/claude-1000/-home-tim-projects-SVWeave/d8ba4d3a-81ad-491b-85b4-e36cb623f062/scratchpad/repro_toolchain",
+  "verify_only": false,
+  "components": {
+    "slang": {
+      "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+      "installed_to": "/tmp/claude-1000/-home-tim-projects-SVWeave/d8ba4d3a-81ad-491b-85b4-e36cb623f062/scratchpad/repro_toolchain/slang",
+      "binary_sha256_ok": true
+    },
+    "verible": {
+      "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+      "installed_to": "/tmp/claude-1000/-home-tim-projects-SVWeave/d8ba4d3a-81ad-491b-85b4-e36cb623f062/scratchpad/repro_toolchain/verible",
+      "binary_sha256_ok": true
+    },
+    "codebase_memory_mcp": {
+      "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+      "installed_to": "/tmp/claude-1000/-home-tim-projects-SVWeave/d8ba4d3a-81ad-491b-85b4-e36cb623f062/scratchpad/repro_toolchain/cbm",
+      "binary_sha256_ok": true
+    },
+    "uvm_core": {
+      "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+      "installed_to": "/tmp/claude-1000/-home-tim-projects-SVWeave/d8ba4d3a-81ad-491b-85b4-e36cb623f062/scratchpad/repro_toolchain/uvm-core",
+      "install_dir_present": true
+    },
+    "pyslang": {},
+    "mcp_sdk": {},
+    "serena": {
+      "commit_ok": true,
+      "uv_lock_sha256_ok": true,
+      "license_sha256_ok": true,
+      "serena_exe_present": true,
+      "serena_agent_version": "1.7.0"
+    }
+  },
+  "errors": [],
+  "ok": true
+}

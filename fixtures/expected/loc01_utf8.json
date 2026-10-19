@@ -1,0 +1,81 @@
+{
+  "topic": "loc01_utf8",
+  "fixture_dir": "language/loc01_utf8",
+  "top": "loc01_top",
+  "encoding_notes": "CRLF line endings, UTF-8 Chinese/Greek/emoji text, tabs",
+  "declarations": [
+    {
+      "kind": "parameter",
+      "qualified_name": "loc01_top.MSG",
+      "file": "top.sv",
+      "ctx": "localparam string MSG",
+      "nth": 0,
+      "text": "MSG",
+      "start": 134,
+      "end": 137
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc01_top.data_bus",
+      "file": "top.sv",
+      "ctx": "\t\tdata_bus,",
+      "nth": 0,
+      "text": "data_bus",
+      "start": 176,
+      "end": 184
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc01_top.data_aux",
+      "file": "top.sv",
+      "ctx": "\t\tdata_aux;",
+      "nth": 0,
+      "text": "data_aux",
+      "start": 189,
+      "end": 197
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc01_top.after_tab",
+      "file": "top.sv",
+      "ctx": "\tafter_tab;",
+      "nth": 0,
+      "text": "after_tab",
+      "start": 226,
+      "end": 235
+    }
+  ],
+  "positions": {
+    "data_bus": {
+      "line": 6,
+      "col_utf8": 3,
+      "lsp_line0": 5,
+      "lsp_utf16": 2,
+      "lsp_utf8": 2
+    },
+    "after_tab": {
+      "line": 8,
+      "col_utf8": 27,
+      "lsp_line0": 7,
+      "lsp_utf16": 18,
+      "lsp_utf8": 26
+    },
+    "MSG": {
+      "line": 4,
+      "col_utf8": 20,
+      "lsp_line0": 3,
+      "lsp_utf16": 19,
+      "lsp_utf8": 19
+    }
+  },
+  "multi_line_declaration": {
+    "file": "top.sv",
+    "ctx": "logic [7:0]\r\n\t\tdata_bus,\r\n\t\tdata_aux;",
+    "nth": 0,
+    "text": "logic [7:0]\r\n\t\tdata_bus,\r\n\t\tdata_aux;",
+    "start": 161,
+    "end": 198
+  },
+  "line_count": 9,
+  "crlf_pairs": 9
+}

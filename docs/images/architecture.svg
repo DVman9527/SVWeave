@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1120" width="100%" role="img" aria-labelledby="t d">
+<title id="t">SVWeave architecture</title>
+<desc id="d">Layered architecture of the SVWeave gateway: clients, the single gateway, three sandboxed backends, immutable snapshot, candidate workspace, SQLite database, trusted directory and the guarded write path to the user source workspace.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="1120" class="bg"/>
+<text x="40" y="32" class="tx b s16">SVWeave architecture, as implemented</text>
+<text x="1170" y="32" class="mu s12" text-anchor="end">trust boundaries TB1 to TB4 are the dashed lines</text>
+<rect x="40" y="52" width="260" height="72" rx="8" class="n"/>
+<text x="52" y="74" class="tx b s14">Human CLI</text>
+<text x="52" y="94" class="mu s12">svweave ... (cli.py)</text>
+<text x="52" y="112" class="mu s12">the only place a human approves</text>
+<rect x="330" y="52" width="300" height="72" rx="8" class="n"/>
+<text x="342" y="74" class="tx b s14">MCP client (AI agent)</text>
+<text x="342" y="94" class="mu s12">reads, analyses, proposes</text>
+<text x="342" y="112" class="mu s12">has no approve tool, no raw backends</text>
+<line x1="24" y1="148" x2="880" y2="148" class="lt"/>
+<text x="480" y="166" class="tt s12">TB1 client boundary: text from tools and sources is data, never instructions</text>
+<path d="M150,124 L150,220" class="l" marker-end="url(#mg)"/>
+<text x="158" y="170" class="mu s12">local CLI</text>
+<path d="M380,124 L380,220" class="l" marker-end="url(#mg)"/>
+<text x="388" y="170" class="mu s12">stdio</text>
+<rect x="40" y="182" width="840" height="266" rx="8" class="n"/>
+<text x="52" y="203" class="tx b s14">SVWeave gateway: one process, the trusted coordinator</text>
+<rect x="56" y="220" width="190" height="62" rx="8" class="chip"/>
+<text x="68" y="242" class="tx b s14 mono">cli.py</text>
+<text x="68" y="262" class="mu s12">click CLI, exit codes</text>
+<rect x="270" y="220" width="190" height="62" rx="8" class="chip"/>
+<text x="282" y="242" class="tx b s14 mono">server.py</text>
+<text x="282" y="262" class="mu s12">MCP stdio, SDK 2.3.0</text>
+<rect x="484" y="220" width="380" height="62" rx="8" class="chip"/>
+<text x="496" y="242" class="tx b s14 mono">gateway/tools.py + schemas.py</text>
+<text x="496" y="262" class="mu s12">11 svw_* tools: validate, dispatch, redact</text>
+<path d="M460,251 L484,251" class="l" marker-end="url(#mg)"/>
+<rect x="56" y="304" width="808" height="70" rx="8" class="chip"/>
+<text x="68" y="326" class="tx b s14 mono">application/services.py</text>
+<text x="68" y="346" class="mu s12">one function per use case, shared by the CLI and every MCP tool</text>
+<text x="68" y="364" class="mu s12">(build, queries, search, edit, evidence, status, report, doctor)</text>
+<path d="M151,282 L151,304" class="l" marker-end="url(#mg)"/>
+<path d="M674,282 L674,304" class="l" marker-end="url(#mg)"/>
+<rect x="56" y="390" width="186" height="46" rx="8" class="chip"/>
+<text x="68" y="412" class="tx b s13">policy</text>
+<text x="68" y="430" class="mu s12 mono">config/policy.py</text>
+<rect x="264" y="390" width="186" height="46" rx="8" class="chip"/>
+<text x="276" y="412" class="tx b s13">job manager</text>
+<text x="276" y="430" class="mu s12 mono">application/jobs.py</text>
+<rect x="472" y="390" width="186" height="46" rx="8" class="chip"/>
+<text x="484" y="412" class="tx b s13">provenance + envelope</text>
+<text x="484" y="430" class="mu s12 mono">domain/envelope.py</text>
+<rect x="680" y="390" width="186" height="46" rx="8" class="chip"/>
+<text x="692" y="412" class="tx b s13">error mapping</text>
+<text x="692" y="430" class="mu s12 mono">domain/errors.py</text>
+<rect x="40" y="486" width="266" height="74" rx="8" class="n"/>
+<text x="52" y="508" class="tx b s14">Graph adapter</text>
+<text x="52" y="528" class="mu s12 mono">adapters/codebase_memory/</text>
+<text x="52" y="546" class="mu s12">MCP client: SOURCE_CANDIDATE only</text>
+<path d="M173,448 L173,486" class="l" marker-end="url(#mg)"/>
+<path d="M173,560 L173,598" class="l" marker-end="url(#mg)"/>
+<rect x="327" y="486" width="266" height="74" rx="8" class="n"/>
+<text x="339" y="508" class="tx b s14">Serena adapter</text>
+<text x="339" y="528" class="mu s12 mono">adapters/serena/</text>
+<text x="339" y="546" class="mu s12">MCP client: edits in the candidate</text>
+<path d="M460,448 L460,486" class="l" marker-end="url(#mg)"/>
+<path d="M460,560 L460,598" class="l" marker-end="url(#mg)"/>
+<rect x="614" y="486" width="266" height="74" rx="8" class="n"/>
+<text x="626" y="508" class="tx b s14">slang adapter</text>
+<text x="626" y="528" class="mu s12 mono">adapters/slang/</text>
+<text x="626" y="546" class="mu s12">worker IPC, never loaded in gateway</text>
+<path d="M747,448 L747,486" class="l" marker-end="url(#mg)"/>
+<path d="M747,560 L747,598" class="l" marker-end="url(#mg)"/>
+<text x="1170" y="0" class="tx"></text>
+<rect x="40" y="598" width="266" height="150" rx="8" class="tb"/>
+<text x="52" y="618" class="tt b s12">TB2 bwrap sandbox</text>
+<text x="52" y="634" class="tt s12">--unshare-net, original source not mounted</text>
+<rect x="52" y="646" width="242" height="90" rx="8" class="chip"/>
+<text x="64" y="668" class="tx b s13">codebase-memory-mcp v0.11.0</text>
+<text x="64" y="687" class="mu s12">portable build, own state dir</text>
+<text x="64" y="704" class="mu s12">reads snapshot, health DEGRADED</text>
+<rect x="327" y="598" width="266" height="150" rx="8" class="tb"/>
+<text x="339" y="618" class="tt b s12">TB2 bwrap sandbox</text>
+<text x="339" y="634" class="tt s12">--unshare-net, original source not mounted</text>
+<rect x="339" y="646" width="242" height="90" rx="8" class="chip"/>
+<text x="351" y="668" class="tx b s13">Serena v1.7.0 + Verible LSP</text>
+<text x="351" y="687" class="mu s12">writes candidate + own state</text>
+<text x="351" y="704" class="mu s12">health DEGRADED, function edits</text>
+<rect x="614" y="598" width="266" height="150" rx="8" class="tb"/>
+<text x="626" y="618" class="tt b s12">TB2 bwrap sandbox</text>
+<text x="626" y="634" class="tt s12">--unshare-net, original source not mounted</text>
+<rect x="626" y="646" width="242" height="90" rx="8" class="chip"/>
+<text x="638" y="668" class="tx b s13">pyslang 12.0.0 worker</text>
+<text x="638" y="687" class="mu s12">python -I, RLIMIT_AS, killpg</text>
+<text x="638" y="704" class="mu s12">snapshot read-only, READY</text>
+<rect x="40" y="786" width="840" height="128" rx="8" class="tb"/>
+<text x="52" y="806" class="tt b s12">Repo-local runtime state .svweave/ (never committed)</text>
+<rect x="52" y="818" width="266" height="84" rx="8" class="n"/>
+<text x="64" y="840" class="tx b s13">Immutable snapshot</text>
+<text x="64" y="859" class="mu s12">snapshot/capture.py</text>
+<text x="64" y="876" class="mu s12">inventory + bytes + lookup space</text>
+<rect x="322" y="818" width="266" height="84" rx="8" class="a"/>
+<text x="334" y="840" class="tx b s13">Candidate workspace</text>
+<text x="334" y="859" class="mu s12">candidates/&lt;txn&gt;, real byte copy</text>
+<text x="334" y="876" class="mu s12">all edits land here, not in source</text>
+<rect x="592" y="818" width="266" height="84" rx="8" class="n"/>
+<text x="604" y="840" class="tx b s13">SQLite semantic DB + journal</text>
+<text x="604" y="859" class="mu s12">storage/: svweave.db, journal</text>
+<text x="604" y="876" class="mu s12">only COMPLETE builds published</text>
+<path d="M173,748 L173,786" class="l" marker-end="url(#mg)"/>
+<path d="M460,748 L460,786" class="la" marker-end="url(#ma)"/>
+<text x="468" y="772" class="ta s12">edits</text>
+<path d="M747,748 L747,786" class="l" marker-end="url(#mg)"/>
+<text x="755" y="772" class="mu s12">rows via ingest</text>
+<rect x="940" y="182" width="230" height="262" rx="8" class="tb"/>
+<text x="952" y="203" class="tt b s13">TB3 trusted directory</text>
+<text x="952" y="220" class="tt s12">outside the repository</text>
+<text x="952" y="246" class="tx s12 mono">$XDG_CONFIG_HOME/svweave/</text>
+<text x="952" y="266" class="tx s12 mono">workspaces/&lt;key&gt;/:</text>
+<text x="952" y="286" class="tx s12 mono">policy.json</text>
+<text x="952" y="306" class="tx s12 mono">approval.key (0600)</text>
+<text x="952" y="326" class="tx s12 mono">approvals/&lt;txn&gt;.json</text>
+<text x="952" y="346" class="tx s12 mono">cursor.key (0600)</text>
+<text x="952" y="366" class="tx s12 mono">last backend probe</text>
+<path d="M880,262 L940,262" class="lt" marker-end="url(#mt)"/>
+<rect x="940" y="478" width="230" height="282" rx="8" class="a"/>
+<text x="952" y="500" class="ta b s14">Edit coordinator</text>
+<text x="952" y="522" class="mu s12">editing/, application/edit.py</text>
+<text x="952" y="542" class="tx s12">machine.py: legal transitions</text>
+<text x="952" y="562" class="tx s12">approval.py: HMAC + expiry</text>
+<text x="952" y="582" class="tx s12">plan.py: prepare</text>
+<text x="952" y="602" class="tx s12">diffing.py: patch hash</text>
+<text x="952" y="622" class="tx s12">journal.py: write-ahead, fsync</text>
+<text x="952" y="642" class="tx s12">lock + CAS vs snapshot</text>
+<text x="952" y="662" class="tx s12">per-file before-hash check</text>
+<path d="M880,400 L910,400 L910,540 L940,540" class="la" marker-end="url(#ma)"/>
+<path d="M1000,760 L1000,850 L880,850" class="l" marker-end="url(#mg)"/>
+<line x1="24" y1="944" x2="1176" y2="944" class="lt"/>
+<text x="40" y="936" class="tt s12">TB4 write boundary: the only crossing is the approved, compare-and-set write by the edit coordinator</text>
+<path d="M1100,760 L1100,990" class="la" marker-end="url(#ma)"/>
+<text x="1090" y="884" class="ta b s12" text-anchor="end">approved + CAS write</text>
+<rect x="40" y="960" width="1130" height="64" rx="8" class="a"/>
+<text x="52" y="982" class="ta b s14">User source workspace</text>
+<text x="52" y="1002" class="mu s12">original files; writable only through the edit coordinator; no backend has a writable mount</text>
+<line x1="40" y1="1070" x2="100" y2="1070" class="la" marker-end="url(#ma)"/>
+<text x="110" y="1074" class="tx s12">controlled write path</text>
+<line x1="300" y1="1070" x2="360" y2="1070" class="l" marker-end="url(#mg)"/>
+<text x="370" y="1074" class="tx s12">call or data flow</text>
+<line x1="520" y1="1070" x2="580" y2="1070" class="lt"/>
+<text x="590" y="1074" class="tx s12">trust boundary</text>
+<text x="40" y="1104" class="mu s12">Raw codebase-memory-mcp and Serena servers are never registered with the client. Only the edit coordinator writes the source workspace.</text>
+</svg>

@@ -1,0 +1,111 @@
+# SVWeave CI (plan 22.1, 23.4).
+#
+# Rules: no secrets, no self-hosted runners, no pushes/PRs/branch-protection changes (plan 23.4).
+# Untrusted PRs only get the fast job; the real-backend job is manual (workflow_dispatch) and
+# needs network ONLY in the bootstrap step, which verifies every artifact against
+# toolchain.lock.json before use.
+#
+# PIN BEFORE USE: the `uses:` references below are TAGS for readability. Before this workflow is
+# enabled, replace each with the full commit SHA of the reviewed release (for example
+# `actions/checkout@<40-hex-sha> # v4.x.y`). Mutable tags are a supply-chain risk (plan 23.1).
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      real_backends:
+        description: "Run the real-backend integration/acceptance job (downloads the pinned toolchain)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: fast checks (ruff, mypy, schema, unit, contract)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # TODO(pin): actions/checkout -> full commit SHA
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # TODO(pin): actions/setup-python -> full commit SHA
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip==24.3.1 uv==0.5.11
+          uv venv --python 3.12 .venv
+          uv pip install --python .venv/bin/python -e '.[dev]'
+      - name: Pinned wheels (pyslang, MCP SDK) and tool archives, SHA-256 verified against the lock
+        run: .venv/bin/python scripts/bootstrap_locked.py --skip-serena
+      - name: Ruff
+        run: .venv/bin/ruff check src tests
+      - name: Mypy (strict)
+        run: .venv/bin/mypy
+      - name: Schemas in sync with the models
+        run: .venv/bin/svweave schema emit --check
+      - name: Unit tests
+        run: .venv/bin/python -m pytest tests/unit -q --no-cov
+      - name: Contract tests
+        run: .venv/bin/python -m pytest tests/contract -q --no-cov
+      # Real-backend tests skip locally when a backend is missing; in this job they are not run at
+      # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
+
+  real-backends:
+    name: real backends (integration, fault injection, acceptance)
+    if: github.event_name == 'workflow_dispatch' && inputs.real_backends
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SVWEAVE_REQUIRE_BACKENDS: "1"
+    steps:
+      # TODO(pin): actions/checkout -> full commit SHA
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # TODO(pin): actions/setup-python -> full commit SHA
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check unprivileged user namespaces (bwrap)
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap
+          # Ubuntu 24.04 restricts unprivileged user namespaces for bwrap; enable for this job only.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          bwrap --ro-bind / / true
+      - name: Install package and the pinned toolchain (network only here, hashes verified)
+        run: |
+          python -m pip install --upgrade pip==24.3.1 uv==0.5.11
+          uv venv --python 3.12 .venv
+          uv pip install --python .venv/bin/python -e '.[dev]'
+          .venv/bin/python scripts/bootstrap_locked.py
+          .venv/bin/python scripts/bootstrap_locked.py --verify-only
+      - name: Backend contract probe
+        run: .venv/bin/python scripts/probe_backends.py
+      - name: Integration, fault injection and acceptance (skips are failures)
+        run: |
+          .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov
+      - name: Critical mutation suite (plan 20.5)
+        run: .venv/bin/python scripts/mutation_suite.py
+      - name: Small-scale benchmark (smoke only; not the plan 22.3 reference run)
+        run: .venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30
+      - name: Upload qualification evidence (no source text)
+        # TODO(pin): actions/upload-artifact -> full commit SHA
+        uses: actions/upload-artifact@v4
+        with:
+          name: svweave-evidence
+          path: |
+            evidence/mutation/
+            .svweave/bench/*.json
+          if-no-files-found: ignore

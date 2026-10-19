@@ -1,0 +1,31 @@
+{
+  "topic": "bld07_incdir",
+  "fixture_dir": "language/bld07_incdir",
+  "top": "inc_top",
+  "expect": {
+    "dir_a_first": {
+      "P": "11"
+    },
+    "dir_b_first": {
+      "P": "22"
+    }
+  },
+  "headers": {
+    "dir_a": {
+      "file": "dir_a/common.svh",
+      "ctx": "`define VAL 11",
+      "nth": 0,
+      "text": "VAL",
+      "start": 8,
+      "end": 11
+    },
+    "dir_b": {
+      "file": "dir_b/common.svh",
+      "ctx": "`define VAL 22",
+      "nth": 0,
+      "text": "VAL",
+      "start": 8,
+      "end": 11
+    }
+  }
+}

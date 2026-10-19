@@ -1,0 +1,84 @@
+{
+  "test": "DEP-01 offline clean-room bootstrap + three-backend probe",
+  "network": "disabled: bwrap --unshare-net around bootstrap, verify and probe (1.1.1.1:443 connect probe: BLOCKED)",
+  "lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+  "bootstrap": {
+    "command": "scripts/bootstrap_locked.py --offline --create-venv --artifact-dir ${REPO}/.toolchain/downloads --serena-source ${REPO}/.toolchain/serena-src --uv-cache-dir <copy of the uv cache>",
+    "ok": true,
+    "errors": [],
+    "gateway_wheelhouse": {
+      "requirements_sha256_ok": true,
+      "wheels_expected": 31,
+      "wheels_present_sha256_ok": 31
+    }
+  },
+  "installed": {
+    "binaries_sha256_equal_lock": [
+      "slang",
+      "codebase_memory_mcp",
+      "verible"
+    ],
+    "gateway_venv": {
+      "pyslang": "12.0.0",
+      "mcp": "2.3.0"
+    },
+    "serena_agent": {
+      "commit_ok": true,
+      "uv_lock_sha256_ok": true,
+      "license_sha256_ok": true,
+      "serena_exe_present": true,
+      "serena_agent_version": "1.7.0"
+    }
+  },
+  "verify_only_rc": 0,
+  "probe": {
+    "summary": {
+      "pyslang": "READY",
+      "slang_cli": "READY",
+      "cbm": "DEGRADED",
+      "serena": "DEGRADED"
+    },
+    "limitations": [
+      "cbm: search_graph finds class svw_driver",
+      "cbm: two run_phase methods extracted",
+      "cbm: no fixture file parse_unusable",
+      "serena: find_symbol svw_driver/run_phase (task method)"
+    ],
+    "schema_digest": {
+      "cbm": {
+        "tools_list_sha256": "f8e127dc64775bb0977e9acdb3a2e128e0b6d60a2994241aac16dabd32e00eec",
+        "per_tool_schema_sha256": {
+          "index_repository": "6bc4a37dca36ffe00caef563811eb4461241721802255ccf1cc10409b336d63b",
+          "search_graph": "da3b6f9893a747db20db0cbbd38171748ac071df550813805bf90e98dc913199",
+          "query_graph": "73cbbe7c61d878db7d3d95f91914e932005ee6afe96e98004065ad3fcee360a3",
+          "trace_path": "e7a15a39d841b9a5ea84a872ab24de6ef69a6ef1afebbe2e28bd06c1b8d512f7",
+          "get_code_snippet": "c6044821d59c2cf09c4ed98264f332a53986d950b651097465a3306708624c74",
+          "get_file_outline": "3576b302c94097e70567acb579f28828ccde1e69e9f0630466987c6596566ac7",
+          "get_graph_schema": "65256bf0c43d4aa95bdd0586444a75d9a46557294d31bbf831451da71e072696",
+          "compare_graphs": "4f9270f71a894dd03acadee4fafad4416d64ceb8035511d3fb409a873d35effa",
+          "get_architecture": "3bbfc8acb0c94f7e20ab96379f9fdb1dc2c151dab17cb274698d51463d326bbd",
+          "search_code": "226fc27a4744bed00a3d4948721aada6349f5da29651bd52900a2546602e73d6",
+          "list_projects": "c866268d53240f77825f43a4617dc269599a9ba9f1058b9f717b4fc37c72ec9c",
+          "delete_project": "1379040bafe1ff0ad862456c608f3765d908badc3d06738d2cd84e97d3be07ca",
+          "index_status": "0b086d1399e158d1aee61ab1edc3709a85200b283ccec738cc90a8ecc94c06a1",
+          "check_index_coverage": "3c738ccb4c19c5d3de1f637cee78974b4fa95aaa11459de39682d21a513d566c",
+          "detect_changes": "219ddf505ce27ba599706b0e1bd212a55a02e7065305ddabbc5e96e33c5f3939",
+          "manage_adr": "7ca174cbc8144745d6ce866524ee33e60fb1e1a4351a166f11cc918fb440fe57",
+          "ingest_traces": "473760bd684592c9f778e3b8e9a2dd4d1d8c40d7408b499ca00273e653ce2429"
+        }
+      },
+      "serena": {
+        "tools_list_sha256": "b9883bfe248fedc54ab81522436d96e2fe6308c52114dda6d7a3861d99107494",
+        "per_tool_schema_sha256": {
+          "replace_symbol_body": "c1c6f5568b80427c400b8f769b718e18381bfd25b9a5696637fb442a22e3963c",
+          "get_symbols_overview": "040e5c6565e55b69d665af7478599af0222dbcfcb55ddcc7dbbe917f24f4e08e",
+          "find_symbol": "13699ed3b8da59bfcabe4f227c9ab74689964796530091e030100c078e05b143",
+          "find_referencing_symbols": "fb7867037102bd3515f8179b1fb09e40d29733c59b81abd2e7f1ccbe3da940f8",
+          "find_declaration": "850411a59c6afe605701a0fcbf6eaf3fdf2b224b1567755eda708643b1ebb661",
+          "get_diagnostics_for_file": "fd545b5066587af2a2ee89de3f4ce346596d5e4d815b6ea55f766fa1201b1d32"
+        }
+      }
+    },
+    "matches_committed_capability_report": true
+  }
+}

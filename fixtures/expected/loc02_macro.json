@@ -1,0 +1,119 @@
+{
+  "topic": "loc02_macro",
+  "fixture_dir": "language/loc02_macro",
+  "top": "loc02_top",
+  "declarations": [
+    {
+      "kind": "variable",
+      "qualified_name": "loc02_a.arg_reg",
+      "file": "top.sv",
+      "ctx": "`MAKE_REG(arg_reg)",
+      "nth": 0,
+      "text": "arg_reg",
+      "start": 69,
+      "end": 76
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc02_a.fixed_reg",
+      "file": "defs.svh",
+      "ctx": "logic [3:0] fixed_reg;",
+      "nth": 0,
+      "text": "fixed_reg",
+      "start": 66,
+      "end": 75
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc02_b.fixed_reg",
+      "file": "defs.svh",
+      "ctx": "logic [3:0] fixed_reg;",
+      "nth": 0,
+      "text": "fixed_reg",
+      "start": 66,
+      "end": 75
+    },
+    {
+      "kind": "parameter",
+      "qualified_name": "loc02_a.FROM_HEADER",
+      "file": "dup.svh",
+      "ctx": "localparam int FROM_HEADER = 5;",
+      "nth": 0,
+      "text": "FROM_HEADER",
+      "start": 15,
+      "end": 26
+    },
+    {
+      "kind": "parameter",
+      "qualified_name": "loc02_b.FROM_HEADER",
+      "file": "dup.svh",
+      "ctx": "localparam int FROM_HEADER = 5;",
+      "nth": 0,
+      "text": "FROM_HEADER",
+      "start": 15,
+      "end": 26
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "loc02_b.after_line_reg",
+      "file": "top.sv",
+      "ctx": "logic after_line_reg;",
+      "nth": 0,
+      "text": "after_line_reg",
+      "start": 192,
+      "end": 206
+    }
+  ],
+  "macro_origins": {
+    "loc02_a.arg_reg": {
+      "macro": "MAKE_REG",
+      "spelled_in": "macro_argument",
+      "expansion": {
+        "file": "top.sv",
+        "ctx": "`MAKE_REG(arg_reg)",
+        "nth": 0,
+        "text": "`MAKE_REG",
+        "start": 59,
+        "end": 68
+      }
+    },
+    "loc02_a.fixed_reg": {
+      "macro": "DECL_FIXED",
+      "spelled_in": "macro_body",
+      "expansion": {
+        "file": "top.sv",
+        "ctx": "`DECL_FIXED\nendmodule\n\nmodule loc02_b",
+        "nth": 0,
+        "text": "`DECL_FIXED",
+        "start": 80,
+        "end": 91
+      }
+    },
+    "loc02_b.fixed_reg": {
+      "macro": "DECL_FIXED",
+      "spelled_in": "macro_body",
+      "expansion": {
+        "file": "top.sv",
+        "ctx": "`DECL_FIXED\n`line 100",
+        "nth": 0,
+        "text": "`DECL_FIXED",
+        "start": 142,
+        "end": 153
+      }
+    }
+  },
+  "line_directive": {
+    "display_file": "virtual_file.sv",
+    "display_line": 100,
+    "physical_line": 12,
+    "decl": "loc02_b.after_line_reg"
+  },
+  "repeated_include": {
+    "header": "dup.svh",
+    "scopes": [
+      "loc02_a",
+      "loc02_b"
+    ],
+    "distinct_declarations": 2
+  }
+}

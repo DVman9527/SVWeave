@@ -1,0 +1,397 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "const": "prepare"
+        },
+        "base_build_id": {
+          "maxLength": 64,
+          "minLength": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "edits": {
+          "items": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "declaration_id": {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "symbol_replacement"
+                  },
+                  "new_body": {
+                    "maxLength": 60000,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "declaration_id",
+                  "new_body"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "end_byte": {
+                    "maximum": 1099511627776,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "expected_sha256": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "exact_range"
+                  },
+                  "logical_path": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "replacement": {
+                    "maxLength": 60000,
+                    "type": "string"
+                  },
+                  "start_byte": {
+                    "maximum": 1099511627776,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "logical_path",
+                  "start_byte",
+                  "end_byte",
+                  "expected_sha256",
+                  "replacement"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "qualified_name"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "symbol_id"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "expected_sha256": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "slang_symbol"
+                  },
+                  "qualified_name": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "replacement": {
+                    "maxLength": 60000,
+                    "type": "string"
+                  },
+                  "symbol_id": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "replacement"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "type": "array"
+        },
+        "request_key": {
+          "pattern": "^[A-Za-z0-9._:-]{8,128}$",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "maxLength": 64,
+          "minLength": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "validate_profiles": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "type": "array"
+        }
+      },
+      "required": [
+        "action",
+        "base_build_id",
+        "snapshot_id",
+        "edits",
+        "request_key"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "const": "validate"
+        },
+        "transaction_id": {
+          "pattern": "^txn-[0-9a-f]{20}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "transaction_id"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "const": "commit"
+        },
+        "expected_patch_hash": {
+          "maxLength": 64,
+          "minLength": 64,
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "request_key": {
+          "pattern": "^[A-Za-z0-9._:-]{8,128}$",
+          "type": "string"
+        },
+        "transaction_id": {
+          "pattern": "^txn-[0-9a-f]{20}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "transaction_id",
+        "expected_patch_hash",
+        "request_key"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "const": "abort"
+        },
+        "transaction_id": {
+          "pattern": "^txn-[0-9a-f]{20}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "transaction_id"
+      ],
+      "type": "object"
+    }
+  ],
+  "properties": {
+    "action": {
+      "enum": [
+        "prepare",
+        "validate",
+        "commit",
+        "abort"
+      ]
+    },
+    "base_build_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "edits": {
+      "items": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "declaration_id": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              },
+              "kind": {
+                "const": "symbol_replacement"
+              },
+              "new_body": {
+                "maxLength": 60000,
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "declaration_id",
+              "new_body"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "end_byte": {
+                "maximum": 1099511627776,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "expected_sha256": {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "exact_range"
+              },
+              "logical_path": {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              "replacement": {
+                "maxLength": 60000,
+                "type": "string"
+              },
+              "start_byte": {
+                "maximum": 1099511627776,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "kind",
+              "logical_path",
+              "start_byte",
+              "end_byte",
+              "expected_sha256",
+              "replacement"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "oneOf": [
+              {
+                "required": [
+                  "qualified_name"
+                ]
+              },
+              {
+                "required": [
+                  "symbol_id"
+                ]
+              }
+            ],
+            "properties": {
+              "expected_sha256": {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "kind": {
+                "const": "slang_symbol"
+              },
+              "qualified_name": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "replacement": {
+                "maxLength": 60000,
+                "type": "string"
+              },
+              "symbol_id": {
+                "maxLength": 64,
+                "minLength": 64,
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind",
+              "replacement"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array"
+    },
+    "expected_patch_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "request_key": {
+      "pattern": "^[A-Za-z0-9._:-]{8,128}$",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "transaction_id": {
+      "pattern": "^txn-[0-9a-f]{20}$",
+      "type": "string"
+    },
+    "validate_profiles": {
+      "items": {
+        "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+        "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array"
+    }
+  },
+  "required": [
+    "action"
+  ],
+  "type": "object"
+}

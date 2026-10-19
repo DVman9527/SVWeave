@@ -1,0 +1,662 @@
+{
+  "$defs": {
+    "Analysis": {
+      "additionalProperties": false,
+      "properties": {
+        "max_build_seconds": {
+          "default": 120,
+          "minimum": 1,
+          "title": "Max Build Seconds",
+          "type": "integer"
+        },
+        "max_worker_memory_mib": {
+          "default": 8192,
+          "minimum": 64,
+          "title": "Max Worker Memory Mib",
+          "type": "integer"
+        },
+        "missing_input_policy": {
+          "const": "block",
+          "default": "block",
+          "title": "Missing Input Policy",
+          "type": "string"
+        },
+        "stub_policy": {
+          "const": "explicit_only",
+          "default": "explicit_only",
+          "title": "Stub Policy",
+          "type": "string"
+        },
+        "stubs": {
+          "items": {
+            "$ref": "#/$defs/StubRecord"
+          },
+          "title": "Stubs",
+          "type": "array"
+        },
+        "unsupported_option_policy": {
+          "const": "block",
+          "default": "block",
+          "title": "Unsupported Option Policy",
+          "type": "string"
+        }
+      },
+      "title": "Analysis",
+      "type": "object"
+    },
+    "CompilationGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "defines": {
+          "items": {
+            "$ref": "#/$defs/Define"
+          },
+          "title": "Defines",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "include_dirs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Include Dirs",
+          "type": "array"
+        },
+        "library_dirs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Dirs",
+          "type": "array"
+        },
+        "library_extensions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Extensions",
+          "type": "array"
+        },
+        "library_files": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Files",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceInput"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "sources"
+      ],
+      "title": "CompilationGroup",
+      "type": "object"
+    },
+    "CompilationUnits": {
+      "additionalProperties": false,
+      "properties": {
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/CompilationGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "single",
+            "per_file",
+            "explicit_groups"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "CompilationUnits",
+      "type": "object"
+    },
+    "Define": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Define",
+      "type": "object"
+    },
+    "Editing": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_paths": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Paths",
+          "type": "array"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_changed_lines": {
+          "default": 200,
+          "minimum": 1,
+          "title": "Max Changed Lines",
+          "type": "integer"
+        },
+        "max_files_per_patch": {
+          "default": 5,
+          "minimum": 1,
+          "title": "Max Files Per Patch",
+          "type": "integer"
+        },
+        "require_human_approval": {
+          "default": true,
+          "title": "Require Human Approval",
+          "type": "boolean"
+        },
+        "validate_profiles": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Validate Profiles",
+          "type": "array"
+        }
+      },
+      "title": "Editing",
+      "type": "object"
+    },
+    "GeneratedInput": {
+      "additionalProperties": false,
+      "properties": {
+        "generator_command_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generator Command Id"
+        },
+        "input_hashes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Input Hashes",
+          "type": "object"
+        },
+        "output_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Hash"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "GeneratedInput",
+      "type": "object"
+    },
+    "IgnoredOptionDecl": {
+      "additionalProperties": false,
+      "description": "A simulator option the profile explicitly declares irrelevant to static analysis.\n\nFilelists written for a simulator carry run-time options (``+notimingcheck``, ``+nospecify``) that\nSVWeave does not model; by default any unknown option BLOCKS the build. Declaring it here is an\nexplicit, reviewable decision: the option is still recorded in the ``ignored_options`` ledger\n(classification ``profile_declared``) and is part of the build's config identity. Only options\nthat take NO argument can be declared (an argument-taking option would swallow the next token,\nwhich may be a source file). Options the resolver interprets (include dirs, defines, libraries,\nnested filelists) and slang's own options (``--...``, ``-G``) cannot be declared.",
+      "properties": {
+        "option": {
+          "pattern": "^[-+][A-Za-z0-9_.:=+-]+$",
+          "title": "Option",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "option",
+        "reason"
+      ],
+      "title": "IgnoredOptionDecl",
+      "type": "object"
+    },
+    "LanguageOptions": {
+      "additionalProperties": false,
+      "description": "Allowlisted slang language knobs (plan 8.3 'unsupported options block'): ``timescale`` ->\n``--timescale <base>/<precision>``, ``std`` -> ``--std <version>``, ``compat`` ->\n``--compat <vendor>`` (slang's vendor-leniency bundle; only ``vcs`` is accepted). Recorded in\nconfig_id and in the build's semantic_deviations. Nothing else can be passed through to slang.",
+      "properties": {
+        "compat": {
+          "anyOf": [
+            {
+              "const": "vcs",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Compat"
+        },
+        "std": {
+          "anyOf": [
+            {
+              "enum": [
+                "1364-2005",
+                "1800-2017",
+                "1800-2023",
+                "latest"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Std"
+        },
+        "timescale": {
+          "anyOf": [
+            {
+              "pattern": "^(?:1|10|100)(?:s|ms|us|ns|ps|fs)/(?:1|10|100)(?:s|ms|us|ns|ps|fs)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timescale"
+        }
+      },
+      "title": "LanguageOptions",
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "compilation_units": {
+          "$ref": "#/$defs/CompilationUnits"
+        },
+        "cwd": {
+          "default": ".",
+          "minLength": 1,
+          "title": "Cwd",
+          "type": "string"
+        },
+        "defines": {
+          "items": {
+            "$ref": "#/$defs/Define"
+          },
+          "title": "Defines",
+          "type": "array"
+        },
+        "diagnostic_policy": {
+          "const": "no_errors",
+          "default": "no_errors",
+          "title": "Diagnostic Policy",
+          "type": "string"
+        },
+        "environment_allowlist": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Environment Allowlist",
+          "type": "array"
+        },
+        "generated_inputs": {
+          "items": {
+            "$ref": "#/$defs/GeneratedInput"
+          },
+          "title": "Generated Inputs",
+          "type": "array"
+        },
+        "ignored_options": {
+          "items": {
+            "$ref": "#/$defs/IgnoredOptionDecl"
+          },
+          "title": "Ignored Options",
+          "type": "array"
+        },
+        "include_dirs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Include Dirs",
+          "type": "array"
+        },
+        "language_mode": {
+          "const": "systemverilog",
+          "default": "systemverilog",
+          "title": "Language Mode",
+          "type": "string"
+        },
+        "language_options": {
+          "$ref": "#/$defs/LanguageOptions"
+        },
+        "library_dirs": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Dirs",
+          "type": "array"
+        },
+        "library_extensions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Extensions",
+          "type": "array"
+        },
+        "library_files": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Library Files",
+          "type": "array"
+        },
+        "source_inputs": {
+          "items": {
+            "$ref": "#/$defs/SourceInput"
+          },
+          "title": "Source Inputs",
+          "type": "array"
+        },
+        "top_modules": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Top Modules",
+          "type": "array"
+        },
+        "top_parameters": {
+          "items": {
+            "$ref": "#/$defs/TopParameter"
+          },
+          "title": "Top Parameters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "compilation_units"
+      ],
+      "title": "Profile",
+      "type": "object"
+    },
+    "Project": {
+      "additionalProperties": false,
+      "properties": {
+        "default_profile": {
+          "minLength": 1,
+          "title": "Default Profile",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "root": {
+          "default": ".",
+          "minLength": 1,
+          "title": "Root",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "default_profile"
+      ],
+      "title": "Project",
+      "type": "object"
+    },
+    "SourceInput": {
+      "additionalProperties": false,
+      "properties": {
+        "dialect": {
+          "const": "svweave-filelist-v1",
+          "default": "svweave-filelist-v1",
+          "title": "Dialect",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "filelist",
+            "file"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "path_mode": {
+          "default": "cwd",
+          "enum": [
+            "cwd",
+            "filelist"
+          ],
+          "title": "Path Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "SourceInput",
+      "type": "object"
+    },
+    "SourceRoot": {
+      "additionalProperties": false,
+      "description": "A trusted source root. `path` omitted means external: resolved through\nsvweave.local.yaml root_mappings under the same id.",
+      "properties": {
+        "exclude": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "include": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "writable": {
+          "default": false,
+          "title": "Writable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "SourceRoot",
+      "type": "object"
+    },
+    "StubRecord": {
+      "additionalProperties": false,
+      "description": "Declared stub / interface model replacing a blackbox or encrypted IP (plan 16.5). The build\nstays PARTIAL; the record only names what was replaced.",
+      "properties": {
+        "model_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Model Sha256",
+          "type": "string"
+        },
+        "module": {
+          "minLength": 1,
+          "title": "Module",
+          "type": "string"
+        },
+        "original_ip": {
+          "minLength": 1,
+          "title": "Original Ip",
+          "type": "string"
+        },
+        "replaced_scope": {
+          "minLength": 1,
+          "title": "Replaced Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "module",
+        "original_ip",
+        "model_sha256",
+        "replaced_scope"
+      ],
+      "title": "StubRecord",
+      "type": "object"
+    },
+    "TopParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "top": {
+          "minLength": 1,
+          "title": "Top",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "top",
+        "name",
+        "value"
+      ],
+      "title": "TopParameter",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "svweave.yaml",
+  "properties": {
+    "analysis": {
+      "$ref": "#/$defs/Analysis"
+    },
+    "editing": {
+      "$ref": "#/$defs/Editing"
+    },
+    "profiles": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Profile"
+      },
+      "title": "Profiles",
+      "type": "object"
+    },
+    "project": {
+      "$ref": "#/$defs/Project"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_roots": {
+      "items": {
+        "$ref": "#/$defs/SourceRoot"
+      },
+      "title": "Source Roots",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "project",
+    "source_roots",
+    "profiles"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

@@ -1,0 +1,400 @@
+{
+  "topic": "sem08_virtual",
+  "fixture_dir": "language/sem08_virtual",
+  "top": "sem08_top",
+  "declarations": [
+    {
+      "kind": "class",
+      "qualified_name": "vpkg::animal",
+      "file": "top.sv",
+      "ctx": "virtual class animal;",
+      "nth": 0,
+      "text": "animal",
+      "start": 30,
+      "end": 36
+    },
+    {
+      "kind": "class",
+      "qualified_name": "vpkg::dog",
+      "file": "top.sv",
+      "ctx": "class dog extends animal;",
+      "nth": 0,
+      "text": "dog",
+      "start": 167,
+      "end": 170
+    },
+    {
+      "kind": "class",
+      "qualified_name": "vpkg::cat",
+      "file": "top.sv",
+      "ctx": "class cat extends animal;",
+      "nth": 0,
+      "text": "cat",
+      "start": 281,
+      "end": 284
+    },
+    {
+      "kind": "function",
+      "qualified_name": "vpkg::animal::speak",
+      "file": "top.sv",
+      "ctx": "pure virtual function string speak();",
+      "nth": 0,
+      "text": "speak",
+      "start": 71,
+      "end": 76,
+      "virtual": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "vpkg::dog::speak",
+      "file": "top.sv",
+      "ctx": "virtual function string speak();\n      return \"woof\";",
+      "nth": 0,
+      "text": "speak",
+      "start": 215,
+      "end": 220,
+      "virtual": true
+    },
+    {
+      "kind": "function",
+      "qualified_name": "vpkg::cat::speak",
+      "file": "top.sv",
+      "ctx": "virtual function string speak();\n      return \"meow\";",
+      "nth": 0,
+      "text": "speak",
+      "start": 329,
+      "end": 334,
+      "virtual": true
+    },
+    {
+      "kind": "package",
+      "qualified_name": "vpkg",
+      "file": "top.sv",
+      "ctx": "package vpkg;",
+      "nth": 0,
+      "text": "vpkg",
+      "start": 8,
+      "end": 12
+    },
+    {
+      "kind": "function",
+      "qualified_name": "vpkg::animal::intro",
+      "file": "top.sv",
+      "ctx": "function string intro();",
+      "nth": 0,
+      "text": "intro",
+      "start": 100,
+      "end": 105,
+      "virtual": false
+    },
+    {
+      "kind": "module",
+      "qualified_name": "sem08_top",
+      "file": "top.sv",
+      "ctx": "module sem08_top;",
+      "nth": 0,
+      "text": "sem08_top",
+      "start": 405,
+      "end": 414
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem08_top.a",
+      "file": "top.sv",
+      "ctx": "animal a;",
+      "nth": 0,
+      "text": "a",
+      "start": 443,
+      "end": 444
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem08_top.d",
+      "file": "top.sv",
+      "ctx": "dog d = new();",
+      "nth": 0,
+      "text": "d",
+      "start": 452,
+      "end": 453
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem08_top.c",
+      "file": "top.sv",
+      "ctx": "cat c = new();",
+      "nth": 0,
+      "text": "c",
+      "start": 469,
+      "end": 470
+    }
+  ],
+  "references": [
+    {
+      "kind": "call",
+      "target": "vpkg::animal::speak",
+      "status": "dynamic_unresolved",
+      "file": "top.sv",
+      "ctx": "a.speak());\n    a = c;",
+      "nth": 0,
+      "text": "speak",
+      "start": 528,
+      "end": 533
+    },
+    {
+      "kind": "call",
+      "target": "vpkg::animal::speak",
+      "status": "dynamic_unresolved",
+      "file": "top.sv",
+      "ctx": "a.speak());\n    $display(\"%s\", d.intro",
+      "nth": 0,
+      "text": "speak",
+      "start": 570,
+      "end": 575
+    },
+    {
+      "kind": "call",
+      "target": "vpkg::animal::speak",
+      "status": "dynamic_unresolved",
+      "file": "top.sv",
+      "ctx": "return speak();",
+      "nth": 0,
+      "text": "speak",
+      "start": 122,
+      "end": 127
+    },
+    {
+      "kind": "call",
+      "target": "vpkg::animal::intro",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "d.intro()",
+      "nth": 0,
+      "text": "intro",
+      "start": 601,
+      "end": 606
+    },
+    {
+      "kind": "extends",
+      "target": "vpkg::animal",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "class dog extends animal;",
+      "nth": 0,
+      "text": "animal",
+      "start": 179,
+      "end": 185
+    },
+    {
+      "kind": "extends",
+      "target": "vpkg::animal",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "class cat extends animal;",
+      "nth": 0,
+      "text": "animal",
+      "start": 293,
+      "end": 299
+    },
+    {
+      "kind": "import",
+      "target": "vpkg",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "import vpkg::*;",
+      "nth": 0,
+      "text": "vpkg::*",
+      "start": 425,
+      "end": 432
+    },
+    {
+      "kind": "type",
+      "target": "vpkg::animal",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "animal a;",
+      "nth": 0,
+      "text": "animal",
+      "start": 436,
+      "end": 442
+    },
+    {
+      "kind": "type",
+      "target": "vpkg::dog",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "dog d = new();",
+      "nth": 0,
+      "text": "dog",
+      "start": 448,
+      "end": 451
+    },
+    {
+      "kind": "new",
+      "target": "vpkg::dog",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "dog d = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 456,
+      "end": 461
+    },
+    {
+      "kind": "type",
+      "target": "vpkg::cat",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "cat c = new();",
+      "nth": 0,
+      "text": "cat",
+      "start": 465,
+      "end": 468
+    },
+    {
+      "kind": "new",
+      "target": "vpkg::cat",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "cat c = new();",
+      "nth": 0,
+      "text": "new()",
+      "start": 473,
+      "end": 478
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = d;",
+      "nth": 0,
+      "text": "a",
+      "start": 500,
+      "end": 501
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.d",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = d;",
+      "nth": 0,
+      "text": "d",
+      "start": 504,
+      "end": 505
+    },
+    {
+      "kind": "system_call",
+      "target": null,
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = d;\n    $display(\"%s\", a.speak()",
+      "nth": 0,
+      "text": "$display",
+      "start": 511,
+      "end": 519
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = d;\n    $display(\"%s\", a.speak()",
+      "nth": 0,
+      "text": "a",
+      "start": 526,
+      "end": 527
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = c;",
+      "nth": 0,
+      "text": "a",
+      "start": 542,
+      "end": 543
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.c",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = c;",
+      "nth": 0,
+      "text": "c",
+      "start": 546,
+      "end": 547
+    },
+    {
+      "kind": "system_call",
+      "target": null,
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = c;\n    $display(\"%s\", a.speak()",
+      "nth": 0,
+      "text": "$display",
+      "start": 553,
+      "end": 561
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.a",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "a = c;\n    $display(\"%s\", a.speak()",
+      "nth": 0,
+      "text": "a",
+      "start": 568,
+      "end": 569
+    },
+    {
+      "kind": "system_call",
+      "target": null,
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "$display(\"%s\", d.intro",
+      "nth": 0,
+      "text": "$display",
+      "start": 584,
+      "end": 592
+    },
+    {
+      "kind": "value",
+      "target": "sem08_top.d",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "d.intro()",
+      "nth": 0,
+      "text": "d",
+      "start": 599,
+      "end": 600
+    }
+  ],
+  "override_candidates": [
+    "vpkg::dog::speak",
+    "vpkg::cat::speak"
+  ],
+  "closed_scope": {
+    "declaration_files": [
+      "top.sv"
+    ],
+    "reference_files": [
+      "top.sv"
+    ],
+    "exclude_declarations": [
+      {
+        "kind": "instance",
+        "qualified_name": "sem08_top",
+        "file": "top.sv",
+        "ctx": "module sem08_top;",
+        "nth": 0,
+        "text": "sem08_top",
+        "start": 405,
+        "end": 414,
+        "reason": "the hierarchy root is modelled as an `instance` row spanning the same bytes as its module declaration; the module row is the golden entry"
+      }
+    ]
+  }
+}

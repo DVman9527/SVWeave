@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "probe": {
+      "default": false,
+      "type": "boolean"
+    },
+    "profile": {
+      "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

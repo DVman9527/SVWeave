@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Edit transaction state machine</title>
+<desc id="d">The legal transition table of the edit transaction state machine in editing/machine.py, with the gates enforced on each transition.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="860" class="bg"/>
+<text x="40" y="32" class="tx b s16">Edit transaction state machine (editing/machine.py, LEGAL table)</text>
+<text x="1170" y="32" class="mu s12" text-anchor="end">any other transition raises INTERNAL</text>
+<rect x="32" y="110" width="156" height="56" rx="8" class="n"/>
+<text x="110.0" y="143" class="tx b s12 mono" text-anchor="middle">PREPARED</text>
+<rect x="228" y="110" width="156" height="56" rx="8" class="n"/>
+<text x="306.0" y="143" class="tx b s12 mono" text-anchor="middle">CANDIDATE_READY</text>
+<rect x="424" y="110" width="156" height="56" rx="8" class="n"/>
+<text x="502.0" y="143" class="tx b s12 mono" text-anchor="middle">VALIDATING</text>
+<rect x="620" y="110" width="156" height="56" rx="8" class="n"/>
+<text x="698.0" y="143" class="tx b s12 mono" text-anchor="middle">VALIDATED</text>
+<rect x="816" y="110" width="156" height="56" rx="8" class="n"/>
+<text x="894.0" y="143" class="tx b s12 mono" text-anchor="middle">AWAITING_APPROVAL</text>
+<rect x="1012" y="110" width="156" height="56" rx="8" class="a"/>
+<text x="1090.0" y="143" class="ta b s12 mono" text-anchor="middle">APPROVED</text>
+<path d="M188,138.0 L228,138.0" class="la" marker-end="url(#ma)"/>
+<circle cx="208" cy="116.0" r="11" class="a"/>
+<text x="208" y="120.5" class="ta b s12" text-anchor="middle">A</text>
+<path d="M384,138.0 L424,138.0" class="la" marker-end="url(#ma)"/>
+<circle cx="404" cy="116.0" r="11" class="a"/>
+<text x="404" y="120.5" class="ta b s12" text-anchor="middle">B</text>
+<path d="M580,138.0 L620,138.0" class="la" marker-end="url(#ma)"/>
+<circle cx="600" cy="116.0" r="11" class="a"/>
+<text x="600" y="120.5" class="ta b s12" text-anchor="middle">C</text>
+<path d="M776,138.0 L816,138.0" class="la" marker-end="url(#ma)"/>
+<path d="M972,138.0 L1012,138.0" class="la" marker-end="url(#ma)"/>
+<circle cx="992" cy="116.0" r="11" class="a"/>
+<text x="992" y="120.5" class="ta b s12" text-anchor="middle">D</text>
+<text x="32" y="98" class="mu s12">happy path (blue arrows)</text>
+<line x1="20" y1="208" x2="1060" y2="208" class="lw"/>
+<line x1="80" y1="166" x2="80" y2="208" class="lw"/>
+<line x1="276" y1="166" x2="276" y2="208" class="lw"/>
+<line x1="472" y1="166" x2="472" y2="208" class="lw"/>
+<line x1="668" y1="166" x2="668" y2="208" class="lw"/>
+<line x1="864" y1="166" x2="864" y2="208" class="lw"/>
+<line x1="1060" y1="166" x2="1060" y2="208" class="lw"/>
+<line x1="20" y1="208" x2="20" y2="712" class="lw"/>
+<text x="40" y="230" class="tw s12">any not-yet-applied state (PREPARED to APPROVED) may go to</text>
+<text x="40" y="246" class="tw s12">one of the four abandon states below</text>
+<rect x="1012" y="300" width="156" height="56" rx="8" class="a"/>
+<text x="1090.0" y="333" class="ta b s12 mono" text-anchor="middle">COMMITTING</text>
+<rect x="816" y="300" width="156" height="56" rx="8" class="a"/>
+<text x="894.0" y="333" class="ta b s12 mono" text-anchor="middle">APPLIED</text>
+<rect x="620" y="300" width="156" height="56" rx="8" class="a"/>
+<text x="698.0" y="333" class="ta b s12 mono" text-anchor="middle">POST_APPLY_VERIFIED</text>
+<path d="M1120,166 L1120,300" class="la" marker-end="url(#ma)"/>
+<circle cx="1144" cy="188" r="11" class="a"/>
+<text x="1144" y="192.5" class="ta b s12" text-anchor="middle">E</text>
+<path d="M1012,328 L972,328" class="la" marker-end="url(#ma)"/>
+<circle cx="992" cy="306" r="11" class="a"/>
+<text x="992" y="310.5" class="ta b s12" text-anchor="middle">F</text>
+<path d="M816,328 L776,328" class="la" marker-end="url(#ma)"/>
+<circle cx="796" cy="306" r="11" class="a"/>
+<text x="796" y="310.5" class="ta b s12" text-anchor="middle">G</text>
+<text x="698.0" y="372" class="mu s12" text-anchor="middle">terminal</text>
+<rect x="560" y="420" width="340" height="86" rx="8" class="w"/>
+<text x="572" y="442" class="tw b s12 mono">APPLIED + post_apply_status: FAILED</text>
+<text x="572" y="462" class="tx s12">state stays APPLIED, never reported as verified;</text>
+<text x="572" y="479" class="tx s12">replaying commit re-runs the verification</text>
+<text x="572" y="496" class="mu s12">(bytes, snapshot id or build check failed)</text>
+<path d="M840,356 L840,420" class="lw" marker-end="url(#mw)"/>
+<rect x="1012" y="560" width="156" height="56" rx="8" class="w"/>
+<text x="1090.0" y="593" class="tw b s12 mono" text-anchor="middle">RECOVERY_REQUIRED</text>
+<path d="M1060,356 L1060,560" class="lw" marker-end="url(#mw)"/>
+<text x="1054" y="386" class="tw s12" text-anchor="end">crash or</text>
+<text x="1054" y="402" class="tw s12" text-anchor="end">interrupt</text>
+<path d="M1168,144 L1186,144 L1186,588 L1168,588" class="lw" marker-end="url(#mw)"/>
+<text x="1180" y="422" class="tw s12" text-anchor="end">crash after journal,</text>
+<text x="1180" y="438" class="tw s12" text-anchor="end">before COMMITTING</text>
+<text x="1180" y="454" class="tw s12" text-anchor="end">was recorded</text>
+<path d="M1012,580 L940,580 L940,356" class="la" marker-end="url(#ma)"/>
+<text x="932" y="572" class="ta s12" text-anchor="end">roll forward</text>
+<rect x="40" y="652" width="830" height="100" rx="8" class="n"/>
+<text x="52" y="672" class="mu b s12">terminal states, no outgoing transitions</text>
+<rect x="56" y="684" width="180" height="56" rx="8" class="w"/>
+<text x="146.0" y="717" class="tw b s12 mono" text-anchor="middle">VALIDATION_FAILED</text>
+<rect x="260" y="684" width="180" height="56" rx="8" class="n"/>
+<text x="350.0" y="717" class="tx b s12 mono" text-anchor="middle">EXPIRED</text>
+<rect x="464" y="684" width="180" height="56" rx="8" class="w"/>
+<text x="554.0" y="717" class="tw b s12 mono" text-anchor="middle">CONFLICT</text>
+<rect x="668" y="684" width="180" height="56" rx="8" class="n"/>
+<text x="758.0" y="717" class="tx b s12 mono" text-anchor="middle">ABORTED</text>
+<path d="M20,712 L40,712" class="lw" marker-end="url(#mw)"/>
+<path d="M1060,616 L1060,612 L554,612 L554,684" class="lw" marker-end="url(#mw)"/>
+<path d="M1120,616 L1120,625 L758,625 L758,684" class="lw" marker-end="url(#mw)"/>
+<text x="570" y="604" class="tw s12">to CONFLICT: the human's bytes are kept</text>
+<text x="1160" y="646" class="tw s12" text-anchor="end">to ABORTED: rolled back or none applied</text>
+<rect x="40" y="264" width="500" height="366" rx="8" class="chip"/>
+<text x="52" y="284" class="tx b s13">Gates (badges on the blue edges)</text>
+<circle cx="66" cy="302" r="11" class="a"/>
+<text x="66" y="306.5" class="ta b s12" text-anchor="middle">A</text>
+<text x="86" y="306" class="tx b s12">prepare</text>
+<text x="86" y="322" class="mu s12">build COMPLETE + CURRENT; edit bound to id or range + hash</text>
+<circle cx="66" cy="344" r="11" class="a"/>
+<text x="66" y="348.5" class="ta b s12" text-anchor="middle">B</text>
+<text x="86" y="348" class="tx b s12">freeze + scope</text>
+<text x="86" y="364" class="mu s12">only declared files and allowed_paths; size limits</text>
+<circle cx="66" cy="386" r="11" class="a"/>
+<text x="66" y="390.5" class="ta b s12" text-anchor="middle">C</text>
+<text x="86" y="390" class="tx b s12">validate</text>
+<text x="86" y="406" class="mu s12">baseline and candidate both NO_ERRORS + COMPLETE</text>
+<circle cx="66" cy="428" r="11" class="a"/>
+<text x="66" y="432.5" class="ta b s12" text-anchor="middle">D</text>
+<text x="86" y="432" class="tx b s12">approve</text>
+<text x="86" y="448" class="mu s12">TTY, 12-char hash prefix; HMAC record; 30 min expiry</text>
+<circle cx="66" cy="470" r="11" class="a"/>
+<text x="66" y="474.5" class="ta b s12" text-anchor="middle">E</text>
+<text x="86" y="474" class="tx b s12">commit gate</text>
+<text x="86" y="490" class="mu s12">approval HMAC + expiry; config_id recheck; path policy;</text>
+<text x="86" y="504" class="mu s12">toolchain unchanged; exclusive lock; workspace CAS; journal</text>
+<text x="86" y="518" class="mu s12">fsync</text>
+<circle cx="66" cy="540" r="11" class="a"/>
+<text x="66" y="544.5" class="ta b s12" text-anchor="middle">F</text>
+<text x="86" y="544" class="tx b s12">write</text>
+<text x="86" y="560" class="mu s12">per file: current == before-hash; temp, fsync, rename</text>
+<circle cx="66" cy="582" r="11" class="a"/>
+<text x="66" y="586.5" class="ta b s12" text-anchor="middle">G</text>
+<text x="86" y="586" class="tx b s12">post-apply</text>
+<text x="86" y="602" class="mu s12">bytes == after-hashes; snapshot id match; rebuild clean</text>
+<text x="40" y="800" class="mu s12">Typical triggers of abandon states: VALIDATION_FAILED at validate, EXPIRED when the 30 min approval or transaction ttl lapses,</text>
+<text x="40" y="816" class="mu s12">CONFLICT on a failed CAS or EDIT_CONFLICT, ABORTED by svweave edit abort (refused once COMMITTING, RECOVERY_REQUIRED or APPLIED).</text>
+<text x="40" y="836" class="mu s12">While a journal is unfinished, every new prepare and commit fails with RECOVERY_REQUIRED.</text>
+</svg>

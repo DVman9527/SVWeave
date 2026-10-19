@@ -1,0 +1,12 @@
+{
+  "topic": "stub_boundary",
+  "fixture_dir": "language/stub_boundary",
+  "top": "stub_top",
+  "stub": {
+    "definition": "vendor_ip",
+    "stub_name": "vendor_ip_v1",
+    "instance": "stub_top.u_ip",
+    "completeness": "PARTIAL",
+    "gap": "stub_boundary"
+  }
+}

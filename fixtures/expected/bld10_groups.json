@@ -1,0 +1,40 @@
+{
+  "topic": "bld10_groups",
+  "fixture_dir": "language/bld10_groups",
+  "top": [
+    "top1",
+    "top2"
+  ],
+  "expect": {
+    "groups": {
+      "g1": {
+        "W": "8",
+        "top": "top1"
+      },
+      "g2": {
+        "W": "16",
+        "top": "top2"
+      }
+    },
+    "declarations": [
+      {
+        "qualified_name": "top1.WIDTH",
+        "value": "8",
+        "cu_differs": true
+      },
+      {
+        "qualified_name": "top2.WIDTH",
+        "value": "16",
+        "cu_differs": true
+      }
+    ],
+    "shared_header": {
+      "file": "inc/shared.svh",
+      "ctx": "localparam int WIDTH = `W;",
+      "nth": 0,
+      "text": "WIDTH",
+      "start": 15,
+      "end": 20
+    }
+  }
+}

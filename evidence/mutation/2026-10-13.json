@@ -1,0 +1,446 @@
+{
+  "suite": "critical-mutations (plan 20.5)",
+  "date": "2026-10-13T08:02:53+00:00",
+  "import_proof": {
+    "svweave_origin_under_python_I": "<repo>/.svweave/mutation/repo/src/svweave/__init__.py",
+    "inside_scratch_copy": true
+  },
+  "total": 10,
+  "killed": 10,
+  "survived": [],
+  "errors": [],
+  "all_killed": true,
+  "baselines": {
+    "tests/unit/test_snapshot.py tests/unit/test_review_fixes.py -k SNP or header": {
+      "rc": 0,
+      "seconds": 2.7,
+      "tail": [
+        "...........                                                              [100%]"
+      ]
+    },
+    "tests/unit/test_slang_args.py tests/integration/test_build_identity.py -k BLD_07 or include or incdir or slang_args or args": {
+      "rc": 0,
+      "seconds": 3.3,
+      "tail": [
+        "....                                                                     [100%]"
+      ]
+    },
+    "tests/integration/test_uvm.py tests/integration/test_sem.py tests/integration/test_edt_flow.py::test_bare_method_name_is_ambiguous_even_with_real_serena": {
+      "rc": 0,
+      "seconds": 54.0,
+      "tail": [
+        "...............                                                          [100%]"
+      ]
+    },
+    "tests/integration/test_sem.py tests/integration/test_sva.py tests/integration/test_cli_semantic.py": {
+      "rc": 0,
+      "seconds": 12.7,
+      "tail": [
+        "....................                                                     [100%]"
+      ]
+    },
+    "tests/unit/test_edit_prepare.py tests/unit/test_edit_commit.py tests/fault_injection/test_edit_crash.py": {
+      "rc": 0,
+      "seconds": 51.7,
+      "tail": [
+        "...................................................................      [100%]"
+      ]
+    },
+    "tests/unit/test_edit_commit.py tests/unit/test_edit_machine.py tests/unit/test_edit_validate.py": {
+      "rc": 0,
+      "seconds": 39.7,
+      "tail": [
+        "..............................................................           [100%]"
+      ]
+    },
+    "tests/unit/test_edit_prepare.py tests/unit/test_edit_validate.py tests/unit/test_adapters_serena.py": {
+      "rc": 0,
+      "seconds": 30.8,
+      "tail": [
+        "........................................................................ [ 84%]",
+        ".............                                                            [100%]"
+      ]
+    },
+    "tests/fault_injection/test_edit_crash.py tests/unit/test_edit_commit.py": {
+      "rc": 0,
+      "seconds": 37.0,
+      "tail": [
+        "....................................                                     [100%]"
+      ]
+    },
+    "tests/unit/test_manifest.py tests/unit/test_slang_args.py tests/unit/test_config.py": {
+      "rc": 0,
+      "seconds": 4.0,
+      "tail": [
+        "........................................................................ [ 94%]",
+        "....                                                                     [100%]"
+      ]
+    },
+    "tests/unit/test_gateway_evidence.py tests/unit/test_gateway_status_report.py tests/contract": {
+      "rc": 0,
+      "seconds": 19.5,
+      "tail": [
+        "............................................................             [100%]"
+      ]
+    }
+  },
+  "mutations": [
+    {
+      "id": "M01",
+      "title": "remove the header hash from the snapshot inventory (headers hash to a constant)",
+      "plan": "20.5 #1; 9.1/9.3",
+      "files": [
+        "src/svweave/snapshot/capture.py"
+      ],
+      "tests": [
+        "tests/unit/test_snapshot.py",
+        "tests/unit/test_review_fixes.py",
+        "-k",
+        "SNP or header"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.snapshot.capture": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 2.6,
+      "failing_tests": [
+        "tests/unit/test_snapshot.py::test_SNP_01_modified_included_header_makes_snapshot_stale",
+        "tests/unit/test_snapshot.py::test_SNP_02_new_higher_priority_header_invalidates_even_if_original_unchanged",
+        "tests/unit/test_snapshot.py::test_SNP_02_lookup_inventory_covers_search_space_even_when_empty_dir",
+        "tests/unit/test_snapshot.py::test_SNP_02_nested_include_subdir_and_excluded_dirs",
+        "tests/unit/test_snapshot.py::test_SNP_05_new_file_appearing_in_lookup_dir_during_capture"
+      ],
+      "pytest_tail": [
+        "FAILED tests/unit/test_snapshot.py::test_SNP_02_lookup_inventory_covers_search_space_even_when_empty_dir",
+        "FAILED tests/unit/test_snapshot.py::test_SNP_02_nested_include_subdir_and_excluded_dirs",
+        "FAILED tests/unit/test_snapshot.py::test_SNP_05_new_file_appearing_in_lookup_dir_during_capture",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      ]
+    },
+    {
+      "id": "M02",
+      "title": "ignore include-directory order (slang -I dirs are sorted alphabetically)",
+      "plan": "20.5 #2; BLD-07",
+      "files": [
+        "src/svweave/manifest/slang_args.py"
+      ],
+      "tests": [
+        "tests/unit/test_slang_args.py",
+        "tests/integration/test_build_identity.py",
+        "-k",
+        "BLD_07 or include or incdir or slang_args or args"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.manifest.slang_args": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 2.9,
+      "failing_tests": [
+        "tests/integration/test_build_identity.py::test_BLD_07_include_dir_order_changes_selected_header_and_build_id"
+      ],
+      "pytest_tail": [
+        "      + 11",
+        "<repo>/.svweave/mutation/repo/tests/integration/test_build_identity.py:68: AssertionError: assert '11' == '22'",
+        "=========================== short test summary info ============================",
+        "FAILED tests/integration/test_build_identity.py::test_BLD_07_include_dir_order_changes_selected_header_and_build_id"
+      ]
+    },
+    {
+      "id": "M03",
+      "title": "merge methods by bare name (function/task qualified_name = bare name)",
+      "plan": "20.5 #3; SEM same-name methods",
+      "files": [
+        "src/svweave/adapters/slang/extract.py"
+      ],
+      "tests": [
+        "tests/integration/test_uvm.py",
+        "tests/integration/test_sem.py",
+        "tests/integration/test_edt_flow.py::test_bare_method_name_is_ambiguous_even_with_real_serena"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.adapters.slang.extract": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 32.5,
+      "failing_tests": [
+        "tests/integration/test_uvm.py::test_UVM_01_real_uvm_static_compile_finds_classes_and_methods",
+        "tests/integration/test_uvm.py::test_UVM_02_factory_overrides_are_listed_call_sites_not_a_topology",
+        "tests/integration/test_uvm.py::test_UVM_03_config_db_sites_keep_type_wildcard_and_context",
+        "tests/integration/test_sem.py::test_SEM_01_same_name_methods_in_two_packages_stay_separate",
+        "tests/integration/test_sem.py::test_SEM_02_parameterized_class_specializations_share_one_declaration"
+      ],
+      "pytest_tail": [
+        "FAILED tests/integration/test_uvm.py::test_UVM_03_config_db_sites_keep_type_wildcard_and_context",
+        "FAILED tests/integration/test_sem.py::test_SEM_01_same_name_methods_in_two_packages_stay_separate",
+        "FAILED tests/integration/test_sem.py::test_SEM_02_parameterized_class_specializations_share_one_declaration",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      ]
+    },
+    {
+      "id": "M04",
+      "title": "PARTIAL becomes COMPLETE (ingest completeness verdict always COMPLETE)",
+      "plan": "20.5 #4; SEM-07",
+      "files": [
+        "src/svweave/adapters/slang/ingest.py"
+      ],
+      "tests": [
+        "tests/integration/test_sem.py",
+        "tests/integration/test_sva.py",
+        "tests/integration/test_cli_semantic.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.adapters.slang.ingest": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 12.6,
+      "failing_tests": [
+        "tests/integration/test_sem.py::test_SEM_07_errors_give_precise_diagnostics_and_partial",
+        "tests/integration/test_sva.py::test_SVA_02_unknown_signal_and_unresolvable_bind_are_not_a_valid_inventory",
+        "tests/integration/test_sva.py::test_stub_boundary_marks_partial_and_names_the_stub",
+        "tests/integration/test_cli_semantic.py::test_build_exit_code_3_for_errors_and_connections_query"
+      ],
+      "pytest_tail": [
+        "FAILED tests/integration/test_sem.py::test_SEM_07_errors_give_precise_diagnostics_and_partial",
+        "FAILED tests/integration/test_sva.py::test_SVA_02_unknown_signal_and_unresolvable_bind_are_not_a_valid_inventory",
+        "FAILED tests/integration/test_sva.py::test_stub_boundary_marks_partial_and_names_the_stub",
+        "FAILED tests/integration/test_cli_semantic.py::test_build_exit_code_3_for_errors_and_connections_query"
+      ]
+    },
+    {
+      "id": "M05",
+      "title": "cancel the expected-hash compare-and-set (exact range and commit precondition)",
+      "plan": "20.5 #5; EDT-02",
+      "files": [
+        "src/svweave/editing/plan.py",
+        "src/svweave/application/edit.py",
+        "src/svweave/editing/journal.py"
+      ],
+      "tests": [
+        "tests/unit/test_edit_prepare.py",
+        "tests/unit/test_edit_commit.py",
+        "tests/fault_injection/test_edit_crash.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.editing.plan": {
+          "origin_in_copy": true,
+          "marker_present": true
+        },
+        "svweave.application.edit": {
+          "origin_in_copy": true,
+          "marker_present": true
+        },
+        "svweave.editing.journal": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 52.1,
+      "failing_tests": [
+        "tests/unit/test_edit_commit.py::test_edt02_stale_expected_hash_check_protects_the_target_even_if_snapshot_check_passes",
+        "tests/fault_injection/test_edit_crash.py::test_failure_during_apply_after_some_files_requires_recovery"
+      ],
+      "pytest_tail": [
+        "<repo>/.svweave/mutation/repo/tests/fault_injection/test_edit_crash.py:50: Failed: DID NOT RAISE SvwError",
+        "=========================== short test summary info ============================",
+        "FAILED tests/unit/test_edit_commit.py::test_edt02_stale_expected_hash_check_protects_the_target_even_if_snapshot_check_passes",
+        "FAILED tests/fault_injection/test_edit_crash.py::test_failure_during_apply_after_some_files_requires_recovery"
+      ]
+    },
+    {
+      "id": "M06",
+      "title": "accept a fake approval (HMAC signature check disabled)",
+      "plan": "20.5 #6; EDT-04",
+      "files": [
+        "src/svweave/editing/approval.py"
+      ],
+      "tests": [
+        "tests/unit/test_edit_commit.py",
+        "tests/unit/test_edit_machine.py",
+        "tests/unit/test_edit_validate.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.editing.approval": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 39.1,
+      "failing_tests": [
+        "tests/unit/test_edit_commit.py::test_sec06_forged_approval_files_are_refused"
+      ],
+      "pytest_tail": [
+        "E   Failed: DID NOT RAISE SvwError",
+        "<repo>/.svweave/mutation/repo/tests/unit/test_edit_commit.py:35: Failed: DID NOT RAISE SvwError",
+        "=========================== short test summary info ============================",
+        "FAILED tests/unit/test_edit_commit.py::test_sec06_forged_approval_files_are_refused"
+      ]
+    },
+    {
+      "id": "M07",
+      "title": "let the backend write the original (candidate is hardlinked to the snapshot)",
+      "plan": "20.5 #7; ADR-007, SEC-01",
+      "files": [
+        "src/svweave/editing/candidate.py"
+      ],
+      "tests": [
+        "tests/unit/test_edit_prepare.py",
+        "tests/unit/test_edit_validate.py",
+        "tests/unit/test_adapters_serena.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.editing.candidate": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 16.6,
+      "failing_tests": [
+        "tests/unit/test_edit_prepare.py::test_prepare_creates_independent_byte_copy_and_never_touches_the_original",
+        "tests/unit/test_edit_prepare.py::test_edit_path_is_recorded_per_edit_and_serena_edit_is_labelled",
+        "tests/unit/test_edit_prepare.py::test_overlapping_and_mixed_edits_are_refused",
+        "tests/unit/test_edit_prepare.py::test_edt06_serena_touching_an_extra_file_rejects_the_candidate",
+        "tests/unit/test_edit_prepare.py::test_serena_span_wider_than_the_declaration_keeps_the_extra_qualifier_bytes"
+      ],
+      "pytest_tail": [
+        "FAILED tests/unit/test_edit_prepare.py::test_overlapping_and_mixed_edits_are_refused",
+        "FAILED tests/unit/test_edit_prepare.py::test_edt06_serena_touching_an_extra_file_rejects_the_candidate",
+        "FAILED tests/unit/test_edit_prepare.py::test_serena_span_wider_than_the_declaration_keeps_the_extra_qualifier_bytes",
+        "!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+      ]
+    },
+    {
+      "id": "M08",
+      "title": "blind rollback after a crash (conflicting files are classified as applied, recovery CAS removed)",
+      "plan": "20.5 #8; EDT-07/08",
+      "files": [
+        "src/svweave/editing/journal.py",
+        "src/svweave/application/edit.py"
+      ],
+      "tests": [
+        "tests/fault_injection/test_edit_crash.py",
+        "tests/unit/test_edit_commit.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.editing.journal": {
+          "origin_in_copy": true,
+          "marker_present": true
+        },
+        "svweave.application.edit": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 36.0,
+      "failing_tests": [
+        "tests/fault_injection/test_edit_crash.py::test_edt08_human_edit_after_crash_is_never_overwritten",
+        "tests/fault_injection/test_edit_crash.py::test_edt08_unrelated_third_state_is_a_conflict_not_a_guess"
+      ],
+      "pytest_tail": [
+        "<repo>/.svweave/mutation/repo/tests/fault_injection/test_edit_crash.py:183: AssertionError: assert {'rtl/pkg.sv'...v': 'applied'} == {'rtl/pkg.sv'...': 'conflict'}",
+        "=========================== short test summary info ============================",
+        "FAILED tests/fault_injection/test_edit_crash.py::test_edt08_human_edit_after_crash_is_never_overwritten",
+        "FAILED tests/fault_injection/test_edit_crash.py::test_edt08_unrelated_third_state_is_a_conflict_not_a_guess"
+      ]
+    },
+    {
+      "id": "M09",
+      "title": "ignore unsupported options (unknown flag is logged and dropped, build not blocked)",
+      "plan": "20.5 #9; MAN unsupported flags",
+      "files": [
+        "src/svweave/manifest/resolver.py"
+      ],
+      "tests": [
+        "tests/unit/test_manifest.py",
+        "tests/unit/test_slang_args.py",
+        "tests/unit/test_config.py"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.manifest.resolver": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 4.1,
+      "failing_tests": [
+        "tests/unit/test_manifest.py::test_BLD_03_unsupported_options_reported_with_origin",
+        "tests/unit/test_manifest.py::test_BLD_03_all_unsupported_options_collected_not_dropped"
+      ],
+      "pytest_tail": [
+        "<repo>/.svweave/mutation/repo/tests/unit/test_manifest.py:40: Failed: DID NOT RAISE SvwError",
+        "=========================== short test summary info ============================",
+        "FAILED tests/unit/test_manifest.py::test_BLD_03_unsupported_options_reported_with_origin",
+        "FAILED tests/unit/test_manifest.py::test_BLD_03_all_unsupported_options_collected_not_dropped"
+      ]
+    },
+    {
+      "id": "M10",
+      "title": "treat a static build as simulation PASS (absent evidence reported as PASS)",
+      "plan": "20.5 #10; REL-01, SVA-03",
+      "files": [
+        "src/svweave/application/evidence.py"
+      ],
+      "tests": [
+        "tests/unit/test_gateway_evidence.py",
+        "tests/unit/test_gateway_status_report.py",
+        "tests/contract"
+      ],
+      "baseline_rc": 0,
+      "import_proof": {
+        "svweave.application.evidence": {
+          "origin_in_copy": true,
+          "marker_present": true
+        }
+      },
+      "status": "KILLED",
+      "pytest_rc": 1,
+      "seconds": 19.2,
+      "failing_tests": [
+        "tests/unit/test_gateway_evidence.py::test_UVM_04_unlinked_evidence_is_never_attached_to_a_build",
+        "tests/unit/test_gateway_evidence.py::test_REL_01_states_are_separate_and_never_merged",
+        "tests/unit/test_gateway_status_report.py::test_report_fills_template_from_real_data_and_marks_the_rest",
+        "tests/unit/test_gateway_status_report.py::test_report_shows_last_probe_and_declared_evidence_separately"
+      ],
+      "pytest_tail": [
+        "FAILED tests/unit/test_gateway_evidence.py::test_UVM_04_unlinked_evidence_is_never_attached_to_a_build",
+        "FAILED tests/unit/test_gateway_evidence.py::test_REL_01_states_are_separate_and_never_merged",
+        "FAILED tests/unit/test_gateway_status_report.py::test_report_fills_template_from_real_data_and_marks_the_rest",
+        "FAILED tests/unit/test_gateway_status_report.py::test_report_shows_last_probe_and_declared_evidence_separately"
+      ]
+    }
+  ]
+}

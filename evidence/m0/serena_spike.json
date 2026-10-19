@@ -1,0 +1,888 @@
+{
+  "backend": "serena",
+  "serena_exe": "${REPO}/.toolchain/serena-venv/bin/serena",
+  "args": [
+    "start-mcp-server",
+    "--project",
+    "${REPO}/.svweave/spike/candidate/fixtures",
+    "--context",
+    "${REPO}/.toolchain/state/serena/svweave_spike_context.yml",
+    "--transport",
+    "stdio",
+    "--enable-web-dashboard",
+    "false",
+    "--open-web-dashboard",
+    "false",
+    "--enable-gui-log-window",
+    "false",
+    "--log-level",
+    "INFO",
+    "--tool-timeout",
+    "120"
+  ],
+  "env": {
+    "PATH": "${REPO}/.toolchain/verible/bin:${REPO}/.toolchain/serena-venv/bin:/usr/bin:/bin",
+    "HOME": "${REPO}/.toolchain/state/serena/home",
+    "SERENA_HOME": "${REPO}/.toolchain/state/serena/home/.serena",
+    "XDG_CONFIG_HOME": "${REPO}/.toolchain/state/serena/home/.config",
+    "XDG_CACHE_HOME": "${REPO}/.toolchain/state/serena/cache",
+    "XDG_DATA_HOME": "${REPO}/.toolchain/state/serena/data",
+    "LANG": "C.UTF-8",
+    "PYTHONNOUSERSITE": "1",
+    "UV_NO_SYNC": "1"
+  },
+  "config": {
+    "serena_home": "${REPO}/.toolchain/state/serena/home/.serena",
+    "context_file": "${REPO}/.toolchain/state/serena/svweave_spike_context.yml",
+    "project_yml": "${REPO}/.toolchain/state/serena/projects/fixtures/.serena/project.yml"
+  },
+  "candidate": "${REPO}/.svweave/spike/candidate/fixtures",
+  "candidate_manifest_before": {
+    "demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+    "demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+    "demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+    "demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+    "demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+    "demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+    "uvm/svw_demo_uvm_pkg.sv": "de4075a37f90472f0c4c1efd7286726e8b88c21f183b351e9ad4bfb096541a6d",
+    "uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97",
+    "verible.filelist": "20b945496fccc1e0de75717b2558a18050237f757bf1d8f997902e1abc048fc8"
+  },
+  "verible_filelist": [
+    "demo/include/demo_defs.svh",
+    "demo/rtl/demo_lane.sv",
+    "demo/rtl/demo_top.sv",
+    "demo/sva/demo_bind.sv",
+    "demo/sva/stream_hold_sva.sv",
+    "uvm/svw_demo_uvm_pkg.sv",
+    "uvm/svw_uvm_top.sv"
+  ],
+  "verible_ls_version": "Version\tv0.0-4296-g0f262651\nCommit-Timestamp\t2026-09-23T08:15:19Z\nBuilt\t2026-09-23T08:18:08Z",
+  "initialize": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {
+      "experimental": {},
+      "prompts": {
+        "listChanged": false
+      },
+      "resources": {
+        "subscribe": false,
+        "listChanged": false
+      },
+      "tools": {
+        "listChanged": false
+      }
+    },
+    "serverInfo": {
+      "name": "Serena",
+      "version": "1.28.1",
+      "websiteUrl": "https://oraios.github.io/serena"
+    },
+    "instructions": "CRITICAL: Before starting to work on a coding task, call the `initial_instructions` tool to read the 'Serena Instructions Manual'."
+  },
+  "timings": {
+    "initialize_s": 2.88
+  },
+  "tools": [
+    {
+      "name": "replace_symbol_body",
+      "title": "Replace Symbol Body",
+      "description": "Replaces the body of the given symbol.\n\nIMPORTANT: Only replace symbol bodies if you have previously made a retrieval with include_body=True and thus know what\nconstitutes the body!.",
+      "inputSchema": {
+        "properties": {
+          "name_path": {
+            "title": "Name Path",
+            "type": "string",
+            "description": "Name path of the symbol whose body to replace."
+          },
+          "relative_path": {
+            "title": "Relative Path",
+            "type": "string",
+            "description": "The relative path to the file containing the symbol."
+          },
+          "body": {
+            "title": "Body",
+            "type": "string",
+            "description": "The new symbol body. The symbol body is the definition of a symbol\nin the programming language, including e.g. the signature line for functions.\nDepending on the language, it may or may not include a preceding docstring or other preceding annotations."
+          }
+        },
+        "required": [
+          "name_path",
+          "relative_path",
+          "body"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Replace Symbol Body",
+        "readOnlyHint": false,
+        "destructiveHint": true
+      }
+    },
+    {
+      "name": "get_symbols_overview",
+      "title": "Get Symbols Overview",
+      "description": "Use this tool to get a high-level understanding of the code symbols in a file.\nThis should be the first tool to call when you want to understand a new file, unless you already know\nwhat you are looking for. Returns a JSON object containing symbols grouped by kind in a compact format.",
+      "inputSchema": {
+        "properties": {
+          "relative_path": {
+            "title": "Relative Path",
+            "type": "string",
+            "description": "The relative path to the file to get the overview of."
+          },
+          "depth": {
+            "default": -1,
+            "title": "Depth",
+            "type": "integer",
+            "description": "Depth up to which descendants shall be retrieved.\nDefault (-1) results in a language specific choice: 1 for java and kotlin and 0 for other languages."
+          },
+          "max_answer_chars": {
+            "default": -1,
+            "title": "Max Answer Chars",
+            "type": "integer",
+            "description": "If the overview is longer than this number of characters,\nno content will be returned. -1 means the default value from the config will be used.\nDon't adjust unless there is really no other way to get the content required for the task."
+          }
+        },
+        "required": [
+          "relative_path"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Get Symbols Overview",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      }
+    },
+    {
+      "name": "find_symbol",
+      "title": "Find Symbol",
+      "description": "Finds symbols and code entities (classes, methods, etc.) based on the given name path pattern.\nThe returned symbol information can be used for edits or further queries.\nSpecify `depth > 0` to also retrieve children/descendants (e.g., methods of a class).\n\nA name path is a path in the symbol tree *within a source file*.\nFor example, the method `my_method` defined in class `MyClass` would have the name path `MyClass/my_method`.\nIf a symbol is overloaded (e.g., in Java), a 0-based index is appended (e.g. \"MyClass/my_method[0]\") to\nuniquely identify it.\n\nTo search for a symbol, you provide a name path pattern that is used to match against name paths.\nIt can be\n * a simple name (e.g. \"method\"), which will match any symbol with that name\n * a relative path like \"class/method\", which will match any symbol with that name path suffix\n * an absolute name path \"/class/method\" (absolute name path), which requires an exact match of the full name path within the source file.\nAppend an index `[i]` to match a specific overload only, e.g. \"MyClass/my_method[1]\". Returns symbols (with locations) matching the name.",
+      "inputSchema": {
+        "properties": {
+          "name_path_pattern": {
+            "title": "Name Path Pattern",
+            "type": "string",
+            "description": "The name path matching pattern (see above)."
+          },
+          "depth": {
+            "default": 0,
+            "title": "Depth",
+            "type": "integer",
+            "description": "Depth up to which descendants shall be retrieved (e.g. use 1 to also retrieve immediate children;\nfor the case where the symbol is a class, this will return its methods).\nIgnored if `include_body=True`. Default 0."
+          },
+          "relative_path": {
+            "default": "",
+            "title": "Relative Path",
+            "type": "string",
+            "description": "(optional) restrict search to this file or directory. If None, searches entire codebase.\nIf a directory is passed, the search will be restricted to the files in that directory.\nIf a file is passed, the search will be restricted to that file."
+          },
+          "include_body": {
+            "default": false,
+            "title": "Include Body",
+            "type": "boolean",
+            "description": "Whether to include the symbol's source code. Use judiciously."
+          },
+          "include_info": {
+            "default": false,
+            "title": "Include Info",
+            "type": "boolean",
+            "description": "Whether to include additional info (hover-like, typically including docstring and signature),\nabout the symbol (ignored if include_body is True). Info is never included for child symbols.\nNote: Depending on the language, this can be slow (e.g., C/C++)."
+          },
+          "include_kinds": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Include Kinds",
+            "type": "array",
+            "description": "(optional) limits results to the given LSP symbol kinds (integers)."
+          },
+          "exclude_kinds": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Exclude Kinds",
+            "type": "array",
+            "description": "(optional) list of LSP symbol kinds (integers) to exclude."
+          },
+          "substring_matching": {
+            "default": false,
+            "title": "Substring Matching",
+            "type": "boolean",
+            "description": "If True, use substring matching for the last element of the pattern, such that\n\"Foo/get\" would match \"Foo/getValue\" and \"Foo/getData\"."
+          },
+          "max_matches": {
+            "default": -1,
+            "title": "Max Matches",
+            "type": "integer",
+            "description": "Maximum number of permitted matches. If exceeded, a shortened result is returned\nwhich allows refining the search. -1 (default) means no limit. Set to 1 if you search for a single symbol."
+          },
+          "max_answer_chars": {
+            "default": -1,
+            "title": "Max Answer Chars",
+            "type": "integer",
+            "description": "Max result length; -1 for default."
+          }
+        },
+        "required": [
+          "name_path_pattern"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Find Symbol",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      }
+    },
+    {
+      "name": "find_referencing_symbols",
+      "title": "Find Referencing Symbols",
+      "description": "Finds references to the symbol at the given `name_path`. The result will contain metadata about the referencing symbols\nas well as a short code snippet around the reference. Returns a list of JSON objects with the symbols referencing the requested symbol.",
+      "inputSchema": {
+        "properties": {
+          "name_path": {
+            "title": "Name Path",
+            "type": "string",
+            "description": "Name path of the symbol."
+          },
+          "relative_path": {
+            "title": "Relative Path",
+            "type": "string",
+            "description": "The relative path to the file containing the symbol for which to find references."
+          },
+          "include_kinds": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Include Kinds",
+            "type": "array",
+            "description": "(optional) limits results to the given LSP symbol kinds (integers)."
+          },
+          "exclude_kinds": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Exclude Kinds",
+            "type": "array",
+            "description": "Optional list of LSP symbol kinds (integers) to exclude."
+          },
+          "max_answer_chars": {
+            "default": -1,
+            "title": "Max Answer Chars",
+            "type": "integer",
+            "description": "Max result length; -1 for default."
+          }
+        },
+        "required": [
+          "name_path",
+          "relative_path"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Find Referencing Symbols",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      }
+    },
+    {
+      "name": "find_declaration",
+      "title": "Find Declaration",
+      "description": "Finds the declaration of a symbol.",
+      "inputSchema": {
+        "properties": {
+          "relative_path": {
+            "title": "Relative Path",
+            "type": "string",
+            "description": "The relative path to the source file containing the symbol for which to find the declaration."
+          },
+          "regex": {
+            "title": "Regex",
+            "type": "string",
+            "description": "A regular expression with one group, where the group matches the symbol for which to perform the lookup.\nFor example, to find the declaration of the `process` method in a call like `obj.process()`,\npass an expression like \"obj\\.(process)\\(process_input_arg=37\\)\".\nPrefer regexes with sufficiently large context around the group to render the match unambiguous.\nUses Python syntax with MULTILINE and DOTALL flags enabled."
+          },
+          "containing_symbol_name_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Containing Symbol Name Path",
+            "description": "Optional name path of a containing symbol whose body shall be searched instead of the full file."
+          },
+          "include_body": {
+            "default": false,
+            "title": "Include Body",
+            "type": "boolean",
+            "description": "Whether to include the symbol's body in the result. Default False."
+          },
+          "include_info": {
+            "default": false,
+            "title": "Include Info",
+            "type": "boolean",
+            "description": "Whether to include additional info (hover-like). Default False."
+          }
+        },
+        "required": [
+          "relative_path",
+          "regex"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Find Declaration",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      }
+    },
+    {
+      "name": "get_diagnostics_for_file",
+      "title": "Get Diagnostics For File",
+      "description": "Gets diagnostics for a file. Diagnostics are grouped as `relative_path -> severity -> name_path -> diagnostics_results`.\nIf a diagnostic cannot be mapped to a symbol, it is grouped under the special name path `<file>`. Returns grouped diagnostics for the requested file.",
+      "inputSchema": {
+        "properties": {
+          "relative_path": {
+            "title": "Relative Path",
+            "type": "string",
+            "description": "The relative path to the file to inspect."
+          },
+          "start_line": {
+            "default": 0,
+            "title": "Start Line",
+            "type": "integer",
+            "description": "The first 0-based line to include. Defaults to 0."
+          },
+          "end_line": {
+            "default": -1,
+            "title": "End Line",
+            "type": "integer",
+            "description": "The last 0-based line to include. Defaults to -1, which means until the end of the file."
+          },
+          "min_severity": {
+            "default": 4,
+            "title": "Min Severity",
+            "type": "integer",
+            "description": "Minimum LSP severity to include, where 1=Error, 2=Warning, 3=Information, 4=Hint.\nDiagnostics with lower-or-equal numeric severity are returned."
+          },
+          "max_answer_chars": {
+            "default": -1,
+            "title": "Max Answer Chars",
+            "type": "integer",
+            "description": "Max result length; -1 for default."
+          }
+        },
+        "required": [
+          "relative_path"
+        ],
+        "title": "applyArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "applyOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "title": "Get Diagnostics For File",
+        "readOnlyHint": true,
+        "destructiveHint": false
+      }
+    }
+  ],
+  "tools_digest": {
+    "tools_list_sha256": "b9883bfe248fedc54ab81522436d96e2fe6308c52114dda6d7a3861d99107494",
+    "per_tool_schema_sha256": {
+      "replace_symbol_body": "c1c6f5568b80427c400b8f769b718e18381bfd25b9a5696637fb442a22e3963c",
+      "get_symbols_overview": "040e5c6565e55b69d665af7478599af0222dbcfcb55ddcc7dbbe917f24f4e08e",
+      "find_symbol": "13699ed3b8da59bfcabe4f227c9ab74689964796530091e030100c078e05b143",
+      "find_referencing_symbols": "fb7867037102bd3515f8179b1fb09e40d29733c59b81abd2e7f1ccbe3da940f8",
+      "find_declaration": "850411a59c6afe605701a0fcbf6eaf3fdf2b224b1567755eda708643b1ebb661",
+      "get_diagnostics_for_file": "fd545b5066587af2a2ee89de3f4ce346596d5e4d815b6ea55f766fa1201b1d32"
+    }
+  },
+  "calls": [
+    {
+      "tool": "get_symbols_overview",
+      "arguments": {
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "depth": 2
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.158,
+      "text": "{\"Package\": [{\"svw_demo_uvm_pkg\": {\"Class\": [\"svw_driver\", \"svw_monitor\", {\"svw_env\": {\"Function\": [\"build_phase\"]}}, {\"svw_smoke_test\": {\"Function\": [\"build_phase\"]}}]}}]}",
+      "json": {
+        "Package": [
+          {
+            "svw_demo_uvm_pkg": {
+              "Class": [
+                "svw_driver",
+                "svw_monitor",
+                {
+                  "svw_env": {
+                    "Function": [
+                      "build_phase"
+                    ]
+                  }
+                },
+                {
+                  "svw_smoke_test": {
+                    "Function": [
+                      "build_phase"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "structured": {
+        "result": "{\"Package\": [{\"svw_demo_uvm_pkg\": {\"Class\": [\"svw_driver\", \"svw_monitor\", {\"svw_env\": {\"Function\": [\"build_phase\"]}}, {\"svw_smoke_test\": {\"Function\": [\"build_phase\"]}}]}}]}"
+      }
+    },
+    {
+      "tool": "find_symbol",
+      "arguments": {
+        "name_path_pattern": "svw_driver/run_phase",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "include_body": true
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.046,
+      "text": "[]",
+      "json": [],
+      "structured": {
+        "result": "[]"
+      }
+    },
+    {
+      "tool": "find_symbol",
+      "arguments": {
+        "name_path_pattern": "run_phase",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "include_body": false
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.102,
+      "text": "[]",
+      "json": [],
+      "structured": {
+        "result": "[]"
+      }
+    },
+    {
+      "tool": "find_symbol",
+      "arguments": {
+        "name_path_pattern": "demo_lane",
+        "include_body": false
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.121,
+      "text": "[{\"name_path\": \"fixtures/demo/rtl/demo_lane\", \"kind\": \"File\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 0, \"end_line\": 19}}, {\"name_path\": \"demo_lane\", \"kind\": \"Method\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 1, \"end_line\": 16}}]",
+      "json": [
+        {
+          "name_path": "fixtures/demo/rtl/demo_lane",
+          "kind": "File",
+          "relative_path": "demo/rtl/demo_lane.sv",
+          "body_location": {
+            "start_line": 0,
+            "end_line": 19
+          }
+        },
+        {
+          "name_path": "demo_lane",
+          "kind": "Method",
+          "relative_path": "demo/rtl/demo_lane.sv",
+          "body_location": {
+            "start_line": 1,
+            "end_line": 16
+          }
+        }
+      ],
+      "structured": {
+        "result": "[{\"name_path\": \"fixtures/demo/rtl/demo_lane\", \"kind\": \"File\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 0, \"end_line\": 19}}, {\"name_path\": \"demo_lane\", \"kind\": \"Method\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 1, \"end_line\": 16}}]"
+      }
+    },
+    {
+      "tool": "find_referencing_symbols",
+      "arguments": {
+        "name_path": "svw_driver",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 2.12,
+      "text": "{\"uvm/svw_demo_uvm_pkg.sv\": {\"Class\": [{\"name_path\": \"svw_demo_uvm_pkg/svw_driver\", \"body_location\": {\"start_line\": 4, \"end_line\": 12}, \"content_around_reference\": \"...   4:  class svw_driver extends uvm_driver #(uvm_sequence_item);\\n  >   5:    `uvm_component_utils(svw_driver)\\n...   6:    function new(string name = \\\"svw_driver\\\", uvm_component parent = null);\"}, {\"name_path\": \"svw_demo_uvm_pkg/svw_driver\", \"body_location\": {\"start_line\": 4, \"end_line\": 12}, \"content_around_reference\": \"...   5:    `uvm_component_utils(svw_driver)\\n  >   6:    function new(string name = \\\"svw_driver\\\", uvm_component parent = null);\\n...   7:      super.new(name, parent);\"}, {\"name_path\": \"svw_demo_uvm_pkg/svw_env\", \"body_location\": {\"start_line\": 24, \"end_line\": 36}, \"content_around_reference\": \"...  25:    `uvm_component_utils(svw_env)\\n  >  26:    svw_driver drv;\\n...  27:    svw_monitor mon;\"}], \"Function\": [{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}, \"content_around_reference\": \"...  32:      super.build_phase(phase);\\n  >  33:      drv = svw_driver::type_id::create(\\\"drv\\\", this);\\n...  34:      mon = svw_monitor::type_id::create(\\\"mon\\\", this);\"}]}}",
+      "json": {
+        "uvm/svw_demo_uvm_pkg.sv": {
+          "Class": [
+            {
+              "name_path": "svw_demo_uvm_pkg/svw_driver",
+              "body_location": {
+                "start_line": 4,
+                "end_line": 12
+              },
+              "content_around_reference": "...   4:  class svw_driver extends uvm_driver #(uvm_sequence_item);\n  >   5:    `uvm_component_utils(svw_driver)\n...   6:    function new(string name = \"svw_driver\", uvm_component parent = null);"
+            },
+            {
+              "name_path": "svw_demo_uvm_pkg/svw_driver",
+              "body_location": {
+                "start_line": 4,
+                "end_line": 12
+              },
+              "content_around_reference": "...   5:    `uvm_component_utils(svw_driver)\n  >   6:    function new(string name = \"svw_driver\", uvm_component parent = null);\n...   7:      super.new(name, parent);"
+            },
+            {
+              "name_path": "svw_demo_uvm_pkg/svw_env",
+              "body_location": {
+                "start_line": 24,
+                "end_line": 36
+              },
+              "content_around_reference": "...  25:    `uvm_component_utils(svw_env)\n  >  26:    svw_driver drv;\n...  27:    svw_monitor mon;"
+            }
+          ],
+          "Function": [
+            {
+              "name_path": "svw_demo_uvm_pkg/svw_env/build_phase",
+              "body_location": {
+                "start_line": 31,
+                "end_line": 35
+              },
+              "content_around_reference": "...  32:      super.build_phase(phase);\n  >  33:      drv = svw_driver::type_id::create(\"drv\", this);\n...  34:      mon = svw_monitor::type_id::create(\"mon\", this);"
+            }
+          ]
+        }
+      },
+      "structured": {
+        "result": "{\"uvm/svw_demo_uvm_pkg.sv\": {\"Class\": [{\"name_path\": \"svw_demo_uvm_pkg/svw_driver\", \"body_location\": {\"start_line\": 4, \"end_line\": 12}, \"content_around_reference\": \"...   4:  class svw_driver extends uvm_driver #(uvm_sequence_item);\\n  >   5:    `uvm_component_utils(svw_driver)\\n...   6:    function new(string name = \\\"svw_driver\\\", uvm_component parent = null);\"}, {\"name_path\": \"svw_demo_uvm_pkg/svw_driver\", \"body_location\": {\"start_line\": 4, \"end_line\": 12}, \"content_around_reference\": \"...   5:    `uvm_component_utils(svw_driver)\\n  >   6:    function new(string name = \\\"svw_driver\\\", uvm_component parent = null);\\n...   7:      super.new(name, parent);\"}, {\"name_path\": \"svw_demo_uvm_pkg/svw_env\", \"body_location\": {\"start_line\": 24, \"end_line\": 36}, \"content_around_reference\": \"...  25:    `uvm_component_utils(svw_env)\\n  >  26:    svw_driver drv;\\n...  27:    svw_monitor mon;\"}], \"Function\": [{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}, \"content_around_reference\": \"...  32:      super.build_phase(phase);\\n  >  33:      drv = svw_driver::type_id::create(\\\"drv\\\", this);\\n...  34:      mon = svw_monitor::type_id::create(\\\"mon\\\", this);\"}]}}"
+      }
+    },
+    {
+      "tool": "find_referencing_symbols",
+      "arguments": {
+        "name_path": "demo_lane",
+        "relative_path": "demo/rtl/demo_lane.sv"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.115,
+      "text": "{\"demo/rtl/demo_top.sv\": {\"Namespace\": [{\"name_path\": \"demo_top/g_lane\", \"body_location\": {\"start_line\": 15, \"end_line\": 26}, \"content_around_reference\": \"...  15:  for (genvar lane = 0; lane < LANES; lane++) begin : g_lane\\n  >  16:    demo_lane #(.DATA_W(DATA_W)) u_lane (\\n...  17:      .clk     (clk),\"}]}}",
+      "json": {
+        "demo/rtl/demo_top.sv": {
+          "Namespace": [
+            {
+              "name_path": "demo_top/g_lane",
+              "body_location": {
+                "start_line": 15,
+                "end_line": 26
+              },
+              "content_around_reference": "...  15:  for (genvar lane = 0; lane < LANES; lane++) begin : g_lane\n  >  16:    demo_lane #(.DATA_W(DATA_W)) u_lane (\n...  17:      .clk     (clk),"
+            }
+          ]
+        }
+      },
+      "structured": {
+        "result": "{\"demo/rtl/demo_top.sv\": {\"Namespace\": [{\"name_path\": \"demo_top/g_lane\", \"body_location\": {\"start_line\": 15, \"end_line\": 26}, \"content_around_reference\": \"...  15:  for (genvar lane = 0; lane < LANES; lane++) begin : g_lane\\n  >  16:    demo_lane #(.DATA_W(DATA_W)) u_lane (\\n...  17:      .clk     (clk),\"}]}}"
+      }
+    },
+    {
+      "tool": "find_symbol",
+      "arguments": {
+        "name_path_pattern": "svw_driver/run_phase",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "include_body": true
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.029,
+      "text": "[]",
+      "json": [],
+      "structured": {
+        "result": "[]"
+      }
+    },
+    {
+      "tool": "find_symbol",
+      "arguments": {
+        "name_path_pattern": "svw_env/build_phase",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "include_body": true
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.108,
+      "text": "[{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"kind\": \"Function\", \"relative_path\": \"uvm/svw_demo_uvm_pkg.sv\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}, \"body\": \"virtual function void build_phase(uvm_phase phase);\\n      super.build_phase(phase);\\n      drv = svw_driver::type_id::create(\\\"drv\\\", this);\\n      mon = svw_monitor::type_id::create(\\\"mon\\\", this);\\n    endfunction\"}]",
+      "json": [
+        {
+          "name_path": "svw_demo_uvm_pkg/svw_env/build_phase",
+          "kind": "Function",
+          "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+          "body_location": {
+            "start_line": 31,
+            "end_line": 35
+          },
+          "body": "virtual function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv = svw_driver::type_id::create(\"drv\", this);\n      mon = svw_monitor::type_id::create(\"mon\", this);\n    endfunction"
+        }
+      ],
+      "structured": {
+        "result": "[{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"kind\": \"Function\", \"relative_path\": \"uvm/svw_demo_uvm_pkg.sv\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}, \"body\": \"virtual function void build_phase(uvm_phase phase);\\n      super.build_phase(phase);\\n      drv = svw_driver::type_id::create(\\\"drv\\\", this);\\n      mon = svw_monitor::type_id::create(\\\"mon\\\", this);\\n    endfunction\"}]"
+      }
+    },
+    {
+      "tool": "replace_symbol_body",
+      "arguments": {
+        "name_path": "svw_env/build_phase",
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+        "body": "virtual function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv = svw_driver::type_id::create(\"drv_edited\", this);\n      mon = svw_monitor::type_id::create(\"mon\", this);\n    endfunction"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.112,
+      "text": "OK",
+      "json": null,
+      "structured": {
+        "result": "OK"
+      }
+    },
+    {
+      "tool": "get_diagnostics_for_file",
+      "arguments": {
+        "relative_path": "uvm/svw_demo_uvm_pkg.sv"
+      },
+      "ok": true,
+      "is_error": false,
+      "elapsed_s": 0.04,
+      "text": "{\"uvm/svw_demo_uvm_pkg.sv\": {\"Warning\": {\"svw_demo_uvm_pkg/svw_env/build_phase\": [{\"message\": \"The 'name' argument of type_id::create() must match the name of the variable to which it is assigned: drv, got: \\\"drv_edited\\\".  [Style: uvm-naming][create-object-name-match]\", \"range\": {\"end\": {\"character\": 52, \"line\": 33}, \"start\": {\"character\": 40, \"line\": 33}}, \"code\": null, \"source\": \"verible\"}]}}}",
+      "json": {
+        "uvm/svw_demo_uvm_pkg.sv": {
+          "Warning": {
+            "svw_demo_uvm_pkg/svw_env/build_phase": [
+              {
+                "message": "The 'name' argument of type_id::create() must match the name of the variable to which it is assigned: drv, got: \"drv_edited\".  [Style: uvm-naming][create-object-name-match]",
+                "range": {
+                  "end": {
+                    "character": 52,
+                    "line": 33
+                  },
+                  "start": {
+                    "character": 40,
+                    "line": 33
+                  }
+                },
+                "code": null,
+                "source": "verible"
+              }
+            ]
+          }
+        }
+      },
+      "structured": {
+        "result": "{\"uvm/svw_demo_uvm_pkg.sv\": {\"Warning\": {\"svw_demo_uvm_pkg/svw_env/build_phase\": [{\"message\": \"The 'name' argument of type_id::create() must match the name of the variable to which it is assigned: drv, got: \\\"drv_edited\\\".  [Style: uvm-naming][create-object-name-match]\", \"range\": {\"end\": {\"character\": 52, \"line\": 33}, \"start\": {\"character\": 40, \"line\": 33}}, \"code\": null, \"source\": \"verible\"}]}}}"
+      }
+    }
+  ],
+  "edits": [
+    {
+      "name_path": "svw_driver/run_phase",
+      "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+      "old_literal": "\"driver fixture\"",
+      "new_literal": "\"driver fixture edited\"",
+      "target_qualified": "svw_demo_uvm_pkg::svw_driver::run_phase",
+      "sibling_qualified": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+      "find_symbol_result": "[]",
+      "body_from_serena": null,
+      "attempted": false,
+      "status": "BLOCKED",
+      "reason": "find_symbol(name_path_pattern='svw_driver/run_phase', include_body=True) returned '[]'; no symbol body available for replace_symbol_body"
+    },
+    {
+      "name_path": "svw_env/build_phase",
+      "relative_path": "uvm/svw_demo_uvm_pkg.sv",
+      "old_literal": "\"drv\"",
+      "new_literal": "\"drv_edited\"",
+      "target_qualified": "svw_demo_uvm_pkg::svw_env::build_phase",
+      "sibling_qualified": "svw_demo_uvm_pkg::svw_smoke_test::build_phase",
+      "find_symbol_result": "[{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"kind\": \"Function\", \"relative_path\": \"uvm/svw_demo_uvm_pkg.sv\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}, \"body\": \"virtual function void build_phase(uvm_phase phase);\\n      super.build_phase(phase);\\n      drv = svw_driver::type_id::create(\\\"drv\\\", this);\\n      mon = svw_monitor::type_id::create(\\\"mon\\\", this);\\n    endfunction\"}]",
+      "body_from_serena": "virtual function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv = svw_driver::type_id::create(\"drv\", this);\n      mon = svw_monitor::type_id::create(\"mon\", this);\n    endfunction",
+      "attempted": true,
+      "replace_result": "OK",
+      "unified_diff": "--- a/uvm/svw_demo_uvm_pkg.sv\n+++ b/uvm/svw_demo_uvm_pkg.sv\n@@ -31,7 +31,7 @@\n     endfunction\n     virtual function void build_phase(uvm_phase phase);\n       super.build_phase(phase);\n-      drv = svw_driver::type_id::create(\"drv\", this);\n+      drv = svw_driver::type_id::create(\"drv_edited\", this);\n       mon = svw_monitor::type_id::create(\"mon\", this);\n     endfunction\n   endclass\n",
+      "byte_changes": [
+        {
+          "tag": "insert",
+          "orig_byte_range": [
+            1103,
+            1103
+          ],
+          "orig_text": "",
+          "new_text": "_edited"
+        }
+      ],
+      "scope_check": {
+        "target_byte_range_pyslang": [
+          983,
+          1183
+        ],
+        "sibling_byte_range_pyslang": [
+          1433,
+          1575
+        ],
+        "n_changes": 1,
+        "all_changes_inside_target": true,
+        "sibling_touched": false,
+        "literal_now_present": true
+      },
+      "status": "PASS"
+    }
+  ],
+  "backend_process_tree_peak_rss": [
+    {
+      "pid": 4047075,
+      "ppid": 4047063,
+      "vm_hwm_kib": 109520,
+      "cmd": "${REPO}/.toolchain/serena-venv/bin/python ${REPO}/.toolchain/serena-venv/bin/serena start-mcp-server --project ${REPO}/.svweave/spike/candidate/fixtures --context ${REPO}/.toolchain/state/serena/svweave_spike_context.yml --t"
+    },
+    {
+      "pid": 4047138,
+      "ppid": 4047075,
+      "vm_hwm_kib": 5276,
+      "cmd": "${REPO}/.toolchain/verible/bin/verible-verilog-ls "
+    }
+  ],
+  "candidate_manifest_after": {
+    "demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+    "demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+    "demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+    "demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+    "demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+    "demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+    "uvm/svw_demo_uvm_pkg.sv": "c4585ccc220ddc8158857c305e2e3aaab85e09a43875e63b99e9de3002e3523c",
+    "uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97",
+    "verible.filelist": "20b945496fccc1e0de75717b2558a18050237f757bf1d8f997902e1abc048fc8"
+  },
+  "changed_files_in_candidate": [
+    "uvm/svw_demo_uvm_pkg.sv"
+  ],
+  "original_fixtures_unchanged": true,
+  "unified_diff_total": "--- a/uvm/svw_demo_uvm_pkg.sv\n+++ b/uvm/svw_demo_uvm_pkg.sv\n@@ -31,7 +31,7 @@\n     endfunction\n     virtual function void build_phase(uvm_phase phase);\n       super.build_phase(phase);\n-      drv = svw_driver::type_id::create(\"drv\", this);\n+      drv = svw_driver::type_id::create(\"drv_edited\", this);\n       mon = svw_monitor::type_id::create(\"mon\", this);\n     endfunction\n   endclass\n",
+  "peak_rss_kib_children": 129420,
+  "status": "completed",
+  "wall_s": 7.833,
+  "pyslang_validation_on_candidate": {
+    "returncode": 0,
+    "stdout_tail": "{\n  \"uvm_error_count\": 0,\n  \"uvm_diag_count\": 1,\n  \"run_phase\": [\n    {\n      \"q\": \"svw_demo_uvm_pkg::svw_driver::run_phase\",\n      \"hier\": \"svw_demo_uvm_pkg::svw_driver::run_phase\",\n      \"file\": \"fixtures/uvm/svw_demo_uvm_pkg.sv\",\n      \"offset\": 312\n    },\n    {\n      \"q\": \"svw_demo_uvm_pkg::svw_monitor::run_phase\",\n      \"hier\": \"svw_demo_uvm_pkg::svw_monitor::run_phase\",\n      \"file\": \"fixtures/uvm/svw_demo_uvm_pkg.sv\",\n      \"offset\": 637\n    }\n  ]\n}\n",
+    "wall_s": 0.595,
+    "peak_rss_kib": 133264,
+    "diagnostics_count": 1,
+    "errors": [],
+    "run_phase": [
+      {
+        "q": "svw_demo_uvm_pkg::svw_driver::run_phase",
+        "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_DRV\", \"driver fixture\", UVM_LOW)\n    endtask"
+      },
+      {
+        "q": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+        "text": "task run_phase(uvm_phase phase);\n      `uvm_info(\"SVW_MON\", \"monitor fixture\", UVM_LOW)\n    endtask"
+      },
+      {
+        "q": "svw_demo_uvm_pkg::svw_env::build_phase",
+        "text": "function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      drv = svw_driver::type_id::create(\"drv_edited\", this);\n      mon = svw_monitor::type_id::create(\"mon\", this);\n    endfunction"
+      },
+      {
+        "q": "svw_demo_uvm_pkg::svw_smoke_test::build_phase",
+        "text": "function void build_phase(uvm_phase phase);\n      super.build_phase(phase);\n      env = svw_env::type_id::create(\"env\", this);\n    endfunction"
+      }
+    ]
+  }
+}

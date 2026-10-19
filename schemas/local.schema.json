@@ -1,0 +1,46 @@
+{
+  "$defs": {
+    "RootMapping": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "path"
+      ],
+      "title": "RootMapping",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "svweave.local.yaml: host-specific external root mappings.",
+  "properties": {
+    "root_mappings": {
+      "items": {
+        "$ref": "#/$defs/RootMapping"
+      },
+      "title": "Root Mappings",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version"
+  ],
+  "title": "LocalConfig",
+  "type": "object"
+}

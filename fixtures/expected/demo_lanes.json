@@ -1,0 +1,108 @@
+{
+  "topic": "demo_lanes",
+  "fixture_dir": "demo/",
+  "top": "demo_top",
+  "variants": {
+    "L2": {
+      "LANES": 2,
+      "DATA_W": 32,
+      "lane_paths": [
+        "demo_top.g_lane[0].u_lane",
+        "demo_top.g_lane[1].u_lane"
+      ],
+      "checker_paths": [
+        "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+        "demo_top.g_lane[1].u_lane.u_stream_hold_sva"
+      ]
+    },
+    "L4": {
+      "LANES": 4,
+      "DATA_W": 32,
+      "lane_paths": [
+        "demo_top.g_lane[0].u_lane",
+        "demo_top.g_lane[1].u_lane",
+        "demo_top.g_lane[2].u_lane",
+        "demo_top.g_lane[3].u_lane"
+      ],
+      "checker_paths": [
+        "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+        "demo_top.g_lane[1].u_lane.u_stream_hold_sva",
+        "demo_top.g_lane[2].u_lane.u_stream_hold_sva",
+        "demo_top.g_lane[3].u_lane.u_stream_hold_sva"
+      ]
+    },
+    "W64": {
+      "LANES": 2,
+      "DATA_W": 64
+    }
+  },
+  "data_i_actual": {
+    "instance": "demo_top.g_lane[0].u_lane",
+    "formal": "data_i",
+    "actual_text": "data_i[lane]",
+    "kind": "ElementSelect",
+    "referenced": [
+      "data_i",
+      "lane"
+    ],
+    "file": "rtl/demo_top.sv",
+    "ctx": ".data_i  (data_i[lane])",
+    "nth": 0,
+    "text": "data_i[lane]",
+    "start": 780,
+    "end": 792
+  },
+  "bind": {
+    "file": "sva/demo_bind.sv",
+    "ctx": "bind demo_lane stream_hold_sva",
+    "nth": 0,
+    "text": "bind demo_lane",
+    "start": 0,
+    "end": 14,
+    "target_text": "demo_lane"
+  },
+  "declarations": [
+    {
+      "kind": "module",
+      "qualified_name": "demo_lane",
+      "file": "rtl/demo_lane.sv",
+      "ctx": "module demo_lane #(",
+      "nth": 0,
+      "text": "demo_lane",
+      "start": 29,
+      "end": 38
+    },
+    {
+      "kind": "module",
+      "qualified_name": "demo_top",
+      "file": "rtl/demo_top.sv",
+      "ctx": "module demo_top #(",
+      "nth": 0,
+      "text": "demo_top",
+      "start": 54,
+      "end": 62
+    },
+    {
+      "kind": "property",
+      "qualified_name": "stream_hold_sva.p_stall_holds",
+      "file": "sva/stream_hold_sva.sv",
+      "ctx": "property p_stall_holds;",
+      "nth": 0,
+      "text": "p_stall_holds",
+      "start": 269,
+      "end": 282
+    }
+  ],
+  "assert": {
+    "label": "ap_stall_holds",
+    "kind": "assert",
+    "file": "sva/stream_hold_sva.sv",
+    "ctx": "ap_stall_holds: assert property (p_stall_holds);",
+    "nth": 0,
+    "text": "ap_stall_holds: assert property (p_stall_holds);",
+    "start": 395,
+    "end": 443
+  },
+  "clock": "@(posedge clk)",
+  "disable_iff": "!rst_n"
+}

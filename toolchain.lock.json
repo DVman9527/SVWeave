@@ -1,0 +1,251 @@
+{
+  "schema_version": "1.0",
+  "qualification_state": "UNQUALIFIED",
+  "platform": "linux-x86_64",
+  "python_minor": "3.12",
+  "created_at": "2026-10-13",
+  "created_by": "M0 spike (SVW-001/002); reproduce with scripts/bootstrap_locked.py",
+  "components": {
+    "slang": {
+      "commit": "545f88b2ed3a2d20325fbd17413af177a6bca72f",
+      "artifact_sha256": "d1f680e2c90b95daab3b812a6431055e3d8828fde281dbf89b72ee3eceb90dd5",
+      "tag": "v12.0",
+      "version_string": "slang version 12.0.0+545f88b2e",
+      "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+      "install_dir": ".toolchain/slang",
+      "archive_strip_components": 0,
+      "binary": ".toolchain/slang/slang",
+      "binary_sha256": "c6e06db368042fa369a7a84d1082bada97c6ff466f9a14de43b624c25c9944a1",
+      "role": "CLI reproduction/diagnostics only (ADR-003); dynamically linked, runs on glibc 2.28",
+      "paired_with": "pyslang 12.0.0 (same upstream release v12.0)"
+    },
+    "pyslang": {
+      "version": "12.0.0",
+      "wheel_sha256": "3c24dfadf0f318928433eedd7558e128f7a05f8a4d514f81aab08f2cba3db47d",
+      "record_sha256": "52a97ff1b8418a40736597e10a04052adce129103f3b0860d2b3f9d7ed55ba7b",
+      "wheel_filename": "pyslang-12.0.0-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "source_url": "https://files.pythonhosted.org/packages/c6/20/1b6aec1fcb6d9c6efc491d651fa8e4064efba4ad43bd8ee1fa16096eca3d/pyslang-12.0.0-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+      "install_target": ".venv (gateway/HDL-worker environment)",
+      "upstream_commit": "545f88b2ed3a2d20325fbd17413af177a6bca72f"
+    },
+    "serena": {
+      "commit": "949a27ef1e5fda1a6e7b561e777bcece345c6ffd",
+      "dependency_lock_sha256": "48f88af6b9a7c942820b65d0321176b33b49f0012a8a0cd036ee1f5140cfe167",
+      "tag": "v1.7.0",
+      "package": "serena-agent==1.7.0",
+      "source_url": "https://github.com/oraios/serena",
+      "src_dir": ".toolchain/serena-src",
+      "venv_dir": ".toolchain/serena-venv",
+      "install_method": "git clone + checkout commit; verify uv.lock sha256; UV_PROJECT_ENVIRONMENT=<venv_dir> uv sync --frozen --no-dev",
+      "license_file_sha256": "16017e50562bb112006f6f32d17ca989e0e573b011bd6790b642018b1c195b0c",
+      "pinned_mcp_python_sdk_inside_serena": "mcp==1.28.1"
+    },
+    "verible": {
+      "version": "v0.0-4296-g0f262651",
+      "artifact_sha256": "8569defb891d2316067613ea00442af28a7a09d405d95b54c0c91f9942d26635",
+      "commit": "0f26265133bda3ade669bc36fc71a6e1f39ad809",
+      "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+      "install_dir": ".toolchain/verible",
+      "archive_strip_components": 1,
+      "binary": ".toolchain/verible/bin/verible-verilog-ls",
+      "binary_sha256": "d401eaa313b52afd04b0bdf8c1f81c3988e4b79caf6a02039967a184ed8eaf4a"
+    },
+    "codebase_memory_mcp": {
+      "commit": "8972ea69c6ad94b1ef1d4ffbf0a92d78d2db1798",
+      "artifact_sha256": "1f9e8293eb2bc5c05cfa27a7e8fc033da6d729ffad525ccfcdaa3fd606306683",
+      "tag": "v0.11.0",
+      "variant": "linux-amd64-portable (statically linked; the non-portable linux-amd64 build needs GLIBC_2.38 and fails on this glibc 2.28 host)",
+      "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+      "upstream_checksums_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/checksums.txt",
+      "upstream_checksums_sha256": "5e5a3b25c619ecf8f7349acf38d74f1989b4ec65dfae911d8ceb788969f1cf91",
+      "install_dir": ".toolchain/cbm",
+      "archive_strip_components": 0,
+      "binary": ".toolchain/cbm/codebase-memory-mcp",
+      "binary_sha256": "ce11c141431aeadd788506c3a7e6942db8fd438dec369d0707a39ec9fd8c6510"
+    },
+    "mcp_sdk": {
+      "version": "2.3.0",
+      "wheel_sha256": "dd0c44c089d16453e8ae31a3877a0054d7a2314caaa81f5e0541b9b1734b2377",
+      "wheel_filename": "mcp-2.3.0-py3-none-any.whl",
+      "source_url": "https://files.pythonhosted.org/packages/20/d7/4a2878f128df729db3ca04e71bfce26405cc2e0c9ebe19c592feeb4c61b9/mcp-2.3.0-py3-none-any.whl",
+      "install_target": ".venv (gateway environment)",
+      "note": "transitive deps (mcp-types 2.3.0, anyio 4.15.1, ...) resolved by uv at install time; not yet hash-locked"
+    },
+    "uvm_core": {
+      "tag": "2020.3.1",
+      "commit": "78c06547a2a0a29b3dc9dcafae62b75b2ff61544",
+      "artifact_sha256": "f55bdbc02cc500d4a2f41b31bad127653289eb2073f806ce156fb82662b362b8",
+      "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+      "install_dir": ".toolchain/uvm-core",
+      "archive_strip_components": 1,
+      "role": "external pinned UVM library for the UVM static profile (+incdir+src src/uvm_pkg.sv)"
+    }
+  },
+  "capability_report_sha256": "7d4c99803bb124c18f9d739f7ccffa9b6789e51e6ceb00fae2eeccaeeaf9475f",
+  "license_manifest_sha256": "4bc9b8ab5d4f4c281c8c91d624bb0737541dd0e138174b6f1379962e72f3d798",
+  "gateway_wheelhouse": {
+    "requirements_in": "scripts/gateway-requirements.in",
+    "requirements_file": "scripts/gateway-requirements.txt",
+    "requirements_sha256": "158ed52e7916738539913e0b8fc06bfb0a9a8cd626cc94c8ed3ff9816528e24a",
+    "wheelhouse_dir": ".toolchain/downloads/wheelhouse",
+    "target": "cp312 / manylinux_2_28 x86_64 (glibc >= 2.28)",
+    "install": "uv pip install --offline --no-index --find-links <wheelhouse> --require-hashes -r scripts/gateway-requirements.txt",
+    "wheels": [
+      {
+        "filename": "annotated_types-0.8.0-py3-none-any.whl",
+        "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+        "source_url": "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl"
+      },
+      {
+        "filename": "anyio-4.15.1-py3-none-any.whl",
+        "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+        "source_url": "https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl"
+      },
+      {
+        "filename": "attrs-26.1.0-py3-none-any.whl",
+        "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+        "source_url": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl"
+      },
+      {
+        "filename": "cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "sha256": "c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf",
+        "source_url": "https://files.pythonhosted.org/packages/b1/db/dceb9dd5b231e1da801793f8acc9f3c52a7e1afe40bb1aae37e02b0faad5/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+      },
+      {
+        "filename": "click-8.5.0-py3-none-any.whl",
+        "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+        "source_url": "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl"
+      },
+      {
+        "filename": "cryptography-50.0.2-cp311-abi3-manylinux_2_28_x86_64.whl",
+        "sha256": "4061c0079120205fb760c58acab6443e217307dcf05e3702cf970e0689972856",
+        "source_url": "https://files.pythonhosted.org/packages/1a/f1/b474e930c4d910328780e3940da76f5aa5cbc48ce1fc14e44d239d9ea9db/cryptography-50.0.2-cp311-abi3-manylinux_2_28_x86_64.whl"
+      },
+      {
+        "filename": "h11-0.16.0-py3-none-any.whl",
+        "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+        "source_url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl"
+      },
+      {
+        "filename": "httpcore2-2.13.1-py3-none-any.whl",
+        "sha256": "e1e05d4f25f7d7d496bfb96748f6f4b67657b03da069b3a68c36069f3db73d0a",
+        "source_url": "https://files.pythonhosted.org/packages/09/ba/a4568248771ce81957bfb7cc600264a40fbcda092391ee1c415c50be4bea/httpcore2-2.13.1-py3-none-any.whl"
+      },
+      {
+        "filename": "httpx2-2.13.1-py3-none-any.whl",
+        "sha256": "6dff50fabc270ee5fd25d845d0b078ed20564579744d6d962850975996d2f9a4",
+        "source_url": "https://files.pythonhosted.org/packages/d8/9c/6fe8931fd9f381042a9e4c7d5a7b4cbf7016b252bec0c99a49fce42c3326/httpx2-2.13.1-py3-none-any.whl"
+      },
+      {
+        "filename": "idna-3.20-py3-none-any.whl",
+        "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+        "source_url": "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl"
+      },
+      {
+        "filename": "jsonschema-4.26.0-py3-none-any.whl",
+        "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+        "source_url": "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl"
+      },
+      {
+        "filename": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+        "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+        "source_url": "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl"
+      },
+      {
+        "filename": "mcp-2.3.0-py3-none-any.whl",
+        "sha256": "dd0c44c089d16453e8ae31a3877a0054d7a2314caaa81f5e0541b9b1734b2377",
+        "source_url": "https://files.pythonhosted.org/packages/20/d7/4a2878f128df729db3ca04e71bfce26405cc2e0c9ebe19c592feeb4c61b9/mcp-2.3.0-py3-none-any.whl"
+      },
+      {
+        "filename": "mcp_types-2.3.0-py3-none-any.whl",
+        "sha256": "968efdbdaedfab06adae40d378a34395f1090c5921d4be3c9cde283aaf76d91d",
+        "source_url": "https://files.pythonhosted.org/packages/ce/48/32583066b155bb5d4507e7887dc88ee23118cc4de8e2a12870c49719e2a8/mcp_types-2.3.0-py3-none-any.whl"
+      },
+      {
+        "filename": "nanobind_backend-1.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "6aa9864050cc5fd1ff59d1f9b79740efa278515eed27af848efae07125c029b8",
+        "source_url": "https://files.pythonhosted.org/packages/b9/2c/7fb13ecb1e8c0c268e26c6bc44be4a7f51996b2a3c006749ce6fc4fd7da2/nanobind_backend-1.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+      },
+      {
+        "filename": "opentelemetry_api-1.45.1-py3-none-any.whl",
+        "sha256": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+        "source_url": "https://files.pythonhosted.org/packages/1e/41/f7dcf80b81ee8e71c1a2b59f14208bc723edbd89ed027a73b175abf6348e/opentelemetry_api-1.45.1-py3-none-any.whl"
+      },
+      {
+        "filename": "pycparser-3.11-py3-none-any.whl",
+        "sha256": "51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80",
+        "source_url": "https://files.pythonhosted.org/packages/90/11/0e6f11117525ff0eec40ebac3d313376f102df93ca44ad9e893ee85e4f89/pycparser-3.11-py3-none-any.whl"
+      },
+      {
+        "filename": "pydantic-2.14.1-py3-none-any.whl",
+        "sha256": "9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454",
+        "source_url": "https://files.pythonhosted.org/packages/35/ea/a56b9fe5066f3537b7882f77e9c5dfb26d8c2eefdaed9b5fc73d57b4dc22/pydantic-2.14.1-py3-none-any.whl"
+      },
+      {
+        "filename": "pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "93ba4e9d8210d941c200431a56b2c0400b131865947903937ed3ec5404307d2e",
+        "source_url": "https://files.pythonhosted.org/packages/90/24/48cd98388e4ac2c08d0800af36d15413db15e20387f1038123a2c86cb2f6/pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+      },
+      {
+        "filename": "pyjwt-2.15.1-py3-none-any.whl",
+        "sha256": "42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193",
+        "source_url": "https://files.pythonhosted.org/packages/50/ca/44de4e75f8aadc457f0634be3b542815078ded46dca30efb960edeecad6e/pyjwt-2.15.1-py3-none-any.whl"
+      },
+      {
+        "filename": "pyslang-12.0.0-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "3c24dfadf0f318928433eedd7558e128f7a05f8a4d514f81aab08f2cba3db47d",
+        "source_url": "https://files.pythonhosted.org/packages/c6/20/1b6aec1fcb6d9c6efc491d651fa8e4064efba4ad43bd8ee1fa16096eca3d/pyslang-12.0.0-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+      },
+      {
+        "filename": "python_multipart-0.0.32-py3-none-any.whl",
+        "sha256": "ff6d3f776f16878c894e52e107296ffc890e913c611b1a4ec6c44e2821fe2e23",
+        "source_url": "https://files.pythonhosted.org/packages/e1/04/e8135ebd1ad02c56ec633277529b2602ff99ff634be76cdba5744cf554fd/python_multipart-0.0.32-py3-none-any.whl"
+      },
+      {
+        "filename": "pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        "sha256": "ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc",
+        "source_url": "https://files.pythonhosted.org/packages/8b/9d/b3589d3877982d4f2329302ef98a8026e7f4443c765c46cfecc8858c6b4b/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+      },
+      {
+        "filename": "referencing-0.37.0-py3-none-any.whl",
+        "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+        "source_url": "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl"
+      },
+      {
+        "filename": "rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "sha256": "addeda51556dac7c1a2f14cda62db8b621cd12afba3091d03a96c72932387eab",
+        "source_url": "https://files.pythonhosted.org/packages/1d/6d/b26eb1e75395925b3a142ed351cbed2ec8212f5c9d937aee3df32c701baa/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+      },
+      {
+        "filename": "sse_starlette-3.5.0-py3-none-any.whl",
+        "sha256": "3e6e1070df3f0f5d9cea81496de92dbb72f6721871d99748ece67441dd8b7997",
+        "source_url": "https://files.pythonhosted.org/packages/be/e4/cdda14023c316d71493bc54fdffc3dd006631b88866145c9d3cc33e0f1df/sse_starlette-3.5.0-py3-none-any.whl"
+      },
+      {
+        "filename": "starlette-1.7.0-py3-none-any.whl",
+        "sha256": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+        "source_url": "https://files.pythonhosted.org/packages/4e/d6/1ec1b290f9e0fb067899b61e1d37a30c923068bad260b216dbe37a7d2967/starlette-1.7.0-py3-none-any.whl"
+      },
+      {
+        "filename": "truststore-0.10.5-py3-none-any.whl",
+        "sha256": "9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c",
+        "source_url": "https://files.pythonhosted.org/packages/51/e9/3a7820be2bb0fe53b6bc9c3be26d3d1158004e4c3ab953aa6840b955b1e9/truststore-0.10.5-py3-none-any.whl"
+      },
+      {
+        "filename": "typing_extensions-4.16.0-py3-none-any.whl",
+        "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+        "source_url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl"
+      },
+      {
+        "filename": "typing_inspection-0.4.4-py3-none-any.whl",
+        "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+        "source_url": "https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl"
+      },
+      {
+        "filename": "uvicorn-0.54.0-py3-none-any.whl",
+        "sha256": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf",
+        "source_url": "https://files.pythonhosted.org/packages/38/0c/b54a4fdd7f90a3af8b02ebc9ce6712c2c208b7926a2f7bad95c33ebbe943/uvicorn-0.54.0-py3-none-any.whl"
+      }
+    ]
+  }
+}

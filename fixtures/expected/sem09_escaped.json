@@ -1,0 +1,171 @@
+{
+  "topic": "sem09_escaped",
+  "fixture_dir": "language/sem09_escaped",
+  "top": "sem09_top",
+  "instances": [
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "x.y",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "x",
+          null
+        ]
+      ],
+      "definition": "wrap"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "x",
+          null
+        ],
+        [
+          "y",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "g",
+          [
+            0
+          ]
+        ],
+        [
+          "h",
+          [
+            0
+          ]
+        ],
+        [
+          "u",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "g",
+          [
+            0
+          ]
+        ],
+        [
+          "h",
+          [
+            1
+          ]
+        ],
+        [
+          "u",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "g",
+          [
+            1
+          ]
+        ],
+        [
+          "h",
+          [
+            0
+          ]
+        ],
+        [
+          "u",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    },
+    {
+      "components": [
+        [
+          "sem09_top",
+          null
+        ],
+        [
+          "g",
+          [
+            1
+          ]
+        ],
+        [
+          "h",
+          [
+            1
+          ]
+        ],
+        [
+          "u",
+          null
+        ]
+      ],
+      "definition": "leaf"
+    }
+  ],
+  "naive_split_collision": {
+    "a": [
+      "sem09_top",
+      "x.y"
+    ],
+    "b": [
+      "sem09_top",
+      "x",
+      "y"
+    ],
+    "same_joined_string": "sem09_top.x.y"
+  },
+  "instance_count": 8,
+  "escaped_instance_span": {
+    "file": "top.sv",
+    "ctx": "leaf \\x.y (",
+    "nth": 0,
+    "text": "\\x.y",
+    "start": 221,
+    "end": 225
+  }
+}

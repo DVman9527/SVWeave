@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-13",
+  "qualification_state": "UNQUALIFIED",
+  "legal_review_status": "NOT_DONE",
+  "note": "Engineering inventory, not a legal conclusion (plan §3.2). Process-level adapters do not by themselves discharge license obligations. SVWeave's own license is not yet decided by the owner.",
+  "components": [
+    {
+      "component": "slang (CLI binary)",
+      "version": "v12.0 (545f88b2ed3a2d20325fbd17413af177a6bca72f)",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/slang-LICENSE",
+      "license_file_sha256": "0aaa5e55c23baad51bdab241e36220d2fa8df1147ce289a81a58ae4d1c1502fe",
+      "license_source": "https://raw.githubusercontent.com/MikePopoloski/slang/545f88b2ed3a2d20325fbd17413af177a6bca72f/LICENSE",
+      "notes": "Release tarball contains only the binary (no LICENSE file). Bundled third-party libraries in the binary (e.g. fmt, mimalloc, boost-unordered) not yet inventoried."
+    },
+    {
+      "component": "pyslang",
+      "version": "12.0.0",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/pyslang-12.0.0-LICENSE",
+      "license_file_sha256": "0aaa5e55c23baad51bdab241e36220d2fa8df1147ce289a81a58ae4d1c1502fe",
+      "license_source": "wheel pyslang-12.0.0.dist-info/licenses/LICENSE",
+      "notes": "Identical text to slang LICENSE. Native extension; statically bundled third-party code not yet inventoried. Wheel dependency nanobind-backend 1.0.0 pulled in by uv (license not yet checked)."
+    },
+    {
+      "component": "Serena application (serena-agent)",
+      "version": "v1.7.0 (949a27ef1e5fda1a6e7b561e777bcece345c6ffd)",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/serena-v1.7.0-LICENSE",
+      "license_file_sha256": "16017e50562bb112006f6f32d17ca989e0e573b011bd6790b642018b1c195b0c",
+      "license_source": ".toolchain/serena-src/LICENSE at the pinned commit",
+      "notes": "AT THE PINNED v1.7.0 COMMIT the whole repository LICENSE is a single MIT license (git log: 'Switched to MIT license'). The plan's statement (GPL-3.0-or-later application / MIT SolidLSP) matches the CURRENT main branch (737ccc29a72aec5e6a2404d1caef1d0c0d9fb663), not v1.7.0. Upgrading Serena past v1.7.0 changes the license of src/serena to GPL-3.0-or-later and makes the combined serena-agent distribution GPL-3.0-or-later. SVWeave does not copy Serena code; it runs Serena as a separate MCP process."
+    },
+    {
+      "component": "Serena (main branch, reference only, NOT installed)",
+      "version": "main@737ccc29a72aec5e6a2404d1caef1d0c0d9fb663",
+      "license": "GPL-3.0-or-later (application) AND MIT (src/solidlsp, test/solidlsp, test/resources)",
+      "license_file": "evidence/m0/licenses/serena-main-LICENSE-737ccc29",
+      "license_file_sha256": "6239f4be78ccff409aedfbce88ac89b26f488f76aac7ab199fb6876dc7fdeb4c",
+      "license_source": "https://raw.githubusercontent.com/oraios/serena/737ccc29a72aec5e6a2404d1caef1d0c0d9fb663/LICENSE",
+      "notes": "Recorded so that an upgrade is gated by license review (ADR-010)."
+    },
+    {
+      "component": "SolidLSP (part of Serena)",
+      "version": "as in serena v1.7.0",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/serena-v1.7.0-LICENSE",
+      "license_file_sha256": "16017e50562bb112006f6f32d17ca989e0e573b011bd6790b642018b1c195b0c",
+      "notes": "MIT at v1.7.0 (whole repo) and MIT on main (per-component). Do not infer the application license from SolidLSP."
+    },
+    {
+      "component": "Serena transitive Python dependencies",
+      "version": "uv.lock sha256 48f88af6b9a7c942820b65d0321176b33b49f0012a8a0cd036ee1f5140cfe167",
+      "license": "NOASSERTION",
+      "notes": "Not yet audited (e.g. anthropic, flask, pywebview, tiktoken, mcp 1.28.1). Required before any redistribution of the Serena venv."
+    },
+    {
+      "component": "codebase-memory-mcp",
+      "version": "v0.11.0 (8972ea69c6ad94b1ef1d4ffbf0a92d78d2db1798), linux-amd64-portable",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/cbm-v0.11.0-LICENSE",
+      "license_file_sha256": "1f58f9911dc5e3bcb96de28bb28e7b6bb7eb323952d29569c5d7214a152146bb",
+      "third_party_notices_file": ".toolchain/cbm/THIRD_PARTY_NOTICES.md (from release tarball; 564 KiB, not copied into the repo)",
+      "third_party_notices_sha256": "57df11de7391283832f4b0d1f015acddbd93bbd94ce1b49e8e05ab68fbad3e8c",
+      "third_party_md": "evidence/m0/licenses/cbm-THIRD_PARTY.md",
+      "third_party_md_sha256": "203d19a808847e9c9b667fedc5a6eff376e0e7e222a20a1de7c7bee469b1167f",
+      "notes": "Binary vendors tree-sitter runtime + ~150 grammars (relevant here: gmlarumbe/tree-sitter-systemverilog MIT, tree-sitter/tree-sitter-verilog MIT), vendored C/C++ libraries, embedded static token embeddings derived from nomic-embed-code (Apache-2.0) and an embedded graph UI. Full list in THIRD_PARTY_NOTICES.md."
+    },
+    {
+      "component": "Verible",
+      "version": "v0.0-4296-g0f262651 (0f26265133bda3ade669bc36fc71a6e1f39ad809)",
+      "license": "Apache-2.0",
+      "license_file": "evidence/m0/licenses/verible-LICENSE",
+      "license_file_sha256": "2cf0a64c57f5e72fc377e2db383e89658785686a0fcde9c24b0c6a4f405934e1",
+      "license_source": "https://raw.githubusercontent.com/chipsalliance/verible/0f26265133bda3ade669bc36fc71a6e1f39ad809/LICENSE",
+      "notes": "Static release tarball contains no LICENSE/NOTICE file; LICENSE fetched from the tag commit. Statically linked third-party code not inventoried."
+    },
+    {
+      "component": "MCP Python SDK (gateway side)",
+      "version": "mcp 2.3.0 (+ mcp-types 2.3.0)",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/mcp-2.3.0-LICENSE",
+      "license_file_sha256": "5e13dbbc1d120fc2a03cecde7c91424ae2d7de11b63d58ded2f4431e261ee50d",
+      "license_source": "wheel mcp-2.3.0.dist-info/licenses/LICENSE",
+      "notes": "Transitive deps (anyio, starlette, uvicorn, pyjwt, cryptography, ...) not yet audited."
+    },
+    {
+      "component": "Accellera UVM (uvm-core)",
+      "version": "2020.3.1 (78c06547a2a0a29b3dc9dcafae62b75b2ff61544)",
+      "license": "Apache-2.0",
+      "license_file": "evidence/m0/licenses/uvm-core-2020.3.1-LICENSE.txt",
+      "license_file_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "notice_file": "evidence/m0/licenses/uvm-core-2020.3.1-NOTICE.txt",
+      "notice_file_sha256": "b89f85d3f14ae457890c932bd543124e6521f74b3b01ab208932ef72488748c2",
+      "notes": "External dependency for the UVM static profile only; not redistributed by SVWeave."
+    },
+    {
+      "component": "bubblewrap",
+      "version": "0.4.0 (host /usr/bin/bwrap, OS package)",
+      "license": "LGPL-2.0-or-later",
+      "license_file": null,
+      "license_file_sha256": null,
+      "notes": "Host-provided; executed, not bundled. License id from upstream project, not verified from the host package files."
+    },
+    {
+      "component": "SVWeave (own code)",
+      "version": "unreleased",
+      "license": "NOASSERTION",
+      "notes": "Owner has not chosen a license yet (plan §3.2); do not claim MIT for the whole bundle."
+    }
+  ]
+}

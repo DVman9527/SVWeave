@@ -1,0 +1,290 @@
+{
+  "topic": "sem02_paramclass",
+  "fixture_dir": "language/sem02_paramclass",
+  "top": "sem02_top",
+  "declarations": [
+    {
+      "kind": "package",
+      "qualified_name": "box_pkg",
+      "file": "box_pkg.sv",
+      "ctx": "package box_pkg;",
+      "nth": 0,
+      "text": "box_pkg",
+      "start": 8,
+      "end": 15
+    },
+    {
+      "kind": "class",
+      "qualified_name": "box_pkg::box",
+      "file": "box_pkg.sv",
+      "ctx": "class box #(",
+      "nth": 0,
+      "text": "box",
+      "start": 25,
+      "end": 28
+    },
+    {
+      "kind": "parameter",
+      "qualified_name": "box_pkg::box::W",
+      "file": "box_pkg.sv",
+      "ctx": "int W = 8",
+      "nth": 0,
+      "text": "W",
+      "start": 35,
+      "end": 36
+    },
+    {
+      "kind": "type_parameter",
+      "qualified_name": "box_pkg::box::T",
+      "file": "box_pkg.sv",
+      "ctx": "type T = logic",
+      "nth": 0,
+      "text": "T",
+      "start": 47,
+      "end": 48
+    },
+    {
+      "kind": "field",
+      "qualified_name": "box_pkg::box::data",
+      "file": "box_pkg.sv",
+      "ctx": "data;",
+      "nth": 0,
+      "text": "data",
+      "start": 75,
+      "end": 79
+    },
+    {
+      "kind": "field",
+      "qualified_name": "box_pkg::box::item",
+      "file": "box_pkg.sv",
+      "ctx": "T item;",
+      "nth": 0,
+      "text": "item",
+      "start": 87,
+      "end": 91
+    },
+    {
+      "kind": "function",
+      "qualified_name": "box_pkg::box::width",
+      "file": "box_pkg.sv",
+      "ctx": "function int width()",
+      "nth": 0,
+      "text": "width",
+      "start": 110,
+      "end": 115
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem02_top.b8",
+      "file": "top.sv",
+      "ctx": "b8 = new()",
+      "nth": 0,
+      "text": "b8",
+      "start": 50,
+      "end": 52
+    },
+    {
+      "kind": "variable",
+      "qualified_name": "sem02_top.b16",
+      "file": "top.sv",
+      "ctx": "b16 = new()",
+      "nth": 0,
+      "text": "b16",
+      "start": 79,
+      "end": 82
+    },
+    {
+      "kind": "module",
+      "qualified_name": "sem02_top",
+      "file": "top.sv",
+      "ctx": "module sem02_top;",
+      "nth": 0,
+      "text": "sem02_top",
+      "start": 7,
+      "end": 16
+    }
+  ],
+  "specializations": [
+    {
+      "text": "box_pkg::box#(8,logic)",
+      "class": "box_pkg::box",
+      "parameters": {
+        "W": "8",
+        "T": "logic"
+      }
+    },
+    {
+      "text": "box_pkg::box#(16,int)",
+      "class": "box_pkg::box",
+      "parameters": {
+        "W": "16",
+        "T": "int"
+      }
+    }
+  ],
+  "references": [
+    {
+      "kind": "type",
+      "target": "box_pkg::box",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "box #(8) b8",
+      "nth": 0,
+      "text": "box #(8)",
+      "start": 41,
+      "end": 49,
+      "specialization": "box_pkg::box#(8,logic)"
+    },
+    {
+      "kind": "type",
+      "target": "box_pkg::box",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "box #(16, int) b16",
+      "nth": 0,
+      "text": "box #(16, int)",
+      "start": 64,
+      "end": 78,
+      "specialization": "box_pkg::box#(16,int)"
+    },
+    {
+      "kind": "call",
+      "target": "box_pkg::box::width",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b8.width()",
+      "nth": 0,
+      "text": "width",
+      "start": 135,
+      "end": 140,
+      "specialization_path": "box_pkg::box#(8,logic)::width"
+    },
+    {
+      "kind": "call",
+      "target": "box_pkg::box::width",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b16.width()",
+      "nth": 0,
+      "text": "width",
+      "start": 148,
+      "end": 153,
+      "specialization_path": "box_pkg::box#(16,int)::width"
+    },
+    {
+      "kind": "type",
+      "target": "box_pkg::box::T",
+      "status": "resolved_static",
+      "file": "box_pkg.sv",
+      "ctx": "T item;",
+      "nth": 0,
+      "text": "T",
+      "start": 85,
+      "end": 86
+    },
+    {
+      "kind": "value",
+      "target": "box_pkg::box::W",
+      "status": "resolved_static",
+      "file": "box_pkg.sv",
+      "ctx": "return W;",
+      "nth": 0,
+      "text": "W",
+      "start": 132,
+      "end": 133
+    },
+    {
+      "kind": "import",
+      "target": "box_pkg",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "import box_pkg::*;",
+      "nth": 0,
+      "text": "box_pkg::*",
+      "start": 27,
+      "end": 37
+    },
+    {
+      "kind": "new",
+      "target": "box_pkg::box",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b8 = new()",
+      "nth": 0,
+      "text": "new()",
+      "start": 55,
+      "end": 60
+    },
+    {
+      "kind": "new",
+      "target": "box_pkg::box",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b16 = new()",
+      "nth": 0,
+      "text": "new()",
+      "start": 85,
+      "end": 90
+    },
+    {
+      "kind": "system_call",
+      "target": null,
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "$display(\"%0d %0d\"",
+      "nth": 0,
+      "text": "$display",
+      "start": 112,
+      "end": 120
+    },
+    {
+      "kind": "value",
+      "target": "sem02_top.b8",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b8.width()",
+      "nth": 0,
+      "text": "b8",
+      "start": 132,
+      "end": 134
+    },
+    {
+      "kind": "value",
+      "target": "sem02_top.b16",
+      "status": "resolved_static",
+      "file": "top.sv",
+      "ctx": "b16.width()",
+      "nth": 0,
+      "text": "b16",
+      "start": 144,
+      "end": 147
+    }
+  ],
+  "counts": {
+    "declarations_of_width": 1,
+    "specializations": 2
+  },
+  "closed_scope": {
+    "declaration_files": [
+      "box_pkg.sv",
+      "top.sv"
+    ],
+    "reference_files": [
+      "box_pkg.sv",
+      "top.sv"
+    ],
+    "exclude_declarations": [
+      {
+        "kind": "instance",
+        "qualified_name": "sem02_top",
+        "file": "top.sv",
+        "ctx": "module sem02_top;",
+        "nth": 0,
+        "text": "sem02_top",
+        "start": 7,
+        "end": 16,
+        "reason": "the hierarchy root is modelled as an `instance` row spanning the same bytes as its module declaration; the module row is the golden entry"
+      }
+    ]
+  }
+}

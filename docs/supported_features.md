@@ -1,0 +1,212 @@
+# Supported features and limitations (M2 semantic core)
+
+Status: implemented in `src/svweave/adapters/slang/`, `application/build.py`,
+`application/queries.py`. Everything below was exercised against the pinned **pyslang 12.0.0**
+(ADR-003) on `fixtures/language`, `fixtures/demo` and `fixtures/uvm` with the real UVM 2020.3.1
+library. Goldens: `fixtures/expected/` (hand-written, see its README). Plan references are to
+`SVWeave_plan.md`.
+
+This is a **static** semantic core. Nothing here represents simulation, formal proof, UVM
+runtime behaviour (factory resolution, `config_db` matching, phase scheduling), or EDA
+(commercial simulator) semantics. `static-preview-qualified` needs the later milestones.
+
+## 1. Pipeline
+
+`svweave build --profile P`:
+
+1. resolve manifest (M1) and capture an immutable snapshot (M1);
+2. `toolchain_id` = H(pyslang version + wheel sha256 + canonical RECORD sha256, slang commit + binary
+   sha256, extractor version + sha256 of the extractor sources, DTO schema) from
+   `toolchain.lock.json` (found via `SVWEAVE_TOOLCHAIN_ROOT` or the installed tool only); the
+   installed pyslang must equal the lock and its files must match its dist-info `RECORD`
+   (`CAPABILITY_MISMATCH` otherwise). The pinned `record_sha256` is the sha256 of the sorted RECORD lines without installer-added entries (`INSTALLER`, `REQUESTED`, `direct_url.json`, `uv_cache.json`, `RECORD`, compiled `__pycache__`/`.pyc`), so pip, uv and the wheel's own RECORD give the same value; `build_id` = H(snapshot, config, toolchain, schema);
+3. a COMPLETE build with that id is **reused** (no new job); anything else runs a job
+   (`QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED/TIMED_OUT`);
+4. the HDL worker (`python -I -m svweave.adapters.slang.worker`, own process group, cwd = snapshot
+   files root, `RLIMIT_AS` from `analysis.max_worker_memory_mib`, wall timeout
+   `analysis.max_build_seconds`, clean environment) returns a JSON DTO; the gateway never loads
+   pyslang;
+5. dependency leak check (plan 8.4 step 9): every file slang read must be in the snapshot
+   inventory (adapter-written `-C` group files are declared in the request); otherwise the build
+   is stored as **BLOCKED**, semantic rows are withheld and nothing is published;
+6. rows are written in one staging transaction; **only COMPLETE builds move the published
+   pointer**; run artifacts are written to `.svweave/runs/<job-id>/` (plan 24.1).
+
+Job state, completeness and diagnostics stay separate: a design with errors is job `SUCCEEDED`,
+analysis `PARTIAL`, diagnostics `HAS_ERRORS` (SEM-07).
+
+### Completeness verdict
+
+`COMPLETE` iff all of these hold:
+
+* no error diagnostics (slang or driver errors) and every slang driver step succeeded
+  (`parseCommandLine`, `processOptions`, `parseAllSources` are read from the worker status, never
+  inferred from stderr text);
+* no unresolved or unsupported reference (`candidate_source` / `unsupported`);
+* no blackbox boundary: no explicit stub (`svw_stub` attribute or manifest `analysis.stubs`
+  record), no implicit empty-bodied module with ports (`empty_module_body`) and no protected /
+  encrypted envelope (`protected_envelope`); plan 16.5;
+* every port association was exposed by slang with a consistent span;
+* **per-occurrence scope rule (B1/M1):** unsupported symbol kinds, extractor exceptions and
+  *dropped reference occurrences* are counted per occurrence and split by where the occurrence
+  is spelled. Any occurrence in a **project** file makes the build `PARTIAL` (a reason is stored
+  and "negative reference conclusions" are not claimed, plan 10.4). Occurrences in files of an
+  **external source root** (`@root/...`, for example the pinned UVM library) are counted and
+  listed in `analysis_coverage.limitations` only. The verdict therefore never depends on which
+  instance slang happened to visit first.
+
+Warnings, `dynamic_unresolved` virtual calls, generic classes never specialized, definitions not
+elaborated, `ifdef-disabled regions and unloaded library members are **limitations**, not
+blockers.
+
+Reference occurrences that cannot be recorded (iterator variables of array-method `with` clauses,
+symbols without a source declaration, compiler-generated variables, missing locations) are
+counted in `dropped_refs` (reason + scope). The function return variable and `this` ARE resolved
+(`return_value` / `this` references to the function / class declaration).
+
+## 2. What is extracted (plan 10.3)
+
+| Category | Content |
+|---|---|
+| Declarations | kind, name, **qualified scope** (`Symbol.lexicalPath`: `pkg::class::method`, `module.signal`), name span, full span, compilation unit, library (definitions), type text, macro origin, kind-specific attributes. Kinds: module/interface/program definitions, package, class (generic and plain), field, variable, net, parameter, type_parameter, port, interface_port, argument, genvar, generate_block, modport, modport_port, property, sequence, typedef, constraint, covergroup, coverpoint, cover_cross, clocking, enum_value, struct_field, let, checker, instance. |
+| Class/member | base class (text + declaration id), abstract/interface flag, per-specialization parameters (`specializations` table), methods (virtual/pure/static/constructor/visibility/arguments, `override` link, DPI import + spec string), `rand` mode, constraints, covergroups/coverpoints. A generic class has **one** declaration and N specializations. |
+| References | source occurrence span, kind (`value`, `hier_value`, `call`, `system_call`, `type`, `extends`, `new`, `import`, `instantiation`, `unresolved`, `wildcard_connection`), target declaration, status, reason, enclosing declaration, context (call arguments **as written**, callee specialization path). Deduplicated per (span, kind, target) across instances and specializations. |
+| Resolution status | `resolved_static`, `dynamic_unresolved` (virtual method called through a handle: the static target is the declared method; `override_candidates` lists overriding methods, none is chosen), `candidate_source` (a name slang could not resolve, from the diagnostic range), `unsupported` (reserved), `inactive_for_profile` (inactive regions table). `super.f()` and `Class::f()` are static. |
+| Instances | path **components** (name + generate/array indices; identity), display path (SV-escaped), hierarchical path, definition (+ declaration id), parent, elaborated parameter values, generate context, top flag, interface flag, explicit stub flag (`(* svw_stub = "..." *)` attribute), blackbox candidate (ports but empty body), bind origin. |
+| Port association | per instance and formal: direction, port type, association style (`named`, `named_implicit`, `positional`, `wildcard`, `open`, `omitted`), actual expression **text taken from the source bytes**, its span, expression kind, type/bit width, constant flag, every symbol referenced inside the actual, concatenation parts (a `{a,b}` is **never** collapsed to one signal), interface instance + modport for interface ports. Output actuals use the ADR-003 unwrap quirk. |
+| SVA | per build: source entries (property/sequence declarations, assert/assume/cover/restrict/expect statements), **bind directives** (source span, target text, elaborated targets), and per-instance **elaborated** assertions (one per bound lane). Clock and `disable iff` text from the property spec when written. Execution/proof status is always `NOT_RUN`. |
+| Diagnostics | severity, code, message, primary location, ranges, macro notes, option name. Default-off (`Ignored`) diagnostics are filtered per ADR-003. Driver stderr messages are kept as `DriverMessage` entries. |
+| Dependencies | unique files from the SourceManager (macro and unnamed buffers excluded, repeated `include buffers deduplicated by full path), include directives, library members present but never loaded. |
+| Inactive source | `ifdef/`else-disabled regions (from slang's own disabled-token lists; modules/interfaces/packages/classes inside them are found by parsing the region with slang), definitions not elaborated under the tops, generate branches not selected. All `inactive_for_profile`. |
+| Unsupported inventory | symbol kinds the extractor does not handle (with count and a sample location) and extractor exceptions. |
+
+### Locations (plan 13.4)
+
+Canonical spans are **zero-based half-open byte offsets into the ORIGINAL physical file
+bytes** (the snapshot copy; `logical` path in results). `line`/`col` are 1-based display values,
+`position_encoding` is `utf-8` (column counts bytes). `lsp_positions()` converts to LSP
+(zero-based line, UTF-16 or UTF-8 or UTF-32 character) and back
+(`domain/locations.py`; lines end at `\n`, `\r\n` or `\r`; offsets inside a multi-byte character
+raise instead of being rounded). Macro-expanded locations carry `macro` = `{name, spelled_in:
+macro_argument|macro_body, expansion:{file,start,line,col}}`: the span is where the token text is
+spelled; the expansion is the invocation site. `` `line `` directives only add a separate
+`display:{file,line}`; they never move the canonical span. A spelling inside a macro **body**
+is shared by every expansion, so a location query on it returns all scoped candidates and
+`AMBIGUOUS_SYMBOL` (editing must refuse; the edit path is M4).
+
+## 3. Queries (plan 14.3) and CLI (plan 15.1)
+
+All return the common envelope: `snapshot_id`, `build_id`, `profile`, `freshness`
+(`CURRENT` = the snapshot equals the workspace now by the M1 check **and** the build's `config_id`
+and `toolchain_id` equal what the workspace resolves to now, so a change that only touches
+`svweave.yaml` (defines, parameters, include order, CU mode) or the toolchain makes the old build
+`STALE`; `STALE` = not current and this is the build the profile serves (its published build; a profile
+with no published build serves its latest stored one), also while a newer build is still running
+or failed, because only a fully validated build moves the published pointer; `HISTORICAL` = not
+current and not the served build (another build of the profile is published, which may be a newer
+build or an older one re-published by build reuse; or this build was never published while
+another is), or the snapshot was garbage-collected), `analysis_coverage{completeness, scope, basis, unresolved_count, limitations}`,
+`provenance{backend: slang, toolchain_id, evidence_kind: HDL_STATIC_RESOLVED}`, pagination.
+
+| CLI | Service | Notes |
+|---|---|---|
+| `svweave build --profile P [--no-reuse]` | `run_build` | exit 0 COMPLETE; **3** errors/PARTIAL/BLOCKED; 4 timeout/crash/resource; 2 config |
+| `svweave query symbol --build B (--symbol S \| --file F --byte N \| --name X)` | `symbol` | several candidates -> `AMBIGUOUS_SYMBOL` (exit 3), never auto-picked |
+| `svweave query references --build B --symbol S [--scope PREFIX]` | `references` | resolved + unresolved-name matches + virtual-dispatch candidates; `searched_scope`, `resolution_basis`; gaps appear in limitations |
+| `svweave query hierarchy --build B [--top T \| --instance I] [--depth N]` | `hierarchy` | pre-order, instance by id or display path |
+| `svweave query connections --build B --instance I [--port P]` | `connections` | direct associations only |
+| `svweave query assertions --build B [--scope I] [--kind source\|bind\|elaborated]` | `assertions` | |
+| `svweave query diagnostics --build B` | `diagnostics` | |
+
+CLI exit codes for the query commands (plan 15.4; `search` is snapshot-bound and not covered):
+a `STALE`/`HISTORICAL` build exits **5**, a `PARTIAL`/`BLOCKED` build exits **3**, unless the user
+passes `--allow-stale` / `--allow-partial` (BLOCKED always exits 3). The structured result carries
+`freshness` / `analysis_coverage` either way; when both apply, 5 wins. MCP tools return the
+envelope itself (not a protocol error) with the same fields.
+
+Scope filters (`references --scope`, `assertions --scope`) are exact, case-sensitive prefix
+matches with no wildcards (`%`, `_` are literal; `top.u` does not match `top.U`). The CLI prints
+pretty JSON only while the printed bytes stay within the 128 KiB cap; otherwise it prints the
+compact form the page was sized for.
+
+Read-path freshness is computed once per query and cached per (workspace, build) behind a stat
+fingerprint of every input (`semantic_common.input_fingerprint`); any change falls back to the
+full hash check, and `freshness_of(..., strict=True)` plus all build/commit paths always do the
+full check. Limitation: an edit preserving size, mtime, inode and ctime is undetectable on the
+read path only (see `docs/limitations.md`).
+
+Run directories (`.svweave/runs/<job-id>/`) always contain all 13 plan-24.1 files; a stage that
+never ran leaves `{"status": "not_available", "reason": ...}` and an aborted job's `result.json`
+carries the error.
+
+Location precision: a declaration whose name span does not contain the name bytes (token pasting
+such as `r_``n`) has `exact: false` plus `inexact_reason`; consumers (editing) must refuse it.
+A port actual that starts or ends inside a macro expansion is reported at its **use site**
+(`macro.use_site`, spelling kept in `macro.spelling`); if no consistent use-site range exists the
+binding is `supported=false` with no span.
+
+Pagination: `limit` default 100, max 500 (otherwise `INVALID_CONFIG`); the opaque cursor is
+`base64url(build, query hash, sort, offset) + HMAC` (key in `.svweave/cursor.key`, mode 0600) and
+is rejected for another build, another query, another sort order or a tampered token; responses
+are capped at 128 KiB: the page is cut, `truncated=true` and `next_cursor` are set, and
+`total_matches` is always present, so an empty or short page is never mistaken for completeness.
+A single item above the cap is replaced by a placeholder (`truncated_item`, `reason`,
+`size_bytes`, `id`); the ENVELOPE then says so too: `pagination.truncated=true`,
+`data.oversize_items`, outcome `PARTIAL`, and `error.code=OUTPUT_LIMIT` when no real item fits.
+`svw_symbol` candidates are paged (default 50, `limit`/`cursor`) and class specializations are
+bounded to 20 per class (`specialization_count`, `specializations_truncated`).
+
+Build result extras: `data.semantic_deviations` (where the analysis knowingly differs from the
+original tree or a vendor flow: snapshot `__FILE__`, external-root exemptions in effect, manifest
+language options, declared stubs) is separate from `data.reasons` (why the build is not
+COMPLETE). `diagnostic_policy` accepts only `no_errors` (errors make the build PARTIAL; warnings
+never block); the former `report_only` value had no effect and was removed.
+
+## 4. Known limitations and capabilities NOT implemented
+
+These are reported as limitations/gaps in the outputs; none is emulated with regular expressions.
+
+* No "find all references" index exists in pyslang (ADR-003). References are the occurrences found
+  by visiting elaborated code (packages, classes, instance bodies, class specializations reached
+  through types). Not covered: uninstantiated generic class bodies, definitions not elaborated,
+  inactive generate/`ifdef branches, library modules never instantiated, and **class
+  specializations that are only reached as the static scope of a call**
+  (`uvm_config_db#(int)::set` is recorded as a call with its `specialization_path`, but the body of
+  that specialization is not walked unless the specialization is also used as a type).
+* Not extracted as references: packed/unpacked dimension expressions, subroutine return-type
+  names, class names used only as scope prefixes (`Cls::member`), enum/struct member type names,
+  `export`/`import` of DPI beyond the declaration, clocking-block signals, bind
+  target instance lists (`bind mod : inst_list`), checker instances, primitives, config blocks
+  (counted in `unsupported_nodes`).
+* Multiple (macro-expanded) origins of one occurrence are reported as candidates; picking one is
+  an edit concern (M4).
+* `explicit_groups` compilation units use slang `-C` files; groups may not declare library
+  inputs (`CAPABILITY_MISMATCH`). Top parameter overrides are passed as `-G <top>.NAME=VALUE`
+  (slang 12 top-scoped form, verified against the pinned build); the DefParam symbol slang creates
+  for it in its `<command-line>` buffer is not reported as an unsupported node.
+* `defparam` in source: the assignment's name is recorded as a `defparam` reference to the overridden
+  parameter (slang applies the override during elaboration, so the hierarchy's parameter values
+  already reflect it; checked in `tests/integration/test_vcs_compat_defparam.py`). A `defparam` whose
+  target slang cannot resolve is still counted in `unsupported_nodes`; no reference is invented.
+* `language_options.compat: vcs` passes `--compat vcs` to slang (use-before-declare, enum/string
+  conversions, hierarchical const, ... as VCS tolerates them). It is part of `config_id`, listed in
+  `semantic_deviations`, and off by default; use a separate profile so strict and relaxed results
+  do not mix. It does NOT fix VCS-only constructs slang rejects regardless (`string.match()`,
+  covergroup cross/binsof over sample formals or class members, ...): those stay errors.
+* `-D NAME` (no value) defines the macro as slang does (value `1`); the manifest keeps the
+  `NAME` versus `NAME=` distinction in `config_id`. Snapshot files live under the snapshot
+  directory, so `` `__FILE__ `` shows that path (plan 9.4): not bit-identical to the original tree.
+* Interface/modport: associations name the interface **instance** and modport; virtual interface
+  handles are typed candidates (`virtual_interface: true`) and are never bound to an instance.
+* UVM: factory overrides and `config_db` set/get are listed as call sites (callee specialization,
+  argument text as written). Whether a `get` matches a `set` is runtime behaviour and is never
+  claimed.
+* Reading the **disabled** side of an `ifdef` uses slang's token list and a fragment re-parse for
+  declarations; a fragment that is not a complete declaration (for example half a module body) is
+  listed as a region without declarations.
+* Peak worker RSS comes from `wait4` of exactly the child. Measured: demo builds about 50 MiB and
+  0.3 s; UVM 2020.3.1 + fixture about 7 s wall (extraction), results about 20 MB of JSON.
+* Cancellation (`cancel_job`) works inside the process that started the build (in-memory job
+  registry); the cross-process job manager is M3.
+* The worker fault-injection hook (`WorkerRequest.test_fault`) is set only by the explicit
+  `test_fault=` keyword of `run_build`/`run_worker`; no configuration field maps to it.

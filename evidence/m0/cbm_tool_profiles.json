@@ -1,0 +1,33 @@
+{
+  "analysis": [
+    [
+      "search_graph",
+      "query_graph",
+      "trace_path",
+      "get_code_snippet",
+      "get_file_outline",
+      "get_graph_schema",
+      "compare_graphs",
+      "get_architecture",
+      "search_code",
+      "list_projects",
+      "index_status",
+      "check_index_coverage",
+      "detect_changes"
+    ],
+    "013544f3d76cf59944d0c95e1d4f857ae74bd21659703b3d4caea513e0e332a6"
+  ],
+  "scout": [
+    [
+      "search_graph",
+      "trace_path",
+      "get_code_snippet",
+      "get_file_outline",
+      "get_architecture",
+      "list_projects",
+      "index_status",
+      "check_index_coverage"
+    ],
+    "32dadc93eb453ec2abfc44a95cd4c0a24aff15419d2b6ad49118a9eb28040070"
+  ]
+}

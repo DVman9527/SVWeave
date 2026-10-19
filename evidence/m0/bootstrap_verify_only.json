@@ -1,0 +1,51 @@
+{
+  "lock": "${REPO}/toolchain.lock.json",
+  "lock_sha256": "dbcb971a30a5a0026b2ba7f2a3b824fc82bbedd8d117a16f6465d80c47eecd08",
+  "toolchain_dir": "${REPO}/.toolchain",
+  "verify_only": true,
+  "components": {
+    "slang": {
+      "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+      "download_present": true,
+      "download_sha256_ok": true,
+      "binary_sha256_ok": true
+    },
+    "verible": {
+      "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+      "download_present": true,
+      "download_sha256_ok": true,
+      "binary_sha256_ok": true
+    },
+    "codebase_memory_mcp": {
+      "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+      "download_present": true,
+      "download_sha256_ok": true,
+      "binary_sha256_ok": true
+    },
+    "uvm_core": {
+      "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+      "download_present": true,
+      "download_sha256_ok": true,
+      "install_dir_present": true
+    },
+    "pyslang": {
+      "wheel_present": true,
+      "wheel_sha256_ok": true,
+      "installed_version": "12.0.0"
+    },
+    "mcp_sdk": {
+      "wheel_present": true,
+      "wheel_sha256_ok": true,
+      "installed_version": "2.3.0"
+    },
+    "serena": {
+      "commit_ok": true,
+      "uv_lock_sha256_ok": true,
+      "license_sha256_ok": true,
+      "serena_exe_present": true,
+      "serena_agent_version": "1.7.0"
+    }
+  },
+  "errors": [],
+  "ok": true
+}
