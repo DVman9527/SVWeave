@@ -22,18 +22,24 @@ D6; editing stays off).
 Run the script with Python 3.11 or newer; the gateway venv itself is 3.12.
 
 ```bash
-mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz   # runtime/python/bin/python3 is 3.12.15
-```
-
-```bash
 (cd vendor && sha256sum -c SHA256SUMS)
-python3.11 scripts/bootstrap_locked.py --skip-serena --create-venv --venv-dir .venv \
-    --venv-python runtime/python/bin/python3 --artifact-dir vendor/downloads
+mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz     # runtime/python/bin/python3 = 3.12.15
+uv venv --python runtime/python/bin/python3 .venv                          # the gateway venv, built on that interpreter
+python3.11 scripts/bootstrap_locked.py --skip-serena --artifact-dir vendor/downloads
 python3.11 scripts/bootstrap_locked.py --skip-serena --verify-only
 # dev wheels (optional), no index access:
-.venv/bin/python -m pip install --no-index --find-links vendor/downloads/wheelhouse-dev \
+uv pip install --python .venv/bin/python --offline --no-index --find-links vendor/downloads/wheelhouse-dev \
     --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
+
+Do not pass `--venv-python runtime/python/bin/python3`: that option names the *venv's* Python, so the
+wheels would be installed into the bundled interpreter itself. Without Serena `svweave doctor` reports
+`backend:serena_exe FAIL` (exit 4); that is expected.
+
+For a run with no network at all, first cache the GitHub artifacts online
+(`bootstrap_locked.py --skip-serena --fetch-only --artifact-dir .toolchain/downloads`, then copy
+`vendor/downloads/wheelhouse` next to them) and add `--offline`. If `~/.cache/uv` is read-only, set
+`UV_CACHE_DIR` to a writable directory.
 
 The installer reuses any artifact already present with the right sha256, so the wheels come from
 `vendor/` and only the GitHub artifacts are downloaded. Regenerate the gateway wheels with
