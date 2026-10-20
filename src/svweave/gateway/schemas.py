@@ -23,6 +23,7 @@ TOOL_NAMES = (
     "svw_references",
     "svw_hierarchy",
     "svw_connections",
+    "svw_impact",
     "svw_assertions",
     "svw_evidence",
     "svw_edit",
@@ -137,6 +138,29 @@ INPUT: dict[str, dict[str, Any]] = {
         },
         ["build_id"],
         oneOf=_one_of(["instance_id"], ["instance_path"]),
+    ),
+    "svw_impact": _obj(
+        {
+            "build_id": HEX64,
+            "symbol_id": HEX64,
+            "location": _obj(
+                {
+                    "file": REL_PATH | {"maxLength": 1024},
+                    "byte": {"type": "integer", "minimum": 0, "maximum": 2**40},
+                },
+                ["file", "byte"],
+            )
+            | {"$schema": None},
+            "name": text(512),
+            "instance_id": HEX64,
+            "instance_path": text(1024),
+            "depth": {"type": "integer", "minimum": 1, "maximum": 20, "default": 3},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
+        },
+        ["build_id"],
+        oneOf=_one_of(
+            ["symbol_id"], ["location"], ["name"], ["instance_id"], ["instance_path"]
+        ),
     ),
     "svw_assertions": _obj(
         {
@@ -292,6 +316,15 @@ DATA: dict[str, dict[str, Any]] = {
     "svw_references": {"type": "object", "properties": _PAGED},
     "svw_hierarchy": {"type": "object", "properties": {**_PAGED, "roots": {"type": "array"}}},
     "svw_connections": {"type": "object", "properties": _PAGED},
+    "svw_impact": {
+        "type": "object",
+        "properties": {
+            "target": {"type": "object"},
+            "summary": {"type": "object"},
+            "truncated_lists": {"type": "array"},
+            "note": {"type": "string"},
+        },
+    },
     "svw_assertions": {"type": "object", "properties": _PAGED},
     "svw_edit": {
         "type": "object",

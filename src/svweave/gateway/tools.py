@@ -180,6 +180,22 @@ def _connections(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     )
 
 
+def _impact(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
+    loc = a.get("location") or {}
+    return services.impact(
+        s,
+        rid,
+        build_id=a["build_id"],
+        symbol_id=a.get("symbol_id"),
+        file=loc.get("file"),
+        byte=loc.get("byte"),
+        name=a.get("name"),
+        instance=a.get("instance_id") or a.get("instance_path"),
+        depth=a.get("depth", 3),
+        limit=a.get("limit"),
+    )
+
+
 def _assertions(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     return services.assertions(
         s,
@@ -303,6 +319,17 @@ for _t in (
         "Direct formal/actual port associations of one instance (paged)." + _COMMON,
         _RO,
         _connections,
+    ),
+    _spec(
+        "svw_impact",
+        "Change impact",
+        "What changing one declaration (module, port, signal, ...) or instance touches, from one "
+        "build: instances, dependent/dependency definitions up to depth levels, port connection "
+        "sites and references. A port and its implicit net are one target; other ambiguity "
+        "returns AMBIGUOUS_SYMBOL. Lists are capped (limit) with complete totals; counts are not "
+        "a risk score, absence is not proof of absence on PARTIAL/STALE results." + _COMMON,
+        _RO,
+        _impact,
     ),
     _spec(
         "svw_assertions",

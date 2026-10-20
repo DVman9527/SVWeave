@@ -68,6 +68,10 @@ BAD_INPUTS: list[tuple[str, dict[str, Any]]] = [
     ("svw_symbol", {"build_id": H}),
     ("svw_references", {"build_id": H, "symbol_id": "nope"}),
     ("svw_connections", {"build_id": H}),
+    ("svw_impact", {"build_id": H}),  # no target
+    ("svw_impact", {"build_id": H, "name": "m", "instance_path": "t"}),  # two targets
+    ("svw_impact", {"build_id": H, "name": "m", "depth": 0}),
+    ("svw_impact", {"build_id": H, "name": "m", "limit": 501}),
     ("svw_build", {}),  # profile required
     ("svw_build", {"profile": "p", "reuse": "yes"}),
     ("svw_build", {"profile": "p; rm -rf /"}),
@@ -176,6 +180,8 @@ def test_every_read_tool_output_validates_against_its_output_schema(built: Built
         ("svw_assertions", {"build_id": b}),
         ("svw_connections", {"build_id": b, "instance_id": inst}),
         ("svw_symbol", {"build_id": b, "name": "demo_top"}),
+        ("svw_impact", {"build_id": b, "name": "demo_lane"}),
+        ("svw_impact", {"build_id": b, "instance_id": inst}),
     ]
     for name, args in cases:
         env, err = call(gw, name, args)

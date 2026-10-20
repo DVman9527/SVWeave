@@ -129,3 +129,21 @@ def test_symbol_references_connections_parity(built: Built) -> None:
             gw, "svw_references", {"build_id": built.build_id, "symbol_id": sid, "limit": 5}
         )
         assert normalize(r1) == normalize(r2)
+
+
+def test_impact_parity_for_a_module_a_port_and_an_instance(built: Built) -> None:
+    gw = make_gateway(built.opts)
+    h, _ = call(gw, "svw_hierarchy", {"build_id": built.build_id})
+    inst = h["data"]["items"][1]["instance_id"]
+    cases = [
+        (["--name", "demo_lane"], {"name": "demo_lane"}),
+        (["--name", "demo_lane.valid_i"], {"name": "demo_lane.valid_i"}),
+        (["--instance", inst], {"instance_id": inst}),
+    ]
+    for cli_args, mcp_args in cases:
+        _, c = cli_env(
+            built.ws.root, "query", "impact", "--build", built.build_id, *cli_args, "--depth", "2"
+        )
+        m, _ = call(gw, "svw_impact", {"build_id": built.build_id, "depth": 2, **mcp_args})
+        assert normalize(c) == normalize(m), cli_args
+        assert m["data"]["target"] and m["data"]["summary"], cli_args

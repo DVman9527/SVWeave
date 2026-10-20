@@ -123,7 +123,7 @@ def test_schema_emit_check_covers_mcp_and_evidence_schemas(tmp_path: Path) -> No
     out = tmp_path / "s"
     run(REPO, "schema", "emit", "--out", str(out))
     assert (out / "evidence.schema.json").is_file()
-    assert len(list((out / "mcp").glob("*.json"))) == 22
+    assert len(list((out / "mcp").glob("*.json"))) == 24
     (out / "mcp" / "svw_status.input.json").write_text("{}")
     code, env = run(REPO, "schema", "emit", "--check", "--out", str(out))
     assert code == 2 and "mcp/svw_status.input.json" in env["data"]["out_of_sync"]

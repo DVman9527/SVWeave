@@ -12,6 +12,7 @@ from typing import Any
 from svweave.application import edit as edit_mod
 from svweave.application import evidence as evidence_mod
 from svweave.application import graph, queries
+from svweave.application import impact as impact_mod
 from svweave.application import status as status_mod
 from svweave.application.search import svw_search
 from svweave.application.session import Session
@@ -261,6 +262,34 @@ def references(
     clean_relpath(scope=scope)
     return queries.references(
         session.opts, build_id, symbol_id, request_id, scope=scope, limit=limit, cursor=cursor
+    )
+
+
+def impact(
+    session: Session,
+    request_id: str,
+    *,
+    build_id: str,
+    symbol_id: str | None = None,
+    file: str | None = None,
+    byte: int | None = None,
+    name: str | None = None,
+    instance: str | None = None,
+    depth: int = 3,
+    limit: int | None = None,
+) -> Envelope:
+    clean_text(symbol_id=symbol_id, file=file, name=name, instance=instance)
+    return impact_mod.impact(
+        session.opts,
+        build_id,
+        request_id,
+        symbol_id=symbol_id,
+        file=file,
+        byte=byte,
+        name=name,
+        instance=instance,
+        depth=depth,
+        limit=limit,
     )
 
 

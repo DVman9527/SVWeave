@@ -296,7 +296,7 @@ def test_explicit_policy_and_manifest_paths(ws: Ws, tmp_path: Path) -> None:
 def test_schema_emit_and_check(tmp_path: Path) -> None:
     out_dir = tmp_path / "sch"
     code, out = run(tmp_path, "schema", "emit", "--out", str(out_dir))
-    assert code == 0 and len(out["data"]["written"]) == 6 + 22  # models + evidence + edit + toolchain + MCP tool schemas
+    assert code == 0 and len(out["data"]["written"]) == 6 + 24  # models + evidence + edit + toolchain + MCP tool schemas
     code, out = run(tmp_path, "schema", "emit", "--out", str(out_dir), "--check")
     assert code == 0 and out["data"]["out_of_sync"] == []
     (out_dir / "local.schema.json").write_text("{}")

@@ -471,6 +471,48 @@ def query_references(
     )
 
 
+@query_grp.command("impact")
+@_build_opt
+@click.option("--symbol", "symbol_id", default=None, help="symbol_id")
+@click.option("--name", default=None, help="Declaration name or qualified name.")
+@click.option("--file", "file", default=None, help="Logical file path (with --byte).")
+@click.option("--byte", type=int, default=None, help="Zero-based byte offset (with --file).")
+@click.option("--instance", default=None, help="Instance id or path.")
+@click.option("--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels.")
+@click.option("--limit", type=int, default=None, help="Items per list (default 50, max 500).")
+@pass_state
+@_query_flags
+def query_impact(
+    st: _State,
+    build_id: str,
+    symbol_id: str | None,
+    name: str | None,
+    file: str | None,
+    byte: int | None,
+    instance: str | None,
+    depth: int,
+    limit: int | None,
+) -> None:
+    """What a change touches: instances, dependents, port connections and references."""
+    sess = st.session()
+    st.emit(
+        st.run(
+            lambda rid: services.impact(
+                sess,
+                rid,
+                build_id=build_id,
+                symbol_id=symbol_id,
+                file=file,
+                byte=byte,
+                name=name,
+                instance=instance,
+                depth=depth,
+                limit=limit,
+            )
+        )
+    )
+
+
 @query_grp.command("connections")
 @_build_opt
 @click.option("--instance", required=True, help="Instance id or path.")
