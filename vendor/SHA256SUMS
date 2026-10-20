@@ -52,3 +52,5 @@ addeda51556dac7c1a2f14cda62db8b621cd12afba3091d03a96c72932387eab  downloads/whee
 65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147  downloads/wheelhouse/typing_inspection-0.4.4-py3-none-any.whl
 505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf  downloads/wheelhouse/uvicorn-0.54.0-py3-none-any.whl
 178d3d83b6e8e99285a65d3fce9c16b87952cc5efdb4d1a0e3ff3be18ff0fc9c  runtime/cpython-3.12.15+20261013-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz
+1344ef02d9d73b90049c07183073277ee40a199379444a8b7c27cf0e26409ca0  serena-src.bundle
+1295c5fd6dbfce24ca8fee2ba8b0e162520089c7fcab9722ba6ad8eb00099078  uv-cache.tar.gz
