@@ -11,7 +11,7 @@ from typing import Any
 
 from svweave.application import edit as edit_mod
 from svweave.application import evidence as evidence_mod
-from svweave.application import queries
+from svweave.application import graph, queries
 from svweave.application import status as status_mod
 from svweave.application.search import svw_search
 from svweave.application.session import Session
@@ -261,6 +261,26 @@ def references(
     clean_relpath(scope=scope)
     return queries.references(
         session.opts, build_id, symbol_id, request_id, scope=scope, limit=limit, cursor=cursor
+    )
+
+
+def graph_export(
+    session: Session,
+    request_id: str,
+    *,
+    build_id: str,
+    name: str | None = None,
+    max_instances: int = graph.DEFAULT_MAX_INSTANCES,
+    max_fanout: int = graph.DEFAULT_MAX_FANOUT,
+) -> Envelope:
+    clean_text(name=name)
+    return graph.export_graph(
+        session.opts,
+        build_id,
+        request_id,
+        name=name,
+        max_instances=max_instances,
+        max_fanout=max_fanout,
     )
 
 

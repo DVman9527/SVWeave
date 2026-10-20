@@ -26,6 +26,9 @@ Editing stays disabled during all of this (and in M3 it does not exist at all).
    `svweave evidence import --manifest evidence.json`, inspect with `svweave query evidence --build B`.
 5. Editing (disabled by default; see `docs/editing.md`):
 
+6. Draw it: `svweave graph export --build B` writes one self-contained HTML page under
+   `.svweave/exports/` (hierarchy plus port-association connections, nothing served, ADR-014).
+
 ```text
 svweave edit prepare --spec spec.json
 svweave edit validate --transaction T

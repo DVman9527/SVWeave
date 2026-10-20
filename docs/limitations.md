@@ -20,7 +20,7 @@ timing or signoff result (plan 4.3).
 | No incremental build | Every build is a full parse and elaboration (ADR-006). An edit triggers a full rebuild. There is no claim that changing one file is cheaper. |
 | Not a language-server replacement | No LSP, no semantic rename, no refactoring beyond the controlled edit flow. |
 | Not implemented (plan 4.3) | Bit-level connectivity, clock/reset domain analysis, CDC/RDC/timing/power, encrypted source recovery, UVM factory/`config_db` resolution, SVA proof, coverage closure, VHDL/AMS/mixed-language. |
-| One workspace per server | `svweave serve` is bound to one workspace; there is no HTTP endpoint (ADR-009). |
+| One workspace per server | `svweave serve` is bound to one workspace; there is no HTTP endpoint (ADR-009); the only UI is the static HTML graph export (ADR-014). |
 | UVM | The pinned Accellera `uvm-core` 2020.3.1 is an external input mapped through `svweave.local.yaml`. UVM runtime topology, phase scheduling, factory overrides and `config_db` hits are not computed; call sites are listed as written. |
 
 ## 2. Semantic core (pyslang extraction, ADR-003, `docs/supported_features.md`)
@@ -209,3 +209,14 @@ evidence). Measured gaps on the fixtures:
   not a statement about other hosts or real projects, and no token-saving claim is made (plan 22.4
   has not been executed).
 * SVWeave's own license is not decided (plan 3.2): **TBD by owner**.
+
+## 8. Graph export (ADR-014)
+
+* Connection edges are shared-signal links from direct port associations, oriented by the declared
+  port direction. They are not a netlist: no driver/load analysis, no bit level, no cross-hierarchy
+  continuous assignments, `tran`/`alias`, or UVM runtime topology.
+* Signals used by more instances than `--max-fanout` are listed as hubs, not drawn; instances beyond
+  `--max-instances` are not drawn (shallowest first). Neither is proof of absence.
+* The page is a snapshot of one build and does not refresh. Layout is a plain tree; very large
+  designs need `--max-instances` or collapsing to stay readable.
+* Only the user's browser renders it; the viewer is not part of the qualification gates.

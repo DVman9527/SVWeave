@@ -269,6 +269,47 @@ def build_cmd(st: _State, profile: str | None, no_reuse: bool) -> None:
     st.emit(env, EXIT_BUILD if env.outcome in (Outcome.PARTIAL, Outcome.BLOCKED) else None)
 
 
+@cli.group("graph")
+def graph_grp() -> None:
+    """Static graph export of a build (self-contained HTML, nothing is served)."""
+
+
+@graph_grp.command("export")
+@click.option("--build", "build_id", required=True, help="64-hex build id.")
+@click.option(
+    "--name", default=None, help="File name stem under .svweave/exports/ (default graph-<build>)."
+)
+@click.option(
+    "--max-instances", type=int, default=5000, show_default=True, help="Draw at most N instances, shallowest first."
+)
+@click.option(
+    "--max-fanout",
+    type=int,
+    default=16,
+    show_default=True,
+    help="Signals used by more instances are listed as hubs, not drawn.",
+)
+@pass_state
+@_query_flags
+def graph_export_cmd(
+    st: _State, build_id: str, name: str | None, max_instances: int, max_fanout: int
+) -> None:
+    """Write .svweave/exports/<name>.html: instance hierarchy plus port-association connections."""
+    sess = st.session()
+    st.emit(
+        st.run(
+            lambda rid: services.graph_export(
+                sess,
+                rid,
+                build_id=build_id,
+                name=name,
+                max_instances=max_instances,
+                max_fanout=max_fanout,
+            )
+        )
+    )
+
+
 @cli.group("query")
 def query_grp() -> None:
     """Semantic queries bound to an immutable build id."""

@@ -8,8 +8,9 @@ find the relevant source (repository graph), then verify static semantics agains
 (candidate copy, validation, human approval, compare-and-set commit).
 
 It is delivered as a Python package, a local CLI (`svweave`) and **one** MCP gateway over three
-separate backend processes. It does not merge the upstream projects and has no web UI, no HTTP
-endpoint and no model training.
+separate backend processes. It does not merge the upstream projects and has no web server, no HTTP
+endpoint and no model training. `svweave graph export` writes a static, self-contained HTML graph
+of one build to `.svweave/exports/` (ADR-014); nothing is served.
 
 ## Table of contents
 
@@ -85,8 +86,8 @@ re-run `scripts/qualify.py` for the state of your tree.
 Not a simulator, formal tool or lint/signoff tool; no bit-level connectivity, clock/reset domain,
 CDC/RDC, timing or power analysis; no recovery of encrypted source; no static resolution of UVM
 factory overrides, `config_db` hits or runtime topology; no SVA proof, coverage closure or
-signoff conclusion; no VHDL, AMS or mixed-language semantics; no multi-tenant service and no
-remote HTTP endpoint; no incremental compile (every build is a full rebuild); Linux only.
+signoff conclusion; no VHDL, AMS or mixed-language semantics; no multi-tenant service, no
+remote HTTP endpoint and no served web UI (only the static graph export, ADR-014); no incremental compile (every build is a full rebuild); Linux only.
 
 ## Repository layout
 
@@ -477,6 +478,23 @@ errors is a job `SUCCEEDED`, analysis `PARTIAL`, diagnostics `HAS_ERRORS`. The i
 lookup search space is part of `snapshot_id`: with include order `dir_a, dir_b`, adding
 `dir_a/common.svh` changes the selected header although `dir_b/common.svh` is untouched.*
 
+## Graph export
+
+```bash
+svweave graph export --build BUILD_ID          # writes .svweave/exports/graph-<build>.html
+```
+
+Open the file in a browser (`file://`, no server). It shows the elaborated instance tree of that
+one build (double-click collapses a subtree, search expands to matches, drag and wheel pan and
+zoom) and, as dashed lines, the connections derived from the build's direct port associations: two
+instances reference the same signal declaration, oriented by the declared port direction. One line
+stands for all signals between two nodes; click it for the list. Clock-like signals used by more
+than `--max-fanout` instances (default 16) are listed as hubs, not drawn. The page carries the
+build's completeness and freshness and says so when it is PARTIAL, STALE or truncated
+(`--max-instances`, shallowest first). It is not a netlist: no driver/load analysis and no bit
+level. The page has no network access (strict CSP) and treats source text as data. Rationale and
+limits: `docs/adr/ADR-014-static-graph-export.md`.
+
 ## Configuration
 
 SVWeave reads three files. `svweave.yaml` and `svweave.local.yaml` are data only: nothing in them is
@@ -642,6 +660,7 @@ prints one JSON envelope.
 | `svweave query search --snapshot S --query Q` | graph candidates or marked text fallback (`--scope`, `--no-graph`) |
 | `svweave report --build B` | status report filled from real data; unevaluated gates say so |
 | `svweave evidence import --manifest FILE` | import external evidence (stored `EXTERNAL_DECLARED`) |
+| `svweave graph export --build B [--name N] [--max-instances N] [--max-fanout N]` | write `.svweave/exports/<name>.html`: instance hierarchy plus port-association connections, one self-contained page, nothing served (ADR-014) |
 | `svweave cache gc [--no-dry-run]` | garbage-collect snapshots; keeps the last 3 and referenced ones; dry run by default |
 | `svweave debug bundle --build B [--out DIR]` | reproduction bundle: hashes, manifest, diagnostics summary, redacted paths |
 | `svweave schema emit [--check] [--out DIR]` | write or verify `schemas/*.schema.json` |

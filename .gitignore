@@ -17,3 +17,6 @@ dist/
 # Host-specific root mappings
 svweave.local.yaml
 .claude/
+
+# GitHub archives that bootstrap_locked.py downloads next to vendor/downloads wheels
+vendor/downloads/*.tar.gz

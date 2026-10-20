@@ -11,3 +11,6 @@ The gateway uses stdio only. Upstream UIs are disabled in dedicated state: cbm `
 
 ## Consequences
 Remote and multi-user deployments are out of scope until a later ADR.
+
+## Amendment
+ADR-014 allows a static, self-contained HTML graph export. It is a file written under `.svweave/exports/`, not a listener: the gateway is still stdio only.
