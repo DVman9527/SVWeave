@@ -225,6 +225,26 @@ def report_of(db: Database, build_id: str) -> dict[str, Any]:
     }
 
 
+MAX_LIMITATIONS = 60
+
+
+def cap_limitations(limits: list[str]) -> list[str]:
+    """Bound the limitation list of an envelope. Builds stored before the per-kind summary can hold
+    thousands of one-line entries (a big SoC: ~700 KB per response, far above the 128 KiB cap). The
+    standing lines come first and the closing "Partial analysis" reasons stay; the middle is cut
+    and the cut is said out loud."""
+    if len(limits) <= MAX_LIMITATIONS:
+        return limits
+    head, tail = limits[: MAX_LIMITATIONS - 2], limits[-1:]
+    omitted = len(limits) - len(head) - len(tail)
+    return [
+        *head,
+        f"... {omitted} more limitation line(s) omitted from this envelope to respect the "
+        "response size cap; the build's counts and reasons below are complete",
+        *tail,
+    ]
+
+
 def coverage_of(
     db: Database, build: sqlite3.Row, extra_limits: list[str] | None = None
 ) -> AnalysisCoverage:
@@ -233,6 +253,7 @@ def coverage_of(
     comp = Completeness(build["completeness"])
     if comp != Completeness.COMPLETE and rep["reasons"]:
         limits.append("Partial analysis: " + "; ".join(rep["reasons"]))
+    limits = cap_limitations(limits)
     return AnalysisCoverage(
         completeness=comp,
         scope=rep["scope"],

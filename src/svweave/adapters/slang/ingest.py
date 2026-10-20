@@ -98,6 +98,9 @@ def _slim_loc(loc: dict[str, Any] | None, ids: _Ids) -> dict[str, Any] | None:
     return out
 
 
+MAX_LISTED_GAPS_PER_KIND = 10
+
+
 def _classify_gaps(
     gaps: list[dict[str, Any]], diags: list[dict[str, Any]], stubs: list[dict[str, str]]
 ) -> list[dict[str, Any]]:
@@ -662,8 +665,22 @@ def ingest(
         limitations.append(
             "`ifdef-disabled regions are inactive_for_profile (listed, not elaborated)."
         )
+    # One line per boundary is unbounded (6637 on the SSE-315 SoC: ~700 KB in every envelope).
+    # The first few are named; the count per kind says the rest, and coverage_gaps holds all rows.
+    listed: dict[str, int] = {}
+    omitted: dict[str, int] = {}
     for g in blocking_gaps:
-        limitations.append(f"Blackbox boundary ({g['kind']}): {g['detail']}")
+        k = str(g["kind"])
+        if listed.get(k, 0) < MAX_LISTED_GAPS_PER_KIND:
+            listed[k] = listed.get(k, 0) + 1
+            limitations.append(f"Blackbox boundary ({k}): {g['detail']}")
+        else:
+            omitted[k] = omitted.get(k, 0) + 1
+    for k, n in sorted(omitted.items()):
+        limitations.append(
+            f"... and {n} more blackbox boundary gap(s) ({k}) not listed here; all "
+            f"{n + listed[k]} are recorded in the build's coverage_gaps"
+        )
     scope = (
         ",".join(tops)
         if tops

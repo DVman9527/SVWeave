@@ -234,3 +234,16 @@ def test_envelope_json_roundtrip_and_pagination_defaults(ws: Ws) -> None:
         require_build(db, "0" * 64)
     assert ei2.value.code == ErrorCode.MISSING_INPUT
     assert check_limit(None) == 100
+
+
+def test_SIZE02_envelope_limitations_are_capped_with_the_standing_lines_and_reasons_kept() -> None:
+    from svweave.application.semantic_common import MAX_LIMITATIONS, cap_limitations
+
+    short = [f"l{i}" for i in range(MAX_LIMITATIONS)]
+    assert cap_limitations(short) == short  # at the cap: untouched
+    many = ["standing-1", "standing-2", *[f"Blackbox boundary {i}" for i in range(6637)], "Partial analysis: x"]
+    out = cap_limitations(many)
+    assert len(out) == MAX_LIMITATIONS
+    assert out[:2] == ["standing-1", "standing-2"] and out[-1] == "Partial analysis: x"
+    assert "more limitation line(s) omitted" in out[-2] and str(len(many) - (MAX_LIMITATIONS - 2) - 1) in out[-2]
+    assert len(json.dumps(out)) < 16_000  # nowhere near the old ~700 KB

@@ -543,3 +543,25 @@ def test_ambiguous_or_extent_less_modules_get_no_attribution() -> None:
         diagnostics=[envelope, _param_diag("m", 60)],
     )
     assert not any("ParameterDoesNotExist" in x for x in run(no_full).reasons)
+
+
+def test_SIZE01_blackbox_boundary_lines_are_bounded_and_the_rest_is_counted() -> None:
+    """A big SoC has thousands of empty-bodied modules; one limitation line each made every
+    envelope ~700 KB, far above the 128 KiB cap. Name a few per kind, count the rest."""
+    gaps = [
+        {"kind": "empty_module_body", "name": f"m{i}", "detail": f"module m{i} has ports but no body"}
+        for i in range(500)
+    ]
+    r = run(dto(gaps=gaps))
+    boundary = [x for x in r.limitations if x.startswith("Blackbox boundary")]
+    assert len(boundary) == 10 and boundary[0].endswith("module m0 has ports but no body")
+    more = [x for x in r.limitations if x.startswith("... and ")]
+    assert more == [
+        "... and 490 more blackbox boundary gap(s) (empty_module_body) not listed here; all "
+        "500 are recorded in the build's coverage_gaps"
+    ]
+    assert len(r.rows["coverage_gaps"]) == 500  # nothing is dropped from the data
+    assert any("500 stub/blackbox/protected-source boundary gap(s)" in x for x in r.reasons)
+    assert r.completeness == Completeness.PARTIAL  # the verdict is unchanged
+    few = run(dto(gaps=gaps[:3]))
+    assert not any(x.startswith("... and ") for x in few.limitations)  # nothing omitted, no line
