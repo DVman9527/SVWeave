@@ -2,39 +2,62 @@
 
 English | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
-**SVWeave is a SystemVerilog-first, local code-intelligence layer.** It lets an AI client first
-find the relevant source (repository graph), then verify static semantics against a **named build**
-(slang elaboration), and only then change code through a traceable, refusable, recoverable flow
-(candidate copy, validation, human approval, compare-and-set commit).
+**SVWeave is a SystemVerilog-first, local code-intelligence layer for AI clients and engineers.**
+It finds the relevant source (repository graph), verifies static semantics against a **named
+build** (slang elaboration of the exact filelists, defines, tops and parameters you configure),
+answers what a change would touch (impact, git diff impact, rename preview), and only then changes
+code through a traceable, refusable, recoverable flow (candidate copy, slang validation, human
+approval, compare-and-set commit).
 
-It is delivered as a Python package, a local CLI (`svweave`) and **one** MCP gateway over three
-separate backend processes. It does not merge the upstream projects and has no web server, no HTTP
-endpoint and no model training. `svweave graph export` writes a static, self-contained HTML graph
-of one build to `.svweave/exports/` (ADR-014); nothing is served.
+It is delivered as a Python package, a local CLI (`svweave`) and **one** MCP gateway (14 `svw_*`
+tools over stdio) on top of three sandboxed backend processes. It does not merge the upstream
+projects and has no web server, no HTTP endpoint and no model training. The only UI is a static,
+self-contained HTML graph of a build that you open from disk.
 
 ## Table of contents
 
-1. [Architecture at a glance](#architecture-at-a-glance)
-2. [Status](#status)
-3. [What it is not](#what-it-is-not-plan-43-non-goals)
-4. [Repository layout](#repository-layout)
-5. [Quickstart](#quickstart)
-6. [Using SVWeave with Claude Code and Codex](#using-svweave-with-claude-code-and-codex)
-7. [How a change flows](#how-a-change-flows)
-8. [Build flow](#build-flow)
-9. [Build identity and states](#build-identity-and-states)
-10. [Configuration](#configuration)
-11. [CLI reference](#cli-reference)
-12. [MCP tool reference](#mcp-tool-reference)
-13. [Controlled edit workflow](#controlled-edit-workflow)
-14. [Toolchain and backends](#toolchain-and-backends)
-15. [Testing and qualification](#testing-and-qualification-verification)
-16. [Security model](#security-model)
-17. [Known limitations](#known-limitations)
-18. [Troubleshooting](#troubleshooting)
-19. [Documentation](#documentation)
-20. [Contributing](#contributing)
-21. [License](#license)
+1. [What it does](#what-it-does)
+2. [Architecture at a glance](#architecture-at-a-glance)
+3. [Status](#status)
+4. [What it is not](#what-it-is-not-plan-43-non-goals)
+5. [Repository layout](#repository-layout)
+6. [Installation](#installation)
+7. [Quickstart](#quickstart)
+8. [Analysis tools: impact, diff impact, rename preview, graph](#analysis-tools-impact-diff-impact-rename-preview-graph)
+9. [Using SVWeave with Claude Code and Codex](#using-svweave-with-claude-code-and-codex)
+10. [How a change flows](#how-a-change-flows)
+11. [Build flow](#build-flow)
+12. [Build identity and states](#build-identity-and-states)
+13. [Configuration](#configuration)
+14. [CLI reference](#cli-reference)
+15. [MCP tool reference](#mcp-tool-reference)
+16. [Controlled edit workflow](#controlled-edit-workflow)
+17. [Toolchain and backends](#toolchain-and-backends)
+18. [Testing and qualification](#testing-and-qualification-verification)
+19. [Security model](#security-model)
+20. [Known limitations](#known-limitations)
+21. [Troubleshooting](#troubleshooting)
+22. [Documentation](#documentation)
+23. [Contributing](#contributing)
+24. [License](#license)
+
+## What it does
+
+| Capability | CLI | MCP tool | Answer is based on |
+|---|---|---|---|
+| Build: resolve the filelists, capture an immutable snapshot, elaborate with slang | `svweave build` | `svw_build`, `svw_job` | the named build (`build_id`) |
+| Find candidate files | `svweave query search` | `svw_search` | repository graph or literal text (a candidate, never semantic truth) |
+| Declarations, references, instance hierarchy, port connections, SVA inventory, diagnostics | `svweave query symbol / references / hierarchy / connections / assertions / diagnostics` | `svw_symbol`, `svw_references`, `svw_hierarchy`, `svw_connections`, `svw_assertions` | slang, for that build |
+| What a change to a module, port, signal or instance touches | `svweave query impact` | `svw_impact` | the build's instance tree and resolved references |
+| What a git diff touches | `svweave query diff-impact` | `svw_diff_impact` | `git diff` mapped onto the build's snapshot |
+| Every edit a rename would make, with blockers | `svweave query rename-preview` | `svw_rename_preview` | resolved references plus a verified lexical scan (read-only) |
+| A browsable graph of the hierarchy and its connections | `svweave graph export` | (CLI only) | the build, written as one static HTML file |
+| Change code safely | `svweave edit ...` | `svw_edit` (cannot approve) | candidate copy, slang validation, human approval, compare-and-set |
+| Status, evidence, reports | `svweave doctor`, `svweave query evidence`, `svweave report` | `svw_status`, `svw_evidence` | recorded runs; EDA, simulation and formal stay `NOT_RUN` |
+
+Every answer is one JSON envelope that carries the build id, snapshot id, `freshness`
+(`CURRENT`, `STALE`, `HISTORICAL`), `analysis_coverage` (completeness, limitations) and
+provenance. A `PARTIAL`, `STALE` or truncated answer never claims that something is absent.
 
 ## Architecture at a glance
 
@@ -57,8 +80,14 @@ simulation, formal or EDA result: `eda_compile`, `simulation` and `formal` are `
 import your own evidence, and imported evidence is `EXTERNAL_DECLARED`, never verified by SVWeave.
 Read `docs/limitations.md` before relying on any result.
 
-**Latest recorded qualification run (2026-10-14, source tree sha256 `21a97d0c...`, git HEAD `b6ba45c` plus uncommitted changes,
-Linux x86_64, this host only):**
+**Latest full test run (2026-10-20, Linux x86_64, this host only):** a fresh copy installed with the
+documented offline procedure (`vendor/`, Serena included) and run with `SVWEAVE_REQUIRE_BACKENDS=1`:
+**1066 passed, 1 skipped, 0 failed**; `ruff`, `mypy` and `svweave schema emit --check` clean. It
+covers the impact, diff-impact, rename-preview and graph-export tools and the fixes of the
+2026-10-19/20 reviews (see `CHANGELOG.md`).
+
+**Latest recorded qualification run (2026-10-14, git HEAD `b6ba45c` plus uncommitted changes; NOT
+re-run since the tools above were added):**
 
 | Item | Result |
 |---|---|
@@ -71,9 +100,14 @@ Linux x86_64, this host only):**
 
 G0 is not a plain PASS because codebase-memory-mcp and Serena probe as `DEGRADED` (inside the
 declared subset) and the owner has not signed the waiver. Copies of the evidence are in
-`evidence/qualification/` (`report.md`, `report.json`, `mutation.json`) and
-`evidence/bench/20261014T085609Z-s1.0.json`. This is a snapshot of one run, not a standing claim;
-re-run `scripts/qualify.py` for the state of your tree.
+`evidence/qualification/`. This is a snapshot of one run, not a standing claim; re-run
+`scripts/qualify.py` for the state of your tree.
+
+**Tried on a real SoC** (2026-10-20, not part of the test suite): an Arm SSE-315-based design of
+3835 HDL files (135 MiB) built in 606 s (worker peak 11 GB) to 115,552 instances and 605,874 port
+associations; the result was honestly `PARTIAL` (compile errors in a gate-level PHY model,
+unresolved references, 6637 empty module bodies). Running it found and fixed the instance-array id
+collision and the oversized envelopes listed in `CHANGELOG.md`.
 
 | Backend (pinned in `toolchain.lock.json`) | Role |
 |---|---|
@@ -86,8 +120,10 @@ re-run `scripts/qualify.py` for the state of your tree.
 Not a simulator, formal tool or lint/signoff tool; no bit-level connectivity, clock/reset domain,
 CDC/RDC, timing or power analysis; no recovery of encrypted source; no static resolution of UVM
 factory overrides, `config_db` hits or runtime topology; no SVA proof, coverage closure or
-signoff conclusion; no VHDL, AMS or mixed-language semantics; no multi-tenant service, no
-remote HTTP endpoint and no served web UI (only the static graph export, ADR-014); no incremental compile (every build is a full rebuild); Linux only.
+signoff conclusion; no VHDL, AMS or mixed-language semantics; no multi-tenant service, no remote
+HTTP endpoint and no served web UI (only the static graph export, ADR-014); no incremental compile
+(every build is a full rebuild); Linux only. Impact counts are counts, not a risk score; a rename
+preview is not a rename (applying goes through the edit loop and a human).
 
 ## Repository layout
 
@@ -97,8 +133,9 @@ SVWeave/
   src/svweave/
     cli.py, server.py        click CLI and MCP stdio server (both thin)
     gateway/                 MCP schemas, tool registry (14 svw_* tools), validation, dispatch
-    application/             use cases shared by CLI and MCP (services, build, queries, search, edit,
-                             jobs, evidence, status, report, doctor, debug bundle, init, keys)
+    application/             use cases shared by CLI and MCP: build, queries, search, edit, jobs,
+                             impact, diff_impact, rename, graph (+ template), evidence, status,
+                             report, doctor, debug bundle, init, keys
     domain/                  ids, states, error catalog + exit codes, envelope, cursor, locations
     config/                  svweave.yaml / svweave.local.yaml / policy.json models, loader, trusted dir
     manifest/                profile resolver, filelist lexer, argument ledger, slang argv builder
@@ -113,6 +150,8 @@ SVWeave/
     storage/                 SQLite, migrations, workspace lock
   schemas/                   generated JSON Schemas (manifest, local, policy, edit, evidence,
                              toolchain, mcp/<tool>.input|output.json)
+  vendor/                    offline install package: locked PyPI wheels, [dev] wheels, Serena,
+                             standalone CPython 3.12, SHA256SUMS (see vendor/README.md)
   fixtures/                  demo, uvm, language, filelists, negative, expected
   tests/                     unit, contract, integration, fault_injection, acceptance
   scripts/                   bootstrap_locked, probe_backends, qualify, benchmark, gen_corpus,
@@ -130,29 +169,55 @@ SVWeave/
 | `fixtures/filelists`, `fixtures/negative` | filelist dialect cases and deliberately broken inputs (cycles, missing files) |
 | `fixtures/expected` | hand-written golden expectations (see its README; never generated from SVWeave output) |
 | `tests/unit` | fast tests with fakes; `tests/contract` MCP schemas, stdio server, CLI parity |
-| `tests/integration` | real pyslang worker, codebase-memory-mcp, Serena, sandbox (`integration` marker) |
+| `tests/integration` | real pyslang worker, codebase-memory-mcp, Serena, sandbox, git (`integration` marker) |
 | `tests/fault_injection` | crash and recovery of the edit commit; `tests/acceptance` the end-to-end demo flow and docs check |
+| `vendor/` | everything a host without PyPI access needs; GitHub-hosted backends are downloaded by the installer |
 | `evidence/` | copies of qualification, benchmark and mutation results referenced by the status above |
+
+## Installation
+
+Requirements: Linux x86_64, `bwrap` (bubblewrap) with unprivileged user namespaces
+(`bwrap --version && bwrap --ro-bind / / true`), `git`, `tar`, `uv`, and Python 3.11 or newer to run
+the installer (the gateway venv itself is Python 3.12). Details: `docs/install.md`.
+
+**A host that can reach PyPI and GitHub:**
+
+```bash
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -e '.[dev]'
+.venv/bin/python scripts/bootstrap_locked.py                 # pinned backends, sha256-verified
+.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network
+```
+
+**A host that reaches GitHub but not PyPI** (typical for a compute cluster) uses the committed
+`vendor/` package: the 31 hash-locked gateway wheels, the `[dev]` wheels, Serena's source bundle and
+locked dependency cache, and a standalone CPython 3.12. The GitHub-hosted backends (slang, Verible,
+codebase-memory-mcp, uvm-core) are still downloaded by the installer and verified against
+`toolchain.lock.json`:
+
+```bash
+(cd vendor && sha256sum -c SHA256SUMS)
+mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz
+git clone vendor/serena-src.bundle .toolchain/serena-src
+mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz
+uv venv --python runtime/python/bin/python3 .venv
+python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads
+python3.11 scripts/bootstrap_locked.py --verify-only
+```
+
+`vendor/README.md` has the dev-wheel step and the fully offline variant (`--offline`, after caching
+the GitHub archives once). This exact procedure produced the test run in [Status](#status).
 
 ## Quickstart
 
-Requirements and the offline procedure are in `docs/install.md`.
-
 ```bash
-# 1. install the package and the pinned backends (the only step that uses the network;
-#    needs `uv` on PATH, or pass --uv PATH to bootstrap_locked.py)
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[dev]'
-.venv/bin/python scripts/bootstrap_locked.py
-.venv/bin/python scripts/bootstrap_locked.py --verify-only
-
-# 2. workspace and checks (this repository ships a demo svweave.yaml and fixtures)
+# workspace and checks (this repository ships a demo svweave.yaml and fixtures)
 #    `svweave` lives in the venv: `source .venv/bin/activate` first (or call .venv/bin/svweave)
 svweave init                       # never overwrites; creates the trusted policy outside the repo
 svweave doctor                     # includes the "client boundary not qualified" item
 svweave doctor --probe             # real fixture probe of every backend (slow)
 
-# 3. resolve, build, query
+# resolve, build, query
 svweave manifest resolve --profile rtl_demo      # review the argument ledger by hand
 svweave build --profile rtl_demo                 # prints build_id and snapshot_id
 svweave query hierarchy --build BUILD_ID
@@ -160,12 +225,23 @@ svweave query symbol --build BUILD_ID --name demo_lane
 svweave query search --snapshot SNAPSHOT_ID --query demo_lane
 svweave report --build BUILD_ID --format json
 
-# 4. serve the MCP gateway for your client (stdio)
+# what would a change touch?
+svweave query impact --build BUILD_ID --name demo_lane
+svweave query diff-impact --build BUILD_ID                       # your uncommitted git changes
+svweave query rename-preview --build BUILD_ID --name demo_lane.valid_i --to valid_in
+svweave graph export --build BUILD_ID                            # .svweave/exports/graph-<id>.html
+
+# serve the MCP gateway for your client (stdio)
 svweave serve --transport stdio
 ```
 
 Exit codes: 0 success of that command (not "design PASS"), 2 usage/config, 3 build errors,
 PARTIAL or BLOCKED, 4 backend/resource/timeout, 5 stale/conflict, 6 policy/approval refusal.
+
+To analyse a project that lives elsewhere (your own SoC), keep `svweave.yaml` in a separate
+workspace and attach the design as an external root: `docs/manifest.md`, section 2b. Simulator
+options are not accepted in filelists; the common cases (`timescale`, run-time-only options) have
+profile fields.
 
 ### MCP client configuration
 
@@ -188,6 +264,81 @@ Register only this server; do not also register the raw codebase-memory-mcp or S
 Add `--no-graph` to `args` on small hosts (search then uses the literal-text fallback only).
 Local indexing is not end-to-end offline: snippets returned to a cloud-model client leave the
 machine.
+
+## Analysis tools: impact, diff impact, rename preview, graph
+
+All four read one build and say so: the envelope carries the build id, completeness, freshness and
+limitations, lists are capped with complete totals, and nothing they report is a risk score.
+
+### Impact (`svweave query impact`, `svw_impact`)
+
+Give one target: a declaration (`--name`, `--symbol`, or `--file` + `--byte`) or an instance
+(`--instance`).
+
+| Target | Answer |
+|---|---|
+| module / interface | every instance, the definitions that instantiate it (`dependents`, up to `--depth` levels) and the ones it instantiates (`dependencies`), the source references |
+| port | every instance connection that binds it (actual expression, signals, file:line), uses of its signal as an actual further down, the dependents of its module |
+| net, variable, parameter, ... | resolved references and the port connections that reference it |
+| instance | ancestors, what lies below it, its own port connections |
+
+A port and the implicit net slang declares for it are one target; any other ambiguity returns
+`AMBIGUOUS_SYMBOL` with the candidates. Dependents come from the elaborated tree: a module never
+instantiated under the build's tops has none here.
+
+### Git diff impact (`svweave query diff-impact`, `svw_diff_impact`)
+
+Reads `git diff -U0` from `--base` (default `HEAD`) to `--head` (default the working tree) and maps
+the OLD-side lines onto the build's snapshot: changed declarations, their owning modules, those
+modules' instances and dependents, changed ports with their connection sites. Build from the base
+revision: each file is marked `aligned` when the snapshot bytes equal the base version, otherwise
+the mapping is flagged approximate. Files outside the build are listed, not analysed; a change in an
+included header is not re-expanded into the files that include it. The workspace has changed since
+the build by definition, so `STALE` does not change the exit code. `git` runs with a fixed argument
+list (no shell, no external diff driver, no textconv, no fsmonitor), revisions are plain tokens,
+and its output is read with a size cap and a timeout. Comparing with the working tree would make git
+run any clean/process filter the repository configures, so that mode is refused when such a filter
+exists (commit the change and use `--head`). Only the project's own subtree is diffed, also when
+the repository around it is larger.
+
+### Rename preview (`svweave query rename-preview`, `svw_rename_preview`)
+
+Read-only. Lists every edit a rename would make, each checked against the snapshot bytes (the text
+at the span must be exactly the old name): the declaration, resolved references, the formal name of
+named port connections (`.old(expr)`), the `end<keyword> : old` label that closes the declaration's
+own block (module, function, task, class, ...), and for modules, interfaces and programs their
+`bind old` targets. It shows the diff, `blockers`, `warnings` and a
+lexical list of other occurrences, and when nothing blocks it returns an `edit_request` that
+`svweave edit prepare --spec` accepts as is (`--write-spec STEM` writes it to
+`.svweave/exports/`). Applying is the controlled edit loop: slang validates the renamed candidate
+and a human approves it.
+
+It blocks, rather than guesses, on: a keyword or invalid identifier, a same-scope name collision,
+references slang did not resolve, `.*`, `.name` or `.name()` connections, sites spelled in a macro
+body or whose bytes do not match, a build that is not `COMPLETE` and `CURRENT`, more edits than one
+request may carry, uses of a module/interface/package name outside the edit set (on the SSE-315
+design this caught real instantiations inside unelaborated modules), uses of a local name that
+slang did not resolve in its declaring scope (searched up through generate blocks and functions to
+the module) or in included headers (an inactive `` `ifdef `` branch, a macro), parameter overrides
+and argument bindings by name (`#(.old(...))`, `f(.old(x))`), and an occurrence scan that had to
+stop early.
+
+### Graph export (`svweave graph export`, CLI only)
+
+```bash
+svweave graph export --build BUILD_ID          # writes .svweave/exports/graph-<build>.html
+```
+
+Open the file in a browser (`file://`, no server). It shows the elaborated instance tree of that
+one build (double-click collapses a subtree, search expands to matches, drag and wheel pan and
+zoom) and, as dashed lines, the connections derived from the build's direct port associations: two
+instances reference the same signal declaration, oriented by the declared port direction. One line
+stands for all signals between two nodes; click it for the list. Clock-like signals used by more
+than `--max-fanout` instances (default 16) are listed as hubs, not drawn. The page carries the
+build's completeness and freshness and says so when it is PARTIAL, STALE or truncated
+(`--max-instances`, shallowest first). It is not a netlist. The page has no network access (strict
+CSP) and treats source text as data. On the 115k-instance SoC above the export took 27 s and drew
+the 5000 shallowest instances (38 MB). Rationale: `docs/adr/ADR-014-static-graph-export.md`.
 
 ## Using SVWeave with Claude Code and Codex
 
@@ -477,23 +628,6 @@ five state dimensions are reported separately and never collapse into one verdic
 errors is a job `SUCCEEDED`, analysis `PARTIAL`, diagnostics `HAS_ERRORS`. The inset shows why the
 lookup search space is part of `snapshot_id`: with include order `dir_a, dir_b`, adding
 `dir_a/common.svh` changes the selected header although `dir_b/common.svh` is untouched.*
-
-## Graph export
-
-```bash
-svweave graph export --build BUILD_ID          # writes .svweave/exports/graph-<build>.html
-```
-
-Open the file in a browser (`file://`, no server). It shows the elaborated instance tree of that
-one build (double-click collapses a subtree, search expands to matches, drag and wheel pan and
-zoom) and, as dashed lines, the connections derived from the build's direct port associations: two
-instances reference the same signal declaration, oriented by the declared port direction. One line
-stands for all signals between two nodes; click it for the list. Clock-like signals used by more
-than `--max-fanout` instances (default 16) are listed as hubs, not drawn. The page carries the
-build's completeness and freshness and says so when it is PARTIAL, STALE or truncated
-(`--max-instances`, shallowest first). It is not a netlist: no driver/load analysis and no bit
-level. The page has no network access (strict CSP) and treats source text as data. Rationale and
-limits: `docs/adr/ADR-014-static-graph-export.md`.
 
 ## Configuration
 
