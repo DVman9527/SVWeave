@@ -239,3 +239,28 @@ evidence). Measured gaps on the fixtures:
   tokens (no leading `-`, no `..`). `--repo` exists on the CLI only and must stay inside the policy's
   allowed roots.
 
+## 10. Rename preview
+
+* It is a PREVIEW. Applying goes through the controlled edit loop (candidate copy, slang validation
+  of baseline and candidate, human approval, compare-and-set commit), which is what can refuse. A
+  rename that the preview calls ready can still fail validation; that is the intended safety net.
+* Edit sites come from slang's resolved references plus the formal name of NAMED port connections
+  (`.old(expr)`), and, for modules, interfaces and programs, `end<kw> : old` labels and `bind old`
+  targets. Each site is checked against the snapshot bytes: the text at the span must be exactly the
+  old name, else the site is skipped and the preview is blocked.
+* Not edited automatically, and reported instead: connections made by `.*`, `.old` (implicit) or
+  `.old()` (blockers); parameter overrides by name `#(.old(..))` and `defparam` (warning, listed under
+  `unconfirmed_occurrences`); sites spelled in a macro body (blocker); references slang did not
+  resolve (blocker); the profile still naming the old top module or top parameter (warning);
+  filelists, file names, hierarchical strings, `$root`/`config` blocks and anything in an inactive
+  `ifdef` or generate branch.
+* `unconfirmed_occurrences` is a lexical scan of the snapshot for the old name outside the edit set.
+  The same name elsewhere is usually a different entity (a local `clk`), so for a local name it is
+  information; for a module, interface, program or package name any remaining use is a blocker.
+* No edit request is produced above 50 edits, `editing.max_files_per_patch` files or
+  `editing.max_changed_lines` lines (the request schema and the edit loop's limits); the diff is
+  still shown. The preview needs a COMPLETE, CURRENT build to call itself ready.
+* Names must be plain identifiers (no escaped identifiers) and not a reserved keyword; a declaration
+  of the same name in the same scope is a blocker, one in a nested scope a warning. Capture by a
+  same-named declaration visible from an outer scope or an imported package is not analysed.
+

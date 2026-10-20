@@ -208,6 +208,21 @@ def _diff_impact(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     )
 
 
+def _rename_preview(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
+    loc = a.get("location") or {}
+    return services.rename_preview(
+        s,
+        rid,
+        build_id=a["build_id"],
+        new_name=a["new_name"],
+        symbol_id=a.get("symbol_id"),
+        file=loc.get("file"),
+        byte=loc.get("byte"),
+        name=a.get("name"),
+        limit=a.get("limit"),
+    )
+
+
 def _assertions(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     return services.assertions(
         s,
@@ -354,6 +369,20 @@ for _t in (
         "changes are not re-expanded. Counts, not a risk score." + _COMMON,
         _RO,
         _diff_impact,
+    ),
+    _spec(
+        "svw_rename_preview",
+        "Rename preview",
+        "READ-ONLY preview of renaming one declaration: every edit site (declaration, resolved "
+        "references, named port connections, end labels and bind targets of modules) verified "
+        "against the snapshot bytes, the unified diff, blockers (keyword, name collision, "
+        "unresolved references, `.*`/`.name` connections, macro-spelled sites, stale or partial "
+        "build, edit limits), warnings and a lexical list of other occurrences. When nothing "
+        "blocks, `edit_request` is a ready `svw_edit` prepare request (exact_range edits); this "
+        "tool never writes the source tree and cannot approve. A port and its implicit net are one "
+        "target; other ambiguity returns AMBIGUOUS_SYMBOL." + _COMMON,
+        _RO,
+        _rename_preview,
     ),
     _spec(
         "svw_assertions",

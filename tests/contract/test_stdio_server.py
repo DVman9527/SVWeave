@@ -220,7 +220,7 @@ def test_sdk_client_handshake_over_stdio_lists_tools_and_queries(built: Built) -
     out = anyio.run(go)
     assert (
         "svw_edit" in out["names"]
-        and len(out["names"]) == 13
+        and len(out["names"]) == 14
         and not any("approv" in n for n in out["names"])
     )
     assert out["env"]["outcome"] == "OK" and out["env"]["build_id"] == built.build_id

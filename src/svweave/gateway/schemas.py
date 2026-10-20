@@ -25,6 +25,7 @@ TOOL_NAMES = (
     "svw_connections",
     "svw_impact",
     "svw_diff_impact",
+    "svw_rename_preview",
     "svw_assertions",
     "svw_evidence",
     "svw_edit",
@@ -40,6 +41,13 @@ JOB_ID = {
 }
 PROFILE = {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,64}$"}
 LIMIT = {"type": "integer", "minimum": 1, "maximum": 500, "default": 100}
+#: a plain SystemVerilog identifier (no escaped identifiers); the trailing newline `$` allows is excluded
+SV_IDENT = {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 255,
+    "pattern": "^[A-Za-z_][A-Za-z0-9_$]*$(?![\\s\\S])",
+}
 #: a git revision as a plain token (no option, no whitespace, no control character, no ".." range)
 GIT_REF = {
     "type": "string",
@@ -179,6 +187,25 @@ INPUT: dict[str, dict[str, Any]] = {
             "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
         },
         ["build_id"],
+    ),
+    "svw_rename_preview": _obj(
+        {
+            "build_id": HEX64,
+            "symbol_id": HEX64,
+            "location": _obj(
+                {
+                    "file": REL_PATH | {"maxLength": 1024},
+                    "byte": {"type": "integer", "minimum": 0, "maximum": 2**40},
+                },
+                ["file", "byte"],
+            )
+            | {"$schema": None},
+            "name": text(512),
+            "new_name": SV_IDENT,
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
+        },
+        ["build_id", "new_name"],
+        oneOf=_one_of(["symbol_id"], ["location"], ["name"]),
     ),
     "svw_assertions": _obj(
         {
@@ -334,6 +361,20 @@ DATA: dict[str, dict[str, Any]] = {
     "svw_references": {"type": "object", "properties": _PAGED},
     "svw_hierarchy": {"type": "object", "properties": {**_PAGED, "roots": {"type": "array"}}},
     "svw_connections": {"type": "object", "properties": _PAGED},
+    "svw_rename_preview": {
+        "type": "object",
+        "properties": {
+            "old_name": {"type": "string"},
+            "new_name": {"type": "string"},
+            "ready_for_edit_request": {"type": "boolean"},
+            "blockers": {"type": "array"},
+            "warnings": {"type": "array"},
+            "sites": {"type": "array"},
+            "edit_request": {"type": ["object", "null"]},
+            "summary": {"type": "object"},
+            "note": {"type": "string"},
+        },
+    },
     "svw_diff_impact": {
         "type": "object",
         "properties": {

@@ -165,9 +165,30 @@ def test_diff_impact_parity_with_a_real_git_change(built: Built) -> None:
     git("add", "-A")
     git("commit", "-q", "-m", "base")  # the committed files are exactly what the build captured
     lane = root / "fixtures/demo/rtl/demo_lane.sv"
+    original = lane.read_bytes()
     lane.write_text(lane.read_text().replace("assign ready_o = ready_i;", "assign ready_o = ~ready_i;"))
-    code, c = cli_env(root, "query", "diff-impact", "--build", built.build_id, "--depth", "2")
-    m, _ = call(make_gateway(built.opts), "svw_diff_impact", {"build_id": built.build_id, "depth": 2})
-    assert code == 0 and normalize(c) == normalize(m)
-    assert [d["qualified_name"] for d in m["data"]["affected_definitions"]] == ["demo_lane"]
-    assert m["data"]["files"][0]["aligned"] is True and m["freshness"] == "STALE"
+    try:  # the `built` fixture is shared: leave the workspace as it was found
+        code, c = cli_env(root, "query", "diff-impact", "--build", built.build_id, "--depth", "2")
+        m, _ = call(make_gateway(built.opts), "svw_diff_impact", {"build_id": built.build_id, "depth": 2})
+        assert code == 0 and normalize(c) == normalize(m)
+        assert [d["qualified_name"] for d in m["data"]["affected_definitions"]] == ["demo_lane"]
+        assert m["data"]["files"][0]["aligned"] is True and m["freshness"] == "STALE"
+    finally:
+        lane.write_bytes(original)
+
+
+def test_rename_preview_parity_for_ready_and_blocked(built: Built) -> None:
+    gw = make_gateway(built.opts)
+    for new, ready in (("valid_in", True), ("wire", False)):
+        code, c = cli_env(
+            built.ws.root, "query", "rename-preview", "--build", built.build_id,
+            "--name", "demo_lane.valid_i", "--to", new,
+        )
+        m, _ = call(
+            gw, "svw_rename_preview",
+            {"build_id": built.build_id, "name": "demo_lane.valid_i", "new_name": new},
+        )
+        assert code == 0 and normalize(c) == normalize(m), new
+        assert m["data"]["ready_for_edit_request"] is ready
+        assert (m["data"]["edit_request"] is not None) is ready
+        assert m["data"]["summary"]["sites"] == 3

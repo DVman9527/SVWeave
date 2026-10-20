@@ -563,6 +563,52 @@ def query_diff_impact(
     )
 
 
+@query_grp.command("rename-preview")
+@_build_opt
+@click.option("--symbol", "symbol_id", default=None, help="symbol_id")
+@click.option("--name", default=None, help="Declaration name or qualified name.")
+@click.option("--file", "file", default=None, help="Logical file path (with --byte).")
+@click.option("--byte", type=int, default=None, help="Zero-based byte offset (with --file).")
+@click.option("--to", "new_name", required=True, help="The new identifier.")
+@click.option("--limit", type=int, default=None, help="Items per list (default 50, max 500).")
+@click.option(
+    "--write-spec",
+    default=None,
+    help="File name stem: write the edit request to .svweave/exports/<stem>.json when ready.",
+)
+@pass_state
+@_query_flags
+def query_rename_preview(
+    st: _State,
+    build_id: str,
+    symbol_id: str | None,
+    name: str | None,
+    file: str | None,
+    byte: int | None,
+    new_name: str,
+    limit: int | None,
+    write_spec: str | None,
+) -> None:
+    """Every edit a rename would make (verified against the snapshot), diff, blockers and an edit request. Read-only."""
+    sess = st.session()
+    st.emit(
+        st.run(
+            lambda rid: services.rename_preview(
+                sess,
+                rid,
+                build_id=build_id,
+                new_name=new_name,
+                symbol_id=symbol_id,
+                file=file,
+                byte=byte,
+                name=name,
+                limit=limit,
+                write_spec=write_spec,
+            )
+        )
+    )
+
+
 @query_grp.command("connections")
 @_build_opt
 @click.option("--instance", required=True, help="Instance id or path.")

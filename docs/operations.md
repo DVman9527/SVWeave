@@ -29,7 +29,12 @@ Editing stays disabled during all of this (and in M3 it does not exist at all).
 6. Before a change lands: `svweave query diff-impact --build B` maps your `git diff` (base `HEAD`, working
    tree) onto the build: changed declarations, modules, instances, dependents. Build from the base
    revision so the lines align; the answer marks each file `aligned` or approximate.
-7. Draw it: `svweave graph export --build B` writes one self-contained HTML page under
+7. Rename: `svweave query rename-preview --build B --name X --to Y` lists every edit (declaration,
+   resolved references, named port connections, end labels and bind targets of modules), verified
+   against the snapshot, with the diff and the blockers. When it is `ready_for_edit_request`,
+   `--write-spec STEM` writes the request under `.svweave/exports/`; `svweave edit prepare --spec`
+   then validates it with slang and a human approves it. The preview itself never writes.
+8. Draw it: `svweave graph export --build B` writes one self-contained HTML page under
    `.svweave/exports/` (hierarchy plus port-association connections, nothing served, ADR-014).
 
 ```text

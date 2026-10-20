@@ -5,6 +5,40 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 
 ## [0.1.0-dev] - unreleased (developer preview, UNQUALIFIED)
 
+### Added
+
+* **Graph export** (`svweave graph export`, ADR-014): one self-contained HTML page per build, the
+  elaborated instance tree plus connections derived from direct port associations. No server, no
+  network (strict CSP), source text embedded as escaped JSON. ADR-009 amended.
+* **Impact analysis** (`svweave query impact`, MCP `svw_impact`): what changing a module, port, signal
+  or instance touches: instances, dependent and dependency definitions, port connection sites,
+  references. A port and its implicit net are one entity.
+* **Git diff impact** (`svweave query diff-impact`, MCP `svw_diff_impact`): the old-side lines of
+  `git diff -U0` mapped onto the build's snapshot, attributed to declarations and modules; per-file
+  `aligned` flag; STALE never changes the exit code.
+* **Rename preview** (`svweave query rename-preview`, MCP `svw_rename_preview`): read-only; every edit
+  site verified against the snapshot bytes, diff, blockers, an `edit_request` for the controlled edit
+  loop. Verified end to end through prepare, slang validation, approval and commit.
+* **Offline install package** `vendor/`: the hash-locked PyPI wheels, the `[dev]` wheels, Serena (source
+  bundle and dependency cache) and a standalone CPython 3.12, with `SHA256SUMS` and install steps.
+
+### Fixed (continued)
+
+* **Instance ids collided for instance-array elements**: slang names an array element `""`, so two
+  arrays in one scope shared ids and the build died with `UNIQUE constraint failed:
+  instances.build_id, instances.instance_id` (found on a 115k-instance SoC). Elements now carry the
+  array's name.
+* **Envelopes could be ~700 KB** on a big build: one limitation line per empty-bodied module (6637).
+  New builds name 10 per kind and count the rest; every envelope also caps the list at 60 lines.
+* **Codex whole-repository review** (each finding verified before patching):
+  `safeio.read_regular_under` follows no link in any component (used for the backend-writable
+  candidate tree); the worker's stdout is capped (default: its memory limit) and the worker group is
+  killed on overflow; the snapshot size cap is enforced while copying; the include-directory walk is
+  bounded in depth and directory count; `git` output is read with a running cap (and a timeout) rather
+  than buffered; SQL `LIKE` patterns built from names escape `_` and `%`; a local rename is blocked
+  when the declaring scope still has uses slang did not resolve (inactive `ifdef`, macros).
+  Identifier validation uses `fullmatch` (a trailing newline passed `$`).
+
 ### Fixed
 
 * **Installer usability** (found by installing as a new user): `scripts/bootstrap_locked.py` no longer

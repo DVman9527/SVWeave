@@ -10,7 +10,7 @@ src/svweave/
   cli.py                  click CLI: parses argv, calls use cases, prints one envelope, exit codes 15.4
   server.py               MCP stdio server (lowlevel SDK Server), logging to stderr, lifespan cleanup
   gateway/
-    schemas.py            input/output JSON Schemas of the 13 tools; writes schemas/mcp/*.json
+    schemas.py            input/output JSON Schemas of the 14 tools; writes schemas/mcp/*.json
     tools.py              ToolSpec registry (register_tool = M4 hook), validation, dispatch, redaction
   application/
     services.py           one function per use case used by CLI + MCP (status, build, job, search,

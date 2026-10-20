@@ -76,6 +76,12 @@ BAD_INPUTS: list[tuple[str, dict[str, Any]]] = [
     ("svw_diff_impact", {"build_id": H, "head": "a..b"}),
     ("svw_diff_impact", {"build_id": H, "base": "a b"}),
     ("svw_diff_impact", {"build_id": H, "repo": "/etc"}),  # no filesystem root is accepted
+    ("svw_rename_preview", {"build_id": H, "name": "m"}),  # new_name required
+    ("svw_rename_preview", {"build_id": H, "name": "m", "new_name": "1bad"}),
+    ("svw_rename_preview", {"build_id": H, "name": "m", "new_name": "a b"}),
+    ("svw_rename_preview", {"build_id": H, "name": "m", "new_name": "ok\n"}),  # trailing newline
+    ("svw_rename_preview", {"build_id": H, "new_name": "x"}),  # no target
+    ("svw_rename_preview", {"build_id": H, "name": "m", "symbol_id": H, "new_name": "x"}),
     ("svw_build", {}),  # profile required
     ("svw_build", {"profile": "p", "reuse": "yes"}),
     ("svw_build", {"profile": "p; rm -rf /"}),
@@ -186,6 +192,7 @@ def test_every_read_tool_output_validates_against_its_output_schema(built: Built
         ("svw_symbol", {"build_id": b, "name": "demo_top"}),
         ("svw_impact", {"build_id": b, "name": "demo_lane"}),
         ("svw_impact", {"build_id": b, "instance_id": inst}),
+        ("svw_rename_preview", {"build_id": b, "name": "demo_lane.valid_i", "new_name": "valid_in"}),
     ]
     for name, args in cases:
         env, err = call(gw, name, args)

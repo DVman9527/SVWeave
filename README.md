@@ -38,7 +38,7 @@ of one build to `.svweave/exports/` (ADR-014); nothing is served.
 
 ## Architecture at a glance
 
-<p align="center"><img src="docs/images/architecture.svg" alt="Architecture diagram: a human CLI and an MCP client reach one SVWeave gateway (cli.py, server.py, gateway/tools.py with 13 svw_* tools, application/services.py, policy, job manager, provenance and error mapping). Three adapters drive codebase-memory-mcp v0.11.0, Serena v1.7.0 with Verible, and a pyslang 12.0.0 worker, each inside a bwrap sandbox without network and without the original source mounted. Snapshots, the candidate workspace and the SQLite database live in .svweave/; policy and keys live in a trusted directory outside the repository. Only the edit coordinator writes the user source workspace, after approval and a compare-and-set check." width="100%"></p>
+<p align="center"><img src="docs/images/architecture.svg" alt="Architecture diagram: a human CLI and an MCP client reach one SVWeave gateway (cli.py, server.py, gateway/tools.py with 14 svw_* tools, application/services.py, policy, job manager, provenance and error mapping). Three adapters drive codebase-memory-mcp v0.11.0, Serena v1.7.0 with Verible, and a pyslang 12.0.0 worker, each inside a bwrap sandbox without network and without the original source mounted. Snapshots, the candidate workspace and the SQLite database live in .svweave/; policy and keys live in a trusted directory outside the repository. Only the edit coordinator writes the user source workspace, after approval and a compare-and-set check." width="100%"></p>
 
 *The client talks to one gateway only. The gateway owns policy, jobs, provenance and error
 mapping, and drives three backends through adapters. Every backend runs in a `bwrap` sandbox with
@@ -96,7 +96,7 @@ SVWeave/
   svweave.yaml, toolchain.lock.json, capability_report.json, license_manifest.json, pyproject.toml
   src/svweave/
     cli.py, server.py        click CLI and MCP stdio server (both thin)
-    gateway/                 MCP schemas, tool registry (13 svw_* tools), validation, dispatch
+    gateway/                 MCP schemas, tool registry (14 svw_* tools), validation, dispatch
     application/             use cases shared by CLI and MCP (services, build, queries, search, edit,
                              jobs, evidence, status, report, doctor, debug bundle, init, keys)
     domain/                  ids, states, error catalog + exit codes, envelope, cursor, locations
@@ -258,7 +258,7 @@ leave the machine.
 
 | Through the gateway | Agent |
 |---|---|
-| `svw_status`, `svw_search`, `svw_symbol`, `svw_references`, `svw_hierarchy`, `svw_connections`, `svw_impact`, `svw_diff_impact`, `svw_assertions`, `svw_evidence` | can read |
+| `svw_status`, `svw_search`, `svw_symbol`, `svw_references`, `svw_hierarchy`, `svw_connections`, `svw_impact`, `svw_diff_impact`, `svw_rename_preview`, `svw_assertions`, `svw_evidence` | can read |
 | `svw_build`, `svw_job` | can start and poll a build (runtime state under `.svweave/`) |
 | `svw_edit` `prepare` / `validate` / `abort` | can propose and validate a candidate, **only if** editing is enabled in `svweave.yaml` **and** in the trusted policy (off by default) |
 | Approval | **cannot**: there is no approve tool and no approval field. A human runs `svweave edit approve` on a real terminal |
@@ -655,6 +655,7 @@ prints one JSON envelope.
 | `svweave query hierarchy --build B` | instance tree (`--top`, `--instance`, `--depth`) |
 | `svweave query impact --build B (--name N \| --symbol S \| --file F --byte N \| --instance I) [--depth N] [--limit N]` | what changing a module, port, signal or instance touches: instances, dependents, port connections, references (counts, not a risk score) |
 | `svweave query diff-impact --build B [--base REF] [--head REF] [--repo DIR] [--depth N] [--limit N]` | what a git diff touches in a build; the diff is read against the build's snapshot (exact only for files marked `aligned`), STALE does not change the exit code |
+| `svweave query rename-preview --build B (--name N \| --symbol S \| --file F --byte N) --to NEW [--write-spec STEM] [--limit N]` | read-only rename preview: verified edit sites, diff, blockers, an edit request for `svweave edit prepare --spec`; never writes the source tree |
 | `svweave query connections --build B --instance I` | direct formal/actual port associations (`--port`) |
 | `svweave query assertions --build B` | static SVA inventory (`--kind` is `source`, `bind` or `elaborated`); execution is always `NOT_RUN` |
 | `svweave query diagnostics --build B` | compiler diagnostics |
@@ -700,7 +701,7 @@ workspace; no tool accepts a filesystem root. Full contract: `docs/mcp_contract.
 `schemas/mcp/<tool>.input.json` and `.output.json`.
 
 <details>
-<summary>The 13 tools</summary>
+<summary>The 14 tools</summary>
 
 | Tool | Required input | Main output | Read-only |
 |---|---|---|---|
@@ -714,6 +715,7 @@ workspace; no tool accepts a filesystem root. Full contract: `docs/mcp_contract.
 | `svw_connections` | `build_id` + `instance_id` or `instance_path` | direct formal/actual associations | yes |
 | `svw_impact` | `build_id` + one of `symbol_id`, `location{file,byte}`, `name`, `instance_id`, `instance_path` | what a change touches: instances, dependent and dependency definitions (`depth`), port connection sites, references; capped lists with complete totals | yes |
 | `svw_diff_impact` | `build_id` (`base` default `HEAD`, `head` default the working tree, `depth`, `limit`) | what a git diff touches: changed declarations, owning modules, instances, dependents, changed ports with connection sites; per-file `aligned` flag | yes (runs a read-only `git diff`) |
+| `svw_rename_preview` | `build_id`, `new_name` + one of `symbol_id`, `location{file,byte}`, `name` (`limit`) | READ-ONLY rename preview: every edit site verified against the snapshot bytes, diff, `blockers`, `warnings`, lexical `unconfirmed_occurrences`, and, when nothing blocks, a ready `edit_request` for `svw_edit` | yes |
 | `svw_assertions` | `build_id` | static SVA inventory | yes |
 | `svw_evidence` | `build_id` or `evidence_id` | static record, imported records, per-kind state | yes |
 | `svw_edit` | `action` = `prepare`, `validate`, `commit` or `abort` plus per-action fields | transaction state, diff, patch hash | no (destructive annotation is hint only) |
