@@ -43,6 +43,11 @@ def _inject_fault(kind: str) -> None:
         # a descendant that outlives a NORMAL worker exit; the runner must still reap the group
         child = subprocess.Popen(["sleep", "3600"])
         print(f"FAULT_CHILD_PID={child.pid}", file=sys.stderr, flush=True)
+    elif kind == "flood":  # endless stdout: the runner must cap it, not buffer it
+        block = b"x" * (1 << 20)
+        while True:
+            sys.stdout.buffer.write(block)
+            sys.stdout.buffer.flush()
     elif kind == "oom":
         chunks = []
         while True:

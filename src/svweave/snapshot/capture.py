@@ -37,6 +37,7 @@ from svweave.storage.lock import workspace_lock
 
 MAX_FILES = 20_000
 MAX_DIRS = 20_000
+MAX_WALK_DEPTH = 200
 MAX_INCLUDE_SCAN_FILES = 5_000
 MAX_INCLUDE_SCAN_BYTES = 4 << 20
 MAX_TOTAL_BYTES = 1 << 30
@@ -224,12 +225,27 @@ def _walk(
     rel: str,
     visited: set[Path],
     out: list[tuple[str, Path]],
+    depth: int = 0,
 ) -> None:
-    """Recursive listing of allowed files; symlinks must stay inside trusted roots."""
+    """Recursive listing of allowed files; symlinks must stay inside trusted roots. Bounded in
+    directories (``MAX_DIRS``, like :func:`walk_dirs`) and in depth, so a hostile or huge tree is a
+    clean ``RESOURCE_LIMIT`` and never a ``RecursionError``."""
+    if depth > MAX_WALK_DEPTH:
+        raise SvwError(
+            ErrorCode.RESOURCE_LIMIT,
+            f"directory nesting exceeds {MAX_WALK_DEPTH} levels",
+            {"limit": MAX_WALK_DEPTH},
+        )
     real_dir = Path(os.path.realpath(directory))
     if real_dir in visited:
         return
     visited.add(real_dir)
+    if len(visited) > MAX_DIRS:
+        raise SvwError(
+            ErrorCode.RESOURCE_LIMIT,
+            f"directory traversal exceeds {MAX_DIRS} directories",
+            {"limit": MAX_DIRS},
+        )
     names = _listdir(directory)
     for name in names:
         child = directory / name
@@ -238,7 +254,7 @@ def _walk(
             ctx.check_trusted(str(child), directory)  # PATH_NOT_ALLOWED on escape
         if child.is_dir():
             if not ctx.dir_excluded(child):
-                _walk(ctx, child, crel + "/", visited, out)
+                _walk(ctx, child, crel + "/", visited, out, depth + 1)
         elif child.is_file() and ctx.allows_file(child):
             out.append((crel, child))
 
@@ -449,16 +465,17 @@ def _capture(
                 size = 0
                 with open(e.real, "rb") as src, open(dest, "xb") as dst:
                     while chunk := src.read(_CHUNK):
+                        # enforced WHILE copying: one huge (or growing) file must not fill the disk
+                        if total + size + len(chunk) > MAX_TOTAL_BYTES:
+                            raise SvwError(
+                                ErrorCode.RESOURCE_LIMIT,
+                                f"snapshot exceeds {MAX_TOTAL_BYTES} bytes",
+                                {"limit": MAX_TOTAL_BYTES},
+                            )
                         h.update(chunk)
                         dst.write(chunk)
                         size += len(chunk)
                 total += size
-                if total > MAX_TOTAL_BYTES:
-                    raise SvwError(
-                        ErrorCode.RESOURCE_LIMIT,
-                        f"snapshot exceeds {MAX_TOTAL_BYTES} bytes",
-                        {"limit": MAX_TOTAL_BYTES},
-                    )
                 files.append(_snapfile(e, h.hexdigest(), size))
             lookup1 = _lookup_inv(lookups)
             if _hook is not None:

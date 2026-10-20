@@ -342,3 +342,48 @@ def test_external_root_files_are_mounted_under_ext(ws: Ws) -> None:
 
 def test_fixture_tree_exists() -> None:
     assert (FIXTURES / "filelists" / "proj" / "lists" / "main.f").is_file()
+
+
+def test_REV_C01_total_size_cap_is_enforced_while_copying_not_after(
+    ws: Ws, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One file larger than the cap used to be copied whole before being refused (disk fill)."""
+    big = ws.root / "rtl" / "a.sv"
+    big.write_bytes(b"// pad\n" * 20_000)  # ~140 KB
+    nm = nm_for(ws, source_inputs=SRC)
+    monkeypatch.setattr(cap, "MAX_TOTAL_BYTES", 4096)
+    monkeypatch.setattr(cap, "_CHUNK", 1024)
+    written: list[int] = []
+    real_remove = cap.remove_snapshot_dir
+
+    def spy(p: Path) -> None:  # the temp tree as it was when the capture failed
+        written.append(sum(f.stat().st_size for f in Path(p).rglob("*") if f.is_file()))
+        real_remove(p)
+
+    monkeypatch.setattr(cap, "remove_snapshot_dir", spy)
+    with pytest.raises(SvwError) as e:
+        snap(ws, nm)
+    assert e.value.code is ErrorCode.RESOURCE_LIMIT
+    assert written and max(written) <= 4096  # stopped at the cap, never the whole 140 KB
+
+
+def test_REV_C02_include_directory_walk_is_bounded_in_depth_and_count(
+    ws: Ws, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    deep = ws.root / "deep"
+    d = deep
+    for i in range(8):
+        d = d / f"d{i}"
+    d.mkdir(parents=True)
+    ctx = ws.ctx()
+    monkeypatch.setattr(cap, "MAX_WALK_DEPTH", 4)
+    with pytest.raises(SvwError) as e:
+        cap._walk(ctx, deep, "deep/", set(), [])
+    assert e.value.code is ErrorCode.RESOURCE_LIMIT and "nesting" in e.value.message
+    monkeypatch.setattr(cap, "MAX_WALK_DEPTH", 200)
+    monkeypatch.setattr(cap, "MAX_DIRS", 3)
+    with pytest.raises(SvwError) as e2:
+        cap._walk(ctx, deep, "deep/", set(), [])
+    assert e2.value.code is ErrorCode.RESOURCE_LIMIT and "directories" in e2.value.message
+    monkeypatch.setattr(cap, "MAX_DIRS", 20_000)
+    cap._walk(ctx, deep, "deep/", set(), [])  # within both bounds: no error

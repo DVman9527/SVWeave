@@ -147,8 +147,14 @@ def run_worker(
     test_fault: str | None = None,
     sandbox: SandboxRunner | None = None,
     allow_degraded: bool | None = None,
+    max_stdout_bytes: int | None = None,
 ) -> WorkerOutcome:
-    """Run one build in a sandboxed child process. Never raises for worker failures."""
+    """Run one build in a sandboxed child process. Never raises for worker failures.
+
+    The parent keeps the worker's whole stdout in memory, so it is bounded: ``max_stdout_bytes``
+    (default: the worker's own memory limit, since the JSON cannot legitimately be larger than the
+    memory that produced it; a 115k-instance SoC emits ~1.5 GB). On overflow the worker group is
+    killed and the outcome is ``resource_limit``; the excess is read and discarded."""
     if test_fault is not None:
         req = req.model_copy(update={"test_fault": test_fault})
     handle = handle or WorkerHandle()
@@ -202,12 +208,24 @@ def run_worker(
         except (BrokenPipeError, OSError):
             pass
 
+    stdout_cap = (
+        max_stdout_bytes if max_stdout_bytes is not None else max(int(memory_mib), 256) * (1 << 20)
+    )
+    overflow: list[int] = []
+
     def drain_out() -> None:
         assert proc.stdout is not None
+        seen = 0
         while True:
             chunk = proc.stdout.read(1 << 20)
             if not chunk:
                 break
+            seen += len(chunk)
+            if seen > stdout_cap:
+                if not overflow:
+                    overflow.append(seen)
+                    kill_group(pid)  # stop the producer; keep draining so it can die
+                continue  # never buffer the excess
             out_chunks.append(chunk)
 
     def drain_err() -> None:
@@ -294,6 +312,13 @@ def run_worker(
     if handle.cancelled and not (out.signal is None and out.exit_code == 0):
         out.kind = "cancelled"
         out.message = "build cancelled; worker process group killed"
+    elif overflow:
+        out.kind = "resource_limit"
+        out.error_code = ErrorCode.RESOURCE_LIMIT
+        out.message = (
+            f"worker output exceeded {stdout_cap // (1 << 20)} MiB; worker process group killed"
+        )
+        out.stdout = b""  # a truncated document must never be parsed
     elif timed_out:
         out.kind = "timeout"
         out.error_code = ErrorCode.BUILD_TIMEOUT

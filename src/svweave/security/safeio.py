@@ -140,6 +140,41 @@ def read_regular(path: Path, max_bytes: int | None = None, *, tail: bool = False
         os.close(fd)
 
 
+def read_regular_under(base: Path, rel: str, max_bytes: int | None = None) -> bytes:
+    """Read ``base/rel`` as a regular file, following NO link in any component below ``base``.
+
+    For trees a backend can write (candidate copies): :func:`read_regular` only refuses a link at
+    the final component, so a directory symlink inside the tree could redirect the read outside it.
+    Raises ``FileNotFoundError`` for a missing final file; any link, non-regular file or missing
+    parent directory is the same ``POLICY_DENIED`` refusal :func:`write_under` gives."""
+    if safe_rel_path(rel) is None:
+        raise unsafe(rel, "not a safe relative path")
+    parts = rel.split("/")
+    try:
+        dfd = _walk(base, parts[:-1], create=False)
+    except OSError as e:
+        if isinstance(e, FileNotFoundError):
+            raise
+        raise unsafe(rel, f"cannot traverse without following links ({e.strerror})") from e
+    try:
+        try:
+            fd = os.open(
+                parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK, dir_fd=dfd
+            )
+        except OSError as e:
+            if isinstance(e, FileNotFoundError):
+                raise
+            raise unsafe(rel, f"cannot open without following links ({e.strerror})") from e
+        try:
+            if not stat.S_ISREG(os.fstat(fd).st_mode):
+                raise unsafe(rel, "not a regular file")
+            return os.read(fd, max_bytes) if max_bytes is not None else _read_all(fd)
+        finally:
+            os.close(fd)
+    finally:
+        os.close(dfd)
+
+
 def _read_all(fd: int) -> bytes:
     chunks = []
     while chunk := os.read(fd, 1 << 20):

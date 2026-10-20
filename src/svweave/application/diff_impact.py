@@ -26,6 +26,8 @@ import os
 import re
 import sqlite3
 import subprocess
+import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -101,33 +103,70 @@ def _git(repo: Path, args: list[str]) -> bytes:
         "GIT_TERMINAL_PROMPT": "0",
     }
     try:
-        r = subprocess.run(  # noqa: S603 - fixed argv, no shell, refs validated by check_ref
+        proc = subprocess.Popen(  # noqa: S603 - fixed argv, no shell, refs validated by check_ref
             argv,
-            capture_output=True,
-            timeout=GIT_TIMEOUT_S,
-            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,
             env=env,
         )
     except FileNotFoundError as e:
         raise SvwError(
             ErrorCode.BACKEND_UNAVAILABLE, "git is not installed", {"reason": "git_missing"}
         ) from e
-    except subprocess.TimeoutExpired as e:
+    # stdout is read in bounded chunks and git is killed the moment the cap is exceeded: the diff
+    # (or a blob) is never buffered whole just to be refused afterwards. stderr is drained on a
+    # thread so a chatty git cannot block on a full pipe.
+    err: list[bytes] = []
+
+    def drain_err() -> None:
+        assert proc.stderr is not None
+        err.append(proc.stderr.read(1 << 16))
+        while proc.stderr.read(1 << 16):
+            pass
+
+    t = threading.Thread(target=drain_err, daemon=True)
+    t.start()
+    chunks: list[bytes] = []
+    size = 0
+    over = timed_out = False
+    deadline = time.monotonic() + GIT_TIMEOUT_S
+    assert proc.stdout is not None
+    while True:
+        if time.monotonic() > deadline:
+            timed_out = True
+            proc.kill()
+            break
+        chunk = proc.stdout.read(1 << 20)
+        if not chunk:
+            break
+        size += len(chunk)
+        if size > MAX_DIFF_BYTES:
+            over = True
+            proc.kill()
+            break
+        chunks.append(chunk)
+    rc = proc.wait()
+    t.join(timeout=5)
+    for f in (proc.stdout, proc.stderr):
+        if f is not None:
+            f.close()
+    if timed_out:
         raise SvwError(
             ErrorCode.BUILD_TIMEOUT, f"git did not finish in {GIT_TIMEOUT_S}s", {"reason": "git_timeout"}
-        ) from e
-    if r.returncode != 0:
-        first = r.stderr.decode("utf-8", "replace").strip().splitlines()[:1]
-        raise SvwError(
-            ErrorCode.MISSING_INPUT,
-            "git could not answer: " + (first[0][:200] if first else f"exit {r.returncode}"),
-            {"reason": "git_failed", "args": args[:3]},
         )
-    if len(r.stdout) > MAX_DIFF_BYTES:
+    if over:
         raise SvwError(
             ErrorCode.OUTPUT_LIMIT, "the diff is larger than 64 MiB", {"reason": "diff_too_large"}
         )
-    return r.stdout
+    if rc != 0:
+        first = (err[0] if err else b"").decode("utf-8", "replace").strip().splitlines()[:1]
+        raise SvwError(
+            ErrorCode.MISSING_INPUT,
+            "git could not answer: " + (first[0][:200] if first else f"exit {rc}"),
+            {"reason": "git_failed", "args": args[:3]},
+        )
+    return b"".join(chunks)
 
 
 class FileDiff:

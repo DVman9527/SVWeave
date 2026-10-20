@@ -1372,9 +1372,8 @@ def _candidate_bytes(ctx: WorkspaceContext, txn_id: str, logical: str, want: str
     from svweave.domain.ids import sha256_hex
     from svweave.security import safeio
 
-    p = candidate_dir(ctx, txn_id) / snapshot_rel(logical)
-    try:
-        data = safeio.read_regular(p)
+    try:  # the candidate tree is backend-writable: no link in ANY component may be followed
+        data = safeio.read_regular_under(candidate_dir(ctx, txn_id), snapshot_rel(logical))
     except (OSError, SvwError):
         return None
     return data if sha256_hex(data) == want else None
