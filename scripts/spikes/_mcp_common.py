@@ -5,10 +5,12 @@ Not a product adapter: this only records what the upstream servers actually retu
 
 from __future__ import annotations
 
+import atexit
 import hashlib
 import json
 import os
 import shutil
+import tempfile
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -98,14 +100,18 @@ async def mcp_session(command: str, args: list[str], env: dict[str, str], cwd: s
     """Spawn an MCP stdio server and yield (session, init_result_dict, timings)."""
     import mcp_types as types
     from mcp.client.session import ClientSession
-    from mcp.client.stdio import StdioServerParameters, stdio_client
+    from mcp.client.stdio import StdioServerParameters
+
+    # the gateway's bounded transport (16 MiB per message): a misbehaving backend must not grow
+    # this probe's memory without limit either (it feeds the G0 gate through probe_backends.py)
+    from svweave.adapters.bounded_stdio import bounded_stdio_client
 
     errlog_path.parent.mkdir(parents=True, exist_ok=True)
     errlog = open(errlog_path, "w")
     params = StdioServerParameters(command=command, args=args, env=env, cwd=cwd)
     t0 = time.monotonic()
     try:
-        async with stdio_client(params, errlog=errlog) as (r, w):
+        async with bounded_stdio_client(params, errlog=errlog) as (r, w):
             async with ClientSession(r, w, read_timeout_seconds=read_timeout,
                                      client_info=types.Implementation(name="svweave-m0-spike",
                                                                       version="0.0.0")) as s:
@@ -148,6 +154,17 @@ def write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, indent=2, default=str, ensure_ascii=False) + "\n")
 
 
+def _short_runtime_dir() -> str:
+    # cbm's daemon socket lives below CBM_RUNTIME_DIR and cbm refuses to start ("secure daemon
+    # endpoint could not be created") when the socket path exceeds sockaddr_un's ~108 bytes, which
+    # .toolchain/state/... in a deep checkout does; the gateway uses a short dir for the same reason
+    # (svweave.adapters.codebase_memory.config.SANDBOX_RUNTIME_DIR / make_host_runtime_dir)
+    d = tempfile.mkdtemp(prefix="svwcbm-")
+    os.chmod(d, 0o700)
+    atexit.register(shutil.rmtree, d, True)
+    return d
+
+
 def cbm_env(state: Path | None = None) -> dict[str, str]:
     s = state or (STATE / "cbm")
     return {
@@ -156,7 +173,7 @@ def cbm_env(state: Path | None = None) -> dict[str, str]:
         "XDG_CONFIG_HOME": str(s / "home/.config"),
         "XDG_CACHE_HOME": str(s / "cache"),
         "CBM_CACHE_DIR": str(s / "cache"),
-        "CBM_RUNTIME_DIR": str(s / "runtime"),
+        "CBM_RUNTIME_DIR": _short_runtime_dir(),
         "LANG": "C.UTF-8",
     }
 

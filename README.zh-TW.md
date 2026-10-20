@@ -140,30 +140,152 @@ SVWeave/
 
 ## 安裝
 
-需求：Linux x86_64、支援非特權使用者命名空間的 `bwrap`（bubblewrap）（`bwrap --version && bwrap --ro-bind / / true`）、`git`、`tar`、`uv`，以及用來執行安裝程式的 Python 3.11 或更新版本（閘道 venv 本身為 Python 3.12）。細節：`docs/install.md`。
+所有元件都鎖定在 `toolchain.lock.json` 中；安裝程式（`scripts/bootstrap_locked.py`）是唯一會使用網路的程式碼，它在使用每個 artifact 之前都會依鎖定檔驗證其 sha256，任何不符都會中止。完整說明：`docs/install.md`；已提交的離線套件：`vendor/README.md`。
 
-**可連上 PyPI 與 GitHub 的主機：**
+### 需求
+
+* **Linux x86_64**（鎖定檔中唯一的平台）。其他平台未經資格認定。
+* **`bwrap`**（bubblewrap），且已啟用非特權使用者命名空間；每個後端都在其中執行。檢查：`bwrap --version && bwrap --ro-bind / / true`。沒有它，後端無法執行（或只能在明確標示的降級模式下執行，見 `docs/security.md` 第 3 節）。
+* **`git`**（只用一次，用來取得鎖定的 Serena commit）與 **`tar`**。
+* **Python 3.11 或更新版本**，用來執行安裝程式。venv 本身是 **Python 3.12**：`PATH` 上要有 `python3.12`，或以 `--python PATH` 指定一個 3.12 直譯器（`vendor/` 套件附有一個獨立的直譯器）。
+* **不需要 `uv`。** 安裝程式會下載鎖定版本的 uv release（0.12.23，鎖定檔的 `uv` 區段），驗證後解壓縮到 `.toolchain/uv/`，之後每一個 uv 指令都只執行那個二進位檔；閘道 venv 也由它自行建立（`--create-venv`）。除非你傳入 `--uv PATH`（會被回報為未經驗證），否則絕不會使用主機上已安裝的 uv。
+* RAM：HDL worker 受 `analysis.max_worker_memory_mib`（預設 8192）限制。磁碟：由 `--fetch-only` 填入的 artifact 快取約 200 MB；`vendor/` 中 Serena 另佔 35 MB、uv tarball 20 MB。
+
+### 安裝 SVWeave
+
+所有指令都在儲存庫根目錄執行。依你的主機網路狀況選擇其中一條路徑。
+
+**(a) 可連上 PyPI 與 GitHub 的主機**
 
 ```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[dev]'
-.venv/bin/python scripts/bootstrap_locked.py                 # pinned backends, sha256-verified
-.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network
+python3.12 scripts/bootstrap_locked.py --create-venv         # pinned uv, .venv, pinned backends, Serena
+.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network; compare installed state with the lock
+# development tools (optional): hash-pinned wheels committed in vendor/, no index access
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index \
+    --find-links vendor/downloads/wheelhouse-dev --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-**可連上 GitHub 但無法連上 PyPI 的主機**（運算叢集的典型情況）使用已提交的 `vendor/` 套件：31 個以雜湊鎖定的閘道 wheel、`[dev]` wheel、Serena 的原始碼 bundle 與鎖定的相依性快取，以及一個獨立的 CPython 3.12。託管於 GitHub 的後端（slang、Verible、codebase-memory-mcp、uvm-core）仍由安裝程式下載，並依 `toolchain.lock.json` 驗證：
+`--create-venv` 依序做的事：下載並驗證鎖定版本的 uv（這是第一個下載項目；雜湊錯誤會在下載任何其他東西之前就停止執行），下載並驗證鎖定檔中的每個封存檔（slang、Verible、codebase-memory-mcp、uvm-core）到 `.toolchain/`，以鎖定版本的 uv 在 `python3.12`（或 `--python`）上建立 `.venv`，以 `--no-index --require-hashes` 把 31 個雜湊鎖定的閘道 wheel 安裝進去，並把這個原始碼樹連結進該 venv（一個 `.pth` 檔加上 `.venv/bin/svweave`），接著 checkout 鎖定的 Serena commit，把 8 個雜湊鎖定的 build wheel 安裝到全新的 Serena venv，並在其中執行 `uv sync --frozen --no-dev --no-build-isolation`。`--skip-serena` 會略過 Serena（此時 `svweave doctor` 會回報 `backend:serena_exe FAIL`）。
+
+**(b) 可連上 GitHub 但無法連上 PyPI 的主機**（運算叢集的典型情況）使用已提交的 `vendor/` 套件：31 個閘道 wheel、`[dev]` wheel、8 個 Serena build wheel、Serena 的原始碼 bundle 與鎖定的相依性快取、鎖定版本的 uv tarball，以及一個獨立的 CPython 3.12。託管於 GitHub 的封存檔（slang、Verible、codebase-memory-mcp、uvm-core）仍由安裝程式下載，並依鎖定檔驗證：
 
 ```bash
 (cd vendor && sha256sum -c SHA256SUMS)
-mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz
-git clone vendor/serena-src.bundle .toolchain/serena-src
-mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz
-uv venv --python runtime/python/bin/python3 .venv
-python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads
-python3.11 scripts/bootstrap_locked.py --verify-only
+mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz   # Serena's locked deps
+git clone vendor/serena-src.bundle .toolchain/serena-src                          # pinned Serena checkout
+mkdir -p .toolchain/runtime && tar -C .toolchain/runtime -xzf vendor/runtime/cpython-*.tar.gz   # .toolchain/runtime/python/bin/python3 = 3.12.15
+python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads --create-venv \
+    --python .toolchain/runtime/python/bin/python3                         # venvs built on that interpreter
+python3.11 scripts/bootstrap_locked.py --verify-only --artifact-dir vendor/downloads
+# dev wheels (optional), no index access, with the pinned uv:
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index --find-links vendor/downloads/wheelhouse-dev \
+    --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-`vendor/README.md` 說明了 dev-wheel 步驟，以及完全離線的變體（`--offline`，需先把 GitHub 封存檔快取一次）。[狀態](#狀態)中的測試執行正是以這個確切程序產生的。
+`--python` 指定的是安裝程式所建立的 venv 的*基底*直譯器；不要傳 `--venv-python .toolchain/runtime/python/bin/python3`（那個選項指定的是 venv 自身的 Python，會把 wheel 直接裝進隨附的直譯器）。安裝程式會重用任何已存在且 sha256 正確的 artifact，因此 wheel 與 uv 都取自 `vendor/`，只有 GitHub 封存檔需要下載。[狀態](#狀態)中的測試執行就是以這個程序產生的（當時仍是另外執行 `uv venv`，而非使用鎖定版本的 uv）。
+
+**(c) 完全離線：先在可連網的主機上快取一次，再以 `--offline` 安裝。** 可連網的主機需要 `git` 與 `python3.12`（或 `--python`），但不需要 venv：
+
+```bash
+# 1. connected host, in the repository directory: fill the cache, install nothing but the pinned uv
+python3.12 scripts/bootstrap_locked.py --fetch-only
+# 2. copy the whole repository directory, .toolchain/ included (.venv is not copied), to the offline host
+# 3. offline host, same architecture: cached, hash-verified artifacts only
+python3.12 scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv
+.venv/bin/python scripts/bootstrap_locked.py --verify-only
+```
+
+`--fetch-only` 會把鎖定檔中的每個封存檔（含 uv tarball）、閘道 wheelhouse 與 Serena build wheelhouse 存到 `.toolchain/downloads/`（可用 `--artifact-dir` 更改），把鎖定的 Serena checkout 存到 `.toolchain/serena-src`，並把存放 Serena 鎖定相依性的 uv 快取存到 `.toolchain/state/uv-cache`（`--uv-cache-dir`）。`--offline` 拒絕任何網路存取：缺少或不符的 artifact 都是錯誤，Serena 取自既有的 checkout（或 `--serena-source <本機 git checkout>`），閘道 venv 只從 wheelhouse 安裝。若離線主機上的快取位於別處，請傳入 `--artifact-dir`、`--uv-cache-dir` 與 `--serena-source`。不使用 fetch-only 快取的變體：先把四個 GitHub tarball（`slang-*`、`verible-*`、`codebase_memory_mcp-*`、`uvm_core-*`，在連網時以 `--fetch-only --artifact-dir <dir>` 快取一次）複製到 `vendor/downloads/`，然後執行 (b) 的 `vendor/` 步驟，並在安裝那一行加上 `--offline`。
+
+**成功的樣子。** 每次執行都會印出一份 JSON 報告（也可用 `--report FILE` 寫入檔案），結尾為 `"ok": true`，結束碼 0。失敗的執行結尾為 `"ok": false`，結束碼 2，原因列在 `errors` 中；不會有任何東西被默默略過或替換。`--verify-only` 絕不使用網路，而是依鎖定檔重新檢查已安裝的狀態（鎖定版本的 uv、二進位檔、wheel、Serena venv、版本）；其報告帶有 `"verify_only": true`。`--uv PATH` 會加入一筆 `warnings` 並標示 `components.uv.verified: false`。
+
+### 驗證安裝
+
+`svweave` 位於 venv 中：每個 shell 執行一次 `source .venv/bin/activate`，或直接呼叫 `.venv/bin/svweave`。在本儲存庫中（它隨附示範用的 `svweave.yaml` 與 `fixtures/`）：
+
+```bash
+svweave init                       # .svweave/ and the trusted policy outside the repo; never overwrites
+svweave doctor                     # config, policy, toolchain hashes, bwrap, client boundary
+svweave doctor --probe             # starts each backend once with a real fixture query (slow)
+svweave build --profile rtl_demo   # the shipped demo: exit 0
+```
+
+預期結果：`svweave doctor` 以結束碼 0 結束，`outcome` 為 `OK`；`client_boundary` 永遠是 `WARN`（`not qualified`，見 `docs/security.md` 第 4 節），而隨附的 `svweave.yaml` 在你對應該外部根目錄之前會給出 `root_mapping:uvm` `WARN`。任何 `FAIL` 都會使結束碼為 4、`outcome` 為 `ERROR`；只有在略過 Serena（`--skip-serena`）時，`backend:serena_exe FAIL` 才是預期的。`svweave build --profile rtl_demo` 以結束碼 0 結束，帶有 `"completeness": "COMPLETE"`、`"diagnostic_outcome": "NO_ERRORS"` 與 `"published": true`，並印出可用於[快速入門](#快速入門)查詢的 `build_id` 與 `snapshot_id`；完整輸出見[實例演練：隨附的示範](#實例演練隨附的示範)。
+
+### 從較早的安裝升級
+
+依你當初使用的路徑重新執行安裝程式（`--create-venv` 會修復既有的 `.toolchain/` 與 `.venv`：venv 只在不存在時才會建立，雜湊鎖定的 wheel 會重新安裝進去），然後執行 `--verify-only`。來自 `docs/install.md` 與 `CHANGELOG.md` 的兩件事：
+
+* 由 build backend 尚未鎖定之前（2026-10-20 之前）的安裝程式所填入的 uv 快取，可能含有以未鎖定 backend 建置的 `proxy-tools` 或 `serena-agent` wheel，而 uv 會重用這類已建置的 wheel。升級後請刪除 `.toolchain/state/uv-cache`（或你的 `--uv-cache-dir`）一次。在 `vendor/` 路徑上，之後請重新解壓縮 `vendor/uv-cache.tar.gz`：它已用鎖定的 backend 與鎖定版本的 uv 重新產生（由其他 uv 版本寫入的快取使用不同的快取 bucket，離線時無法使用）。
+* 文件所述的流程不再以 `uv venv` 開頭；先前以該方式建立的 `.venv` 會被保留，並由 `--create-venv` 重用。
+
+### 連接你的設計專案與 AI 用戶端
+
+這些步驟在**目標**專案（你想分析的設計）中執行，由工程師或負責安裝的 AI 進行；為 AI 撰寫的相同步驟位於 `docs/agents/svweave-mcp-specialist.md` 的「Installing into a project」一節。下文中，`/ABS/PATH` 是這個 SVWeave checkout（因此 `/ABS/PATH/.venv/bin/svweave` 就是執行檔），`/ABS/PATH/TO/PROJECT` 是目標專案的根目錄，也就是存放其 `svweave.yaml` 的目錄。每個步驟都是冪等的。
+
+**1. 把 SVWeave 指向專案。** SVWeave 不必位於設計之內：把 `svweave.yaml` 放在一個工作區目錄中，並把設計以**外部根目錄**的方式接上（在 `svweave.yaml` 中宣告時不帶 `path`，在 `svweave.local.yaml` 中對應到絕對路徑，並把該路徑加入受信任 `policy.json` 的 `allowed_roots`）：`docs/manifest.md` 第 2b 節有確切的 YAML，以及與模擬器命令列的差異（嚴格的 filelist、不接受模擬器選項、`timescale`、多個頂層、加密 IP、UVM）。在該工作區中：
+
+```bash
+svweave init                             # svweave.yaml template, .svweave/, policy.json in the trusted dir
+$EDITOR svweave.yaml                     # profiles, filelists, tops, defines: docs/manifest.md (2b for external roots)
+svweave manifest resolve --profile P     # review the argument ledger by hand
+svweave build --profile P                # exit 0 and COMPLETE, or read the diagnostics
+```
+
+受信任政策建立於儲存庫**之外**（`$XDG_CONFIG_HOME/svweave/workspaces/<key>/policy.json`，見 `docs/security.md`）；在你於該處啟用之前，編輯功能維持停用（`docs/editing.md`）。
+
+**2. 註冊 MCP 伺服器**，名稱為 `svweave`（專門代理人的 `mcp__svweave__*` 工具名稱以此為前提），並使用絕對路徑，因為用戶端會從它自己的工作目錄啟動該行程。Claude Code，在目標專案內執行：
+
+```bash
+claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
+```
+
+預設範圍為 `local`；`-s project` 會在專案根目錄寫入等效、可分享的 `.mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "svweave": {
+      "command": "/ABS/PATH/.venv/bin/svweave",
+      "args": ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+若已存在 `svweave` 項目，就地更新它；絕不要新增第二個。只註冊這一個伺服器，不要註冊原始的 codebase-memory-mcp 或 Serena 伺服器。在資源有限的主機上，請在 args 加入 `--no-graph`（此時 `svw_search` 只使用純文字備援）。Codex：`config.toml` 的 table 與 `codex mcp add` 形式見 [Codex](#codex)。
+
+**3. 把專門代理人複製**到專案中（覆寫較舊的副本；不要更改其 `name: svweave-mcp`，步驟 4 的區塊會參照它）：
+
+```bash
+mkdir -p /ABS/PATH/TO/PROJECT/.claude/agents
+cp /ABS/PATH/docs/agents/svweave-mcp-specialist.md /ABS/PATH/TO/PROJECT/.claude/agents/svweave-mcp.md
+```
+
+**4. 加入路由區塊** `docs/agents/AGENTS.snippet.md` 到 `/ABS/PATH/TO/PROJECT/AGENTS.md`（若專案把代理人規則放在 `CLAUDE.md`，則加到那裡）。**正是這一步讓該專案中的 AI 用戶端知道這個 MCP 存在，並把 SystemVerilog 結構問題交給 `svweave-mcp` 專門代理人**；少了它，代理人檔案只是一個檔案。區塊以 `<!-- svweave:begin -->` 與 `<!-- svweave:end -->` 標記包住：若標記已存在，把兩者之間（含標記）的所有內容換成新的區塊；否則把整個區塊附加到檔案結尾。若專案沒有 `AGENTS.md`，就建立一個。絕不要移除或重新排列專案自己的文字。
+
+```bash
+# first insertion only (no markers yet); afterwards replace the text between the markers instead
+cat /ABS/PATH/docs/agents/AGENTS.snippet.md >> /ABS/PATH/TO/PROJECT/AGENTS.md
+```
+
+**5. 檢查。** 在 Claude Code 中，`/mcp` 會把 `svweave` 列為已連線（Codex 則用 `codex mcp list`），而請用戶端呼叫 `svw_status` 會得到 `outcome` 為 `OK` 且含專案 `data.profiles[]` 的回應封包。若 `svw_status` 失敗，請閱讀其 `error.code`（`docs/mcp_contract.md`）並修正原因；不要為了讓它通過而修改專案的設定。這些用戶端設定並未被 SVWeave 的測試套件演練；細節見[在 Claude Code 與 Codex 中使用 SVWeave](#在-claude-code-與-codex-中使用-svweave)。
+
+### 安裝疑難排解
+
+| 症狀 | 原因與處理 |
+|---|---|
+| `bwrap --ro-bind / / true` 失敗；`svweave doctor` 中 `isolation:bwrap FAIL` | 主機停用了非特權使用者命名空間；必須啟用（由管理員設定）。沒有它，後端無法執行（`docs/security.md` 第 3 節）。不要停用沙箱。 |
+| `Could not acquire lock`，或在 `~/.cache/uv` 之下的寫入錯誤 | 這部主機上 uv 的快取目錄是唯讀的：把 `UV_CACHE_DIR` 設為可寫目錄（`UV_CACHE_DIR=/path/writable python3.12 scripts/bootstrap_locked.py ...`）。 |
+| `sha256 mismatch for <url>: got ..., lock says ...`；`pinned uv is missing or differs from toolchain.lock.json; nothing installed` | 下載到的 artifact 不是鎖定檔所依據的那一個（上游已變更，或傳輸中被改動）。沒有安裝任何東西。不要修改雜湊值，也不要用 `--uv` 繞過：請回報。 |
+| 從 `files.pythonhosted.org` 下載失敗（拒絕連線、逾時），而 GitHub 下載正常 | 無法存取 PyPI：使用路徑 (b)（`--artifact-dir vendor/downloads`），所有 wheel 與 uv 都取自 `vendor/`。 |
+| `offline: <file> is not cached with the locked sha256 (would download ...)`；`offline: no --serena-source given and no existing serena checkout` | `--offline` 發現有 artifact 缺少。在連網主機上重新執行 `--fetch-only` 並把快取（或該 tarball）複製過來；把 `--artifact-dir`、`--uv-cache-dir`、`--serena-source` 指向快取實際所在的位置。 |
+| `serena: git clone of --serena-source failed` | 該路徑必須是安裝程式行程可見的 git checkout（沙箱 bind mount）；它是以 `git clone --no-local file://...` 複製的。 |
+| `svweave doctor`：`backend:serena_exe FAIL`，結束碼 4 | Serena 被略過（`--skip-serena`）或其 venv 不存在：不帶 `--skip-serena` 重新執行安裝程式。只有在你選擇略過 Serena 時才是預期的。 |
+| `--verify-only`：`gateway venv missing: nothing to verify` | `--verify-only` 在 `--create-venv` 之前執行，或針對了另一個 `--venv-dir`；加上 `--no-venv` 可只檢查工具鏈。 |
+| `codebase-memory-mcp` 出現 `GLIBC_2.38' not found` | 鎖定檔正是為此固定了 `linux-amd64-portable`（靜態）版本；不要換成標準版本（`docs/install.md` 第 4 節）。 |
+| Serena 無法啟動；其 stderr 日誌顯示 `/usr/bin/env: '.../serena-venv/bin/serena': No such file or directory` | 這是沙箱尚未重建直譯器符號連結鏈之前的版本（venv 建在 python-build-standalone 執行環境上，例如 `.toolchain/runtime/`）。更新 SVWeave 即可，不需重建 venv。 |
+| 失敗的安裝留下不完整的 `.toolchain/` | 重新執行同一個指令：已存在且 sha256 正確的 artifact 會被重用，其他的會重新下載並重新驗證。解除安裝：移除 `.venv`、`.toolchain/`、`.svweave/`，以及（若需要）受信任目錄。 |
 
 ## 快速入門
 
@@ -211,7 +333,7 @@ SVWeave 絕不會修改用戶端的設定。請在你自己的用戶端加入類
 }
 ```
 
-只註冊這一個伺服器；不要同時註冊原始的 codebase-memory-mcp 或 Serena 伺服器。在資源有限的主機上，請在 `args` 加入 `--no-graph`（此時搜尋只使用純文字備援）。本機索引並非端到端離線：回傳給雲端模型用戶端的程式碼片段會離開這部機器。
+只註冊這一個伺服器；不要同時註冊原始的 codebase-memory-mcp 或 Serena 伺服器。在資源有限的主機上，請在 `args` 加入 `--no-graph`（此時搜尋只使用純文字備援）。本機索引並非端到端離線：回傳給雲端模型用戶端的程式碼片段會離開這部機器。完整的逐專案程序（工作區、註冊、專門代理人、`AGENTS.md` 區塊、檢查）見[連接你的設計專案與 AI 用戶端](#連接你的設計專案與-ai-用戶端)的步驟 1 至 5。
 
 ## 分析工具：影響範圍、diff 影響、重新命名預覽、圖譜
 
@@ -253,6 +375,8 @@ svweave graph export --build BUILD_ID          # writes .svweave/exports/graph-<
 SVWeave 透過 stdio 使用 MCP，因此任何 MCP 用戶端都能啟動它。以下兩種設定遵循各用戶端文件所載的語法（在作者已安裝的版本 Claude Code 2.1.299、Codex CLI 0.162.1 上，`claude mcp add --help` 與 `codex mcp add --help` 接受這些形式）。**SVWeave 的測試套件並未實際演練這些設定**：測試只透過 Python MCP 用戶端驅動閘道，因此針對特定用戶端沒有任何資格認定證據。SVWeave 絕不會修改用戶端的設定；這些指令需由你自行執行。
 
 請使用絕對路徑：用戶端會從它自己的工作目錄啟動該行程。
+
+**專門代理人定義。** `docs/agents/svweave-mcp-specialist.md` 是一份現成的 Claude Code 代理人定義（`name: svweave-mcp`），告訴 AI 如何正確使用這個閘道：何時該把問題交給它、先建置再查詢的工作流程、涵蓋全部 14 個 `svw_*` 工具的「問題對應工具」表、如何解讀 `freshness`、`analysis_coverage` 與 `pagination`、編輯規則（代理人永遠不能核准）以及它必須向使用者說明的限制。`docs/agents/AGENTS.snippet.md` 則是要加進專案 `AGENTS.md` 的對應區塊，以 `<!-- svweave:begin -->` / `<!-- svweave:end -->` 標記包住，因此可以冪等地插入。把 SVWeave 安裝進一個專案，意思就是：以 `svweave` 名稱註冊伺服器（見下文）、把專門代理人複製到該專案的 `.claude/agents/svweave-mcp.md`、再把該區塊加進專案的 `AGENTS.md`（或 `CLAUDE.md`）；確切步驟見專門代理人檔案的「Installing into a project」一節。兩個檔案都放在 `docs/` 之下，是因為本儲存庫的 `.gitignore` 排除了 `.claude/`。
 
 ### Claude Code
 

@@ -20,3 +20,5 @@ svweave.local.yaml
 
 # GitHub archives that bootstrap_locked.py downloads next to vendor/downloads wheels
 vendor/downloads/*.tar.gz
+# ... except the pinned uv release tarball, which the offline package carries (vendor/README.md)
+!vendor/downloads/uv-*.tar.gz

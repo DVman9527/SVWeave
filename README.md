@@ -176,37 +176,241 @@ SVWeave/
 
 ## Installation
 
-Requirements: Linux x86_64, `bwrap` (bubblewrap) with unprivileged user namespaces
-(`bwrap --version && bwrap --ro-bind / / true`), `git`, `tar`, `uv`, and Python 3.11 or newer to run
-the installer (the gateway venv itself is Python 3.12). Details: `docs/install.md`.
+Everything is pinned in `toolchain.lock.json`; the installer (`scripts/bootstrap_locked.py`) is the
+only code that uses the network, verifies the sha256 of every artifact against the lock before using
+it and aborts on any mismatch. Long form: `docs/install.md`; the committed offline package:
+`vendor/README.md`.
 
-**A host that can reach PyPI and GitHub:**
+### Requirements
+
+* **Linux x86_64** (the only platform in the lock). Other platforms are not qualified.
+* **`bwrap`** (bubblewrap) with unprivileged user namespaces enabled; every backend runs inside it.
+  Check: `bwrap --version && bwrap --ro-bind / / true`. Without it the backends do not run (or run
+  only in an explicitly flagged degraded mode, `docs/security.md` section 3).
+* **`git`** (used once, to fetch the pinned Serena commit) and **`tar`**.
+* **Python 3.11 or newer** to run the installer. The venvs themselves are **Python 3.12**: either
+  `python3.12` on `PATH` or `--python PATH` naming a 3.12 interpreter (the `vendor/` package ships a
+  standalone one).
+* **`uv` is not required.** The installer downloads the pinned uv release (0.12.23, lock section
+  `uv`), verifies it, extracts it to `.toolchain/uv/` and runs only that binary for every uv command;
+  it creates the gateway venv itself (`--create-venv`). An installed uv is never used unless you pass
+  `--uv PATH`, which is reported as unverified.
+* RAM: the HDL worker is limited by `analysis.max_worker_memory_mib` (default 8192). Disk: the
+  artifact cache filled by `--fetch-only` is about 200 MB; `vendor/` adds 35 MB for Serena and
+  20 MB for the uv tarball.
+
+### Install SVWeave
+
+Run every command from the repository root. Pick the path that matches your host's network.
+
+**(a) A host that can reach PyPI and GitHub**
 
 ```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[dev]'
-.venv/bin/python scripts/bootstrap_locked.py                 # pinned backends, sha256-verified
-.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network
+python3.12 scripts/bootstrap_locked.py --create-venv         # pinned uv, .venv, pinned backends, Serena
+.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network; compare installed state with the lock
+# development tools (optional): hash-pinned wheels committed in vendor/, no index access
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index \
+    --find-links vendor/downloads/wheelhouse-dev --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-**A host that reaches GitHub but not PyPI** (typical for a compute cluster) uses the committed
-`vendor/` package: the 31 hash-locked gateway wheels, the `[dev]` wheels, Serena's source bundle and
-locked dependency cache, and a standalone CPython 3.12. The GitHub-hosted backends (slang, Verible,
-codebase-memory-mcp, uvm-core) are still downloaded by the installer and verified against
-`toolchain.lock.json`:
+What `--create-venv` does, in order: downloads and verifies the pinned uv (the first download; a
+wrong hash stops the run before anything else), downloads and verifies each archive in the lock
+(slang, Verible, codebase-memory-mcp, uvm-core) into `.toolchain/`, creates `.venv` with the pinned
+uv on `python3.12` (or `--python`), installs the 31 hash-locked gateway wheels into it with
+`--no-index --require-hashes` and links this source tree into it (a `.pth` file plus
+`.venv/bin/svweave`), then checks out the pinned Serena commit, installs the 8 hash-pinned build
+wheels into a fresh Serena venv and runs `uv sync --frozen --no-dev --no-build-isolation` there.
+`--skip-serena` leaves Serena out (then `svweave doctor` reports `backend:serena_exe FAIL`).
+
+**(b) A host that reaches GitHub but not PyPI** (typical for a compute cluster) uses the committed
+`vendor/` package: the 31 gateway wheels, the `[dev]` wheels, the 8 Serena build wheels, Serena's
+source bundle and locked dependency cache, the pinned uv tarball and a standalone CPython 3.12. The
+GitHub-hosted archives (slang, Verible, codebase-memory-mcp, uvm-core) are still downloaded by the
+installer and verified against the lock:
 
 ```bash
 (cd vendor && sha256sum -c SHA256SUMS)
-mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz
-git clone vendor/serena-src.bundle .toolchain/serena-src
-mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz
-uv venv --python runtime/python/bin/python3 .venv
-python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads
-python3.11 scripts/bootstrap_locked.py --verify-only
+mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz   # Serena's locked deps
+git clone vendor/serena-src.bundle .toolchain/serena-src                          # pinned Serena checkout
+mkdir -p .toolchain/runtime && tar -C .toolchain/runtime -xzf vendor/runtime/cpython-*.tar.gz   # .toolchain/runtime/python/bin/python3 = 3.12.15
+python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads --create-venv \
+    --python .toolchain/runtime/python/bin/python3                         # venvs built on that interpreter
+python3.11 scripts/bootstrap_locked.py --verify-only --artifact-dir vendor/downloads
+# dev wheels (optional), no index access, with the pinned uv:
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index --find-links vendor/downloads/wheelhouse-dev \
+    --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-`vendor/README.md` has the dev-wheel step and the fully offline variant (`--offline`, after caching
-the GitHub archives once). This exact procedure produced the test run in [Status](#status).
+`--python` names the *base* interpreter of the venvs the installer creates; do not pass
+`--venv-python .toolchain/runtime/python/bin/python3` (that names the venv's own Python and would install the
+wheels into the bundled interpreter). The installer reuses any artifact already present with the
+right sha256, so the wheels and uv come from `vendor/` and only the GitHub archives are downloaded.
+This procedure (then still with a separate `uv venv` step instead of the pinned uv) produced the
+test run in [Status](#status).
+
+**(c) Fully offline: cache once on a connected host, then install with `--offline`.** The connected
+host needs `git` and `python3.12` (or `--python`) but no venv:
+
+```bash
+# 1. connected host, in the repository directory: fill the cache, install nothing but the pinned uv
+python3.12 scripts/bootstrap_locked.py --fetch-only
+# 2. copy the whole repository directory, .toolchain/ included (.venv is not copied), to the offline host
+# 3. offline host, same architecture: cached, hash-verified artifacts only
+python3.12 scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv
+.venv/bin/python scripts/bootstrap_locked.py --verify-only
+```
+
+`--fetch-only` stores every archive of the lock (the uv tarball included), the gateway wheelhouse
+and the Serena build wheelhouse under `.toolchain/downloads/` (`--artifact-dir` to change), the
+pinned Serena checkout under `.toolchain/serena-src` and the uv cache holding Serena's locked
+dependencies under `.toolchain/state/uv-cache` (`--uv-cache-dir`). `--offline` refuses every
+network access: a missing or mismatching artifact is an error, Serena comes from the existing
+checkout (or `--serena-source <local git checkout>`), and the gateway venv is installed from the
+wheelhouse only. If the cache lives elsewhere on the offline host, pass `--artifact-dir`,
+`--uv-cache-dir` and `--serena-source`. Variant without a fetch-only cache: run the `vendor/` steps
+of (b), after copying the four GitHub tarballs (`slang-*`, `verible-*`, `codebase_memory_mcp-*`,
+`uvm_core-*`, cached once online by `--fetch-only --artifact-dir <dir>`) into `vendor/downloads/`,
+with `--offline` added to the install line.
+
+**What success looks like.** Every run prints one JSON report (also written with `--report FILE`)
+and ends with `"ok": true`, exit code 0. A failed run ends with `"ok": false`, exit code 2 and the
+reasons in `errors`; nothing is silently skipped or substituted. `--verify-only` never touches the
+network and re-checks the installed state (pinned uv, binaries, wheels, Serena venv, versions)
+against the lock; its report carries `"verify_only": true`. `--uv PATH` adds a `warnings` entry
+and `components.uv.verified: false`.
+
+### Verify the install
+
+`svweave` lives in the venv: `source .venv/bin/activate` once per shell, or call
+`.venv/bin/svweave`. In this repository (it ships a demo `svweave.yaml` and `fixtures/`):
+
+```bash
+svweave init                       # .svweave/ and the trusted policy outside the repo; never overwrites
+svweave doctor                     # config, policy, toolchain hashes, bwrap, client boundary
+svweave doctor --probe             # starts each backend once with a real fixture query (slow)
+svweave build --profile rtl_demo   # the shipped demo: exit 0
+```
+
+Expected: `svweave doctor` exits 0 with `outcome` `OK`; `client_boundary` is always `WARN`
+(`not qualified`, `docs/security.md` section 4) and the shipped `svweave.yaml` gives a
+`root_mapping:uvm` `WARN` until you map that external root. A `FAIL` gives exit 4 and `outcome`
+`ERROR`; `backend:serena_exe FAIL` is expected only if Serena was skipped (`--skip-serena`).
+`svweave build --profile rtl_demo` exits 0 with `"completeness": "COMPLETE"`,
+`"diagnostic_outcome": "NO_ERRORS"` and `"published": true` and prints the `build_id` and
+`snapshot_id` to use in the [Quickstart](#quickstart) queries; the full output is in
+[Worked example: the shipped demo](#worked-example-the-shipped-demo).
+
+### Upgrading from an earlier install
+
+Re-run the installer as in the path you used (`--create-venv` repairs an existing `.toolchain/` and
+`.venv`: the venv is created only if missing, the hash-locked wheels are re-installed into it), then
+`--verify-only`. Two things from `docs/install.md` and `CHANGELOG.md`:
+
+* A uv cache filled by an installer from before the build backends were pinned (before 2026-10-20)
+  may hold a `proxy-tools` or `serena-agent` wheel built with an unpinned backend, and uv reuses
+  such built wheels. Delete `.toolchain/state/uv-cache` (or your `--uv-cache-dir`) once after
+  upgrading. On the `vendor/` path, extract `vendor/uv-cache.tar.gz` again afterwards: it was
+  regenerated with the pinned backends and the pinned uv (a cache written by another uv version
+  uses other cache buckets and does not work offline).
+* The documented flows no longer start with `uv venv`; an earlier `.venv` made that way is kept and
+  re-used by `--create-venv`.
+
+### Connect your design project and your AI client
+
+These steps are run in the **target** project (the design you want to analyse), by the engineer
+or by the AI doing the installation; the same steps, written for the AI, are in
+`docs/agents/svweave-mcp-specialist.md`, section "Installing into a project". Below,
+`/ABS/PATH` is this SVWeave checkout (so `/ABS/PATH/.venv/bin/svweave` is the binary) and
+`/ABS/PATH/TO/PROJECT` is the target project root, the directory that holds its `svweave.yaml`.
+Every step is idempotent.
+
+**1. Point SVWeave at the project.** SVWeave never has to live inside the design: keep
+`svweave.yaml` in a workspace directory and attach the design as an **external root** (declared
+without a `path` in `svweave.yaml`, mapped to an absolute path in `svweave.local.yaml`, and that
+path added to `allowed_roots` of the trusted `policy.json`): `docs/manifest.md`, section 2b, has
+the exact YAML and the differences from a simulator command line (strict filelists, no simulator
+options, `timescale`, several tops, encrypted IP, UVM). In that workspace:
+
+```bash
+svweave init                             # svweave.yaml template, .svweave/, policy.json in the trusted dir
+$EDITOR svweave.yaml                     # profiles, filelists, tops, defines: docs/manifest.md (2b for external roots)
+svweave manifest resolve --profile P     # review the argument ledger by hand
+svweave build --profile P                # exit 0 and COMPLETE, or read the diagnostics
+```
+
+The trusted policy is created **outside** the repository
+(`$XDG_CONFIG_HOME/svweave/workspaces/<key>/policy.json`, `docs/security.md`); editing stays
+disabled until you enable it there (`docs/editing.md`).
+
+**2. Register the MCP server** under the name `svweave` (the specialist's `mcp__svweave__*` tool
+names assume it), with absolute paths because the client starts the process from its own working
+directory. Claude Code, run inside the target project:
+
+```bash
+claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
+```
+
+The default scope is `local`; `-s project` writes the equivalent, shareable `.mcp.json` at the
+project root:
+
+```json
+{
+  "mcpServers": {
+    "svweave": {
+      "command": "/ABS/PATH/.venv/bin/svweave",
+      "args": ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+If an `svweave` entry already exists, update it in place; never add a second one. Register only
+this server, not the raw codebase-memory-mcp or Serena servers. Add `--no-graph` to the args on
+small hosts (`svw_search` then uses the literal-text fallback only). Codex: the `config.toml`
+table and `codex mcp add` form are in [Codex](#codex).
+
+**3. Copy the specialist agent** into the project (overwrite an older copy; do not change its
+`name: svweave-mcp`, the snippet in step 4 refers to it):
+
+```bash
+mkdir -p /ABS/PATH/TO/PROJECT/.claude/agents
+cp /ABS/PATH/docs/agents/svweave-mcp-specialist.md /ABS/PATH/TO/PROJECT/.claude/agents/svweave-mcp.md
+```
+
+**4. Add the routing snippet** `docs/agents/AGENTS.snippet.md` to `/ABS/PATH/TO/PROJECT/AGENTS.md`
+(or to `CLAUDE.md` if the project keeps its agent rules there). **This is the step that makes the AI
+clients in that project know the MCP exists and route SystemVerilog structure questions to the
+`svweave-mcp` specialist**; without it the agent file is just a file. The snippet is delimited by
+`<!-- svweave:begin -->` and `<!-- svweave:end -->`: if the markers already exist, replace
+everything between them (inclusive) with the new snippet; otherwise append the whole snippet at the
+end. Create `AGENTS.md` if the project has none. Never remove or reorder the project's own text.
+```bash
+# first insertion only (no markers yet); afterwards replace the text between the markers instead
+cat /ABS/PATH/docs/agents/AGENTS.snippet.md >> /ABS/PATH/TO/PROJECT/AGENTS.md
+```
+
+**5. Check.** In Claude Code, `/mcp` lists `svweave` as connected (`codex mcp list` for Codex),
+and asking the client for `svw_status` returns an envelope with `outcome` `OK` and the project's
+`data.profiles[]`. If `svw_status` fails, read its `error.code` (`docs/mcp_contract.md`) and fix the
+cause; do not edit the project's configuration to make it pass. The client setups are not exercised
+by SVWeave's test suite; details in
+[Using SVWeave with Claude Code and Codex](#using-svweave-with-claude-code-and-codex).
+
+### Installation troubleshooting
+
+| Symptom | Cause and fix |
+|---|---|
+| `bwrap --ro-bind / / true` fails; `isolation:bwrap FAIL` in `svweave doctor` | Unprivileged user namespaces are disabled on the host; they must be enabled (an administrator setting). Without them the backends do not run (`docs/security.md` section 3). Do not disable the sandbox. |
+| `Could not acquire lock` or a write error under `~/.cache/uv` | uv's cache directory is read-only on this host: set `UV_CACHE_DIR` to a writable directory (`UV_CACHE_DIR=/path/writable python3.12 scripts/bootstrap_locked.py ...`). |
+| `sha256 mismatch for <url>: got ..., lock says ...`; `pinned uv is missing or differs from toolchain.lock.json; nothing installed` | The downloaded artifact is not the one the lock was made from (changed upstream or in transit). Nothing was installed. Do not edit the hash and do not pass `--uv` to get around it: report it. |
+| Downloads from `files.pythonhosted.org` fail (refused, timeout) while GitHub downloads work | No PyPI access: use path (b) (`--artifact-dir vendor/downloads`), which takes every wheel and uv from `vendor/`. |
+| `offline: <file> is not cached with the locked sha256 (would download ...)`; `offline: no --serena-source given and no existing serena checkout` | `--offline` found a missing artifact. Re-run `--fetch-only` on a connected host and copy the cache (or that tarball) over; point `--artifact-dir`, `--uv-cache-dir`, `--serena-source` at where the cache really is. |
+| `serena: git clone of --serena-source failed` | The path must be a git checkout visible to the installer process (sandbox bind mounts); it is cloned with `git clone --no-local file://...`. |
+| `svweave doctor`: `backend:serena_exe FAIL`, exit 4 | Serena was skipped (`--skip-serena`) or its venv is missing: re-run the installer without `--skip-serena`. Expected only when you chose to skip Serena. |
+| `--verify-only`: `gateway venv missing: nothing to verify` | `--verify-only` ran before `--create-venv`, or against another `--venv-dir`; add `--no-venv` to check the toolchain alone. |
+| `GLIBC_2.38' not found` from `codebase-memory-mcp` | The lock pins the `linux-amd64-portable` (static) build for this reason; do not replace it with the standard build (`docs/install.md` section 4). |
+| Serena does not start; its stderr log says `/usr/bin/env: '.../serena-venv/bin/serena': No such file or directory` | A build from before the sandbox recreated the interpreter's symlink chain (the venv was built on a python-build-standalone runtime such as `.toolchain/runtime/`). Update SVWeave; the venvs do not need to be rebuilt. |
+| A failed install left a partial `.toolchain/` | Re-run the same command: artifacts already present with the right sha256 are reused, everything else is re-downloaded and re-verified. Uninstall: remove `.venv`, `.toolchain/`, `.svweave/` and, if wanted, the trusted directory. |
 
 ## Quickstart
 
@@ -263,7 +467,9 @@ SVWeave never edits a client's configuration. Add an entry like the following to
 Register only this server; do not also register the raw codebase-memory-mcp or Serena servers.
 Add `--no-graph` to `args` on small hosts (search then uses the literal-text fallback only).
 Local indexing is not end-to-end offline: snippets returned to a cloud-model client leave the
-machine.
+machine. The complete per-project procedure (workspace, registration, specialist agent, `AGENTS.md`
+snippet, check) is step 1 to 5 of
+[Connect your design project and your AI client](#connect-your-design-project-and-your-ai-client).
 
 ## Analysis tools: impact, diff impact, rename preview, graph
 
@@ -350,6 +556,18 @@ only, so there is no qualification evidence for a specific client. SVWeave never
 configuration; you run these commands yourself.
 
 Use absolute paths: the client starts the process from its own working directory.
+
+**Specialist agent definition.** `docs/agents/svweave-mcp-specialist.md` is a ready-made Claude
+Code agent (`name: svweave-mcp`) that tells an AI how to use this gateway correctly: when to route a
+question to it, the build-then-query workflow, a question-to-tool table for all 14 `svw_*` tools,
+how to read `freshness`, `analysis_coverage` and `pagination`, the editing rules (an agent can never
+approve) and the limitations it must state. `docs/agents/AGENTS.snippet.md` is the matching block
+for the project's `AGENTS.md`, delimited by `<!-- svweave:begin -->` / `<!-- svweave:end -->` so it
+can be inserted idempotently. Installing SVWeave into a project therefore means: register the
+server under the name `svweave` (below), copy the specialist to that project's
+`.claude/agents/svweave-mcp.md`, and add the snippet to the project's `AGENTS.md` (or `CLAUDE.md`);
+the exact steps are in the specialist file, section "Installing into a project". Both files are
+kept under `docs/` because this repository's `.gitignore` excludes `.claude/`.
 
 ### Claude Code
 

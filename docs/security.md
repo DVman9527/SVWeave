@@ -126,18 +126,55 @@ only. The **install phase** (`scripts/bootstrap_locked.py`) is the only code tha
 the URLs in `toolchain.lock.json`, and verifies SHA-256 before use. Normal operation never
 downloads and never updates.
 
-**Known open gaps** (found by the 2026-10-20 review, not fixed; tracked in `CHANGELOG.md`):
+What the installer executes, and how each piece is verified:
 
-* Serena's build backend is not hash-pinned. Building the Serena venv (`uv sync --frozen`) builds
-  the Serena project itself, and `uv.lock` does not lock build dependencies, so `hatchling` is taken
-  from the index (online) or from the uv cache (`--fetch-only`, `vendor/uv-cache.tar.gz`) without a
-  hash check, and runs on the install host. Fixing it means hash-locking the build backend in
-  `toolchain.lock.json` (a toolchain identity change). Until then, install Serena from a host you
-  trust, or use `--skip-serena` (editing still works through `exact_range` / `slang_symbol`).
-* `uv` itself is not pinned: the installer uses the `uv` on `PATH`.
-* The MCP SDK's stdio client reads a backend's stdout line by line without a length limit; a backend
-  that writes a huge line without a newline grows the gateway's memory until it is stopped. The
-  backends are pinned and sandboxed, which limits but does not remove this.
+* **uv**: the pinned release tarball (lock section `uv`, sha256 equal to the release's published
+  checksum) is verified before it is opened and the extracted binary before it runs; every uv call
+  uses it, with `UV_PYTHON_DOWNLOADS=never` (uv never fetches an interpreter). `--uv PATH` is an
+  explicit override that is NOT verified; the report marks it (`components.uv.verified: false`,
+  `warnings`).
+* **Serena's build backends**: `uv.lock` does not lock build dependencies, so hatchling (and its
+  dependencies) and setuptools (for the sdist-only `proxy-tools`) are hash-pinned in the lock
+  (`serena_build_wheelhouse`), verified, installed into the Serena venv with
+  `--no-index --require-hashes`, and the venv is synced with `--no-build-isolation`: no build backend
+  comes from an index or an unverified cache entry.
+* Serena's runtime dependencies come from `uv.lock` (hashes checked by uv), the Serena source from the
+  pinned commit (`uv.lock` and `LICENSE` hashes checked), the gateway venv from the hash-locked
+  wheelhouse.
+
+Residual trust (not a gap in the lock, but worth knowing): uv reuses wheels it built earlier from its
+cache. The cache shipped in `vendor/uv-cache.tar.gz` and one filled by `--fetch-only` were built with the
+pinned backends; a `.toolchain/state/uv-cache` filled by an installer from before 2026-10-20 may hold
+`proxy-tools` / `serena-agent` wheels built with an unpinned backend: delete it once. The committed
+`vendor/` files are protected by `vendor/SHA256SUMS` and git history, not by the lock.
+
+**Backend output is bounded** (gap found by the 2026-10-20 review, fixed the same day). The MCP SDK's
+stdio client concatenates a backend's stdout until it sees a newline, with no length limit, so one
+huge line (or one that never ends) grew the gateway's memory until the backend was stopped; a call
+timeout did not stop the reader. The gateway now uses its own transport
+(`src/svweave/adapters/bounded_stdio.py`): the SDK's `stdio_client` contract (same launch in a new
+process group, same streams, JSON-RPC parsing and shutdown sequence) with a reader that reads raw
+bytes and never buffers more than the limit plus one 64 KiB read.
+
+* A stdout line longer than `MAX_MESSAGE_BYTES` = 16 MiB is a protocol error: the reader stops,
+  the backend's process group is terminated at once (SIGTERM, then SIGKILL), the client reaps it like
+  `stop()` does, and the call (or start-up) fails with `BACKEND_UNAVAILABLE`,
+  `details.reason = "message_too_large"`, `details.protocol_error = {kind, limit_bytes,
+  received_bytes_at_least}`.
+* A tool result whose concatenated text exceeds `MAX_RESULT_TEXT_CHARS` = 16 Mi characters (checked
+  before concatenating) fails with `OUTPUT_LIMIT`, `details.reason = "result_too_large"`, and the
+  backend is stopped the same way.
+* The limits sit above what the pinned backends can legitimately send (measured 2026-10-20): cbm
+  0.11.0 itself refuses any response above 10,485,744 bytes (the largest real response seen was a
+  7.7 MB `get_code_snippet` of a 7 MiB single-line module), and Serena 1.7.0 truncates each answer to
+  150,000 characters (`default_max_tool_answer_chars`).
+* The limit counts the payload: a CRLF terminator's `\r` is not counted, and a line of exactly the
+  limit is accepted. Concurrent calls on the same backend that did not cause the violation fail with
+  `BACKEND_UNAVAILABLE`, `details.reason = "backend_terminated"`; only the offending call reports
+  `result_too_large` with its own size. A flood the backend writes on its own (not in answer to a
+  call) is also caught: the next call finds the session stopped and reports the violation.
+* The developer probe (`scripts/probe_backends.py`, through `scripts/spikes/_mcp_common.py`) uses
+  the same bounded transport.
 
 ## 7. Git and CI boundary (plan 23.4)
 

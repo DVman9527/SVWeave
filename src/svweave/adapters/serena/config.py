@@ -272,5 +272,23 @@ def python_binds(venv: Path) -> list[Path]:
     return [real, stdlib, *sorted((prefix / "lib").glob("libpython*"))]
 
 
+def python_links(venv: Path) -> list[tuple[str, Path]]:
+    """The symlinks between the venv's ``bin/python`` and the real interpreter, as
+    ``(target, link path)``: the shebang of every venv script goes through them, and
+    :func:`python_binds` binds only the final file (a python-build-standalone runtime has
+    ``bin/python3 -> python3.12``; without it Serena dies with "/usr/bin/env: ...: No such file")."""
+    links: list[tuple[str, Path]] = []
+    cur = venv / "bin" / "python"
+    for _ in range(40):  # the kernel's own symlink-chain limit
+        if not cur.is_symlink():
+            break
+        target = os.readlink(cur)
+        nxt = Path(target) if os.path.isabs(target) else cur.parent / target
+        if cur != venv / "bin" / "python" and not str(cur).startswith(("/usr/", "/bin/", "/lib")):
+            links.append((target, Path(os.path.normpath(cur))))
+        cur = nxt
+    return links
+
+
 def which_in(path_value: str, name: str) -> str | None:
     return shutil.which(name, path=path_value)

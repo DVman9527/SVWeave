@@ -1,7 +1,7 @@
 {
   "test": "DEP-01 offline clean-room bootstrap + three-backend probe",
   "network": "disabled: bwrap --unshare-net around bootstrap, verify and probe (1.1.1.1:443 connect probe: BLOCKED)",
-  "lock_sha256": "5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
   "bootstrap": {
     "command": "scripts/bootstrap_locked.py --offline --create-venv --artifact-dir ${REPO}/.toolchain/downloads --serena-source ${REPO}/.toolchain/serena-src --uv-cache-dir <copy of the uv cache>",
     "ok": true,

@@ -62,8 +62,9 @@ def _cleanroom(tmp_path: Path) -> None:
     art = REPO / ".toolchain" / "downloads"
     serena_src = REPO / ".toolchain" / "serena-src"
     uv_cache = REPO / ".toolchain" / "state" / "uv-cache"
-    uv = REPO / ".venv" / "bin" / "uv"
-    for need in (art / "wheelhouse", serena_src / ".git", uv_cache, uv):
+    # the pinned uv tarball (lock section `uv`) and the Serena build backends come from the artifact dir
+    uv_tgz = art / ("uv-" + json.loads((REPO / "toolchain.lock.json").read_text())["uv"]["source_url"].rsplit("/", 1)[1])
+    for need in (art / "wheelhouse", art / "serena-build-wheelhouse", serena_src / ".git", uv_cache, uv_tgz):
         if not need.exists():
             skip_or_fail(f"cached artifact missing: {need.relative_to(REPO)} "
                          "(run scripts/bootstrap_locked.py --fetch-only)")
@@ -84,11 +85,12 @@ def _cleanroom(tmp_path: Path) -> None:
     boot = run_netless(
         ["python3", "scripts/bootstrap_locked.py", "--offline", "--create-venv",
          "--artifact-dir", str(art), "--serena-source", str(serena_src),
-         "--uv-cache-dir", str(cache_copy), "--uv", str(uv), "--report", str(room / "boot.json")],
+         "--uv-cache-dir", str(cache_copy), "--report", str(room / "boot.json")],
         room, 1800)
     assert boot.returncode == 0, scrub(boot.stdout[-3000:] + boot.stderr[-3000:], room)
     breport: dict[str, Any] = json.loads((room / "boot.json").read_text())
     assert breport["ok"] is True and breport["offline"] is True and breport["errors"] == []
+    assert breport["components"]["uv"]["source"] == "pinned" and breport["components"]["uv"]["verified"] is True
     # nothing was installed outside the room and the locked bytes are what is installed
     lock = json.loads((REPO / "toolchain.lock.json").read_text())
     comps = lock["components"]

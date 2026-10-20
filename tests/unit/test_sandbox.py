@@ -160,3 +160,50 @@ def test_degraded_mode_still_enforces_write_surface_rules(tmp_path: Path) -> Non
 def test_probe_host_reports_missing_bwrap_with_reason() -> None:
     cap = probe_host("/nonexistent/bwrap", refresh=True)
     assert not cap.available and cap.reason == "bwrap executable not found"
+
+
+def test_symlinks_are_recreated_after_the_binds(tmp_path: Path) -> None:
+    link = tmp_path / "py/bin/python3"
+    a = argv_for(SandboxSpec(ro_paths=(tmp_path / "py/bin/python3.12",), symlinks=(("python3.12", link),)))
+    assert pairs(a, "--symlink")[-1] == ("python3.12", str(link))
+    assert a.index(str(link)) > a.index(str(tmp_path / "py/bin/python3.12"))  # after its sibling's bind
+
+
+def test_a_symlink_inside_a_bound_path_is_refused(tmp_path: Path) -> None:
+    """It would be created on the host (rw) or fail on a read-only mount."""
+    for kw in ({"rw_paths": (tmp_path,)}, {"ro_paths": (tmp_path,)}):
+        with pytest.raises(SvwError) as ei:
+            validate_spec(SandboxSpec(symlinks=(("x", tmp_path / "bin/python3"),), **kw))  # type: ignore[arg-type]
+        assert ei.value.code is ErrorCode.POLICY_DENIED
+    for bad in (Path("rel/link"), Path("/usr/bin/python3"), Path("/etc/x")):
+        with pytest.raises(SvwError):
+            validate_spec(SandboxSpec(symlinks=(("x", bad),)))
+
+
+@pytest.mark.skipif(not probe_host().available, reason="bwrap unusable on this host")
+def test_a_shebang_through_a_recreated_link_runs_in_the_real_sandbox(tmp_path: Path) -> None:
+    """Shape of a venv on a python-build-standalone runtime: venv/bin/python -> rt/bin/sh3 -> realsh."""
+    import shutil
+    import subprocess
+
+    from svweave.adapters.serena import config as scfg
+
+    rt, venv = tmp_path / "rt/bin", tmp_path / "venv/bin"
+    rt.mkdir(parents=True)
+    venv.mkdir(parents=True)
+    shutil.copy2(os.path.realpath("/bin/sh"), rt / "realsh")
+    (rt / "sh3").symlink_to("realsh")
+    (venv / "python").symlink_to(rt / "sh3")
+    tool = venv / "tool"
+    tool.write_text(f"#!{venv / 'python'}\necho shebang-ok\n")
+    tool.chmod(0o755)
+    links = tuple(scfg.python_links(tmp_path / "venv"))
+    assert links == (("realsh", rt / "sh3"),)
+
+    def run(symlinks: tuple[tuple[str, Path], ...]) -> subprocess.CompletedProcess[str]:
+        spec = SandboxSpec(ro_paths=(venv.parent, rt / "realsh"), symlinks=symlinks)
+        return subprocess.run(build_bwrap_argv(spec, [str(tool)]), capture_output=True, text=True, timeout=30)
+
+    assert "No such file" in run(()).stderr  # the bug: only the realpath was bound
+    r = run(links)
+    assert r.returncode == 0 and r.stdout.strip() == "shebang-ok", r.stderr

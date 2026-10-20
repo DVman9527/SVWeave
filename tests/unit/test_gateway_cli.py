@@ -168,7 +168,8 @@ def resolves(words: list[str]) -> bool:
 
 
 def test_DOC_01_documented_commands_exist() -> None:
-    docs = sorted((REPO / "docs").glob("*.md"))
+    # recursive: docs/agents/ (the AI specialist and its AGENTS.md snippet) is documentation too
+    docs = sorted((REPO / "docs").rglob("*.md"))
     docs = [d for d in docs if "adr" not in d.parts and d.name != "m0_spike_report.md"]
     for readme_name in ("README.md", "README.zh-TW.md", "README.zh-CN.md"):
         readme = REPO / readme_name

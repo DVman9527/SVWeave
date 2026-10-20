@@ -56,10 +56,69 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
   filter on the working tree (now refused), and diffed beyond the project's subtree. Impact did not
   find the owning module through generate blocks and warned about descendants it had listed.
 
-### Known open (not fixed)
+### Security (installer supply chain, 2026-10-20)
 
-* Serena's build backend (`hatchling`) is not hash-pinned when the Serena venv is built; `uv` itself is
-  not pinned; the MCP SDK's stdio reader has no line-length limit. See `docs/security.md`, section 6.
+* **Serena's build backend is hash-pinned.** `uv.lock` does not lock build dependencies, so
+  `uv sync --frozen` fetched `hatchling` (and, for the sdist-only `proxy-tools` 0.1.0, `setuptools`)
+  from the index or an unverified uv cache and ran it. The lock now pins the 8 build wheels
+  (`serena_build_wheelhouse`: hatchling 1.32.4, editables 0.6, packaging 26.3, pathspec 1.1.1,
+  pluggy 1.6.0, tomlkit 0.15.1, trove-classifiers 2026.9.21.13, setuptools 84.0.0; sha256 and
+  files.pythonhosted.org URLs); the installer verifies them, installs them into the Serena venv with
+  `--no-index --require-hashes` and syncs with `--no-build-isolation`. `--fetch-only` and `--offline`
+  work the same way; the fetch-only cache never touches an index for a build backend.
+* **uv is pinned.** The installer downloads the uv 0.12.23 release tarball (lock section `uv`; sha256
+  equal to the release's published checksum), verifies it before opening it and the binary before
+  running it, and uses it for every uv command (`UV_PYTHON_DOWNLOADS=never`). `--uv PATH` still
+  overrides it but is reported as unverified (`components.uv.verified: false`, `warnings`).
+  `--verify-only` checks the pinned uv. The installer creates the gateway venv itself
+  (`--create-venv`, new `--python` for the base interpreter), so the documented flows no longer start
+  with `uv venv` and no uv has to be installed.
+* `vendor/`: added the 8 build wheels and the uv tarball; `uv-cache.tar.gz` regenerated with the pinned
+  uv (the old one was written by a newer uv's cache format and was built with unpinned backends).
+  License texts and entries for uv and the build wheels added (`license_manifest.json`,
+  `THIRD_PARTY_NOTICES.md`; pathspec is MPL-2.0). `toolchain.lock.json` changed (new sections, Serena
+  `install_method`, `license_manifest_sha256`), so its sha256 changed; `toolchain_id` (pyslang, slang,
+  extractor) did not.
+* Verified end to end on 2026-10-20 in scratch copies of the repository: the `vendor/` procedure with
+  `--offline` inside `bwrap --unshare-net` (no `uv` on `PATH`) and the GitHub-reachable variant both
+  install Serena 1.7.0 with `--verify-only` ok; DEP-01 passes with the pinned uv
+  (`evidence/dep01/cleanroom.json` refreshed: only `lock_sha256` changed).
+
+### Security (backend output limits, 2026-10-20)
+
+* **A backend can no longer exhaust the gateway's memory through stdout.** The MCP SDK's stdio reader
+  concatenated a backend's stdout until a newline with no length limit (a huge line without a newline
+  grew memory until the backend was stopped; the call timeout did not stop it), and `call_tool`
+  joined result text without a limit. New `svweave.adapters.bounded_stdio.bounded_stdio_client` keeps
+  the SDK's transport contract and launch / shutdown helpers and replaces the reader with a bounded
+  byte reader. A line above 16 MiB (`MAX_MESSAGE_BYTES`) is `BACKEND_UNAVAILABLE` /
+  `reason: message_too_large`; a result text above 16 Mi characters (`MAX_RESULT_TEXT_CHARS`) is
+  `OUTPUT_LIMIT` / `reason: result_too_large`. Either way reading stops and the backend's process group
+  is terminated before the error is raised. The limits are above cbm's own 10,485,744-byte response cap
+  and Serena's 150,000-character answer cap (measured). Tests:
+  `tests/unit/test_adapters_mcp_client.py::test_sec_*` (64 MiB flood with a 1 MiB limit: the reader
+  peaks at limit + one 64 KiB read and fails in about 0.1 s, the old reader timed out after
+  accumulating the flood). See `docs/security.md`, section 6.
+* Review fixes (Opus and Codex reviews of the transport): the backend is terminated before the
+  overflow is delivered, so a consumer that is not reading cannot keep a flooding backend alive; a
+  CRLF line of exactly the limit is accepted; bystander calls on a terminated backend report
+  `backend_terminated` instead of another call's `result_too_large`; a flood written outside any call
+  is reported by the next call. `scripts/probe_backends.py` now uses the bounded transport too.
+
+### Fixed (installer and Serena sandbox)
+
+* Serena could not start when its venv was built on a python-build-standalone interpreter (the
+  documented offline path, `--python .../runtime/python/bin/python3`): the sandbox binds the
+  interpreter by realpath (`bin/python3.12`), so the `bin/python3 -> python3.12` link that the venv's
+  `bin/python` points to did not exist inside it and every venv script died with
+  `/usr/bin/env: '.../serena': No such file or directory`. `SandboxSpec.symlinks` now recreates the
+  intermediate links inside the sandbox (`serena.config.python_links`; a link inside a bound path is
+  refused, so nothing is created on the host). The docs unpack the bundled CPython to
+  `.toolchain/runtime/` so the install stays inside the toolchain directory.
+* `scripts/probe_backends.py` / `scripts/spikes/cbm_spike.py`: cbm was always `UNAVAILABLE` ("secure
+  daemon endpoint could not be created") in a deep checkout (e.g. this one), because the
+  daemon socket below `.toolchain/state/cbm*/runtime` exceeded the ~108-byte `sockaddr_un` limit. The
+  probe now uses a short private temp dir, as the gateway already did (`SANDBOX_RUNTIME_DIR`).
 
 ### Fixed (continued)
 

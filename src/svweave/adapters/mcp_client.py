@@ -9,7 +9,13 @@
   ``BACKEND_UNAVAILABLE`` with ``details.reason == "protocol_error"``;
 * the negotiated protocol revision must equal the revision pinned in ``capability_report.json``
   (test API-05); a different revision is ``CAPABILITY_MISMATCH``, never "use latest";
-* shutdown follows the SDK sequence (close stdin, grace, then kill the whole process group).
+* shutdown follows the SDK sequence (close stdin, grace, then kill the whole process group);
+* backend output is bounded (security.md 6): the stdio transport is the SDK contract with a
+  length-limited reader (:mod:`svweave.adapters.bounded_stdio`); a stdout line longer than
+  ``McpLaunch.max_message_bytes`` is ``BACKEND_UNAVAILABLE`` / ``reason == "message_too_large"``
+  and a tool result whose text exceeds ``McpLaunch.max_result_chars`` is ``OUTPUT_LIMIT`` /
+  ``reason == "result_too_large"``. Either way the backend is terminated (process group + token
+  sweep) before the error is raised.
 
 The async :class:`McpClient` is wrapped by the synchronous :class:`McpSession` (runs on a shared
 event-loop thread) because the application layer and CLI are synchronous.
@@ -37,8 +43,14 @@ import anyio
 import mcp_types as types
 from mcp import MCPError
 from mcp.client.session import ClientSession
-from mcp.client.stdio import StdioServerParameters, stdio_client
+from mcp.client.stdio import StdioServerParameters
 
+from svweave.adapters.bounded_stdio import (
+    MAX_MESSAGE_BYTES,
+    MessageTooLarge,
+    TransportStats,
+    bounded_stdio_client,
+)
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.ids import canonical_json, sha256_hex
 from svweave.security import safeio
@@ -48,6 +60,16 @@ T = TypeVar("T")
 
 TOKEN_ENV = "SVWEAVE_BACKEND_TOKEN"
 CLIENT_NAME = "svweave-gateway"
+
+#: Largest concatenated text of one tool result handed to the adapters (characters). Decoded text
+#: is never longer than the JSON line it came in, so with the default transport limit this is a
+#: second, transport-independent guard (it also bounds the join of many content items and stays in
+#: force if ``max_message_bytes`` is raised). Real results stay below cbm's own 10,485,744-byte
+#: response cap and Serena's 150,000-character answer cap (see ``bounded_stdio.MAX_MESSAGE_BYTES``).
+MAX_RESULT_TEXT_CHARS = 16 * 1024 * 1024
+
+#: Violation kinds that mean "backend output too large": the backend is terminated at once.
+SIZE_VIOLATIONS = frozenset({"message_too_large", "result_too_large"})
 
 
 def tool_schema_sha256(tool: dict[str, Any]) -> str:
@@ -110,6 +132,10 @@ class McpLaunch:
     call_timeout: float = 120.0
     redactor: Redactor = field(default_factory=Redactor)
     log_max_bytes: int = 4 * 1024 * 1024
+    #: Longest stdout line (one JSON-RPC message) accepted from the backend, in bytes.
+    max_message_bytes: int = MAX_MESSAGE_BYTES
+    #: Longest concatenated text of one tool result, in characters.
+    max_result_chars: int = MAX_RESULT_TEXT_CHARS
 
 
 def _leaf(exc: BaseException) -> BaseException:
@@ -204,6 +230,7 @@ class McpClient:
         self._dead_reason: str | None = None
         self._stopped = False
         self._pid: int | None = None
+        self.transport_stats = TransportStats()
 
     # ------------------------------------------------------------------ errors
     def _err(self, code: ErrorCode, message: str, reason: str, **extra: Any) -> SvwError:
@@ -216,6 +243,25 @@ class McpClient:
         return SvwError(code, message, details)
 
     def _violation_error(self) -> SvwError:
+        kind = (self.violation or {}).get("kind")
+        if kind == "message_too_large":
+            return self._err(
+                ErrorCode.BACKEND_UNAVAILABLE,
+                f"{self.launch.backend}: backend wrote a protocol message larger than "
+                f"{self.launch.max_message_bytes} bytes (protocol error); backend terminated",
+                "message_too_large",
+                protocol_error=self.violation or {},
+            )
+        if kind == "result_too_large":
+            # Only the call whose result was too large gets OUTPUT_LIMIT (built in call_tool);
+            # every OTHER call on this session just lost its backend.
+            return self._err(
+                ErrorCode.BACKEND_UNAVAILABLE,
+                f"{self.launch.backend}: backend terminated after another call's result exceeded "
+                f"{self.launch.max_result_chars} characters",
+                "backend_terminated",
+                protocol_error=self.violation or {},
+            )
         return self._err(
             ErrorCode.BACKEND_UNAVAILABLE,
             f"{self.launch.backend}: backend wrote non-protocol data to stdout (protocol error)",
@@ -225,6 +271,15 @@ class McpClient:
 
     # ------------------------------------------------------------------ message handler
     async def _on_message(self, message: object) -> None:
+        if isinstance(message, MessageTooLarge) and self.violation is None:
+            self.violation = {
+                "kind": "message_too_large",
+                "limit_bytes": message.limit_bytes,
+                "received_bytes_at_least": message.received_bytes,
+            }
+            for scope in list(self._inflight):
+                scope.cancel()
+            return
         if isinstance(message, Exception) and self.violation is None:
             sample = ""
             errors = getattr(message, "errors", None)
@@ -327,7 +382,12 @@ class McpClient:
                 command=argv[0], args=argv[1:], env=env, cwd=la.cwd
             )
             try:
-                async with stdio_client(params, errlog=errlog) as (r, w):  # noqa: SIM117
+                async with bounded_stdio_client(  # noqa: SIM117
+                    params,
+                    errlog=errlog,
+                    max_message_bytes=la.max_message_bytes,
+                    stats=self.transport_stats,
+                ) as (r, w):
                     async with ClientSession(
                         r,
                         w,
@@ -455,10 +515,37 @@ class McpClient:
         t = timeout or self.launch.call_timeout
         t0 = time.monotonic()
         session = self._session
-        res = await self._guard(
-            lambda: session.call_tool(name, arguments, read_timeout_seconds=t), t + 5, f"tools/call {name}"
-        )
-        text = "\n".join(getattr(c, "text", "") for c in res.content if getattr(c, "text", None) is not None)
+        try:
+            res = await self._guard(
+                lambda: session.call_tool(name, arguments, read_timeout_seconds=t), t + 5, f"tools/call {name}"
+            )
+        except SvwError:
+            if (self.violation or {}).get("kind") in SIZE_VIOLATIONS:
+                await self.stop()  # the transport already killed the group; reap and close
+            raise
+        texts: list[str] = [x for c in res.content if (x := getattr(c, "text", None)) is not None]
+        # Check the size BEFORE concatenating (no second copy of an oversized result).
+        size = sum(len(x) for x in texts) + max(len(texts) - 1, 0)
+        if size > self.launch.max_result_chars:
+            if self.violation is None:
+                self.violation = {
+                    "kind": "result_too_large",
+                    "tool": name,
+                    "limit_chars": self.launch.max_result_chars,
+                    "size_chars": size,
+                }
+            del res, texts
+            err = self._err(  # THIS call's own error, with its own figures
+                ErrorCode.OUTPUT_LIMIT,
+                f"{self.launch.backend}: tool result text exceeds {self.launch.max_result_chars} "
+                "characters; backend terminated",
+                "result_too_large",
+                protocol_error={"kind": "result_too_large", "tool": name,
+                                "limit_chars": self.launch.max_result_chars, "size_chars": size},
+            )
+            await self.stop()
+            raise err
+        text = "\n".join(texts)
         return ToolResult(
             tool=name,
             text=text,
@@ -573,6 +660,15 @@ class McpSession:
     @property
     def violation(self) -> dict[str, Any] | None:
         return self._client.violation
+
+    def violation_error(self) -> SvwError:
+        """The error a caller should see for this session's recorded violation (for adapters that
+        notice it later, e.g. a backend that flooded while no call was in flight)."""
+        return self._client._violation_error()
+
+    @property
+    def transport_stats(self) -> TransportStats:
+        return self._client.transport_stats
 
     def call_tool(
         self, name: str, arguments: dict[str, Any], timeout: float | None = None

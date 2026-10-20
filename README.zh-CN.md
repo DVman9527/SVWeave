@@ -140,30 +140,152 @@ SVWeave/
 
 ## 安装
 
-要求：Linux x86_64、支持非特权用户命名空间的 `bwrap`（bubblewrap）（`bwrap --version && bwrap --ro-bind / / true`）、`git`、`tar`、`uv`，以及用于运行安装程序的 Python 3.11 或更新版本（网关 venv 本身是 Python 3.12）。详情：`docs/install.md`。
+所有组件都锁定在 `toolchain.lock.json` 中；安装程序（`scripts/bootstrap_locked.py`）是唯一使用网络的代码，它在使用每个 artifact 之前都会依据锁文件校验其 sha256，任何不匹配都会中止。完整说明：`docs/install.md`；已提交的离线包：`vendor/README.md`。
 
-**能访问 PyPI 和 GitHub 的主机：**
+### 要求
+
+* **Linux x86_64**（锁文件中唯一的平台）。其他平台未经资格认定。
+* **`bwrap`**（bubblewrap），且已启用非特权用户命名空间；每个后端都在其中运行。检查：`bwrap --version && bwrap --ro-bind / / true`。没有它，后端无法运行（或只能在明确标记的降级模式下运行，见 `docs/security.md` 第 3 节）。
+* **`git`**（只用一次，用于获取锁定的 Serena commit）和 **`tar`**。
+* **Python 3.11 或更新版本**，用于运行安装程序。venv 本身是 **Python 3.12**：`PATH` 上要有 `python3.12`，或用 `--python PATH` 指定一个 3.12 解释器（`vendor/` 包附带一个独立的解释器）。
+* **不需要 `uv`。** 安装程序会下载锁定版本的 uv release（0.12.23，锁文件的 `uv` 节），校验后解压到 `.toolchain/uv/`，之后每一条 uv 命令都只运行那个二进制文件；网关 venv 也由它自行创建（`--create-venv`）。除非你传入 `--uv PATH`（会被报告为未经校验），否则绝不会使用主机上已安装的 uv。
+* RAM：HDL worker 受 `analysis.max_worker_memory_mib`（默认 8192）限制。磁盘：由 `--fetch-only` 填充的 artifact 缓存约 200 MB；`vendor/` 中 Serena 另占 35 MB、uv tarball 20 MB。
+
+### 安装 SVWeave
+
+所有命令都在仓库根目录运行。按你的主机网络状况选择其中一条路径。
+
+**(a) 能访问 PyPI 和 GitHub 的主机**
 
 ```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[dev]'
-.venv/bin/python scripts/bootstrap_locked.py                 # pinned backends, sha256-verified
-.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network
+python3.12 scripts/bootstrap_locked.py --create-venv         # pinned uv, .venv, pinned backends, Serena
+.venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network; compare installed state with the lock
+# development tools (optional): hash-pinned wheels committed in vendor/, no index access
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index \
+    --find-links vendor/downloads/wheelhouse-dev --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-**能访问 GitHub 但不能访问 PyPI 的主机**（计算集群的典型情况）使用已提交的 `vendor/` 包：31 个按哈希锁定的网关 wheel、`[dev]` wheel、Serena 的源码 bundle 和锁定的依赖缓存，以及一个独立的 CPython 3.12。托管在 GitHub 上的后端（slang、Verible、codebase-memory-mcp、uvm-core）仍由安装程序下载，并依据 `toolchain.lock.json` 校验：
+`--create-venv` 依次做的事：下载并校验锁定版本的 uv（这是第一个下载项；哈希错误会在下载任何其他内容之前就停止运行），下载并校验锁文件中的每个归档（slang、Verible、codebase-memory-mcp、uvm-core）到 `.toolchain/`，用锁定版本的 uv 在 `python3.12`（或 `--python`）上创建 `.venv`，以 `--no-index --require-hashes` 把 31 个按哈希锁定的网关 wheel 安装进去，并把这个源码树链接进该 venv（一个 `.pth` 文件加上 `.venv/bin/svweave`），然后检出锁定的 Serena commit，把 8 个按哈希锁定的 build wheel 安装到全新的 Serena venv，并在其中运行 `uv sync --frozen --no-dev --no-build-isolation`。`--skip-serena` 会跳过 Serena（此时 `svweave doctor` 会报告 `backend:serena_exe FAIL`）。
+
+**(b) 能访问 GitHub 但不能访问 PyPI 的主机**（计算集群的典型情况）使用已提交的 `vendor/` 包：31 个网关 wheel、`[dev]` wheel、8 个 Serena build wheel、Serena 的源码 bundle 和锁定的依赖缓存、锁定版本的 uv tarball，以及一个独立的 CPython 3.12。托管在 GitHub 上的归档（slang、Verible、codebase-memory-mcp、uvm-core）仍由安装程序下载，并依据锁文件校验：
 
 ```bash
 (cd vendor && sha256sum -c SHA256SUMS)
-mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz
-git clone vendor/serena-src.bundle .toolchain/serena-src
-mkdir -p runtime && tar -C runtime -xzf vendor/runtime/cpython-*.tar.gz
-uv venv --python runtime/python/bin/python3 .venv
-python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads
-python3.11 scripts/bootstrap_locked.py --verify-only
+mkdir -p .toolchain/state && tar -C .toolchain/state -xzf vendor/uv-cache.tar.gz   # Serena's locked deps
+git clone vendor/serena-src.bundle .toolchain/serena-src                          # pinned Serena checkout
+mkdir -p .toolchain/runtime && tar -C .toolchain/runtime -xzf vendor/runtime/cpython-*.tar.gz   # .toolchain/runtime/python/bin/python3 = 3.12.15
+python3.11 scripts/bootstrap_locked.py --artifact-dir vendor/downloads --create-venv \
+    --python .toolchain/runtime/python/bin/python3                         # venvs built on that interpreter
+python3.11 scripts/bootstrap_locked.py --verify-only --artifact-dir vendor/downloads
+# dev wheels (optional), no index access, with the pinned uv:
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index --find-links vendor/downloads/wheelhouse-dev \
+    --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-`vendor/README.md` 包含 dev wheel 步骤以及完全离线的变体（`--offline`，需先缓存一次 GitHub 归档）。[状态](#状态)中的测试运行正是用这套流程得到的。
+`--python` 指定的是安装程序所创建的 venv 的*基础*解释器；不要传 `--venv-python .toolchain/runtime/python/bin/python3`（该选项指定的是 venv 自身的 Python，会把 wheel 直接装进随附的解释器）。安装程序会复用任何已存在且 sha256 正确的 artifact，因此 wheel 和 uv 都取自 `vendor/`，只有 GitHub 归档需要下载。[状态](#状态)中的测试运行就是用这套流程得到的（当时仍另外运行 `uv venv`，而非使用锁定版本的 uv）。
+
+**(c) 完全离线：先在联网主机上缓存一次，再用 `--offline` 安装。** 联网主机需要 `git` 和 `python3.12`（或 `--python`），但不需要 venv：
+
+```bash
+# 1. connected host, in the repository directory: fill the cache, install nothing but the pinned uv
+python3.12 scripts/bootstrap_locked.py --fetch-only
+# 2. copy the whole repository directory, .toolchain/ included (.venv is not copied), to the offline host
+# 3. offline host, same architecture: cached, hash-verified artifacts only
+python3.12 scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv
+.venv/bin/python scripts/bootstrap_locked.py --verify-only
+```
+
+`--fetch-only` 会把锁文件中的每个归档（含 uv tarball）、网关 wheelhouse 和 Serena build wheelhouse 存到 `.toolchain/downloads/`（可用 `--artifact-dir` 更改），把锁定的 Serena 检出存到 `.toolchain/serena-src`，并把存放 Serena 锁定依赖的 uv 缓存存到 `.toolchain/state/uv-cache`（`--uv-cache-dir`）。`--offline` 拒绝任何网络访问：缺失或不匹配的 artifact 都是错误，Serena 取自已有的检出（或 `--serena-source <本地 git 检出>`），网关 venv 只从 wheelhouse 安装。如果离线主机上的缓存位于别处，请传入 `--artifact-dir`、`--uv-cache-dir` 和 `--serena-source`。不使用 fetch-only 缓存的变体：先把四个 GitHub tarball（`slang-*`、`verible-*`、`codebase_memory_mcp-*`、`uvm_core-*`，联网时用 `--fetch-only --artifact-dir <dir>` 缓存一次）复制到 `vendor/downloads/`，然后运行 (b) 的 `vendor/` 步骤，并在安装那一行加上 `--offline`。
+
+**成功的样子。** 每次运行都会打印一份 JSON 报告（也可用 `--report FILE` 写入文件），结尾为 `"ok": true`，退出码 0。失败的运行结尾为 `"ok": false`，退出码 2，原因列在 `errors` 中；不会有任何东西被静默跳过或替换。`--verify-only` 绝不使用网络，而是依据锁文件重新检查已安装的状态（锁定版本的 uv、二进制文件、wheel、Serena venv、版本）；其报告带有 `"verify_only": true`。`--uv PATH` 会加入一条 `warnings` 并标记 `components.uv.verified: false`。
+
+### 验证安装
+
+`svweave` 位于 venv 中：每个 shell 运行一次 `source .venv/bin/activate`，或直接调用 `.venv/bin/svweave`。在本仓库中（它随附演示用的 `svweave.yaml` 和 `fixtures/`）：
+
+```bash
+svweave init                       # .svweave/ and the trusted policy outside the repo; never overwrites
+svweave doctor                     # config, policy, toolchain hashes, bwrap, client boundary
+svweave doctor --probe             # starts each backend once with a real fixture query (slow)
+svweave build --profile rtl_demo   # the shipped demo: exit 0
+```
+
+预期结果：`svweave doctor` 以退出码 0 结束，`outcome` 为 `OK`；`client_boundary` 始终是 `WARN`（`not qualified`，见 `docs/security.md` 第 4 节），而随附的 `svweave.yaml` 在你映射该外部根之前会给出 `root_mapping:uvm` `WARN`。任何 `FAIL` 都会使退出码为 4、`outcome` 为 `ERROR`；只有在跳过 Serena（`--skip-serena`）时，`backend:serena_exe FAIL` 才是预期的。`svweave build --profile rtl_demo` 以退出码 0 结束，带有 `"completeness": "COMPLETE"`、`"diagnostic_outcome": "NO_ERRORS"` 和 `"published": true`，并打印可用于[快速开始](#快速开始)查询的 `build_id` 和 `snapshot_id`；完整输出见[实例演练：随附的演示](#实例演练随附的演示)。
+
+### 从较早的安装升级
+
+按你当初使用的路径重新运行安装程序（`--create-venv` 会修复已有的 `.toolchain/` 和 `.venv`：venv 只在不存在时才创建，按哈希锁定的 wheel 会重新安装进去），然后运行 `--verify-only`。来自 `docs/install.md` 和 `CHANGELOG.md` 的两件事：
+
+* 由 build backend 尚未锁定之前（2026-10-20 之前）的安装程序填充的 uv 缓存，可能含有用未锁定 backend 构建的 `proxy-tools` 或 `serena-agent` wheel，而 uv 会复用这类已构建的 wheel。升级后请删除 `.toolchain/state/uv-cache`（或你的 `--uv-cache-dir`）一次。在 `vendor/` 路径上，之后请重新解压 `vendor/uv-cache.tar.gz`：它已用锁定的 backend 和锁定版本的 uv 重新生成（由其他 uv 版本写入的缓存使用不同的缓存 bucket，离线时无法使用）。
+* 文档所述的流程不再以 `uv venv` 开头；先前以该方式创建的 `.venv` 会被保留，并由 `--create-venv` 复用。
+
+### 连接你的设计项目与 AI 客户端
+
+这些步骤在**目标**项目（你想分析的设计）中运行，由工程师或负责安装的 AI 执行；为 AI 编写的相同步骤位于 `docs/agents/svweave-mcp-specialist.md` 的"Installing into a project"一节。下文中，`/ABS/PATH` 是这个 SVWeave 检出（因此 `/ABS/PATH/.venv/bin/svweave` 就是可执行文件），`/ABS/PATH/TO/PROJECT` 是目标项目的根目录，即存放其 `svweave.yaml` 的目录。每一步都是幂等的。
+
+**1. 把 SVWeave 指向项目。** SVWeave 不必位于设计之内：把 `svweave.yaml` 放在一个工作区目录中，并把设计作为**外部根**挂接进来（在 `svweave.yaml` 中声明时不带 `path`，在 `svweave.local.yaml` 中映射到绝对路径，并把该路径加入受信 `policy.json` 的 `allowed_roots`）：`docs/manifest.md` 第 2b 节有确切的 YAML，以及与仿真器命令行的差异（严格的 filelist、不接受仿真器选项、`timescale`、多个顶层、加密 IP、UVM）。在该工作区中：
+
+```bash
+svweave init                             # svweave.yaml template, .svweave/, policy.json in the trusted dir
+$EDITOR svweave.yaml                     # profiles, filelists, tops, defines: docs/manifest.md (2b for external roots)
+svweave manifest resolve --profile P     # review the argument ledger by hand
+svweave build --profile P                # exit 0 and COMPLETE, or read the diagnostics
+```
+
+受信策略创建在仓库**之外**（`$XDG_CONFIG_HOME/svweave/workspaces/<key>/policy.json`，见 `docs/security.md`）；在你于该处启用之前，编辑功能保持禁用（`docs/editing.md`）。
+
+**2. 注册 MCP 服务器**，名称为 `svweave`（专用智能体的 `mcp__svweave__*` 工具名以此为前提），并使用绝对路径，因为客户端会从它自己的工作目录启动该进程。Claude Code，在目标项目内运行：
+
+```bash
+claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
+```
+
+默认作用域为 `local`；`-s project` 会在项目根目录写入等价、可共享的 `.mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "svweave": {
+      "command": "/ABS/PATH/.venv/bin/svweave",
+      "args": ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+如果已存在 `svweave` 条目，就地更新它；绝不要添加第二个。只注册这一个服务器，不要注册原始的 codebase-memory-mcp 或 Serena 服务器。在小型主机上，把 `--no-graph` 加入 args（此时 `svw_search` 只使用字面文本回退）。Codex：`config.toml` 的表和 `codex mcp add` 形式见 [Codex](#codex)。
+
+**3. 把专用智能体复制**到项目中（覆盖较旧的副本；不要更改其 `name: svweave-mcp`，第 4 步的区块会引用它）：
+
+```bash
+mkdir -p /ABS/PATH/TO/PROJECT/.claude/agents
+cp /ABS/PATH/docs/agents/svweave-mcp-specialist.md /ABS/PATH/TO/PROJECT/.claude/agents/svweave-mcp.md
+```
+
+**4. 加入路由区块** `docs/agents/AGENTS.snippet.md` 到 `/ABS/PATH/TO/PROJECT/AGENTS.md`（如果项目把智能体规则放在 `CLAUDE.md`，则加到那里）。**正是这一步让该项目中的 AI 客户端知道这个 MCP 存在，并把 SystemVerilog 结构问题路由给 `svweave-mcp` 专用智能体**；少了它，智能体文件只是一个文件。区块由 `<!-- svweave:begin -->` 和 `<!-- svweave:end -->` 标记包住：如果标记已存在，把两者之间（含标记）的全部内容替换为新的区块；否则把整个区块追加到文件末尾。如果项目没有 `AGENTS.md`，就创建一个。绝不要删除或重排项目自己的文本。
+
+```bash
+# first insertion only (no markers yet); afterwards replace the text between the markers instead
+cat /ABS/PATH/docs/agents/AGENTS.snippet.md >> /ABS/PATH/TO/PROJECT/AGENTS.md
+```
+
+**5. 检查。** 在 Claude Code 中，`/mcp` 会把 `svweave` 列为已连接（Codex 则用 `codex mcp list`），而让客户端调用 `svw_status` 会得到 `outcome` 为 `OK` 且含项目 `data.profiles[]` 的信封。如果 `svw_status` 失败，请阅读其 `error.code`（`docs/mcp_contract.md`）并修复原因；不要为了让它通过而修改项目的配置。这些客户端配置没有被 SVWeave 的测试套件覆盖；详情见[在 Claude Code 和 Codex 中使用 SVWeave](#在-claude-code-和-codex-中使用-svweave)。
+
+### 安装故障排查
+
+| 症状 | 原因与处理 |
+|---|---|
+| `bwrap --ro-bind / / true` 失败；`svweave doctor` 中 `isolation:bwrap FAIL` | 主机禁用了非特权用户命名空间；必须启用（由管理员设置）。没有它，后端无法运行（`docs/security.md` 第 3 节）。不要禁用沙箱。 |
+| `Could not acquire lock`，或 `~/.cache/uv` 下的写入错误 | 这台主机上 uv 的缓存目录是只读的：把 `UV_CACHE_DIR` 设为可写目录（`UV_CACHE_DIR=/path/writable python3.12 scripts/bootstrap_locked.py ...`）。 |
+| `sha256 mismatch for <url>: got ..., lock says ...`；`pinned uv is missing or differs from toolchain.lock.json; nothing installed` | 下载到的 artifact 不是锁文件所依据的那一个（上游已变更，或传输中被改动）。没有安装任何东西。不要修改哈希值，也不要用 `--uv` 绕过：请报告。 |
+| 从 `files.pythonhosted.org` 下载失败（拒绝连接、超时），而 GitHub 下载正常 | 无法访问 PyPI：使用路径 (b)（`--artifact-dir vendor/downloads`），所有 wheel 和 uv 都取自 `vendor/`。 |
+| `offline: <file> is not cached with the locked sha256 (would download ...)`；`offline: no --serena-source given and no existing serena checkout` | `--offline` 发现有 artifact 缺失。在联网主机上重新运行 `--fetch-only` 并把缓存（或该 tarball）复制过来；把 `--artifact-dir`、`--uv-cache-dir`、`--serena-source` 指向缓存实际所在的位置。 |
+| `serena: git clone of --serena-source failed` | 该路径必须是安装程序进程可见的 git 检出（沙箱 bind mount）；它是用 `git clone --no-local file://...` 克隆的。 |
+| `svweave doctor`：`backend:serena_exe FAIL`，退出码 4 | Serena 被跳过（`--skip-serena`）或其 venv 不存在：不带 `--skip-serena` 重新运行安装程序。只有在你选择跳过 Serena 时才是预期的。 |
+| `--verify-only`：`gateway venv missing: nothing to verify` | `--verify-only` 在 `--create-venv` 之前运行，或针对了另一个 `--venv-dir`；加上 `--no-venv` 可只检查工具链。 |
+| `codebase-memory-mcp` 出现 `GLIBC_2.38' not found` | 锁文件正是为此固定了 `linux-amd64-portable`（静态）版本；不要换成标准版本（`docs/install.md` 第 4 节）。 |
+| Serena 无法启动；其 stderr 日志显示 `/usr/bin/env: '.../serena-venv/bin/serena': No such file or directory` | 这是沙箱尚未重建解释器符号链接链之前的版本（venv 建在 python-build-standalone 运行环境上，例如 `.toolchain/runtime/`）。更新 SVWeave 即可，不需要重建 venv。 |
+| 失败的安装留下不完整的 `.toolchain/` | 重新运行同一条命令：已存在且 sha256 正确的 artifact 会被复用，其他的会重新下载并重新校验。卸载：删除 `.venv`、`.toolchain/`、`.svweave/`，以及（如需要）受信目录。 |
 
 ## 快速开始
 
@@ -211,7 +333,7 @@ SVWeave 从不修改客户端的配置。请把类似下面的条目加入你自
 }
 ```
 
-只注册这一个服务器；不要同时注册原始的 codebase-memory-mcp 或 Serena 服务器。在小型主机上，把 `--no-graph` 加入 `args`（此时搜索只使用字面文本回退）。本地索引并非端到端离线：返回给云端模型客户端的代码片段会离开本机。
+只注册这一个服务器；不要同时注册原始的 codebase-memory-mcp 或 Serena 服务器。在小型主机上，把 `--no-graph` 加入 `args`（此时搜索只使用字面文本回退）。本地索引并非端到端离线：返回给云端模型客户端的代码片段会离开本机。完整的逐项目流程（工作区、注册、专用智能体、`AGENTS.md` 区块、检查）见[连接你的设计项目与 AI 客户端](#连接你的设计项目与-ai-客户端)的第 1 至 5 步。
 
 ## 分析工具：影响分析、diff 影响分析、重命名预览、图
 
@@ -253,6 +375,8 @@ svweave graph export --build BUILD_ID          # writes .svweave/exports/graph-<
 SVWeave 通过 stdio 使用 MCP，因此任何 MCP 客户端都可以启动它。下面两种配置遵循两个客户端的文档化语法（在作者所安装的版本 Claude Code 2.1.299、Codex CLI 0.162.1 上，`claude mcp add --help` 和 `codex mcp add --help` 接受这些形式）。**它们没有被 SVWeave 的测试套件覆盖**：测试只通过 Python MCP 客户端驱动网关，因此没有针对特定客户端的资格认定证据。SVWeave 从不修改客户端的配置；这些命令由你自己运行。
 
 请使用绝对路径：客户端会从它自己的工作目录启动该进程。
+
+**专用智能体定义。** `docs/agents/svweave-mcp-specialist.md` 是一份现成的 Claude Code 智能体定义（`name: svweave-mcp`），告诉 AI 如何正确使用这个网关：何时把问题路由给它、先构建再查询的工作流、覆盖全部 14 个 `svw_*` 工具的"问题对应工具"表、如何解读 `freshness`、`analysis_coverage` 和 `pagination`、编辑规则（智能体永远不能审批）以及它必须向用户说明的限制。`docs/agents/AGENTS.snippet.md` 是要加入项目 `AGENTS.md` 的对应区块，用 `<!-- svweave:begin -->` / `<!-- svweave:end -->` 标记包住，因此可以幂等地插入。把 SVWeave 安装到一个项目，意思就是：以 `svweave` 名称注册服务器（见下文）、把专用智能体复制到该项目的 `.claude/agents/svweave-mcp.md`、再把该区块加入项目的 `AGENTS.md`（或 `CLAUDE.md`）；确切步骤见专用智能体文件的"Installing into a project"一节。两个文件都放在 `docs/` 下，是因为本仓库的 `.gitignore` 排除了 `.claude/`。
 
 ### Claude Code
 

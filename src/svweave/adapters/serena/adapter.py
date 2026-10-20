@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from svweave.adapters.mcp_client import (
+    SIZE_VIOLATIONS,
     InitInfo,
     McpLaunch,
     McpSession,
@@ -220,6 +221,7 @@ class SerenaAdapter:
             protected_paths=self.protected_paths,
             rw_exempt=(self.paths.work, *self._exempt_candidate()),
             env=env,
+            symlinks=tuple(cfg.python_links(tc.serena_venv)),
         )
 
     def start(self) -> CapabilityComparison:
@@ -327,9 +329,19 @@ class SerenaAdapter:
             raise self._failure
         if not self._session.alive:
             violation = getattr(self._session, "violation", None)
+            if (violation or {}).get("kind") in SIZE_VIOLATIONS and hasattr(self._session, "violation_error"):
+                # the transport already killed the group; reap now (tokens, detached daemons) and
+                # report the real reason, not a generic protocol error
+                err = self._session.violation_error()
+                with contextlib.suppress(Exception):
+                    self._session.stop()
+                err.details["backend"] = BACKEND
+                self._failure = err
+                raise self._failure
             self._failure = SvwError(
                 ErrorCode.BACKEND_UNAVAILABLE,
-                "Serena wrote non-protocol data to stdout" if violation else "Serena process is gone",
+                f"Serena violated the stdio protocol ({violation.get('kind')})" if violation
+                else "Serena process is gone",
                 {"backend": BACKEND, "reason": "protocol_error" if violation else "process_exited",
                  "protocol_error": violation or {},
                  "stderr_tail": self.redactor.tail_file(self.paths.stderr_log, 2000)},

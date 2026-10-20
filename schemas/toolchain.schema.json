@@ -261,6 +261,54 @@
       "title": "PyslangPin",
       "type": "object"
     },
+    "SerenaBuildWheelhouse": {
+      "additionalProperties": false,
+      "description": "Hash-pinned build backends of the Serena venv (``uv.lock`` does not lock build dependencies).\nThe installer builds Serena without build isolation from exactly these wheels.",
+      "properties": {
+        "install": {
+          "minLength": 1,
+          "title": "Install",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "resolved_with": {
+          "minLength": 1,
+          "title": "Resolved With",
+          "type": "string"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "wheelhouse_dir": {
+          "minLength": 1,
+          "title": "Wheelhouse Dir",
+          "type": "string"
+        },
+        "wheels": {
+          "items": {
+            "$ref": "#/$defs/Wheel"
+          },
+          "title": "Wheels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "purpose",
+        "wheelhouse_dir",
+        "target",
+        "resolved_with",
+        "install",
+        "wheels"
+      ],
+      "title": "SerenaBuildWheelhouse",
+      "type": "object"
+    },
     "SerenaPin": {
       "additionalProperties": false,
       "properties": {
@@ -402,6 +450,93 @@
         "paired_with"
       ],
       "title": "SlangPin",
+      "type": "object"
+    },
+    "UvPin": {
+      "additionalProperties": false,
+      "description": "The ``uv`` release the installer runs (verified tarball, then verified binary).",
+      "properties": {
+        "archive_strip_components": {
+          "title": "Archive Strip Components",
+          "type": "integer"
+        },
+        "artifact_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Sha256",
+          "type": "string"
+        },
+        "binary": {
+          "minLength": 1,
+          "title": "Binary",
+          "type": "string"
+        },
+        "binary_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Binary Sha256",
+          "type": "string"
+        },
+        "commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Commit",
+          "type": "string"
+        },
+        "install_dir": {
+          "minLength": 1,
+          "title": "Install Dir",
+          "type": "string"
+        },
+        "published_at": {
+          "minLength": 1,
+          "title": "Published At",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "source_url": {
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "tag": {
+          "minLength": 1,
+          "title": "Tag",
+          "type": "string"
+        },
+        "upstream_checksums_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Upstream Checksums Sha256",
+          "type": "string"
+        },
+        "upstream_checksums_url": {
+          "minLength": 1,
+          "title": "Upstream Checksums Url",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "tag",
+        "commit",
+        "published_at",
+        "source_url",
+        "artifact_sha256",
+        "upstream_checksums_url",
+        "upstream_checksums_sha256",
+        "install_dir",
+        "archive_strip_components",
+        "binary",
+        "binary_sha256",
+        "role"
+      ],
+      "title": "UvPin",
       "type": "object"
     },
     "UvmPin": {
@@ -609,6 +744,12 @@
       "const": "1.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "serena_build_wheelhouse": {
+      "$ref": "#/$defs/SerenaBuildWheelhouse"
+    },
+    "uv": {
+      "$ref": "#/$defs/UvPin"
     }
   },
   "required": [
@@ -618,7 +759,9 @@
     "python_minor",
     "created_at",
     "created_by",
-    "components"
+    "components",
+    "serena_build_wheelhouse",
+    "uv"
   ],
   "title": "ToolchainLock",
   "type": "object"

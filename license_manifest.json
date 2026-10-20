@@ -96,6 +96,89 @@
       "notes": "External dependency for the UVM static profile only; not redistributed by SVWeave."
     },
     {
+      "component": "uv (installer tool)",
+      "version": "0.12.23 (46b84fd0bfec23b72f29e8e2185ba68a65052f48), uv-x86_64-unknown-linux-gnu",
+      "license": "MIT OR Apache-2.0",
+      "license_file": "evidence/m0/licenses/uv-0.12.23-LICENSE-MIT",
+      "license_file_sha256": "860e3d7a86b84e6a7012c7a635fc64df475cebc6cce34dfeb73a5982ec58176c",
+      "license_file_apache": "evidence/m0/licenses/uv-0.12.23-LICENSE-APACHE",
+      "license_file_apache_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "license_source": "https://raw.githubusercontent.com/astral-sh/uv/46b84fd0bfec23b72f29e8e2185ba68a65052f48/{LICENSE-MIT,LICENSE-APACHE}; Cargo.toml at the tag: license = \"MIT OR Apache-2.0\"",
+      "notes": "Release tarball contains only the uv and uvx binaries (no LICENSE file); license texts fetched from the tag commit. Run by scripts/bootstrap_locked.py only (install time). The tarball is redistributed in vendor/downloads/. Statically linked Rust crates not inventoried."
+    },
+    {
+      "component": "hatchling (Serena build backend)",
+      "version": "1.32.4",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/hatchling-1.32.4-LICENSE.txt",
+      "license_file_sha256": "7f143a8127ad4873862d70854b5bd2abd0085aa73e64fd2b08704a3b9f5c07fc",
+      "license_source": "wheel hatchling-1.32.4.dist-info/licenses/LICENSE.txt (License-Expression: MIT)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "editables (hatchling editable builds)",
+      "version": "0.6",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/editables-0.6-LICENSE.txt",
+      "license_file_sha256": "65f80d840245883efab92f8c70b60cb483d3b734fc95f208364ff69811d602c4",
+      "license_source": "wheel editables-0.6.dist-info/licenses/LICENSE.txt (classifier MIT)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "packaging (hatchling dependency)",
+      "version": "26.3",
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "license_file": "evidence/m0/licenses/packaging-26.3-LICENSE",
+      "license_file_sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+      "license_source": "wheel packaging-26.3.dist-info/licenses/LICENSE (+ LICENSE.APACHE, LICENSE.BSD in the wheel)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "pathspec (hatchling dependency)",
+      "version": "1.1.1",
+      "license": "MPL-2.0",
+      "license_file": "evidence/m0/licenses/pathspec-1.1.1-LICENSE",
+      "license_file_sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "license_source": "wheel pathspec-1.1.1.dist-info/licenses/LICENSE (classifier MPL 2.0)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/. MPL-2.0 is file-level copyleft: redistributing the unmodified wheel is allowed with its license; review before modifying."
+    },
+    {
+      "component": "pluggy (hatchling dependency)",
+      "version": "1.6.0",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/pluggy-1.6.0-LICENSE",
+      "license_file_sha256": "d6b65e6c213a5d0b577911d34d6e5949b9f59d76c238c5071a2f3fc16cfb2606",
+      "license_source": "wheel pluggy-1.6.0.dist-info/licenses/LICENSE",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "tomlkit (hatchling dependency)",
+      "version": "0.15.1",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/tomlkit-0.15.1-LICENSE",
+      "license_file_sha256": "f2f9b460ba719da6626add264d3782f275a4ff7aab677beda08b330911e23adb",
+      "license_source": "wheel tomlkit-0.15.1.dist-info/licenses/LICENSE",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "trove-classifiers (hatchling dependency)",
+      "version": "2026.9.21.13",
+      "license": "Apache-2.0",
+      "license_file": "evidence/m0/licenses/trove_classifiers-2026.9.21.13-LICENSE",
+      "license_file_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "license_source": "wheel trove_classifiers-2026.9.21.13.dist-info/licenses/LICENSE (classifier Apache)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/."
+    },
+    {
+      "component": "setuptools (build backend of proxy-tools 0.1.0, a Serena dependency)",
+      "version": "84.0.0",
+      "license": "MIT",
+      "license_file": "evidence/m0/licenses/setuptools-84.0.0-LICENSE",
+      "license_file_sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+      "license_source": "wheel setuptools-84.0.0.dist-info/licenses/LICENSE (License-Expression: MIT)",
+      "notes": "Build-time only: installed into the Serena venv from the hash-pinned serena_build_wheelhouse (toolchain.lock.json) to build Serena without build isolation, then removed by the exact uv sync. The wheel is redistributed in vendor/downloads/serena-build-wheelhouse/. Vendors (setuptools/_vendor) packaging, wheel, tomli, platformdirs, zipp, more_itertools, jaraco.* (MIT / Apache-2.0 / BSD), importlib_metadata (Apache-2.0) and autocommand 2.2.2 (LGPLv3 per its metadata)."
+    },
+    {
       "component": "bubblewrap",
       "version": "0.4.0 (host /usr/bin/bwrap, OS package)",
       "license": "LGPL-2.0-or-later",

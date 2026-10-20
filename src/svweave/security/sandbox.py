@@ -138,6 +138,11 @@ class SandboxSpec:
     #: Empty private directories created on the sandbox's ephemeral ``/tmp`` (e.g. a short
     #: socket directory); invisible to the host and gone with the sandbox.
     tmp_dirs: tuple[str, ...] = ()
+    #: Symlinks recreated inside the sandbox as ``(target, link path)`` after the binds (e.g. the
+    #: ``bin/python3 -> python3.12`` link a venv's interpreter resolves through: ``ro_paths`` are
+    #: bound by realpath, so an intermediate link would otherwise not exist). A link path inside a
+    #: bound path is refused: it would be created on the host.
+    symlinks: tuple[tuple[str, Path], ...] = ()
 
 
 _FORBIDDEN_RW = {Path("/"), Path("/usr"), Path("/etc"), Path("/proc"), Path("/dev"), Path("/bin"), Path("/lib"), Path("/lib64")}
@@ -188,6 +193,16 @@ def validate_spec(spec: SandboxSpec) -> tuple[list[Path], list[Path]]:
             raise SvwError(
                 ErrorCode.POLICY_DENIED, "refusing to expose / or $HOME to a backend", {"path": str(r)}
             )
+    for _target, link in spec.symlinks:
+        if not link.is_absolute() or ".." in link.parts or link.parts[1:2] in (("usr",), ("etc",)):
+            raise SvwError(ErrorCode.PATH_NOT_ALLOWED, "sandbox symlink path not allowed", {"path": str(link)})
+        for b in (*ro, *rw):
+            if b == link or b in link.parents:
+                raise SvwError(
+                    ErrorCode.POLICY_DENIED,
+                    "sandbox symlink inside a bound path would be created on the host",
+                    {"path": str(link), "bound": str(b)},
+                )
     return ro, rw
 
 
@@ -244,6 +259,8 @@ def build_bwrap_argv(
     binds.sort(key=lambda t: (len(t[0].parts), t[1]))
     for path, writable in binds:
         argv += ["--bind" if writable else "--ro-bind", str(path), str(path)]
+    for target, link in spec.symlinks:
+        argv += ["--symlink", target, str(link)]
     if spec.chdir is not None:
         argv += ["--chdir", str(_norm(spec.chdir))]
     # bwrap 0.4.0 has no --clearenv: clear the environment with env -i inside the sandbox.

@@ -8,7 +8,7 @@ get_graph_schema / get_file_outline / check_index_coverage -> evidence JSON.
 Usage:
     .venv/bin/python scripts/spikes/cbm_spike.py [--mode fast|moderate|full] [--tool-profile analysis]
         [--snapshot DIR] [--out DIR] [--no-copy]
-Environment isolation: HOME / XDG_* / CBM_CACHE_DIR / CBM_RUNTIME_DIR -> .toolchain/state/cbm
+Environment isolation: HOME / XDG_* / CBM_CACHE_DIR -> .toolchain/state/cbm, CBM_RUNTIME_DIR -> a short private temp dir
 """
 
 from __future__ import annotations

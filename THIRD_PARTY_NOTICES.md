@@ -1,9 +1,11 @@
 # Third-Party Notices
 
-SVWeave M0 uses the following third-party components. None of them is redistributed by this
-repository: they are downloaded and installed locally by `scripts/bootstrap_locked.py` from the
-URLs and SHA-256 values in `toolchain.lock.json`. License texts captured at the pinned versions are
-stored under `evidence/m0/licenses/`; their SHA-256 values are in `license_manifest.json`.
+SVWeave M0 uses the following third-party components. They are downloaded and installed locally
+by `scripts/bootstrap_locked.py` from the URLs and SHA-256 values in `toolchain.lock.json`. The
+offline package `vendor/` redistributes some of them unmodified (the PyPI wheels, the Serena source
+bundle and dependency cache, CPython, the uv tarball; see `vendor/README.md`). License texts captured
+at the pinned versions are stored under `evidence/m0/licenses/`; their SHA-256 values are in
+`license_manifest.json`.
 
 This file is an engineering inventory, not a legal review (plan §3.2). Legal review status:
 **NOT_DONE**. SVWeave's own license has not been chosen by the owner.
@@ -17,6 +19,10 @@ This file is an engineering inventory, not a legal review (plan §3.2). Legal re
 | Verible | v0.0-4296-g0f262651 | Apache-2.0 | `evidence/m0/licenses/verible-LICENSE` |
 | MCP Python SDK | mcp 2.3.0 | MIT | `evidence/m0/licenses/mcp-2.3.0-LICENSE` |
 | Accellera UVM (uvm-core) | 2020.3.1 | Apache-2.0 (with NOTICE) | `evidence/m0/licenses/uvm-core-2020.3.1-LICENSE.txt`, `...-NOTICE.txt` |
+| uv (installer only) | 0.12.23, commit 46b84fd0bfec, x86_64-unknown-linux-gnu | MIT OR Apache-2.0 | `evidence/m0/licenses/uv-0.12.23-LICENSE-MIT`, `...-LICENSE-APACHE` |
+| hatchling (Serena build backend, build time only) | 1.32.4 | MIT | `evidence/m0/licenses/hatchling-1.32.4-LICENSE.txt` |
+| editables, packaging, pathspec, pluggy, tomlkit, trove-classifiers (hatchling's build-time dependencies) | 0.6, 26.3, 1.1.1, 1.6.0, 0.15.1, 2026.9.21.13 | MIT; Apache-2.0 OR BSD-2-Clause; **MPL-2.0**; MIT; MIT; Apache-2.0 | `evidence/m0/licenses/<name>-<version>-LICENSE*` |
+| setuptools (builds the sdist-only proxy-tools 0.1.0 inside Serena's venv, build time only) | 84.0.0 | MIT (vendors autocommand 2.2.2, LGPLv3 per its metadata) | `evidence/m0/licenses/setuptools-84.0.0-LICENSE` |
 | bubblewrap | 0.4.0 (host OS package) | LGPL-2.0-or-later (from upstream; host package files not checked) | host system |
 
 ## Serena license version note

@@ -531,3 +531,22 @@ def test_f10_raw_session_is_not_publicly_reachable() -> None:
     for cls in (CbmAdapter, SerenaAdapter):
         assert not hasattr(cls, "session"), "public .session would bypass the tool allowlist"
         assert hasattr(cls, "pid") and hasattr(cls, "tool_infos") and hasattr(cls, "init_info")
+
+
+def test_f10_python_links_recreate_the_chain_to_the_interpreter(tmp_path: Path) -> None:
+    """A python-build-standalone runtime: venv/bin/python -> rt/bin/python3 -> python3.12."""
+    rt = tmp_path / "rt/python"
+    (rt / "bin").mkdir(parents=True)
+    (rt / "lib/python3.12").mkdir(parents=True)
+    (rt / "bin/python3.12").write_bytes(b"")
+    (rt / "bin/python3").symlink_to("python3.12")
+    (tmp_path / "venv/bin").mkdir(parents=True)
+    (tmp_path / "venv/bin/python").symlink_to(rt / "bin/python3")
+    assert scfg.python_links(tmp_path / "venv") == [("python3.12", rt / "bin/python3")]
+    assert rt / "bin/python3.12" in scfg.python_binds(tmp_path / "venv")
+    (tmp_path / "v2/bin").mkdir(parents=True)
+    (tmp_path / "v2/bin/python").symlink_to(rt / "bin/python3.12")  # direct: nothing to recreate
+    assert scfg.python_links(tmp_path / "v2") == []
+    spec = SerenaAdapter(toolchain(), tmp_path / "ss", _mk(tmp_path), SandboxRunner(capability=CAP))._spec({})
+    assert list(spec.symlinks) == scfg.python_links(toolchain().serena_venv)
+    validate_spec(spec)  # the links never fall inside a bound path

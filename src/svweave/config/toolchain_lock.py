@@ -130,6 +130,36 @@ class GatewayWheelhouse(_Strict):
     wheels: list[Wheel]
 
 
+class SerenaBuildWheelhouse(_Strict):
+    """Hash-pinned build backends of the Serena venv (``uv.lock`` does not lock build dependencies).
+    The installer builds Serena without build isolation from exactly these wheels."""
+
+    purpose: Text
+    wheelhouse_dir: Text
+    target: Text
+    resolved_with: Text
+    install: Text
+    wheels: list[Wheel]
+
+
+class UvPin(_Strict):
+    """The ``uv`` release the installer runs (verified tarball, then verified binary)."""
+
+    version: Text
+    tag: Text
+    commit: Commit
+    published_at: Text
+    source_url: Text
+    artifact_sha256: Sha256
+    upstream_checksums_url: Text
+    upstream_checksums_sha256: Sha256
+    install_dir: Text
+    archive_strip_components: int
+    binary: Text
+    binary_sha256: Sha256
+    role: Text
+
+
 class ToolchainLock(_Strict):
     schema_version: Literal["1.0"]
     qualification_state: Text
@@ -141,3 +171,6 @@ class ToolchainLock(_Strict):
     capability_report_sha256: Sha256 | None = None
     license_manifest_sha256: Sha256 | None = None
     gateway_wheelhouse: GatewayWheelhouse | None = None
+    #: required: the installer refuses to build Serena or run uv without these pins
+    serena_build_wheelhouse: SerenaBuildWheelhouse
+    uv: UvPin

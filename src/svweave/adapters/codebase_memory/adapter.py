@@ -32,6 +32,7 @@ from svweave.adapters.codebase_memory.models import (
     tree_fingerprint,
 )
 from svweave.adapters.mcp_client import (
+    SIZE_VIOLATIONS,
     InitInfo,
     McpLaunch,
     McpSession,
@@ -314,10 +315,19 @@ class CbmAdapter:
             raise self._failure
         if not self._session.alive:
             violation = getattr(self._session, "violation", None)
+            if (violation or {}).get("kind") in SIZE_VIOLATIONS and hasattr(self._session, "violation_error"):
+                # the transport already killed the group; reap now (tokens, detached daemons) and
+                # report the real reason, not a generic protocol error
+                err = self._session.violation_error()
+                with contextlib.suppress(Exception):
+                    self._session.stop()
+                err.details["backend"] = BACKEND
+                self._failure = err
+                raise self._failure
             self._failure = SvwError(
                 ErrorCode.BACKEND_UNAVAILABLE,
                 "codebase-memory-mcp "
-                + ("wrote non-protocol data to stdout" if violation else "process is gone"),
+                + (f"violated the stdio protocol ({violation.get('kind')})" if violation else "process is gone"),
                 {
                     "backend": BACKEND,
                     "reason": "protocol_error" if violation else "process_exited",

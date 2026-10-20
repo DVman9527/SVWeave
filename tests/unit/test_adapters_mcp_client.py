@@ -228,3 +228,278 @@ def test_f4_degraded_env_i_launch_is_detected_alive_and_callable(tmp_path: Path)
         assert s.pid is not None and s.alive
         assert s.call_tool("echo", {}).text == "pong"
     assert not s.alive
+
+
+# ---------------------------------------------------------------------- bounded backend output
+# security.md 6: a backend must not be able to grow the gateway's memory with one huge stdout line
+# (no newline) or one huge tool result. Small limits keep the tests fast; the floods are many times
+# larger than the limit, and the reader's own instrumentation proves what was actually buffered.
+
+MIB = 1024 * 1024
+READ_CHUNK = 64 * 1024  # bounded_stdio.READ_CHUNK_BYTES
+
+
+def sized(tmp_path: Path, mode: str, size: int, **limits: int) -> McpLaunch:
+    lc = launch(tmp_path, mode, call_timeout=8.0)
+    lc.argv = [*lc.argv, str(size)]
+    for k, v in limits.items():
+        setattr(lc, k, v)
+    return lc
+
+
+def _status_kib(key: str) -> int:
+    for line in Path("/proc/self/status").read_text().splitlines():
+        if line.startswith(key + ":"):
+            return int(line.split()[1])
+    raise AssertionError(f"no {key}")
+
+
+def _reset_peak_rss() -> bool:
+    """Reset VmHWM (the PEAK resident set) so a later reading measures this test's peak; RSS after
+    the fact cannot fail (the buffer is freed by then)."""
+    try:
+        Path("/proc/self/clear_refs").write_text("5")
+    except OSError:
+        return False
+    return True
+
+
+def _gone(s: McpSession, pid: int | None) -> bool:
+    from svweave.adapters.mcp_client import _token_pids
+
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        pid_gone = pid is None or not Path(f"/proc/{pid}").exists()
+        if pid_gone and not _token_pids(s._client.token):
+            return True
+        time.sleep(0.05)
+    return False
+
+
+def test_sec_oversized_line_without_newline_is_bounded_protocol_error(tmp_path: Path) -> None:
+    limit, flood = 1 * MIB, 64 * MIB
+    s = McpSession(sized(tmp_path, "huge_line", flood, max_message_bytes=limit))
+    s.start()
+    pid = s.pid
+    assert pid is not None
+    measured = _reset_peak_rss()
+    hwm0 = _status_kib("VmHWM")
+    try:
+        t0 = time.monotonic()
+        with pytest.raises(SvwError) as ei:
+            s.call_tool("echo", {})
+        elapsed = time.monotonic() - t0
+        e = ei.value
+        assert e.code is ErrorCode.BACKEND_UNAVAILABLE
+        assert e.details["reason"] == "message_too_large"
+        pe = e.details["protocol_error"]
+        assert pe["kind"] == "message_too_large" and pe["limit_bytes"] == limit
+        assert limit < pe["received_bytes_at_least"] <= limit + READ_CHUNK
+        assert elapsed < 6.0, f"call took {elapsed:.1f}s (must fail on the limit, not the timeout)"
+        st = s.transport_stats
+        assert st.overflow is not None
+        # the client never held more than the limit plus one read chunk of the 64 MiB flood
+        assert st.peak_buffer_bytes <= limit + READ_CHUNK
+        if measured:  # the PEAK, not the RSS after the buffer was freed (that could never fail)
+            assert (_status_kib("VmHWM") - hwm0) * 1024 < 24 * MIB
+        assert not s.alive
+        assert _gone(s, pid), "backend still running after the oversized message"
+    finally:
+        s.stop()
+
+
+def test_sec_oversized_line_during_handshake_fails_start_and_kills_backend(tmp_path: Path) -> None:
+    limit = 1 * MIB
+    s = McpSession(sized(tmp_path, "huge_banner", 32 * MIB, max_message_bytes=limit))
+    t0 = time.monotonic()
+    with pytest.raises(SvwError) as ei:
+        s.start()
+    assert time.monotonic() - t0 < 10.0
+    assert ei.value.code is ErrorCode.BACKEND_UNAVAILABLE
+    assert ei.value.details["reason"] == "message_too_large"
+    assert s.transport_stats.peak_buffer_bytes <= limit + READ_CHUNK
+    assert _gone(s, None)
+    s.stop()
+
+
+def test_sec_tool_result_text_over_limit_is_output_limit(tmp_path: Path) -> None:
+    limit_chars = 256 * 1024
+    s = McpSession(sized(tmp_path, "big_result", 4 * MIB, max_result_chars=limit_chars))
+    s.start()
+    pid = s.pid
+    try:
+        t0 = time.monotonic()
+        with pytest.raises(SvwError) as ei:
+            s.call_tool("echo", {})
+        assert time.monotonic() - t0 < 6.0
+        e = ei.value
+        assert e.code is ErrorCode.OUTPUT_LIMIT
+        assert e.details["reason"] == "result_too_large"
+        pe = e.details["protocol_error"]
+        assert pe == {"kind": "result_too_large", "tool": "echo", "limit_chars": limit_chars,
+                      "size_chars": 4 * MIB}
+        assert not s.alive
+        assert _gone(s, pid), "backend still running after the oversized result"
+        with pytest.raises(SvwError) as again:
+            s.call_tool("echo", {})
+        assert again.value.code is ErrorCode.BACKEND_UNAVAILABLE
+    finally:
+        s.stop()
+
+
+def test_sec_messages_and_results_just_under_the_limits_pass(tmp_path: Path) -> None:
+    limit = 1 * MIB
+    # a response line of exactly the limit (newline excluded) is accepted, and the session lives on
+    with McpSession(sized(tmp_path / "line", "sized_line", limit, max_message_bytes=limit)) as s:
+        r = s.call_tool("echo", {})
+        assert not r.is_error and set(r.text) == {"y"} and len(r.text) > limit - 200
+        assert s.transport_stats.max_line_bytes == limit and s.transport_stats.overflow is None
+        assert s.alive
+        r2 = s.call_tool("echo", {})
+        assert r2.text == r.text
+    # a result text of exactly the result limit is accepted
+    with McpSession(sized(tmp_path / "res", "big_result", limit, max_result_chars=limit)) as s:
+        r = s.call_tool("echo", {})
+        assert len(r.text) == limit and s.violation is None and s.alive
+
+
+def test_sec_default_limits_sit_above_the_pinned_backends_own_caps() -> None:
+    """The defaults must never cut a legitimate response: cbm 0.11.0 refuses on its own side any
+    response above 10,485,744 bytes; Serena answers are capped at 150,000 characters."""
+    from svweave.adapters.bounded_stdio import MAX_MESSAGE_BYTES
+    from svweave.adapters.mcp_client import MAX_RESULT_TEXT_CHARS
+
+    lc = McpLaunch(backend="x", argv=["x"], env={}, stderr_log=Path("/nonexistent"))
+    assert lc.max_message_bytes == MAX_MESSAGE_BYTES == 16 * MIB
+    assert lc.max_result_chars == MAX_RESULT_TEXT_CHARS == 16 * MIB
+    assert MAX_MESSAGE_BYTES > 10_485_744 * 1.5
+    assert MAX_RESULT_TEXT_CHARS > 10_485_744
+
+
+# ----------------------------------------------------------------- review follow-ups (2026-10-20)
+def test_sec_overflow_kills_the_backend_even_if_nobody_reads_the_stream(tmp_path: Path) -> None:
+    """The transport must not wait for a consumer before stopping a flooding backend."""
+    import anyio
+    from mcp.client.stdio import StdioServerParameters
+
+    from svweave.adapters.bounded_stdio import TransportStats, bounded_stdio_client
+
+    fake = str(Path(__file__).with_name("fake_mcp_server.py"))
+    marker = str(32 * MIB + 7)  # a unique argv to find the child in /proc
+
+    def alive() -> bool:
+        for d in Path("/proc").iterdir():
+            if d.name.isdigit():
+                try:
+                    if marker.encode() in (d / "cmdline").read_bytes():
+                        return True
+                except OSError:
+                    pass
+        return False
+
+    async def go() -> tuple[bool, bool]:
+        st = TransportStats()
+        params = StdioServerParameters(command=sys.executable, args=[fake, "huge_banner", "2025-11-25", marker])
+        async with bounded_stdio_client(params, max_message_bytes=1 * MIB, stats=st) as (_read, _write):
+            seen_alive = False
+            for _ in range(100):  # never receive from _read: nobody consumes the overflow
+                await anyio.sleep(0.05)
+                seen_alive = seen_alive or alive()
+                if st.overflow is not None and not alive():
+                    return seen_alive, True
+            return seen_alive, False
+
+    _seen, gone = anyio.run(go)
+    assert gone, "a flooding backend stayed alive while the overflow waited for a reader"
+    assert not alive()
+
+
+def test_sec_crlf_terminator_is_not_counted_and_one_byte_over_is_refused(tmp_path: Path) -> None:
+    limit = 256 * 1024
+    with McpSession(sized(tmp_path / "ok", "crlf_line", limit, max_message_bytes=limit)) as s:
+        r = s.call_tool("echo", {})  # payload exactly the limit, then \r\n: accepted
+        assert not r.is_error and s.alive and s.transport_stats.overflow is None
+    s = McpSession(sized(tmp_path / "over", "crlf_line", limit + 1, max_message_bytes=limit))
+    s.start()
+    try:
+        with pytest.raises(SvwError) as ei:
+            s.call_tool("echo", {})
+        assert ei.value.details["reason"] == "message_too_large"
+    finally:
+        s.stop()
+
+
+def test_sec_a_complete_line_one_byte_over_the_limit_is_refused(tmp_path: Path) -> None:
+    """The complete-line branch (newline present), not only the no-newline flood."""
+    limit = 256 * 1024
+    s = McpSession(sized(tmp_path, "sized_line", limit + 1, max_message_bytes=limit))
+    s.start()
+    pid = s.pid
+    try:
+        with pytest.raises(SvwError) as ei:
+            s.call_tool("echo", {})
+        assert ei.value.details["reason"] == "message_too_large"
+        assert ei.value.details["protocol_error"]["received_bytes_at_least"] == limit + 1
+        assert _gone(s, pid)
+    finally:
+        s.stop()
+
+
+def test_sec_only_the_oversized_call_gets_output_limit_others_see_backend_terminated(
+    tmp_path: Path,
+) -> None:
+    import threading
+
+    s = McpSession(sized(tmp_path, "mixed", 300_000, max_result_chars=100_000))
+    s.start()
+    out: dict[str, SvwError] = {}
+
+    def call(tag: str) -> None:
+        try:
+            s.call_tool("echo", {"x": tag})
+        except SvwError as e:
+            out[tag] = e
+
+    try:
+        slow = threading.Thread(target=call, args=("slow",))
+        slow.start()
+        time.sleep(0.5)  # the slow call is in flight
+        call("big")
+        slow.join(30)
+        big, other = out["big"], out["slow"]
+        assert big.code is ErrorCode.OUTPUT_LIMIT and big.details["reason"] == "result_too_large"
+        assert big.details["protocol_error"]["size_chars"] == 300_000
+        # the bystander was not "too large": its backend was terminated under it
+        assert other.code is ErrorCode.BACKEND_UNAVAILABLE, other.details
+        assert other.details["reason"] == "backend_terminated"
+    finally:
+        s.stop()
+
+
+def test_sec_a_spontaneous_flood_is_reported_and_reaped_by_the_adapter(tmp_path: Path) -> None:
+    from types import SimpleNamespace
+
+    from svweave.adapters.codebase_memory.adapter import CbmAdapter
+    from svweave.adapters.serena.adapter import SerenaAdapter
+
+    s = McpSession(sized(tmp_path, "spont_flood", 8 * MIB, max_message_bytes=1 * MIB))
+    s.start()
+    try:
+        for _ in range(100):  # nothing is in flight: the backend floods on its own
+            if not s.alive:
+                break
+            time.sleep(0.05)
+        assert not s.alive and (s.violation or {}).get("kind") == "message_too_large"
+        for cls in (CbmAdapter, SerenaAdapter):
+            stopped: list[bool] = []
+            fake_session = SimpleNamespace(alive=False, violation=s.violation,
+                                           violation_error=s.violation_error,
+                                           stop=lambda stopped=stopped: stopped.append(True))
+            fake = SimpleNamespace(_session=fake_session, _failure=None)
+            with pytest.raises(SvwError) as ei:
+                cls._require_running(fake)  # type: ignore[arg-type]
+            # was reason "protocol_error" and no stop(): detached daemons outlived the failure
+            assert ei.value.details["reason"] == "message_too_large", cls.__name__
+            assert stopped == [True], cls.__name__
+    finally:
+        s.stop()

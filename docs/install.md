@@ -6,7 +6,10 @@ preview. Everything is pinned in `toolchain.lock.json`; nothing is installed fro
 ## 1. Requirements
 
 * Linux x86_64 (the only platform in the lock: `linux-x86_64`). Other platforms are not qualified.
-* Python 3.12 (`python_minor: 3.12` in the lock) and [`uv`](https://docs.astral.sh/uv/).
+* Python 3.12 for the venvs (`python_minor: 3.12` in the lock; `python3.12` on `PATH` or `--python`)
+  and Python 3.11 or newer to run the installer. [`uv`](https://docs.astral.sh/uv/) does **not** have to
+  be installed: the installer downloads the pinned uv release (lock section `uv`), verifies it and
+  runs only that one.
 * `bubblewrap` (`bwrap`), with unprivileged user namespaces enabled. Without it the backends do not
   run (or run only in an explicitly flagged degraded mode, see `docs/security.md`). Check:
   `bwrap --version && bwrap --ro-bind / / true`.
@@ -18,20 +21,40 @@ preview. Everything is pinned in `toolchain.lock.json`; nothing is installed fro
 ## 2. Install (online, once)
 
 ```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -e '.[dev]'     # this package and its pinned dependencies
-.venv/bin/python scripts/bootstrap_locked.py             # pinned backends into .toolchain/
+python3.12 scripts/bootstrap_locked.py --create-venv         # pinned uv, .venv, pinned backends, Serena
 .venv/bin/python scripts/bootstrap_locked.py --verify-only   # no network; compare installed state with the lock
+# development tools (optional): hash-pinned wheels committed in vendor/, no index access
+.toolchain/uv/uv pip install --python .venv/bin/python --offline --no-index \
+    --find-links vendor/downloads/wheelhouse-dev --require-hashes -r vendor/downloads/dev-requirements.txt
 ```
 
-`bootstrap_locked.py` finds `uv` as `--uv PATH`, else `.venv/bin/uv`, else `uv` on `PATH`, and stops
-before downloading anything if there is none. (`uv venv` does not put `uv` inside the venv.)
+There is no `uv venv` step before the installer: `--create-venv` makes it create the gateway venv
+(`.venv`, on `python3.12` from `PATH` or `--python PATH`) with the pinned uv, install the 31
+hash-locked gateway wheels into it and link this source tree into it (a `.pth` file plus
+`.venv/bin/svweave`, like an editable install).
 
-`bootstrap_locked.py` downloads each archive or wheel named in `toolchain.lock.json`, verifies its
-SHA-256 **before** use, extracts with path-traversal protection, verifies the extracted binaries
-again, checks out the pinned Serena commit and builds its venv from the locked `uv.lock`
-(`uv sync --frozen`). Any mismatch aborts with a non-zero exit code; there is no silent fallback.
-It is the **only** code that uses the network. Use `--skip-serena` to skip the Serena venv and
+What the installer runs, in this order:
+
+1. **uv.** The pinned uv release tarball (lock section `uv`: 0.12.23, `x86_64-unknown-linux-gnu`,
+   sha256 equal to the release's published checksum) is downloaded first, verified against the lock,
+   extracted into `.toolchain/uv/` and the extracted binary is verified again. Every later uv command
+   is that binary, with `UV_PYTHON_DOWNLOADS=never`. A wrong hash stops the run before anything else is
+   downloaded. `--uv PATH` replaces it with another uv; that binary is only checked to be executable,
+   is **not** verified, and the JSON report says so (`components.uv.verified: false` and a
+   `warnings` entry). `--verify-only` checks the pinned uv like the other binaries.
+2. Each archive or wheel named in `toolchain.lock.json`: SHA-256 checked **before** use, extraction with
+   path-traversal protection, extracted binaries checked again.
+3. **Serena.** The pinned commit is checked out (`uv.lock` and `LICENSE` hashes checked) and its venv is
+   built from the locked `uv.lock`. `uv.lock` does not lock *build* dependencies, so the build backends
+   are pinned separately (lock section `serena_build_wheelhouse`: hatchling with its dependencies for
+   serena-agent itself, setuptools for the sdist-only `proxy-tools` 0.1.0). The installer verifies
+   those 8 wheels, installs them into the new Serena venv from the local directory
+   (`--no-index --require-hashes`) and then runs `uv sync --frozen --no-dev --no-build-isolation`:
+   the builds use exactly those wheels, and a missing build dependency is a build error, never a
+   download. The exact sync removes the build-only packages again.
+
+Any mismatch aborts with a non-zero exit code; there is no silent fallback. The installer is the
+**only** code that uses the network. Use `--skip-serena` to skip the Serena venv and
 `--toolchain-dir DIR --no-venv` to reproduce the toolchain elsewhere.
 
 Pinned components (details and hashes: `toolchain.lock.json`):
@@ -62,22 +85,26 @@ The installer reuses any artifact already present with the right hash, so a mach
 internet access can be provisioned from a prepared `.toolchain/` directory:
 
 1. On a connected machine fill the cache without installing anything:
-   `python3.12 scripts/bootstrap_locked.py --fetch-only` (needs `uv` and `git`; no venv is needed).
+   `python3.12 scripts/bootstrap_locked.py --fetch-only` (needs `git`; no venv and no uv are needed:
+   the pinned uv is downloaded, verified and unpacked into `.toolchain/uv/` because it warms the cache).
    This stores, inside the repository directory,
-   * every archive named in the lock plus the hash-pinned gateway wheelhouse (`gateway_wheelhouse`
-     in the lock, 31 wheels including pyslang and mcp) under `.toolchain/downloads/`
+   * every archive named in the lock (the pinned uv tarball included), the hash-pinned gateway
+     wheelhouse (`gateway_wheelhouse` in the lock, 31 wheels including pyslang and mcp) and the 8
+     Serena build-backend wheels (`serena-build-wheelhouse/`) under `.toolchain/downloads/`
      (change with `--artifact-dir`),
    * the pinned Serena checkout under `.toolchain/serena-src`, and
    * the uv cache holding Serena's locked dependencies under `.toolchain/state/uv-cache`
-     (change with `--uv-cache-dir`).
+     (change with `--uv-cache-dir`), filled by the pinned uv with build isolation off (no build
+     backend is taken from an index).
 
-   About 180 MB in total. Nothing is installed.
+   About 200 MB in total. Nothing is installed besides the unpacked uv.
 2. Copy the whole repository directory, `.toolchain/` included, to the offline machine (same
    architecture; `.venv` is not copied).
 3. There run `python3.12 scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`.
    `--offline` never touches the network: every artifact must already be cached and is verified
-   against the lock sha256 before use, Serena is taken from the existing checkout, and the gateway
-   venv installs only from the wheelhouse. It then links the svweave source tree into that venv
+   against the lock sha256 before use (the pinned uv first), Serena is taken from the existing
+   checkout and built only with the pinned build wheels, and the gateway venv installs only from the
+   wheelhouse. It then links the svweave source tree into that venv
    (a `.pth` file and a `bin/svweave` launcher, like an editable install) because the wheelhouse has
    no build backend: `uv pip install -e .` cannot run offline. Finish with `--verify-only`.
 
@@ -102,11 +129,23 @@ Those were run by hand end to end (fetch-only, then `--offline` under `bwrap --u
 flags, then `svweave doctor --probe` and `svweave build`); the linking is unit-tested in
 `tests/unit/test_bootstrap_locked.py`.
 
-The PyPI wheels are also committed in `vendor/` (see `vendor/README.md`) for hosts that reach GitHub but not PyPI;
-GitHub-hosted components are not stored there.
+DEP-01 runs the pinned uv from the artifact dir (no `--uv`) and builds Serena from the pinned build
+wheels; `evidence/dep01/cleanroom.json` was refreshed with this lock on 2026-10-20 (in a scratch copy
+whose `.toolchain/` came from the `vendor/` procedure). The `vendor/` procedure itself was also run end
+to end under `bwrap --unshare-net` (see `CHANGELOG.md`).
+
+The PyPI wheels are also committed in `vendor/` (see `vendor/README.md`) for hosts that reach GitHub but not PyPI,
+together with the pinned uv tarball and a standalone CPython; the other GitHub-hosted components are
+not stored there.
 
 Never let the gateway venv or the Serena venv resolve dependencies from the network at run time;
-`uv sync --frozen` and the lock hashes exist to prevent that.
+`uv sync --frozen`, `--no-build-isolation` with the pinned build wheels and the lock hashes exist to
+prevent that.
+
+A uv cache that an older installer (before the build backends were pinned) filled may hold a
+`proxy-tools` or `serena-agent` wheel that was built with an unpinned backend, and uv reuses such
+built wheels. Delete `.toolchain/state/uv-cache` (or the `--uv-cache-dir`) once after upgrading;
+`vendor/uv-cache.tar.gz` was regenerated with the pinned backends.
 
 ## 4. The glibc note for codebase-memory-mcp
 
