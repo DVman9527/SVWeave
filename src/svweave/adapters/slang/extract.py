@@ -1006,11 +1006,23 @@ class Extractor:
 
     # ------------------------------------------------------------------ instances
     def _walk_instance(
-        self, inst: Any, prefix: list[dict[str, Any]], parent_idx: int | None, gen_ctx: list[str]
+        self,
+        inst: Any,
+        prefix: list[dict[str, Any]],
+        parent_idx: int | None,
+        gen_ctx: list[str],
+        array_name: str = "",
     ) -> None:
+        # An element of an instance array has an EMPTY name in slang; the array symbol carries it.
+        # Without it every array element of one scope shares ("", [i]) and distinct instances
+        # collide on instance_id (SSE-315: 242 collisions). hierarchicalPath already names it.
         comps = [
             *prefix,
-            {"kind": "instance", "name": inst.name, "index": list(inst.arrayPath) or None},
+            {
+                "kind": "instance",
+                "name": inst.name or array_name,
+                "index": list(inst.arrayPath) or None,
+            },
         ]
         idx = len(self.insts)
         hier = inst.hierarchicalPath
@@ -1105,7 +1117,7 @@ class Extractor:
             if k == SK.Instance:
                 self._guard("instance", self._walk_instance, m, comps, inst_idx, gen_ctx)
             elif k == SK.InstanceArray:
-                self._walk_instance_array(m, comps, inst_idx, gen_ctx)
+                self._walk_instance_array(m, comps, inst_idx, gen_ctx, m.name)
             elif k == SK.GenerateBlockArray:
                 for e in m.entries:
                     if e.isUninstantiated:
@@ -1133,13 +1145,19 @@ class Extractor:
                 self._guard("assert_scan", self._scan_assertions, m, inst_idx)
 
     def _walk_instance_array(
-        self, arr: Any, comps: list[dict[str, Any]], inst_idx: int, gen_ctx: list[str]
+        self,
+        arr: Any,
+        comps: list[dict[str, Any]],
+        inst_idx: int,
+        gen_ctx: list[str],
+        name: str = "",
     ) -> None:
+        name = arr.name or name  # nested arrays: the outermost array is the one that is named
         for e in arr.elements:
             if e.kind == SK.Instance:
-                self._guard("instance", self._walk_instance, e, comps, inst_idx, gen_ctx)
+                self._guard("instance", self._walk_instance, e, comps, inst_idx, gen_ctx, name)
             elif e.kind == SK.InstanceArray:
-                self._walk_instance_array(e, comps, inst_idx, gen_ctx)
+                self._walk_instance_array(e, comps, inst_idx, gen_ctx, name)
 
     def _inactive_generate(self, blk: Any, comps: list[dict[str, Any]]) -> None:
         idx = self.decl_for(blk)
