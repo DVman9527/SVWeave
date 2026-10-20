@@ -175,9 +175,23 @@ def test_a_symlink_inside_a_bound_path_is_refused(tmp_path: Path) -> None:
         with pytest.raises(SvwError) as ei:
             validate_spec(SandboxSpec(symlinks=(("x", tmp_path / "bin/python3"),), **kw))  # type: ignore[arg-type]
         assert ei.value.code is ErrorCode.POLICY_DENIED
-    for bad in (Path("rel/link"), Path("/usr/bin/python3"), Path("/etc/x")):
+    for bad in (Path("rel/link"), Path("/usr/bin/python3"), Path("/bin/python3"), Path("/proc/x"),
+                Path("/opt/../usr/x")):
         with pytest.raises(SvwError):
             validate_spec(SandboxSpec(symlinks=(("x", bad),)))
+
+
+def test_a_symlink_into_the_etc_view_is_refused_only_where_etc_is_bound() -> None:
+    """The minimal /etc is a directory on the sandbox's private root holding single-entry binds: a
+    new link beside them stays in the sandbox, a link inside a bound entry (or a full /etc) does not."""
+    validate_spec(SandboxSpec(symlinks=(("x", Path("/etc/svweave-x")),)))
+    with pytest.raises(SvwError) as ei:
+        validate_spec(SandboxSpec(etc="full", symlinks=(("x", Path("/etc/svweave-x")),)))
+    assert ei.value.code is ErrorCode.POLICY_DENIED
+    if os.path.isdir("/etc/alternatives"):  # bound by the minimal view on this host
+        with pytest.raises(SvwError) as ei:
+            validate_spec(SandboxSpec(symlinks=(("x", Path("/etc/alternatives/python3")),)))
+        assert ei.value.code is ErrorCode.POLICY_DENIED
 
 
 @pytest.mark.skipif(not probe_host().available, reason="bwrap unusable on this host")
@@ -206,4 +220,33 @@ def test_a_shebang_through_a_recreated_link_runs_in_the_real_sandbox(tmp_path: P
 
     assert "No such file" in run(()).stderr  # the bug: only the realpath was bound
     r = run(links)
+    assert r.returncode == 0 and r.stdout.strip() == "shebang-ok", r.stderr
+
+
+@pytest.mark.skipif(not probe_host().available, reason="bwrap unusable on this host")
+def test_a_shebang_through_a_python_m_venv_chain_runs_in_the_real_sandbox(tmp_path: Path) -> None:
+    """``python -m venv`` on the system interpreter: venv/bin/python -> python3 -> /usr/bin/python3
+    (on RHEL on through /etc/alternatives/python3). Every link is already visible in the sandbox (the
+    venv bind, /usr, the /etc view), so none is recreated and the spec is valid."""
+    import subprocess
+    from dataclasses import replace
+
+    from svweave.adapters.serena import config as scfg
+
+    host = Path("/usr/bin/python3")
+    if not host.exists():
+        pytest.skip("no /usr/bin/python3 on this host")
+    venv = tmp_path / "venv"
+    (venv / "bin").mkdir(parents=True)
+    (venv / "bin/python3").symlink_to(host)
+    (venv / "bin/python").symlink_to("python3")
+    tool = venv / "bin/tool"
+    tool.write_text(f"#!{venv / 'bin/python'}\nprint('shebang-ok')\n")
+    tool.chmod(0o755)
+    assert scfg.python_links(venv)[0] == (str(host), venv / "bin/python3")  # the raw chain has it
+    spec = SandboxSpec(ro_paths=(venv, *scfg.python_binds(venv)))
+    links = tuple(scfg.python_links(venv, spec))
+    assert links == ()
+    r = subprocess.run(build_bwrap_argv(replace(spec, symlinks=links), [str(tool)]),
+                       capture_output=True, text=True, timeout=30)
     assert r.returncode == 0 and r.stdout.strip() == "shebang-ok", r.stderr

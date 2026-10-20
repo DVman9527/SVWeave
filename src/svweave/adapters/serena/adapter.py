@@ -19,7 +19,7 @@ import os
 import subprocess
 import threading
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -213,7 +213,7 @@ class SerenaAdapter:
         if src.is_dir() and src != tc.root:
             ro.append(Path(os.path.realpath(src)))
         ro.extend(cfg.python_binds(tc.serena_venv))
-        return SandboxSpec(
+        spec = SandboxSpec(
             ro_paths=tuple(ro),
             rw_paths=(self.candidate, self.paths.work),  # host-only logs/ctx are NOT writable
             chdir=self.candidate,
@@ -221,8 +221,9 @@ class SerenaAdapter:
             protected_paths=self.protected_paths,
             rw_exempt=(self.paths.work, *self._exempt_candidate()),
             env=env,
-            symlinks=tuple(cfg.python_links(tc.serena_venv)),
         )
+        # only the links these very mounts do not already show (no second copy of the bind rules)
+        return replace(spec, symlinks=tuple(cfg.python_links(tc.serena_venv, spec)))
 
     def start(self) -> CapabilityComparison:
         with self._lock:

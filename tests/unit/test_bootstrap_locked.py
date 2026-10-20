@@ -95,7 +95,7 @@ def test_link_self_makes_svweave_importable_in_a_bare_venv(tmp_path: Path) -> No
 
 
 def test_link_self_is_a_noop_without_a_source_tree(tmp_path: Path) -> None:
-    """The DEP-01 clean room holds scripts/ only: nothing to link, and that is not an error."""
+    """A copy of scripts/ without the source tree: nothing to link, and that is not an error."""
     bs = load()
     bs.REPO = tmp_path
     report: dict = {"components": {}, "errors": []}

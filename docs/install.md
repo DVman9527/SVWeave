@@ -123,11 +123,12 @@ namespace) and then probes all three backends from the fresh install. Evidence:
 `evidence/dep01/cleanroom.json`. That is a network-isolated clean-room run on the build host, not a
 run on a separate physical air-gapped machine.
 
-What DEP-01 does not cover: its clean room holds `scripts/`, `fixtures/` and the lock only, so it does
-not exercise the `--fetch-only` Serena cache or the offline linking of the svweave package itself.
-Those were run by hand end to end (fetch-only, then `--offline` under `bwrap --unshare-net` with no extra
-flags, then `svweave doctor --probe` and `svweave build`); the linking is unit-tested in
-`tests/unit/test_bootstrap_locked.py`.
+What DEP-01 does not cover: its clean room holds `scripts/`, `fixtures/`, `src/` and the lock only,
+so it does not exercise the `--fetch-only` Serena cache or the `svweave` CLI itself (it does exercise
+the offline linking of `src/` into the fresh venv, which the probes need for the bounded MCP stdio
+transport). Those were run by hand end to end (fetch-only, then `--offline` under
+`bwrap --unshare-net` with no extra flags, then `svweave doctor --probe` and `svweave build`); the
+linking is also unit-tested in `tests/unit/test_bootstrap_locked.py`.
 
 DEP-01 runs the pinned uv from the artifact dir (no `--uv`) and builds Serena from the pinned build
 wheels; `evidence/dep01/cleanroom.json` was refreshed with this lock on 2026-10-20 (in a scratch copy

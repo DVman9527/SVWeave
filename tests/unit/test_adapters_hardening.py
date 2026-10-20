@@ -22,6 +22,7 @@ from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.states import BackendAvailability, Completeness
 from svweave.orchestration import doctor_checks
 from svweave.orchestration.registry import BackendRegistry
+from svweave.orchestration.toolchain import Toolchain
 from svweave.security import safeio
 from svweave.security.redaction import Redactor
 from svweave.security.sandbox import HostCapability, SandboxRunner, SandboxSpec, validate_spec
@@ -550,3 +551,39 @@ def test_f10_python_links_recreate_the_chain_to_the_interpreter(tmp_path: Path) 
     spec = SerenaAdapter(toolchain(), tmp_path / "ss", _mk(tmp_path), SandboxRunner(capability=CAP))._spec({})
     assert list(spec.symlinks) == scfg.python_links(toolchain().serena_venv)
     validate_spec(spec)  # the links never fall inside a bound path
+
+
+def test_f10_python_m_venv_links_already_mounted_are_not_recreated(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``python -m venv``: venv/bin/python -> python3 -> /usr/bin/python3. The in-venv link is inside
+    the venv bind and the system one under /usr: both are visible in the sandbox, recreating them would
+    land on the host and the spec was refused (POLICY_DENIED: Serena could not start)."""
+    venv = tmp_path / "venv"
+    (venv / "bin").mkdir(parents=True)
+    (venv / "bin/python3").symlink_to("/usr/bin/python3")
+    (venv / "bin/python").symlink_to("python3")
+    assert scfg.python_links(venv)[0] == ("/usr/bin/python3", venv / "bin/python3")
+    monkeypatch.setattr(Toolchain, "serena_venv", property(lambda self: venv))
+    spec = SerenaAdapter(toolchain(), tmp_path / "ss", _mk(tmp_path), SandboxRunner(capability=CAP))._spec({})
+    assert spec.symlinks == ()
+    validate_spec(spec)
+
+
+def test_f10_an_alternatives_chain_is_left_to_the_etc_view(tmp_path: Path) -> None:
+    """RHEL: /usr/bin/python3 -> /etc/alternatives/python3 -> /usr/bin/python3.6. The minimal /etc
+    binds /etc/alternatives, so that hop is visible too; a runtime link outside every mount is kept."""
+    chain = os.readlink("/usr/bin/python3") if os.path.islink("/usr/bin/python3") else ""
+    if not chain.startswith("/etc/alternatives/") or not os.path.isdir("/etc/alternatives"):
+        pytest.skip("/usr/bin/python3 is not managed by /etc/alternatives on this host")
+    rt = tmp_path / "rt/bin"
+    rt.mkdir(parents=True)
+    (rt / "python3").symlink_to("/usr/bin/python3")
+    venv = tmp_path / "venv"
+    (venv / "bin").mkdir(parents=True)
+    (venv / "bin/python").symlink_to(rt / "python3")
+    raw = scfg.python_links(venv)
+    assert (chain, Path("/usr/bin/python3")) in raw and any(str(p).startswith("/etc/alternatives/") for _t, p in raw)
+    spec = SandboxSpec(ro_paths=(venv,))
+    assert scfg.python_links(venv, spec) == [("/usr/bin/python3", rt / "python3")]
+    validate_spec(SandboxSpec(ro_paths=(venv,), symlinks=tuple(scfg.python_links(venv, spec))))

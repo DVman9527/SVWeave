@@ -119,6 +119,19 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
   daemon endpoint could not be created") in a deep checkout (e.g. this one), because the
   daemon socket below `.toolchain/state/cbm*/runtime` exceeded the ~108-byte `sockaddr_un` limit. The
   probe now uses a short private temp dir, as the gateway already did (`SANDBOX_RUNTIME_DIR`).
+* The recreated-link fix above refused a `python -m venv` venv (`bin/python -> python3 ->
+  /usr/bin/python3`, on RHEL on through `/etc/alternatives/python3`) with `POLICY_DENIED`, so Serena
+  could not start on it: the in-venv and system links were emitted although the sandbox already shows
+  them. `python_links(venv, spec)` now drops every link the spec's mounts already provide
+  (`sandbox.mount_providing`: the spec's binds, `/usr` and its `/bin`/`/lib*` aliases, `/proc`,
+  `/dev`, the bound `/etc` entries), and `validate_spec` refuses a link by the same rule instead of a
+  fixed `/usr`/`/etc` prefix list: a new link beside the minimal `/etc` binds lives on the sandbox's
+  private root and is allowed, one under `/bin` or `/proc` is now refused.
+* DEP-01 failed: the probes' MCP sessions now go through `svweave.adapters.bounded_stdio`, but the
+  clean room held only `scripts/`, `fixtures/` and the lock, so `probe_backends.py` there hit
+  `ModuleNotFoundError: svweave` and cbm/Serena were `UNAVAILABLE`. The clean room now also receives
+  `src/`, which the offline bootstrap links into the fresh venv (asserted: `linked-src`), so DEP-01
+  also covers that offline linking step.
 
 ### Fixed (continued)
 

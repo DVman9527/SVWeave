@@ -431,7 +431,7 @@ def link_self(venv_python: str, report: dict) -> None:
     if _dist_version(venv_python, "svweave"):
         report["components"]["svweave"] = {"installed": "present"}
         return
-    if not (REPO / "src" / "svweave").is_dir():  # e.g. the DEP-01 clean room holds scripts/ only
+    if not (REPO / "src" / "svweave").is_dir():  # e.g. a copy of scripts/ without the source tree
         report["components"]["svweave"] = {"installed": None, "note": "no source tree next to scripts/"}
         return
     purelib = subprocess.run([venv_python, "-I", "-c", "import sysconfig;print(sysconfig.get_paths()['purelib'])"],

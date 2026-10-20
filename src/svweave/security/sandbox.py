@@ -140,8 +140,8 @@ class SandboxSpec:
     tmp_dirs: tuple[str, ...] = ()
     #: Symlinks recreated inside the sandbox as ``(target, link path)`` after the binds (e.g. the
     #: ``bin/python3 -> python3.12`` link a venv's interpreter resolves through: ``ro_paths`` are
-    #: bound by realpath, so an intermediate link would otherwise not exist). A link path inside a
-    #: bound path is refused: it would be created on the host.
+    #: bound by realpath, so an intermediate link would otherwise not exist). A link path that is
+    #: already mounted (:func:`mount_providing`) is refused: it would be created on the host.
     symlinks: tuple[tuple[str, Path], ...] = ()
 
 
@@ -156,6 +156,28 @@ def _norm(p: Path) -> Path:
 
 def _overlaps(a: Path, b: Path) -> bool:
     return a == b or a in b.parents or b in a.parents
+
+
+#: Top-level paths that are links into the read-only ``/usr`` or special mounts inside the sandbox.
+_SYSTEM_MOUNTS: tuple[Path, ...] = (
+    Path("/usr"), Path("/bin"), Path("/sbin"), Path("/lib"), Path("/lib64"), Path("/proc"), Path("/dev"),
+)
+
+
+def _etc_binds(etc: Literal["minimal", "full"]) -> list[str]:
+    return ["/etc"] if etc == "full" else [e for e in MINIMAL_ETC if os.path.exists(e)]
+
+
+def mount_providing(spec: SandboxSpec, path: Path) -> Path | None:
+    """The mount under which ``path`` (absolute, as seen inside the sandbox) already exists: the
+    system view (``/usr`` and its aliases, the ``/etc`` binds, ``/proc``, ``/dev``) or one of the
+    spec's binds. ``None`` means the path lives on the sandbox's private root, where a symlink can be
+    created without touching the host."""
+    binds = [*_SYSTEM_MOUNTS, *map(Path, _etc_binds(spec.etc)), *map(_norm, (*spec.ro_paths, *spec.rw_paths))]
+    for b in binds:
+        if b == path or b in path.parents:
+            return b
+    return None
 
 
 def validate_spec(spec: SandboxSpec) -> tuple[list[Path], list[Path]]:
@@ -194,15 +216,15 @@ def validate_spec(spec: SandboxSpec) -> tuple[list[Path], list[Path]]:
                 ErrorCode.POLICY_DENIED, "refusing to expose / or $HOME to a backend", {"path": str(r)}
             )
     for _target, link in spec.symlinks:
-        if not link.is_absolute() or ".." in link.parts or link.parts[1:2] in (("usr",), ("etc",)):
+        if not link.is_absolute() or ".." in link.parts:
             raise SvwError(ErrorCode.PATH_NOT_ALLOWED, "sandbox symlink path not allowed", {"path": str(link)})
-        for b in (*ro, *rw):
-            if b == link or b in link.parents:
-                raise SvwError(
-                    ErrorCode.POLICY_DENIED,
-                    "sandbox symlink inside a bound path would be created on the host",
-                    {"path": str(link), "bound": str(b)},
-                )
+        bound = mount_providing(spec, link)
+        if bound is not None:
+            raise SvwError(
+                ErrorCode.POLICY_DENIED,
+                "sandbox symlink inside a bound path would be created on the host",
+                {"path": str(link), "bound": str(bound)},
+            )
     return ro, rw
 
 
@@ -244,12 +266,8 @@ def build_bwrap_argv(
         "usr/lib64",
         "/lib64",
     ]
-    if spec.etc == "full":
-        argv += ["--ro-bind", "/etc", "/etc"]
-    else:
-        for e in MINIMAL_ETC:
-            if os.path.exists(e):
-                argv += ["--ro-bind", e, e]
+    for e in _etc_binds(spec.etc):
+        argv += ["--ro-bind", e, e]
     argv += ["--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp"]
     for d in spec.tmp_dirs:
         if not d.startswith("/tmp/") or ".." in d.split("/"):

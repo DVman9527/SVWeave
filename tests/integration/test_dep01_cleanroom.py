@@ -1,11 +1,12 @@
 """DEP-01 (plan 20.2): clean Linux environment + all pinned artifacts provided, NO network ->
 three backends start and probe successfully, no temporary download, versions/hashes match the lock.
 
-The clean room is an EMPTY temp directory that receives only the repository's scripts, fixtures and
-lock (no .toolchain, no .venv). ``scripts/bootstrap_locked.py --offline`` installs from the locally
-cached artifacts (archives, the hash-locked gateway wheelhouse, a local Serena checkout, a copy of
-the uv cache) while running under ``bwrap --unshare-net``; then ``scripts/probe_backends.py`` of the
-FRESH install probes pyslang, cbm and Serena, also without network. Evidence (no host paths) is
+The clean room is an EMPTY temp directory that receives only the repository's scripts, fixtures,
+svweave source tree (``src/``) and lock (no .toolchain, no .venv). ``scripts/bootstrap_locked.py
+--offline`` installs from the locally cached artifacts (archives, the hash-locked gateway wheelhouse,
+a local Serena checkout, a copy of the uv cache) and links ``src/`` into the fresh venv while running
+under ``bwrap --unshare-net``; then ``scripts/probe_backends.py`` of the FRESH install probes pyslang,
+cbm and Serena, also without network (the MCP probes use svweave's bounded stdio transport). Evidence (no host paths) is
 compared with / written to ``evidence/dep01/cleanroom.json`` (``SVWEAVE_WRITE_EVIDENCE=1``)."""
 
 from __future__ import annotations
@@ -76,7 +77,9 @@ def _cleanroom(tmp_path: Path) -> None:
     room = tmp_path / "cleanroom"
     room.mkdir()
     assert list(room.iterdir()) == []  # EMPTY
-    for rel in ("scripts", "fixtures"):
+    # src/: the probes speak MCP through svweave's bounded stdio transport, so the fresh venv must
+    # import svweave; bootstrap links it offline exactly as on a real offline host
+    for rel in ("scripts", "fixtures", "src"):
         shutil.copytree(REPO / rel, room / rel, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copy(REPO / "toolchain.lock.json", room / "toolchain.lock.json")
     cache_copy = tmp_path / "uv-cache"
@@ -91,6 +94,7 @@ def _cleanroom(tmp_path: Path) -> None:
     breport: dict[str, Any] = json.loads((room / "boot.json").read_text())
     assert breport["ok"] is True and breport["offline"] is True and breport["errors"] == []
     assert breport["components"]["uv"]["source"] == "pinned" and breport["components"]["uv"]["verified"] is True
+    assert breport["components"]["svweave"] == {"installed": "linked-src"}
     # nothing was installed outside the room and the locked bytes are what is installed
     lock = json.loads((REPO / "toolchain.lock.json").read_text())
     comps = lock["components"]
