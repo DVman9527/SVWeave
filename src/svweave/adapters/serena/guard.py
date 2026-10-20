@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import stat
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -15,17 +16,30 @@ EditPath = Literal["serena_symbol", "exact_range"]
 
 
 def _hash_file(p: Path) -> str:
-    h = hashlib.sha256()
-    with open(p, "rb") as f:
+    """sha256 of a regular file opened without following a link and without blocking (a FIFO
+    planted by the backend must never hang the gateway)."""
+    fd = os.open(p, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+    with os.fdopen(fd, "rb") as f:
+        h = hashlib.sha256()
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
 
 
+def _unreadable(e: OSError) -> None:
+    raise SvwError(
+        ErrorCode.POLICY_DENIED,
+        "candidate tree has an unreadable directory: its changes cannot be checked",
+        {"reason": "candidate_unreadable", "path": getattr(e, "filename", None)},
+    )
+
+
 def tree_hashes(root: Path) -> dict[str, str]:
-    """relative POSIX path -> sha256 (or ``symlink:<target>``) for every file under ``root``."""
+    """relative POSIX path -> sha256, ``symlink:<target>`` or ``special:<type>`` for every entry
+    under ``root``. The tree is backend-writable: non-regular files are never opened, and an
+    unreadable directory is an error, not a silently skipped subtree."""
     out: dict[str, str] = {}
-    for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=False, onerror=_unreadable):
         dirnames.sort()
         for dn in dirnames:  # os.walk lists symlinks to directories here and never descends
             dp = Path(dirpath) / dn
@@ -34,7 +48,13 @@ def tree_hashes(root: Path) -> dict[str, str]:
         for fn in sorted(filenames):
             p = Path(dirpath) / fn
             rel = p.relative_to(root).as_posix()
-            out[rel] = ("symlink:" + os.readlink(p)) if p.is_symlink() else _hash_file(p)
+            mode = os.lstat(p).st_mode
+            if stat.S_ISLNK(mode):
+                out[rel] = "symlink:" + os.readlink(p)
+            elif not stat.S_ISREG(mode):
+                out[rel] = f"special:{stat.S_IFMT(mode):o}"  # fifo, socket, device: never opened
+            else:
+                out[rel] = _hash_file(p)
     return out
 
 

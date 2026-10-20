@@ -102,7 +102,10 @@ MAX_LISTED_GAPS_PER_KIND = 10
 
 
 def _classify_gaps(
-    gaps: list[dict[str, Any]], diags: list[dict[str, Any]], stubs: list[dict[str, str]]
+    gaps: list[dict[str, Any]],
+    diags: list[dict[str, Any]],
+    stubs: list[dict[str, str]],
+    instantiated: set[str] | frozenset[str] = frozenset(),
 ) -> list[dict[str, Any]]:
     """Blackbox classification (plan 16.5): every protected envelope and every implicit
     empty-bodied module is a blocking gap; a module declared in the manifest stub records becomes
@@ -121,6 +124,25 @@ def _classify_gaps(
             )
             g["declared_stub"] = dict(rec)
         out.append(g)
+    # A declared stub is a boundary whether or not the extractor saw an empty body: a behavioural
+    # stand-in model HAS a body, and without this the build would come out COMPLETE.
+    have = {str(g.get("name")) for g in out if g.get("kind") == "stub_boundary"}
+    for name in sorted(instantiated & set(declared)):
+        if name in have:
+            continue
+        rec = declared[name]
+        out.append(
+            {
+                "kind": "stub_boundary",
+                "name": name,
+                "detail": (
+                    f"declared stub for {rec['module']!r}: original IP {rec['original_ip']!r}, "
+                    f"model sha256 {rec['model_sha256']}, replaced scope "
+                    f"{rec['replaced_scope']!r}; internals unknown"
+                ),
+                "declared_stub": dict(rec),
+            }
+        )
     for d in diags:
         if d.get("code") == "ProtectedEnvelope":
             loc = d.get("loc") or {}
@@ -203,7 +225,8 @@ def ingest(
         loc = d["loc"]
         logical, sid = ids.source(loc["file"])
         mac = loc.get("macro")
-        mkey = [mac["name"], mac.get("expansion", {}).get("start")] if mac else None
+        exp = mac.get("expansion", {}) if mac else {}
+        mkey = [mac["name"], exp.get("file"), exp.get("start")] if mac else None
         did = canonical_hash(
             [
                 "decl",
@@ -322,7 +345,9 @@ def ingest(
                 loc["end"],
                 r["kind"],
                 tid or [r["reason"], r["target_name"]],
-                mac.get("expansion", {}).get("start") if mac else None,
+                [mac.get("expansion", {}).get("file"), mac.get("expansion", {}).get("start")]
+                if mac
+                else None,
             ]
         )
         ci = r.get("container_idx")
@@ -537,7 +562,12 @@ def ingest(
                 "data": dumps({**data, "loc": loc}),
             }
         )
-    gaps = _classify_gaps(result["gaps"], result["diagnostics"], stubs or [])
+    gaps = _classify_gaps(
+        result["gaps"],
+        result["diagnostics"],
+        stubs or [],
+        {str(i.get("definition")) for i in result["instances"]},
+    )
     gap_rows: list[dict[str, Any]] = []
     for n, g in enumerate(gaps):
         data = {k: v for k, v in g.items() if k not in ("kind", "name", "detail")}

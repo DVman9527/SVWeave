@@ -36,6 +36,14 @@ environment, and the user's host.
   snapshots, the semantic database, candidates, journals, run logs and backend state; it is never
   committed.
 
+The trusted `policy.json` is refused (`policy_writable_by_others`) when it or its directory is
+writable by other users; `svweave init` creates it 0600 in a 0700 directory. Group-write is allowed,
+because user-private groups (umask 002) make the group the owner alone. A snapshot directory that
+already exists is re-hashed before it is reused, so a `.svweave/` shipped inside a repository cannot
+substitute other bytes, and cleaning up a snapshot never changes the permissions of a symlink
+target. A project path may not start with `_ext/`, the prefix reserved for external roots inside a
+snapshot.
+
 ## 3. Sandbox (bubblewrap) - ADR-011
 
 Every upstream backend (codebase-memory-mcp, Serena with Verible) is started through an argument
@@ -117,6 +125,19 @@ The backends have no network. The gateway has no listening socket (no HTTP, ADR-
 only. The **install phase** (`scripts/bootstrap_locked.py`) is the only code that downloads, from
 the URLs in `toolchain.lock.json`, and verifies SHA-256 before use. Normal operation never
 downloads and never updates.
+
+**Known open gaps** (found by the 2026-10-20 review, not fixed; tracked in `CHANGELOG.md`):
+
+* Serena's build backend is not hash-pinned. Building the Serena venv (`uv sync --frozen`) builds
+  the Serena project itself, and `uv.lock` does not lock build dependencies, so `hatchling` is taken
+  from the index (online) or from the uv cache (`--fetch-only`, `vendor/uv-cache.tar.gz`) without a
+  hash check, and runs on the install host. Fixing it means hash-locking the build backend in
+  `toolchain.lock.json` (a toolchain identity change). Until then, install Serena from a host you
+  trust, or use `--skip-serena` (editing still works through `exact_range` / `slang_symbol`).
+* `uv` itself is not pinned: the installer uses the `uv` on `PATH`.
+* The MCP SDK's stdio client reads a backend's stdout line by line without a length limit; a backend
+  that writes a huge line without a newline grows the gateway's memory until it is stopped. The
+  backends are pinned and sandboxed, which limits but does not remove this.
 
 ## 7. Git and CI boundary (plan 23.4)
 

@@ -261,13 +261,22 @@ def macro_refusal(db: Database, build_id: str, file: str, start: int, end: int) 
     return None
 
 
-_DEFINE = re.compile(rb"^[ \t]*`[ \t]*define\b", re.MULTILINE)
+_DEFINE = re.compile(rb"`[ \t]*define\b")
 
 
 def define_spans(data: bytes) -> list[tuple[int, int]]:
-    """Byte spans of every ```define`` directive (with ``\\``-continued lines)."""
+    """Byte spans of every ```define`` directive (with ``\\``-continued lines), wherever it starts
+    on a line (``module m; endmodule `define W 8`` is legal); comments and strings are masked so a
+    ```define`` inside them does not count."""
     out: list[tuple[int, int]] = []
-    for m in _DEFINE.finditer(data):
+    masked = mask_comments_strings(data)
+    for m in _DEFINE.finditer(masked if masked is not None else data):
+        start = m.start()
+        lead = start
+        while lead > 0 and data[lead - 1] in b" \t":
+            lead -= 1
+        if lead == 0 or data[lead - 1] == 0x0A:  # only indentation before it: the span is the line
+            start = lead
         pos = m.end()
         while True:
             nl = data.find(b"\n", pos)
@@ -279,7 +288,7 @@ def define_spans(data: bytes) -> list[tuple[int, int]]:
                 continue
             end = nl
             break
-        out.append((m.start(), end))
+        out.append((start, end))
     return out
 
 
@@ -349,7 +358,7 @@ def _resolve_symbol(
         start=fs,
         end=fe,
         expected_sha256=sha256_hex(data[fs:fe]),
-        replacement=_text_bytes(e.new_body, i),
+        replacement=_checked_text(e.new_body, i),
         declaration_id=e.declaration_id,
         qualified_name=row["qualified_name"],
         decl_kind=row["kind"],
@@ -808,6 +817,30 @@ def _checked_declaration(
     return file, fs, fe, data
 
 
+_MACRO_STATE = frozenset({b"define", b"undef", b"undefineall"})
+
+
+def _refuse_macro_state_change(repl: bytes, i: int) -> None:
+    """exact_range / symbol_replacement text may not (re)define or undefine macros: that changes
+    every later expansion, which is the macro-definition edit v1 refuses (comments and strings are
+    masked; a directive spelled there is text)."""
+    toks = backtick_tokens(repl)
+    for t in toks or ():
+        if t in _MACRO_STATE:
+            raise denied(
+                "macro_definition_edit_unsupported",
+                f"replacement text contains `{t.decode()}: (re)defining or undefining a macro is "
+                "outside the qualified v1 subset",
+                index=i,
+            )
+
+
+def _checked_text(text: str, i: int) -> bytes:
+    b = _text_bytes(text, i)
+    _refuse_macro_state_change(b, i)
+    return b
+
+
 def _text_bytes(text: str, i: int) -> bytes:
     b = text.encode("utf-8")
     if b"\x00" in b:
@@ -845,7 +878,9 @@ def _resolve_range(
             {"reason": "expected_bytes_mismatch", "index": i},
         )
     for d0, d1 in define_spans(data):
-        if (e.start_byte < d1 and d0 < e.end_byte) or d0 <= e.start_byte == e.end_byte <= d1:
+        # inclusive bounds: the newline that ENDS the directive (at d1) and the byte just before it
+        # starts (d0) belong to it; replacing or removing either changes the macro's text
+        if e.start_byte <= d1 and d0 <= e.end_byte:
             raise denied(
                 "macro_definition_edit_unsupported",
                 "editing a macro definition (`define directive) is outside the qualified v1 "
@@ -863,7 +898,7 @@ def _resolve_range(
         start=e.start_byte,
         end=e.end_byte,
         expected_sha256=e.expected_sha256,
-        replacement=_text_bytes(e.replacement, i),
+        replacement=_checked_text(e.replacement, i),
         reason="explicit exact-range patch requested",
     )
 

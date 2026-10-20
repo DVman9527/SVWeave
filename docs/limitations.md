@@ -234,6 +234,9 @@ evidence). Measured gaps on the fixtures:
   build (testbench, docs) are listed under `unmapped_files`, not analysed.
 * A diff is read against a workspace that has changed since the build, so the command never exits 5
   for STALE; `freshness` in the envelope still says so.
+* Comparing with the working tree makes git run the repository's clean/process filters, so that mode
+  is refused (`POLICY_DENIED`, `git_filters_configured`) when any is configured; `--head REF`
+  (commit to commit) reads blobs only. Only the project's own subtree is diffed.
 * The tool runs `git diff` / `git cat-file` with a fixed argument list (no shell, no external diff
   driver, no textconv, no fsmonitor, no optional locks) in the project root; revisions are plain
   tokens (no leading `-`, no `..`). `--repo` exists on the CLI only and must stay inside the policy's
@@ -249,9 +252,12 @@ evidence). Measured gaps on the fixtures:
   targets. Each site is checked against the snapshot bytes: the text at the span must be exactly the
   old name, else the site is skipped and the preview is blocked.
 * Not edited automatically, and reported instead: connections made by `.*`, `.old` (implicit) or
-  `.old()` (blockers); parameter overrides by name `#(.old(..))` and `defparam` (warning, listed under
-  `unconfirmed_occurrences`); sites spelled in a macro body (blocker); references slang did not
-  resolve (blocker); the profile still naming the old top module or top parameter (warning);
+  `.old()` (blockers); parameter overrides by name `#(.old(..))` and argument bindings by name
+  `f(.old(x))` (blockers); `defparam` (listed under `unconfirmed_occurrences`); sites spelled in a
+  macro body (blocker); references slang did not resolve (blocker); uses of a local name in its
+  declaring scope (searched up to the enclosing module) or in included headers that slang did not
+  resolve (blocker); an occurrence scan that stopped early (blocker); the profile still naming the
+  old top module or top parameter (warning);
   filelists, file names, hierarchical strings, `$root`/`config` blocks and anything in an inactive
   `ifdef` or generate branch.
 * `unconfirmed_occurrences` is a lexical scan of the snapshot for the old name outside the edit set.

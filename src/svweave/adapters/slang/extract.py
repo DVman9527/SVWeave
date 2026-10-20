@@ -359,7 +359,8 @@ class Extractor:
         qn = sym.lexicalPath
         cu = self._cu_of(sym)
         mac = ns.get("macro")
-        mkey = (mac["name"], mac.get("expansion", {}).get("start")) if mac else None
+        exp = mac.get("expansion", {}) if mac else {}
+        mkey = (mac["name"], exp.get("file"), exp.get("start")) if mac else None
         key = (ns["file"], ns["start"], ns["end"], dkind, qn, cu, mkey)
         idx = self._decl_by_key.get(key)
         if idx is not None:
@@ -580,7 +581,10 @@ class Extractor:
             target_idx,
             status,
             target_name,
-            mac["expansion"].get("start") if mac and "expansion" in mac else None,
+            # the expansion's FILE too: two files can expand the same macro at the same offset
+            (mac["expansion"].get("file"), mac["expansion"].get("start"))
+            if mac and "expansion" in mac
+            else None,
         )
         if key in self._ref_keys:
             return

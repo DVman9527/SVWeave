@@ -32,7 +32,7 @@
       "type": "string"
     },
     "limit": {
-      "default": 100,
+      "default": 50,
       "maximum": 500,
       "minimum": 1,
       "type": "integer"

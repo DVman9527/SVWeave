@@ -1,6 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "allOf": [
+    {
+      "not": {
+        "required": [
+          "evidence_id",
+          "type"
+        ]
+      }
+    },
+    {
+      "not": {
+        "required": [
+          "evidence_id",
+          "limit"
+        ]
+      }
+    },
+    {
+      "not": {
+        "required": [
+          "evidence_id",
+          "cursor"
+        ]
+      }
+    }
+  ],
   "oneOf": [
     {
       "required": [

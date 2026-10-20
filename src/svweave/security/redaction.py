@@ -19,8 +19,12 @@ REDACTED_PATH = "<host-path-redacted>"
 
 # KEY=value / KEY: value where KEY looks like a credential name.
 _SECRET_NAME = r"[A-Za-z0-9_.-]*(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD|PASSPHRASE|CREDENTIAL|AUTH|COOKIE)[A-Za-z0-9_.-]*"
-_ENV_SECRET = re.compile(rf"(?i)\b({_SECRET_NAME})(\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|\S+)")
+# the name may be quoted ("password": "x"); the closing quote then sits before the separator
+_ENV_SECRET = re.compile(rf"(?i)\b({_SECRET_NAME})([\"']?\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|\S+)")
 _BEARER = re.compile(r"(?i)\b(bearer|basic)\s+[A-Za-z0-9._~+/=-]{8,}")
+# an Authorization header: the scheme word ("token", "Bearer", ...) AND the credential go
+_AUTH_HEADER = re.compile(r"(?i)\b(authorization)([\"']?\s*[=:]\s*)(?:[A-Za-z][\w-]*\s+)?[^\s\"',;]+")
+_FILE_URL = re.compile(r"(?i)\bfile://(?=/)")
 _KNOWN_TOKENS = re.compile(
     r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}"
     r"|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})\b"
@@ -28,7 +32,8 @@ _KNOWN_TOKENS = re.compile(
 _PEM = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?(?:-----END [A-Z ]*PRIVATE KEY-----|\Z)", re.S)
 _URL_CRED = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)[^/\s:@]+:[^/\s@]+@")
 # Absolute POSIX path with at least two components, not glued to a preceding word/path char.
-_ABS_PATH = re.compile(r"(?<![\w.~:/@+-])/(?:[\w.@+%=,-]+/)+[\w.@+%=,-]+/?")
+# A ':' before it does not protect a path (PATH=/a/b:/c/d, file:/home/x): only word/path chars do.
+_ABS_PATH = re.compile(r"(?<![\w.~/@+-])/(?:[\w.@+%=,-]+/)+[\w.@+%=,-]+/?")
 
 #: System locations that carry no private information.
 SYSTEM_PREFIXES: tuple[str, ...] = (
@@ -72,9 +77,11 @@ class Redactor:
     def text(self, s: str) -> str:
         s = _PEM.sub(REDACTED, s)
         s = _URL_CRED.sub(lambda m: m.group(1) + REDACTED + "@", s)
+        s = _AUTH_HEADER.sub(lambda m: f"{m.group(1)}{m.group(2)}{REDACTED}", s)
         s = _BEARER.sub(lambda m: f"{m.group(1)} {REDACTED}", s)
         s = _ENV_SECRET.sub(lambda m: f"{m.group(1)}{m.group(2)}{REDACTED}", s)
         s = _KNOWN_TOKENS.sub(REDACTED, s)
+        s = _FILE_URL.sub("file:", s)  # file:///home/x -> file:/home/x, then the path rule applies
         return _ABS_PATH.sub(self._sub_path, s)
 
     def value(self, obj: Any) -> Any:
@@ -84,10 +91,11 @@ class Redactor:
         if isinstance(obj, Mapping):
             out: dict[Any, Any] = {}
             for k, v in obj.items():
+                rk = self.text(k) if isinstance(k, str) else k  # a key can be a host path too
                 if isinstance(k, str) and _SECRET_KEY_NAME.search(k) and isinstance(v, str | bytes):
-                    out[k] = REDACTED
+                    out[rk] = REDACTED
                 else:
-                    out[k] = self.value(v)
+                    out[rk] = self.value(v)
             return out
         if isinstance(obj, list | tuple):
             return [self.value(v) for v in obj]

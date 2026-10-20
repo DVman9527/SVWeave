@@ -1104,6 +1104,15 @@ def _commit_locked(
     appr_method: str,
 ) -> Txn:
     jr.assert_no_recovery_pending(ctx, [t.transaction_id for t in store.blocking()])
+    # The caller's `txn` was read BEFORE the workspace lock: an abort (or another commit) may have
+    # landed in between. Re-read under the lock, before anything (the journal) is written.
+    txn = store.get(txn.transaction_id)
+    if txn.state not in (S.AWAITING_APPROVAL, S.APPROVED):
+        raise SvwError(
+            ErrorCode.EDIT_CONFLICT,
+            f"transaction is {txn.state.value}, not awaiting commit",
+            {"reason": "state_changed_before_commit", "state": txn.state.value},
+        )
     try:
         check_inputs_unchanged(ctx, txn)
     except SvwError as e:
@@ -1198,6 +1207,7 @@ def _post_apply(
         failures.append({"reason": "post_apply_bytes_differ", "paths": mismatches})
     pb = txn.record.get("profile_builds", {})
     verified: dict[str, Any] = {}
+    to_publish: list[tuple[str, str, Any]] = []
     if not mismatches:
         for prof in txn.record["profiles"]:
             nm = resolve_profile(ctx, prof)
@@ -1227,12 +1237,16 @@ def _post_apply(
                     "diagnostic_outcome": row.get("diagnostic_outcome"),
                 })
                 continue
-            old = want.get("baseline_build_id")
-            db.publish_build(str(env.build_id))
-            from svweave.application.semantic_common import freshness_of
+            to_publish.append((prof, str(env.build_id), want.get("baseline_build_id")))
+    if not failures:
+        # publish only when EVERY validate profile is clean (docs/editing.md: "Only then is it
+        # published"); a later failing profile must not leave an earlier pointer moved
+        from svweave.application.semantic_common import freshness_of
 
-            entry["old_build_id"] = old
-            entry["old_build_freshness"] = (
+        for prof, bid, old in to_publish:
+            db.publish_build(bid)
+            verified[prof]["old_build_id"] = old
+            verified[prof]["old_build_freshness"] = (
                 freshness_of(ctx, db, require_build(db, old)).value if old else None
             )
     if failures:

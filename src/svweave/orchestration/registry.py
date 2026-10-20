@@ -12,6 +12,7 @@ Runtime failures reported through :meth:`note_failure` downgrade health immediat
 
 from __future__ import annotations
 
+import contextlib
 import importlib.metadata
 import json
 import shutil
@@ -191,8 +192,12 @@ class BackendRegistry:
             )
             try:
                 cmp = ad.start(snapshot_root)
-            except SvwError as e:
-                self.note_failure(CBM, e)
+            except BaseException as e:
+                # a half-started backend (process, runtime dir) must not outlive the failure
+                with contextlib.suppress(Exception):
+                    ad.stop()
+                if isinstance(e, SvwError):
+                    self.note_failure(CBM, e)
                 raise
             self._cbm = ad
             h = self._health[CBM]
@@ -230,8 +235,11 @@ class BackendRegistry:
             )
             try:
                 ad.start()
-            except SvwError as e:
-                self.note_failure(SERENA, e)
+            except BaseException as e:
+                with contextlib.suppress(Exception):  # never two Serena processes (plan 6.3)
+                    ad.stop()
+                if isinstance(e, SvwError):
+                    self.note_failure(SERENA, e)
                 raise
             self._serena = ad
             self._failed_at.pop(SERENA, None)

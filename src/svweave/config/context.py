@@ -205,6 +205,14 @@ class WorkspaceContext:
         root_abs = _abs(root)
         if is_within(lexical, self.project_root) and root.internal:
             rel = lexical.relative_to(self.project_root).as_posix()
+            if rel == "_ext" or rel.startswith("_ext/"):
+                # `_ext/<id>/...` is where EXTERNAL roots live inside a snapshot: a project file
+                # there would collide with @<id>/... and be treated as external (not blocking)
+                raise PathPolicy.deny(
+                    rel,
+                    "a project path may not start with the reserved directory '_ext/'",
+                    "rename the directory, or declare it as an external root and address it as @<id>",
+                )
             return "" if rel == "." else rel
         rel = lexical.relative_to(root_abs).as_posix()
         return f"@{root.id}/{'' if rel == '.' else rel}"

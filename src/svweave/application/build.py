@@ -280,8 +280,10 @@ def _build_snapshot(
     existing = db.conn.execute("SELECT * FROM builds WHERE build_id=?", (build_id,)).fetchone()
     if existing is not None and reuse and existing["completeness"] == Completeness.COMPLETE.value:
         if publish:
-            _publish_reused(ctx, db, existing)
-        return _stored_envelope(ctx, db, build_id, request_id, reused=True, job_id=None)
+            _publish_reused(ctx, db, existing, nm.profile)
+        return _stored_envelope(
+            ctx, db, build_id, request_id, reused=True, job_id=None, profile=nm.profile
+        )
 
     job_id = pre_job_id or new_job_id()
     db.start_job(job_id, build_id, rec.snapshot_id)
@@ -327,15 +329,16 @@ def _build_snapshot(
                 _REGISTRY.pop(job_id, None)
 
 
-def _publish_reused(ctx: WorkspaceContext, db: Database, build: Any) -> None:
+def _publish_reused(ctx: WorkspaceContext, db: Database, build: Any, profile: str) -> None:
     """A reused COMPLETE build must also move the published pointer when the caller asked to
     publish (B8) - but only after the full (strict) freshness check, so a build whose inputs no
-    longer match the workspace is never published."""
-    pub = db.published(build["workspace_id"], build["profile"])
+    longer match the workspace is never published. The pointer is the REQUESTING profile's: a
+    second profile with identical inputs reuses the first profile's build_id."""
+    pub = db.published(build["workspace_id"], profile)
     if pub is not None and pub["build_id"] == build["build_id"]:
         return
     if freshness_of(ctx, db, build, strict=True) is Freshness.CURRENT:
-        db.publish_build(build["build_id"])
+        db.publish_build(build["build_id"], profile)
 
 
 def _run_job(
@@ -851,13 +854,15 @@ def _stored_envelope(
     published: bool | None = None,
     resource: dict[str, Any] | None = None,
     run: _Run | None = None,
+    profile: str | None = None,
 ) -> Envelope:
     from svweave.application.semantic_common import build_envelope, report_of
 
     b = require_build(db, build_id)
     rep = report_of(db, build_id)
+    prof = profile or b["profile"]
     if published is None:
-        pub = db.published(b["workspace_id"], b["profile"])
+        pub = db.published(b["workspace_id"], prof)
         published = bool(pub and pub["build_id"] == build_id)
     stats = rep.get("stats") or {}
     data: dict[str, Any] = {
@@ -900,6 +905,7 @@ def _stored_envelope(
             details={"reasons": rep["reasons"], "diagnostic_outcome": b["diagnostic_outcome"]},
         )
     env = build_envelope(ctx, db, b, request_id, data, error=err)
+    env.profile = prof  # the profile that asked, not the first profile that built these inputs
     return env
 
 

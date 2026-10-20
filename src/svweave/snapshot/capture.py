@@ -394,22 +394,53 @@ def snapshot_id_for(
 
 
 # --------------------------------------------------------------------------- capture
+def _chmod_nofollow(p: str, mode: int) -> None:
+    """chmod that never reaches through a symlink (a link planted in a temp or snapshot tree must
+    not change the permissions of its target, for example ~/.ssh)."""
+    if not os.path.islink(p):
+        os.chmod(p, mode)
+
+
 def _force_rmtree(path: Path) -> None:
     def onerr(func: Callable[..., object], p: str, _exc: object) -> None:
-        os.chmod(os.path.dirname(p), 0o755)
-        os.chmod(p, 0o755)
+        _chmod_nofollow(os.path.dirname(p), 0o755)
+        _chmod_nofollow(p, 0o755)
         func(p)
 
-    for root, dirs, _files in os.walk(path):
-        os.chmod(root, 0o755)
+    for root, dirs, _files in os.walk(path):  # followlinks=False: never descends into a link
+        _chmod_nofollow(root, 0o755)
         for d in dirs:
-            os.chmod(os.path.join(root, d), 0o755)
+            _chmod_nofollow(os.path.join(root, d), 0o755)
     shutil.rmtree(path, onerror=onerr)
 
 
 def remove_snapshot_dir(path: Path) -> None:
+    if path.is_symlink():  # remove the link itself, never the tree it points to
+        path.unlink()
+        return
     if path.exists():
         _force_rmtree(path)
+
+
+def _content_matches(final: Path, files: list[SnapFile]) -> bool:
+    """True when ``final`` holds exactly the bytes just captured (every file re-hashed, regular,
+    not a link). A snapshot directory that already exists is not trusted by its name alone: its id
+    is computable from public facts, so a pre-seeded ``.svweave/`` could hold other bytes."""
+    for f in files:
+        p = final / f.snapshot_path
+        try:
+            st = os.lstat(p)
+        except OSError:
+            return False
+        if not stat.S_ISREG(st.st_mode):
+            return False
+        h = hashlib.sha256()
+        with open(p, "rb") as fh:
+            while chunk := fh.read(_CHUNK):
+                h.update(chunk)
+        if h.hexdigest() != f.sha256:
+            return False
+    return True
 
 
 def _freeze(root: Path) -> None:
@@ -498,9 +529,13 @@ def _capture(
                 lookup=lookup1,
             )
             final = root / sid
-            if final.exists():
-                remove_snapshot_dir(tmp)
-                return load_record(final)
+            if final.exists() or final.is_symlink():
+                if not final.is_symlink() and _content_matches(final, files):
+                    remove_snapshot_dir(tmp)
+                    # same bytes, but THIS call's metadata (profile, config): the stored record
+                    # may have been written for another profile with the same inputs
+                    return record
+                remove_snapshot_dir(final)  # corrupt or planted: replaced by the verified copy
             (tmp / "snapshot.json").write_text(record.model_dump_json(indent=2), encoding="utf-8")
             _freeze(tmp)
             os.rename(tmp, final)

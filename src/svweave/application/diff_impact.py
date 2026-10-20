@@ -83,7 +83,7 @@ def check_ref(ref: str, field: str) -> str:
     return ref
 
 
-def _git(repo: Path, args: list[str]) -> bytes:
+def _git(repo: Path, args: list[str], ok: tuple[int, ...] = (0,)) -> bytes:
     argv = [
         "git",
         "-C",
@@ -159,7 +159,7 @@ def _git(repo: Path, args: list[str]) -> bytes:
         raise SvwError(
             ErrorCode.OUTPUT_LIMIT, "the diff is larger than 64 MiB", {"reason": "diff_too_large"}
         )
-    if rc != 0:
+    if rc not in ok:
         first = (err[0] if err else b"").decode("utf-8", "replace").strip().splitlines()[:1]
         raise SvwError(
             ErrorCode.MISSING_INPUT,
@@ -190,13 +190,23 @@ def _path(s: str) -> str | None:
 
 
 def parse_diff(text: str) -> list[FileDiff]:
+    """Files and old-side hunks of ``git diff -U0``. Hunk bodies are consumed by COUNT (the
+    ``-a,n +c,d`` header says how many lines follow), so a content line that happens to start with
+    ``+++ ``/``--- `` is never mistaken for a file header; lines are split on ``\\n`` only (form
+    feeds and Unicode separators are content)."""
     out: list[FileDiff] = []
     cur: FileDiff | None = None
     old: str | None = None
-    for line in text.splitlines():
-        if line.startswith("--- "):
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        i += 1
+        if line.startswith("diff --git "):
+            cur, old = None, None
+        elif line.startswith("--- ") and cur is None:
             old = _path(line[4:])
-        elif line.startswith("+++ "):
+        elif line.startswith("+++ ") and cur is None:
             cur = FileDiff(old, _path(line[4:]))
             out.append(cur)
         elif line.startswith("Binary files ") or line.startswith("GIT binary patch"):
@@ -214,6 +224,13 @@ def parse_diff(text: str) -> list[FileDiff]:
                 cur.hunks.append((a, n))
                 cur.removed += n
                 cur.added += d
+                body = n + d
+                # skip exactly the hunk's own lines; every one starts with '+', '-', ' ' or '\\'
+                # ("\\ No newline at end of file", which does not count), never with a header
+                while body > 0 and i < len(lines) and lines[i][:1] in ("+", "-", " ", "\\"):
+                    if not lines[i].startswith("\\"):
+                        body -= 1
+                    i += 1
     return out
 
 
@@ -289,8 +306,32 @@ def diff_impact(
         _git(top, ["rev-parse", "--verify", "-q", base + "^{commit}"])
         if head is not None:
             _git(top, ["rev-parse", "--verify", "-q", head + "^{commit}"])
+        else:
+            # Comparing with the WORKING TREE makes git run any clean / process filter the
+            # repository configures (.gitattributes `filter=x` + `filter.x.clean`): a program
+            # chosen by the repository. --no-ext-diff / --no-textconv do not stop that. Refuse,
+            # and point at the commit-to-commit form, which reads blobs only.
+            filters = _git(
+                top, ["config", "--get-regexp", r"^filter\..*\.(clean|process)$"], ok=(0, 1)
+            ).decode("utf-8", "replace").strip()
+            if filters:
+                raise SvwError(
+                    ErrorCode.POLICY_DENIED,
+                    "the repository configures git clean/process filters, which git would run to "
+                    "diff the working tree; commit the change and use --head REF instead",
+                    {"reason": "git_filters_configured",
+                     "filters": sorted({ln.split()[0] for ln in filters.splitlines()})[:10]},
+                )
         diff_args = ["diff", "-U0", "--no-color", "--no-ext-diff", "--no-textconv", "--no-renames"]
         diff_args += [base] + ([head] if head else []) + ["--"]
+        # only the project's own subtree: a monorepo around it is none of this tool's business
+        proj = Path(os.path.realpath(s.ctx.project_root))
+        try:
+            rel = proj.relative_to(Path(os.path.realpath(top))).as_posix()
+        except ValueError:
+            rel = "."
+        if rel != ".":
+            diff_args.append(rel)
         diffs = parse_diff(_git(top, diff_args).decode("utf-8", "replace"))
 
         snap_dir = snapshots_dir(s.ctx) / str(s.build["snapshot_id"])
@@ -424,7 +465,7 @@ def diff_impact(
         data: dict[str, Any] = {
             "base": base,
             "head": head or "working tree",
-            "repo": str(top),
+            "repo": str(top) if rel == "." else f"{top.name}/ (diff limited to {rel}/)",
             "affected_definitions": defs_out,
             "affected_declarations": affected,
             "non_instance_declarations": non_instance,

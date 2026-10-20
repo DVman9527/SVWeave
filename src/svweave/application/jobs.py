@@ -76,6 +76,7 @@ class JobManager:
         self._thread: threading.Thread | None = None
         self._active_id: str | None = None
         self._active_profile: str | None = None
+        self._active_args: tuple[bool, str | None] | None = None
         self._handle: WorkerHandle | None = None
         self._owned: set[str] = set()
 
@@ -121,8 +122,18 @@ class JobManager:
         with self._lock, self._db(ctx) as db:
             self.sweep_orphans(ctx, db)
             if self._thread is not None and self._thread.is_alive() and self._active_id:
-                if self._active_profile == name:
+                if self._active_profile == name and self._active_args == (reuse, expected_snapshot_id):
                     return {**self._row(db, self._active_id), "already_running": True}
+                if self._active_profile == name:
+                    # same profile, different request: joining would silently drop this caller's
+                    # expected_snapshot_id / reuse (a stale-snapshot guard that never fires)
+                    raise SvwError(
+                        ErrorCode.RESOURCE_LIMIT,
+                        "a build of this profile is running with different arguments "
+                        "(reuse / expected_snapshot_id); retry when it has finished",
+                        {"active_job_id": self._active_id, "active_profile": self._active_profile,
+                         "reason": "different_build_arguments"},
+                    )
                 raise SvwError(
                     ErrorCode.RESOURCE_LIMIT,
                     "another build job is active; only one build runs at a time",
@@ -167,6 +178,7 @@ class JobManager:
                 )
             handle = WorkerHandle()
             self._handle, self._active_id, self._active_profile = handle, job_id, name
+            self._active_args = (reuse, expected_snapshot_id)
             self._owned.add(job_id)
             t = threading.Thread(
                 target=self._run,
@@ -264,6 +276,7 @@ class JobManager:
                 self._owned.discard(job_id)
                 if self._active_id == job_id:
                     self._active_id = self._active_profile = self._handle = None
+                    self._active_args = None
 
     def _store_result(self, job_id: str, env: Envelope | None) -> str:
         """Persist the result envelope; sqlite contention is retried, never silently dropped."""

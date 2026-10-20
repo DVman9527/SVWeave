@@ -294,7 +294,12 @@ def build_envelope(
         }[comp]
     warns = list(warnings or [])
     fr = freshness if freshness is not None else freshness_of(ctx, db, build)
-    if fr != Freshness.CURRENT:
+    if fr == Freshness.UNKNOWN:
+        warns.append(
+            "freshness is UNKNOWN: whether the workspace still matches this build's snapshot "
+            "could not be determined; results describe the snapshot"
+        )
+    elif fr != Freshness.CURRENT:
         warns.append(
             f"freshness is {fr.value}: the workspace changed since this build's snapshot; "
             "results describe the snapshot, not the current files"

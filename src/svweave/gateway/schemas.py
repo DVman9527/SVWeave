@@ -119,7 +119,8 @@ INPUT: dict[str, dict[str, Any]] = {
             )
             | {"$schema": None},
             "name": text(512),
-            **_PAGING,
+            "limit": {**LIMIT, "default": 50},
+            "cursor": CURSOR,
         },
         ["build_id"],
         oneOf=_one_of(["symbol_id"], ["location"], ["name"]),
@@ -225,6 +226,11 @@ INPUT: dict[str, dict[str, Any]] = {
         },
         [],
         oneOf=_one_of(["build_id"], ["evidence_id"]),
+        allOf=[  # one record by id: a filter or page given with it would be silently ignored
+            {"not": {"required": ["evidence_id", "type"]}},
+            {"not": {"required": ["evidence_id", "limit"]}},
+            {"not": {"required": ["evidence_id", "cursor"]}},
+        ],
     ),
 }
 TXN_ID = {"type": "string", "pattern": "^txn-[0-9a-f]{20}$"}

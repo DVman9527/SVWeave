@@ -28,6 +28,10 @@ CONFLICT`.
      candidates); a declaration spelled in a macro body is refused;
    * `exact_range {logical_path, start_byte, end_byte, expected_sha256, replacement}`: compare-and-set
      on the original slice;
+     for both this and `symbol_replacement`, a range that touches a `` `define `` directive (its
+     text, the newline that ends it or the byte before it, wherever on the line it starts) and a
+     replacement containing `` `define ``, `` `undef `` or `` `undefineall `` outside comments and
+     strings are refused (`macro_definition_edit_unsupported`);
    * `slang_symbol {qualified_name | symbol_id, replacement, expected_sha256?}` (ADR-013): replace the
      whole `task` / `function` / constructor declaration located **by name** in the slang semantic
      database. Exactly one of `qualified_name` or a 64-hex `symbol_id`. Spell names as slang does:

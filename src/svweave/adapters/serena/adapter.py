@@ -104,6 +104,27 @@ class SymbolEditPlan:
     matches: list[SymbolRecord] = field(default_factory=list)
 
 
+def _line_no(v: Any) -> int | None:
+    """A line number from untrusted backend output (bool and non-integers refused)."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, str) and v.isdigit():
+        return int(v)
+    return None
+
+
+def _bad_output(redactor: Any, what: str, sample: Any) -> SvwError:
+    """Malformed Serena output is BACKEND_UNAVAILABLE (what probes and callers handle), never a
+    bare AttributeError / ValueError that escapes as a traceback."""
+    return SvwError(
+        ErrorCode.BACKEND_UNAVAILABLE,
+        f"Serena returned unexpected output: {what}",
+        {"backend": BACKEND, "reason": "bad_output", "sample": redactor.text(repr(sample)[:200])},
+    )
+
+
 class SerenaAdapter:
     def __init__(
         self,
@@ -344,15 +365,18 @@ class SerenaAdapter:
     def _symbol_from(self, d: dict[str, Any]) -> SymbolRecord | None:
         rel = d.get("relative_path")
         loc = d.get("body_location") or {}
-        if safeio.safe_rel_path(rel) is None or "start_line" not in loc:
+        if safeio.safe_rel_path(rel) is None or not isinstance(loc, dict) or "start_line" not in loc:
             return None  # Serena-returned paths are untrusted: absolute / '..' results are dropped
         assert isinstance(rel, str)
+        start, end = _line_no(loc.get("start_line")), _line_no(loc.get("end_line"))
+        if start is None or end is None:
+            raise _bad_output(self.redactor, "symbol body_location is not a pair of line numbers", loc)
         rec = SymbolRecord(
             name_path=str(d.get("name_path", "")),
             kind=str(d.get("kind", "")),
             relative_path=rel,
-            start_line=int(loc["start_line"]),
-            end_line=int(loc["end_line"]),
+            start_line=start,
+            end_line=end,
             body=d.get("body") if isinstance(d.get("body"), str) else None,
         )
         try:
@@ -415,12 +439,20 @@ class SerenaAdapter:
                 if not isinstance(groups, dict) or safeio.safe_rel_path(rel) is None:
                     continue
                 for kind, items in groups.items():
+                    if not isinstance(items, list):
+                        raise _bad_output(self.redactor, "references group is not a list", items)
                     for it in items:
+                        if not isinstance(it, dict):
+                            raise _bad_output(self.redactor, "reference entry is not an object", it)
                         loc = it.get("body_location") or {}
+                        sl = _line_no(loc.get("start_line", 0)) if isinstance(loc, dict) else None
+                        el = _line_no(loc.get("end_line", 0)) if isinstance(loc, dict) else None
+                        if sl is None or el is None:
+                            raise _bad_output(self.redactor, "reference body_location is malformed", loc)
                         out.append(ReferenceRecord(
                             relative_path=str(rel), kind_group=str(kind),
                             name_path=str(it.get("name_path", "")),
-                            start_line=int(loc.get("start_line", 0)), end_line=int(loc.get("end_line", 0)),
+                            start_line=sl, end_line=el,
                             content_around_reference=str(it.get("content_around_reference", "")),
                         ))
             return out

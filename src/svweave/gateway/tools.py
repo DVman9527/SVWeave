@@ -79,11 +79,11 @@ class ToolSpec:
                 {
                     "path": "/" + "/".join(str(p) for p in e.absolute_path),
                     "validator": e.validator,
-                    # never echo the offending value of pattern/length violations
+                    # never echo the offending value (docs/mcp_contract.md): jsonschema's messages
+                    # embed the instance for type / oneOf / additionalProperties / minimum ...
+                    # Only "required" names a field of the schema itself, never request data.
                     "message": (
-                        f"violates {e.validator}"
-                        if e.validator in ("pattern", "maxLength", "minLength", "enum", "const")
-                        else e.message[:160]
+                        e.message[:160] if e.validator == "required" else f"violates {e.validator}"
                     ),
                 }
             )

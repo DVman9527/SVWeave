@@ -145,8 +145,15 @@ def make_bundle(
         locs: list[dict[str, Any]] = []
         for d in diags[:200]:
             try:
-                first = (json.loads(d["locations"] or "[]") or [None])[0]
+                raw = json.loads(d["locations"] or "null")
             except ValueError:
+                raw = None
+            # stored by ingest as {"primary": {...}, "ranges": [...]}; a list is tolerated too
+            if isinstance(raw, dict):
+                first = raw.get("primary")
+            elif isinstance(raw, list) and raw:
+                first = raw[0]
+            else:
                 first = None
             loc = (
                 {k: first.get(k) for k in ("file", "line", "col")}

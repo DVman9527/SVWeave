@@ -267,17 +267,43 @@ def _references_of(
     return {"total": total, "by_kind": by_kind, "distinct_files": distinct_files}, sample, files
 
 
-def _owner_definition(s: _S, decl: sqlite3.Row) -> str | None:
-    """Declaration id of the module/interface that owns a port/net/variable (via its scope)."""
-    scope = decl["scope"]
+def _scope_parents(scope: str) -> list[str]:
+    """``scope`` and every enclosing scope, innermost first: ``top.g.f`` -> top.g.f, top.g, top;
+    ``p::c::m`` -> p::c::m, p::c, p (generate blocks and subroutines nest inside a module)."""
+    out = []
+    cur = scope
+    while cur:
+        out.append(cur)
+        cut = max(cur.rfind("."), cur.rfind("::"))
+        if cut <= 0:
+            break
+        cur = cur[:cut]
+    return out
+
+
+def _enclosing(s: _S, scope: str | None, kinds: tuple[str, ...]) -> sqlite3.Row | None:
+    """The innermost declaration of one of ``kinds`` that encloses ``scope`` (walking up through
+    generate blocks, functions, tasks ...); None when there is none."""
     if not scope:
         return None
-    r = s.one(
-        "SELECT declaration_id FROM declarations WHERE build_id=? AND qualified_name=? "
-        "AND kind IN ('module','interface','program') ORDER BY span_start LIMIT 1",
-        s.bid,
-        scope,
-    )
+    q = ",".join("?" for _ in kinds)
+    for cand in _scope_parents(scope):
+        r = s.one(
+            f"SELECT * FROM declarations WHERE build_id=? AND qualified_name=? AND kind IN ({q}) "
+            "ORDER BY span_start LIMIT 1",
+            s.bid,
+            cand,
+            *kinds,
+        )
+        if r is not None:
+            return r
+    return None
+
+
+def _owner_definition(s: _S, decl: sqlite3.Row) -> str | None:
+    """Declaration id of the module/interface/program that owns a declaration: the innermost one
+    enclosing its scope (a variable in a generate block or a function belongs to the module)."""
+    r = _enclosing(s, decl["scope"], ("module", "interface", "program"))
     return str(r["declaration_id"]) if r else None
 
 
@@ -480,6 +506,25 @@ def _twins(rows: list[sqlite3.Row]) -> list[sqlite3.Row] | None:
     return sorted(rows, key=lambda r: (r["kind"] != "port", r["declaration_id"]))
 
 
+def _with_twins(s: _S, rows: list[sqlite3.Row]) -> list[sqlite3.Row]:
+    """A single row picked by symbol_id or location gains the other declarations at the SAME name
+    span (slang's implicit net of an ANSI port), so every entry point sees one entity."""
+    if len(rows) != 1:
+        return rows
+    r = rows[0]
+    same = s.rows(
+        "SELECT * FROM declarations WHERE build_id=? AND name=? AND file=? AND span_start=? "
+        "AND span_end=? AND scope IS ?",
+        s.bid,
+        r["name"],
+        r["file"],
+        r["span_start"],
+        r["span_end"],
+        r["scope"],
+    )
+    return same if len(same) > 1 else rows
+
+
 def _fit(data: dict[str, Any], budget: int, keys: tuple[str, ...] = _LISTS) -> list[str]:
     """Shrink the list sections until the JSON fits ``budget``; returns the keys that were cut. A
     cut list keeps its ``*_total``/``summary`` figures, so the omission is visible."""
@@ -559,6 +604,7 @@ def impact(
                     "no declaration matches the target",
                     {"reason": "symbol_missing"},
                 )
+            rows = _with_twins(s, rows)
             twins = _twins(rows)
             if twins is not None:
                 rows = [twins[0]]
@@ -618,10 +664,18 @@ def impact(
                 f"truncated: {', '.join(cut)} cut to fit the response cap; the *_total and summary "
                 "figures are complete, items not listed must not be assumed absent"
             )
-        for k in ("instances", "connections", "signal_uses", "descendants"):
+        for k in ("instances", "connections", "signal_uses"):  # descendants are grouped: see below
             tot = data.get(f"{k}_total")
             if isinstance(tot, int) and isinstance(data.get(k), list) and tot > len(data[k]):
                 warns.append(f"{k}: {len(data[k])} of {tot} listed (limit {lim})")
+        groups = data.get("descendants")
+        if isinstance(groups, list) and isinstance(data.get("descendants_total"), int):
+            shown = sum(int(g.get("instances", 0)) for g in groups)
+            if shown < data["descendants_total"]:
+                warns.append(
+                    f"descendants: {len(groups)} definition group(s) cover {shown} of "
+                    f"{data['descendants_total']} instances (limit {lim} groups)"
+                )
         return build_envelope(
             s.ctx,
             s.db,

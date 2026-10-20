@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 from pathlib import Path
 from typing import Any
 
@@ -178,6 +179,19 @@ def load_policy(path: Path) -> Policy:
             f"{path.name} is not owned by the current user",
             {"file": str(path)},
         )
+    # the trusted policy widens what SVWeave may read and write: another local account must not be
+    # able to rewrite it (or swap it through its directory). World-writable is refused; group-write
+    # is not, because user-private groups (umask 002, the RHEL default) make it the owner alone.
+    # `svweave init` creates the file 0600 in a 0700 directory regardless of the umask.
+    for p, what in ((path, "file"), (path.parent, "directory")):
+        mode = p.stat().st_mode
+        if mode & stat.S_IWOTH:
+            raise SvwError(
+                ErrorCode.POLICY_DENIED,
+                f"the trusted policy {what} is writable by others "
+                f"(mode {stat.S_IMODE(mode):o}); run chmod o-w on it",
+                {"file": str(path), "reason": "policy_writable_by_others"},
+            )
     try:
         data = json.loads(text)
     except json.JSONDecodeError as e:

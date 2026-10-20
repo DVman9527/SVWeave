@@ -488,6 +488,14 @@ def symbol(
             outcome=outcome,
             freshness=s.fresh(),
         )
+        size = len(env.to_json(indent=None).encode("utf-8"))
+        if size > MAX_RESPONSE_BYTES and len(cands) > 1:
+            # the candidate budget cannot see the envelope or the AMBIGUOUS_SYMBOL details (which
+            # repeat every kept candidate): measure the real thing and page smaller until it fits
+            return symbol(
+                opts, build_id, request_id, symbol_id=symbol_id, file=file, byte=byte, name=name,
+                limit=max(1, (len(cands) * MAX_RESPONSE_BYTES) // size - 1), cursor=cursor,
+            )
         return flag_oversize(env, "candidates")
 
 

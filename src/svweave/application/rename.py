@@ -33,10 +33,12 @@ import re
 from typing import Any
 
 from svweave.application.impact import (
+    _enclosing,
     _fit,
     _names,
     _owner_definition,
     _twins,
+    _with_twins,
 )
 from svweave.application.options import WorkspaceOptions
 from svweave.application.queries import (
@@ -64,6 +66,10 @@ GLOBAL_KINDS = frozenset({"module", "interface", "program", "package", "primitiv
 END_KEYWORD = {
     "module": rb"endmodule", "interface": rb"endinterface", "program": rb"endprogram",
     "package": rb"endpackage", "primitive": rb"endprimitive", "checker": rb"endchecker",
+    # local blocks: only the label that closes the declaration's OWN block is edited
+    "function": rb"endfunction", "task": rb"endtask", "class": rb"endclass",
+    "property": rb"endproperty", "sequence": rb"endsequence", "covergroup": rb"endgroup",
+    "clocking": rb"endclocking",
 }
 RENAME_NOTE = (
     "every edit site is verified against the snapshot bytes; resolved references and named port "
@@ -183,6 +189,7 @@ def rename_preview(
                 "no declaration matches the target",
                 {"reason": "symbol_missing"},
             )
+        rows = _with_twins(s, rows)
         twins = _twins(rows)
         if twins is not None:
             rows = [twins[0]]
@@ -407,7 +414,7 @@ def rename_preview(
                 like,
             )
             if n_over:
-                warn("parameter_overrides_by_name",
+                block("parameter_overrides_by_name",
                      f"{n_over} instance(s) override this parameter by name (#(.{old}(...))); those "
                      "sites are not edited automatically, see unconfirmed_occurrences",
                      instances=n_over)
@@ -432,16 +439,22 @@ def rename_preview(
             confirmed.setdefault(lf, []).append((a0, a1))
         word = _word_re(old)
         global_kind = decl["kind"] in GLOBAL_KINDS
-        ext = None
-        if scope and not global_kind:  # source extent of the enclosing module/package/class
-            ext = s.one(
-                "SELECT file, COALESCE(full_start, span_start) AS lo, COALESCE(full_end, span_end) "
-                "AS hi FROM declarations WHERE build_id=? AND qualified_name=? AND kind IN "
-                "('module','interface','program','package','class','checker') "
-                "ORDER BY span_start LIMIT 1",
-                s.bid,
-                scope,
-            )
+        ext: dict[str, Any] | None = None
+        if scope and not global_kind:
+            # source extent of the enclosing module/package/class, walking up through generate
+            # blocks, functions and tasks (top.g.f.tmp belongs to module top)
+            er = _enclosing(s, scope, ("module", "interface", "program", "package", "class",
+                                       "checker"))
+            if er is not None:
+                ext = {
+                    "file": er["file"],
+                    "lo": er["full_start"] if er["full_start"] is not None else er["span_start"],
+                    "hi": er["full_end"] if er["full_end"] is not None else er["span_end"],
+                }
+        own_lo = decl["full_start"] if decl["full_start"] is not None else decl["span_start"]
+        own_hi = decl["full_end"] if decl["full_end"] is not None else decl["span_end"]
+        header_uses: list[dict[str, Any]] = []
+        named_args: list[dict[str, Any]] = []
         owner_uses: list[dict[str, Any]] = []
         end_kw = END_KEYWORD.get(str(decl["kind"]))
         unconf: list[dict[str, Any]] = []
@@ -474,9 +487,12 @@ def rename_preview(
                         cat = "named_association"
                     elif re.search(rb"\bend\w*\s*:\s*$", before):
                         cat = "end_label"
+                        own_block = (
+                            sf.logical_path == decl["file"] and own_lo <= off < own_hi
+                        )  # the label that closes THIS declaration's own block
                         if end_kw is not None and re.search(
                             rb"\b" + end_kw + rb"\s*:\s*$", before
-                        ):
+                        ) and (global_kind or own_block):
                             add_site(sf.logical_path, off, mt.end(), "end_label", None, None)
                             continue
                     elif re.search(rb"\bbind\s+$", before):
@@ -491,10 +507,14 @@ def rename_preview(
                 entry = {"file": sf.logical_path, "line": line, "col": col, "category": cat,
                          "text": _line_text(data, off)}
                 if (
-                    ext is not None and cat == "other_use" and sf.logical_path == ext["file"]
-                    and ext["lo"] <= off < ext["hi"]
+                    ext is not None and cat in ("other_use", "end_label")
+                    and sf.logical_path == ext["file"] and ext["lo"] <= off < ext["hi"]
                 ):
                     owner_uses.append(entry)  # inside the declaring scope, yet no resolved reference
+                elif not global_kind and cat == "other_use" and sf.role not in ("source", "filelist"):
+                    header_uses.append(entry)  # an included header: may be spliced into the scope
+                if decl["kind"] == "argument" and cat == "named_association":
+                    named_args.append(entry)  # f(.old(x)): a call binding THIS argument by name
                 if len(unconf) < 4 * lim:
                     unconf.append(entry)
             if scan_truncated:
@@ -513,6 +533,19 @@ def rename_preview(
                 by_category={k: v for k, v in by_cat.items() if k != "comment_or_string"},
                 examples=[x for x in unconf if x["category"] != "comment_or_string"][:5],
             )
+        if scan_truncated:
+            block("lexical_scan_truncated",
+                  f"the occurrence scan stopped after {MAX_SCAN_MATCHES} matches: uses beyond it "
+                  "were not checked")
+        if header_uses:
+            block("unresolved_uses_in_included_files",
+                  f"{len(header_uses)} use(s) of {old!r} in included files are not resolved "
+                  "references (an inactive branch or a macro in a header): they may belong to "
+                  "this entity", examples=header_uses[:5])
+        if named_args:
+            block("named_argument_bindings",
+                  f"{len(named_args)} call(s) bind an argument named {old!r} by name (.{old}(...)); "
+                  "those sites are not edited automatically", examples=named_args[:5])
         if owner_uses:
             block(
                 "unresolved_uses_in_owner_scope",

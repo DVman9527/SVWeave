@@ -33,6 +33,9 @@ deleted file mode 100644
 +++ /dev/null
 @@ -1,4 +0,0 @@
 -a
+-b
+-c
+-d
 diff --git a/dir with space/s.sv b/dir with space/s.sv
 --- a/dir with space/s.sv\t
 +++ b/dir with space/s.sv\t
@@ -94,3 +97,17 @@ def test_DIF_U04_refs_are_plain_tokens_never_options(bad: str) -> None:
 @pytest.mark.parametrize("good", ["HEAD", "HEAD~3", "main", "origin/main", "v1.2.3", "abc123", "HEAD^", "a@b"])
 def test_DIF_U05_ordinary_revisions_pass(good: str) -> None:
     assert check_ref(good, "base") == good
+
+
+def test_DIF_U06_content_lines_that_look_like_headers_are_content() -> None:
+    """A hunk body is consumed by count: an added line `++ note` shows as `+++ note`."""
+    diff = (
+        "diff --git a/f.sv b/f.sv\n--- a/f.sv\n+++ b/f.sv\n"
+        "@@ -3 +3,2 @@\n-old\n+new\n+++ note\n"
+        "@@ -7 +8 @@\n-x\n+y\n"
+        "\\ No newline at end of file\n"
+        "diff --git a/g.sv b/g.sv\n--- a/g.sv\n+++ b/g.sv\n@@ -1 +1 @@\n-p\n+q\x0cr\n"
+    )
+    fds = parse_diff(diff)
+    assert [(f.path, f.hunks) for f in fds] == [("f.sv", [(3, 1), (7, 1)]), ("g.sv", [(1, 1)])]
+    assert fds[0].added == 3 and fds[0].removed == 2

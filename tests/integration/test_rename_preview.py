@@ -304,10 +304,12 @@ endmodule
 """
     root, bid = lean_ws(tmp_path, {"rtl/p.sv": src}, "top")
     code, env = preview(root, bid, "--name", "leaf.a_b", "--to", "c_d")
-    # a_b is never overridden: `_` must not match the x of `axb` (the unescaped LIKE warned here)
+    # a_b is never overridden: `_` must not match the x of `axb` (the unescaped LIKE blocked here)
     assert code == 0 and "parameter_overrides_by_name" not in [
-        w["code"] for w in env["data"]["warnings"]
+        b["code"] for b in env["data"]["blockers"]
     ]
+    assert env["data"]["ready_for_edit_request"] is True, env["data"]["blockers"]
     code, env = preview(root, bid, "--name", "leaf.axb", "--to", "c_d")
-    warn = [w for w in env["data"]["warnings"] if w["code"] == "parameter_overrides_by_name"]
-    assert code == 0 and len(warn) == 1 and warn[0]["instances"] == 1  # the real override is found
+    over = [b for b in env["data"]["blockers"] if b["code"] == "parameter_overrides_by_name"]
+    assert code == 0 and len(over) == 1 and over[0]["instances"] == 1  # the real override is found
+    assert env["data"]["ready_for_edit_request"] is False  # #(.axb(5)) would be left behind

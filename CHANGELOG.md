@@ -22,6 +22,45 @@ pre-release until the qualification report says `ACCEPTED_STATIC_PREVIEW`.
 * **Offline install package** `vendor/`: the hash-locked PyPI wheels, the `[dev]` wheels, Serena (source
   bundle and dependency cache) and a standalone CPython 3.12, with `SHA256SUMS` and install steps.
 
+### Fixed (Opus whole-repository review, 2026-10-20; each finding verified, each fix has a test that fails without it)
+
+* **Edit loop**: a `` `define `` could still be changed through the newline that ends it (exclusive
+  bounds) or when it did not start a line; `exact_range` / `symbol_replacement` text could add
+  `` `define `` / `` `undef ``; an abort landing between commit's checks and its lock left an orphan
+  journal that blocked every later edit (the state is now re-read under the lock); post-apply
+  published each clean profile before the others had passed.
+* **Snapshots and config**: an existing snapshot directory was reused without re-hashing (a
+  repository-shipped `.svweave/` could substitute bytes) and with another profile's metadata; snapshot
+  cleanup chmod-ed symlink targets; project paths under `_ext/` collided with external roots and were
+  treated as external (not blocking); a world-writable trusted policy was accepted; redaction missed
+  `:`-joined paths, `file://` URLs, quoted secret keys, `Authorization: token ...` and dict keys.
+* **Semantic core**: a declared stub whose model has a body came out COMPLETE; two files expanding
+  the same macro at the same offset lost references to deduplication; a second profile with
+  identical inputs reused the first one's build but was never published and was labelled with the
+  first profile's name; a running build absorbed a request with a different `expected_snapshot_id`.
+* **Queries and MCP**: `svw_symbol` could exceed the 128 KiB cap; `debug bundle` crashed on builds with
+  diagnostics; a graph cursor was applied to the text fallback (skipping results) and the fallback
+  minted cursors beyond its own offset limit; schema errors echoed request values; UNKNOWN freshness
+  was reported as a workspace change; the `svw_symbol` schema advertised the wrong default page and
+  `svw_evidence` accepted fields it ignored.
+* **Backends and installer**: a FIFO in a candidate tree hung the gateway and unreadable directories
+  were skipped silently; a backend that failed half-way through start-up was not stopped; malformed
+  Serena output escaped as a bare exception; `--verify-only` passed without a venv; a changed Serena
+  LICENSE was not an error; hardlinks in stripped archives raised an uncaught `KeyError`.
+* **Analysis tools**: rename preview missed unresolved uses inside functions, generate blocks and
+  included headers (a ready edit could commit and leave the old name behind), did not edit a
+  function's own `endfunction : name` label, and treated named argument bindings and parameter
+  overrides as warnings; a port picked by `symbol_id` lost its implicit-net twin; a truncated scan
+  could still be ready. The graph connected different instances of the same module. Diff impact
+  mistook content lines starting with `+++ ` for file headers, could run a repository's git clean
+  filter on the working tree (now refused), and diffed beyond the project's subtree. Impact did not
+  find the owning module through generate blocks and warned about descendants it had listed.
+
+### Known open (not fixed)
+
+* Serena's build backend (`hatchling`) is not hash-pinned when the Serena venv is built; `uv` itself is
+  not pinned; the MCP SDK's stdio reader has no line-length limit. See `docs/security.md`, section 6.
+
 ### Fixed (continued)
 
 * **Instance ids collided for instance-array elements**: slang names an array element `""`, so two

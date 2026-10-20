@@ -266,15 +266,17 @@ class Database:
             (workspace_id, profile, build_id, row["snapshot_id"], _now()),
         )
 
-    def publish_build(self, build_id: str) -> None:
-        """Move the published pointer to an existing COMPLETE build (M4 post-apply)."""
+    def publish_build(self, build_id: str, profile: str | None = None) -> None:
+        """Move the published pointer to an existing COMPLETE build (M4 post-apply). ``profile``
+        is the profile to publish FOR: a build is content-addressed, so two profiles with identical
+        inputs share one build_id, and the second must get its own pointer to it."""
         with self.transaction() as c:
             b = c.execute(
                 "SELECT workspace_id, profile FROM builds WHERE build_id=?", (build_id,)
             ).fetchone()
             if b is None:
                 raise SvwError(ErrorCode.MISSING_INPUT, f"unknown build {build_id}")
-            self._publish(c, b["workspace_id"], b["profile"], build_id)
+            self._publish(c, b["workspace_id"], profile or b["profile"], build_id)
 
     def published(self, workspace_id: str, profile: str) -> sqlite3.Row | None:
         row: sqlite3.Row | None = self.conn.execute(

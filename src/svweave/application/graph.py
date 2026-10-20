@@ -110,9 +110,9 @@ def build_model(s: Any, *, max_instances: int, max_fanout: int) -> dict[str, Any
                 }
             )
         for x in sigs:
-            m = members.setdefault(
-                str(x["declaration_id"]), {"path": str(x.get("path")), "uses": []}
-            )
+            # key by the hierarchical PATH: u1.w and u2.w share one declaration id (same module
+            # instantiated twice) but are different signals
+            m = members.setdefault(str(x.get("path")), {"path": str(x.get("path")), "uses": []})
             m["uses"].append((iid, b["formal_port"], b["direction"]))
 
     edges: list[dict[str, Any]] = []

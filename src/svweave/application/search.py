@@ -309,9 +309,11 @@ def svw_search(
                 if e.code in (ErrorCode.BACKEND_UNAVAILABLE, ErrorCode.CAPABILITY_MISMATCH):
                     registry.note_failure(CBM, e)
                 fallback_reason = f"graph search failed: {e.code.value} ({e.details.get('reason', e.message)})"
-                if cur_mode == CBM_BACKEND:
-                    warnings.append("cursor from the graph backend restarted as a text_fallback search")
-                    offset = 0
+    if cur_mode == CBM_BACKEND:
+        # a graph cursor counts upstream graph rows, never text matches: whatever made us fall back
+        # (no registry, unusable backend, failed call), page 1 of the text results starts at 0
+        warnings.append("cursor from the graph backend restarted as a text_fallback search")
+        offset = 0
     return _text_response(root, snapshot_id, query, scope, limit, offset, qh, rid, workspace_id, profile,
                           fallback_reason or "", warnings, text_limits, key)
 
@@ -412,8 +414,12 @@ def _text_response(
               "query": query, "files_scanned": scan.files_scanned},
         pagination=Pagination(
             limit=limit, truncated=truncated,
-            next_cursor=encode_cursor(snapshot_id, qh, TEXT_FALLBACK, offset + len(items), key) if more else None),
+            # never mint a cursor this tool would refuse: past MAX_OFFSET the page stays truncated
+            next_cursor=encode_cursor(snapshot_id, qh, TEXT_FALLBACK, offset + len(items), key)
+            if more and offset + len(items) <= MAX_OFFSET else None),
         warnings=[f"DEGRADED: {reason}", *warnings]
+        + ([f"results beyond offset {MAX_OFFSET} cannot be paged; narrow the query or the scope"]
+           if more and offset + len(items) > MAX_OFFSET else [])
         + (["response capped at 128 KiB; use next_cursor"] if capped else [])
         + (["text scan hit its file/byte/time budget; results may be incomplete"] if scan.truncated_by_budget else []),
     )

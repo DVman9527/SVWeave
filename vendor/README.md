@@ -2,7 +2,9 @@
 
 Only what cannot be fetched from GitHub. Everything GitHub-hosted is NOT stored here and is
 downloaded by `bootstrap_locked.py` (sha256-verified against `toolchain.lock.json`): slang, Verible,
-codebase-memory-mcp, uvm-core and `uv` itself. Serena is included on request (below), although its
+codebase-memory-mcp and uvm-core. `uv` itself is NOT pinned or verified: the installer uses the
+`uv` found on `PATH` (install it from its official release and check the published checksum).
+Serena is included on request (below), although its
 source is on GitHub too: its PyPI dependencies are what a host without PyPI access really needs.
 
 Coverage is checked against the tool list in `install_IT.md` section 7 (items 8 to 41).

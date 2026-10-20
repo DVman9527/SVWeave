@@ -101,6 +101,11 @@ def safe_extract(archive: Path, dest: Path, strip: int) -> None:
             if len(parts) <= strip:
                 continue
             m.name = str(Path(*parts[strip:]))
+            if m.islnk():  # a hardlink names another MEMBER: it must be stripped the same way
+                lparts = Path(m.linkname).parts
+                if len(lparts) <= strip:
+                    raise LockError(f"hardlink {m.name!r} -> {m.linkname!r} leaves the archive root")
+                m.linkname = str(Path(*lparts[strip:]))
             members.append(m)
         if dest.exists():
             shutil.rmtree(dest)
@@ -243,6 +248,8 @@ def install_serena(lock: dict, toolchain: Path, verify_only: bool, uv: str, repo
     entry["license_sha256_ok"] = lic_ok
     if not entry["commit_ok"] or not lock_ok:
         report["errors"].append(f"serena: commit/uv.lock mismatch (HEAD={head})")
+    elif not lic_ok:  # the license is part of what was reviewed (ADR-010): a swap is not "ok"
+        report["errors"].append("serena: LICENSE sha256 != lock")
     elif not verify_only:
         _serena_sync(c, src, venv, uv, uv_cache or toolchain / "state/uv-cache")
     exe = venv / "bin/serena"
@@ -304,6 +311,10 @@ def install_wheels(lock: dict, toolchain: Path, verify_only: bool, venv_python: 
         subprocess.run([uv, "pip", "install", "-q", "--python", venv_python, "--offline", "--no-index",
                         "--find-links", str(wh), "--require-hashes", "-r", str(reqs)],
                        check=True, timeout=900)
+    if verify_only and venv_python and not Path(venv_python).exists():
+        report["errors"].append(
+            "gateway venv missing: nothing to verify at " + str(venv_python) + " (use --no-venv to skip)"
+        )
     if venv_python and Path(venv_python).exists():
         for name in WHEELS:
             dist = {"pyslang": "pyslang", "mcp_sdk": "mcp"}[name]
@@ -387,8 +398,8 @@ def main() -> int:
             install_serena(lock, toolchain, a.verify_only, a.uv, report,
                            Path(a.serena_source).resolve() if a.serena_source else None,
                            Path(a.uv_cache_dir).resolve() if a.uv_cache_dir else None)
-    except (LockError, subprocess.CalledProcessError, OSError) as e:
-        report["errors"].append(f"{type(e).__name__}: {e}")
+    except (LockError, subprocess.CalledProcessError, OSError, tarfile.TarError, KeyError) as e:
+        report["errors"].append(f"{type(e).__name__}: {e}")  # always a JSON report, never a traceback
     report["ok"] = not report["errors"]
     out = json.dumps(report, indent=2)
     out = out.replace(str(REPO), "${REPO}").replace(str(Path.home()), "${HOME}")  # no private host paths
