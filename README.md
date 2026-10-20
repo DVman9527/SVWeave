@@ -203,6 +203,17 @@ it and aborts on any mismatch. Long form: `docs/install.md`; the committed offli
 
 Run every command from the repository root. Pick the path that matches your host's network.
 
+<p align="center"><img src="docs/images/install-flow.svg" alt="Installation flow. Three paths at the top: (a) online, python3.12 scripts/bootstrap_locked.py --create-venv, where the installer downloads every artifact of the lock and verifies its sha256, with optional dev wheels from vendor/downloads/wheelhouse-dev; (b) GitHub reachable but not PyPI, where vendor/ is checked with (cd vendor &amp;&amp; sha256sum -c SHA256SUMS), uv-cache.tar.gz, serena-src.bundle and the CPython 3.12.15 tarball are unpacked into .toolchain/state/uv-cache, .toolchain/serena-src and .toolchain/runtime/python, and the installer runs with --artifact-dir vendor/downloads --create-venv --python .toolchain/runtime/python/bin/python3 while slang, Verible, codebase-memory-mcp and uvm-core are still downloaded from GitHub and verified; (c) fully offline, where --fetch-only on a connected host fills .toolchain/downloads, serena-src and state/uv-cache, the repository is copied with .toolchain/, and --offline --create-venv --venv-dir .venv installs from the cache with no network. All three enter scripts/bootstrap_locked.py driven by toolchain.lock.json, which runs four steps in order: 1 the pinned uv 0.12.23, whose tarball sha256 is checked before it is opened and whose extracted binary is checked again, then used for every uv command with UV_PYTHON_DOWNLOADS=never (--uv PATH is reported unverified); 2 the backend archives slang v12.0, Verible, codebase-memory-mcp v0.11.0 portable and uvm-core 2020.3.1, checked before extraction with path traversal rejected and binaries checked again; 3 the gateway venv .venv, created with the pinned uv on python3.12 or --python, 31 hash-locked wheels installed with --no-index --require-hashes and the source tree linked in; 4 Serena v1.7.0 from the pinned commit with uv.lock and LICENSE hashes checked, 8 hash-pinned build wheels and uv sync --frozen --no-dev --no-build-isolation. Success is ok true and exit 0 with one JSON report; failure is ok false, exit 2 and errors, never skipped or substituted. Bottom left: the resulting .toolchain/ with uv, runtime, slang, verible, cbm, uvm-core, serena-src, serena-venv, state and downloads, and the gateway .venv. Bottom right: the checks bootstrap_locked.py --verify-only, svweave init, svweave doctor, svweave doctor --probe and svweave build --profile rtl_demo." width="100%"></p>
+
+*Whichever path you take, the same installer does the work and the lock decides what is accepted:
+the pinned uv is the first download and nothing else runs before its hash matches; every archive and
+wheel is checked against `toolchain.lock.json` before it is opened; the gateway venv and the Serena
+venv are built by the installer itself, the second without build isolation from hash-pinned build
+wheels. Path (b) differs only in where the files come from (`vendor/`, reused because their sha256
+matches) and path (c) only in when the network is used (once, for `--fetch-only`). Each step and
+flag is spelled out below; the checks at the bottom right are [Verify the
+install](#verify-the-install).*
+
 **(a) A host that can reach PyPI and GitHub**
 
 ```bash
@@ -323,6 +334,16 @@ or by the AI doing the installation; the same steps, written for the AI, are in
 `/ABS/PATH` is this SVWeave checkout (so `/ABS/PATH/.venv/bin/svweave` is the binary) and
 `/ABS/PATH/TO/PROJECT` is the target project root, the directory that holds its `svweave.yaml`.
 Every step is idempotent.
+
+<p align="center"><img src="docs/images/ai-integration.svg" alt="Connecting a design project and an AI client. Top: from the SVWeave checkout three things reach the target design project: (i) the MCP server registered under the name svweave with claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio, or .mcp.json with -s project, or the [mcp_servers.svweave] table for Codex, one entry only; (ii) the specialist agent .claude/agents/svweave-mcp.md with name svweave-mcp, copied from docs/agents/svweave-mcp-specialist.md; (iii) the block between the svweave:begin and svweave:end markers from docs/agents/AGENTS.snippet.md, inserted into AGENTS.md or CLAUDE.md by replacing the existing block or appending it once. Step 1 (svweave.yaml workspace, external root, first build) comes first and step 5 checks that /mcp shows svweave connected and svw_status returns OK. Middle: at run time the main agent, Claude Code or Codex, reads the AGENTS.md block and routes HDL structure questions to the svweave-mcp specialist, which calls the 14 mcp__svweave__svw_* tools over MCP stdio of one gateway process per client; each call returns one JSON envelope with build_id, snapshot_id, freshness and analysis_coverage. The specialist's workflow: svw_status, svw_build returning a job_id, svw_job polled to SUCCEEDED, queries with the build_id, and optionally svw_edit. Bottom: the agent may read, build and prepare, validate or abort an edit when editing is enabled; it can never approve: a human runs svweave edit approve on a real terminal before a commit." width="100%"></p>
+
+*Installing into a project leaves three artifacts there, all keyed to the name `svweave`: the MCP
+registration (`--root` binds that gateway to one project), the specialist agent and the routing
+block. The block is what makes the project's main agent hand SystemVerilog structure questions to
+the specialist instead of grepping; the specialist then builds first and queries that build, and
+stops at `validate` when it proposes an edit, because approval exists only on a human's terminal.
+None of these client setups is exercised by SVWeave's test suite (see [Using SVWeave with Claude
+Code and Codex](#using-svweave-with-claude-code-and-codex)).*
 
 **1. Point SVWeave at the project.** SVWeave never has to live inside the design: keep
 `svweave.yaml` in a workspace directory and attach the design as an **external root** (declared
@@ -475,6 +496,15 @@ snippet, check) is step 1 to 5 of
 
 All four read one build and say so: the envelope carries the build id, completeness, freshness and
 limitations, lists are capped with complete totals, and nothing they report is a risk score.
+
+<p align="center"><img src="docs/images/analysis-tools.svg" alt="Analysis tools. Top: one build, build_id = hash of snapshot_id, config_id, toolchain_id and schema version, COMPLETE or PARTIAL and CURRENT, STALE or HISTORICAL, holding the immutable snapshot bytes, the instance tree elaborated under the profile's tops, the declarations with statically resolved references, and the direct port associations. Four columns read it. Impact (svw_impact, svweave query impact): one target by --name, --symbol, --file plus --byte or --instance; returns for a module or interface every instance, dependents up to --depth, dependencies and references, for a port each connection site and dependents, for a net, variable or parameter resolved references and connections, for an instance its ancestors, subtree and port connections; ambiguity gives AMBIGUOUS_SYMBOL. Git diff impact (svw_diff_impact, svweave query diff-impact): git diff -U0 from --base HEAD to --head, the working tree by default, with fixed argv, no shell and a size cap; old-side lines are mapped onto the snapshot bytes, per file aligned or approximate; returns changed declarations, their modules' instances and dependents and changed ports with their connection sites; files outside the build are only listed, headers are not re-expanded. Rename preview (svw_rename_preview, svweave query rename-preview), read-only: the declaration, resolved references, formal names of named connections, the end label and bind targets, each verified against the snapshot bytes; returns diff, blockers, warnings, other lexical occurrences and an edit_request when ready; blocks on unresolved references, .* and .name connections, macro sites, name collisions, a build that is not COMPLETE and CURRENT, and named parameter overrides. Graph export (svweave graph export --build B, CLI only): one static .svweave/exports/graph-build.html with the instance tree and dashed connections between instances that use the same signal declaration in a direct port association; hubs over --max-fanout 16 are listed, at most --max-instances 5000 shallowest first, file://, strict CSP, not a netlist. Bottom: impact and diff impact return a JSON envelope, rename preview feeds the controlled edit loop with its edit_request, graph export is opened in a browser from disk." width="100%"></p>
+
+*All four tools are views of the same stored build; none re-elaborates the design or touches the
+source tree. They differ in what they start from (a declaration or instance, a git diff, a rename
+target, the whole tree) and in what they hand on: an envelope, an `edit_request` that only the
+[controlled edit workflow](#controlled-edit-workflow) can apply, or a static HTML page. Each inherits
+the build's completeness and freshness, so a `PARTIAL` or `STALE` build gives an answer that says so;
+the rename preview refuses to be "ready" on anything but a `COMPLETE`, `CURRENT` build.*
 
 ### Impact (`svweave query impact`, `svw_impact`)
 
@@ -1338,6 +1368,27 @@ shell or file tools can write the source tree. `svweave doctor` therefore always
 `client_boundary: not qualified`, and editing is off by default. `bwrap` has no resource limits or
 seccomp filter. Local indexing is not end-to-end offline: snippets returned to a cloud-model client
 leave the machine. Details: `docs/security.md`.
+
+<p align="center"><img src="docs/images/backend-sandbox.svg" alt="Backend sandbox and transport bounds. Left, the trusted gateway: the SandboxRunner in security/sandbox.py builds one bwrap argument array, never a shell string, checks the write surface with validate_spec, and without usable bwrap raises BACKEND_UNAVAILABLE unless degraded mode was allowed and flagged as degraded_no_isolation. The bounded MCP stdio transport keeps the SDK's stdio_client contract but reads stdout as raw bytes in 64 KiB reads, accepting at most 16 MiB per JSON-RPC line and 16 Mi characters per tool result; the pinned backends stay below that (cbm itself refuses responses over about 10 MiB, Serena truncates each answer to 150,000 characters). On overflow: 1 the backend's process group is terminated, SIGTERM then SIGKILL, and reaped; 2 the offending call fails with BACKEND_UNAVAILABLE reason message_too_large for a too-long line or OUTPUT_LIMIT reason result_too_large for a too-long result; 3 other calls on that backend in the result case fail with BACKEND_UNAVAILABLE reason backend_terminated. Stderr goes to a host-only log, a non-protocol stdout line is a protocol_error, and the protocol revision must match the pinned one. Right, the bwrap sandbox, one per backend process: namespaces --die-with-parent, --new-session, --unshare-user, --unshare-pid, --unshare-ipc, --unshare-uts, --unshare-cgroup-try, --unshare-net; /usr read-only with /bin, /sbin, /lib and /lib64 as symlinks into it, only a short list of /etc files, /proc and /dev, $HOME not bound; a private tmpfs /tmp where codebase-memory-mcp gets /tmp/cbm-rt for CBM_RUNTIME_DIR because a unix socket path must fit sockaddr_un, about 108 bytes; read-only binds of the pinned toolchain, the venv interpreter's executable, stdlib and libpython, and the snapshot, with the venv's bin/python symlink chain recreated by --symlink only where mount_providing finds no mount already showing it; read-write binds only for the candidate copy and the backend's work directory; refused: a writable bind on or around the protected original source, writable system directories or $HOME, and a path bound both ways; the backend process starts as /usr/bin/env -i with an explicit environment allowlist." width="100%"></p>
+
+*Two controls meet at the backend boundary. The sandbox decides what a backend process can see and
+write: a namespaced, network-less view of `/usr` and a few `/etc` files, read-only binds of exactly
+the toolchain, interpreter and snapshot it needs, and write access to two directories only, its
+candidate copy (Serena) and its own work directory; the original source is protected by
+`validate_spec()` and by default not mounted at all. The transport decides how much a backend can
+make the gateway hold in memory: the MCP SDK's reader had no line limit, so the gateway reads backend
+output through its own bounded reader and kills the backend before it reports an oversized message
+or result.*
+
+Two details the figure shows that are easy to miss. codebase-memory-mcp coordinates through a unix
+socket under `CBM_RUNTIME_DIR`, and a socket path longer than the kernel's `sockaddr_un` limit
+(about 108 bytes) fails, which a deep workspace path easily reaches; the sandbox therefore gives it
+the short private directory `/tmp/cbm-rt` on its ephemeral `/tmp`. Read-only binds are made by real
+path, so a venv whose interpreter is reached through a symlink chain (a python-build-standalone
+runtime has `bin/python3 -> python3.12`) would lose the intermediate links; the Serena sandbox
+recreates them with `--symlink`, but only where no bind already shows the link, because a link
+inside a bind would be created on the host (`mount_providing()`). Limits and reasons:
+`docs/security.md` sections 3 and 6.
 
 ## Known limitations
 

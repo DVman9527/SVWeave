@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 940" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Connecting a design project and an AI client</title>
+<desc id="d">Top: installing SVWeave into a target design project, every step idempotent. From the SVWeave checkout three things reach the project: (i) the MCP server registration named svweave, made with claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio (or .mcp.json, or the mcp_servers.svweave table of the Codex config.toml), where --root binds the gateway to that one project; (ii) the specialist agent .claude/agents/svweave-mcp.md, copied from docs/agents/svweave-mcp-specialist.md; (iii) the block between &lt;!-- svweave:begin --&gt; and &lt;!-- svweave:end --&gt; from docs/agents/AGENTS.snippet.md, inserted into the project's AGENTS.md or CLAUDE.md by replacing the old block or appending once. Beforehand the project gets an svweave.yaml workspace and a first build; afterwards /mcp and svw_status check the connection. Bottom: at run time the main agent reads the snippet and routes SystemVerilog structure questions to the svweave-mcp specialist, which calls the mcp__svweave__svw_* tools of one gateway process per client; the gateway answers with one envelope per call. The specialist builds first (svw_status, svw_build, svw_job) and then queries with the build_id. It may prepare, validate and abort an edit with svw_edit when editing is enabled, but it can never approve: a human runs svweave edit approve on a real terminal, and only then can svweave edit commit or svw_edit commit apply the change.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="940" class="bg"/>
+<text x="40" y="32" class="tx b s16">Connecting a design project and an AI client</text>
+<text x="1160" y="32" class="mu s12" text-anchor="end">every install step is idempotent; README steps 1 to 5</text>
+<rect x="40" y="52" width="340" height="332" rx="8" class="n"/>
+<text x="52" y="74" class="tx b s14">SVWeave checkout (/ABS/PATH)</text>
+<rect x="56" y="90" width="308" height="52" rx="8" class="chip"/>
+<text x="68" y="111" class="tx b s12 mono">.venv/bin/svweave</text>
+<text x="68" y="130" class="mu s12">the gateway binary (absolute path)</text>
+<rect x="56" y="186" width="308" height="52" rx="8" class="chip"/>
+<text x="68" y="207" class="tx b s12 mono">docs/agents/</text>
+<text x="68" y="226" class="tx s12 mono">svweave-mcp-specialist.md</text>
+<rect x="56" y="282" width="308" height="52" rx="8" class="chip"/>
+<text x="68" y="303" class="tx b s12 mono">docs/agents/</text>
+<text x="68" y="322" class="tx s12 mono">AGENTS.snippet.md</text>
+<text x="52" y="362" class="mu s12">step 1 first: svweave.yaml workspace,</text>
+<text x="52" y="378" class="mu s12">external root, svweave build --profile P</text>
+<rect x="500" y="52" width="660" height="332" rx="8" class="n"/>
+<text x="512" y="74" class="tx b s14">Target design project (/ABS/PATH/TO/PROJECT)</text>
+<rect x="516" y="86" width="628" height="92" rx="8" class="a"/>
+<text x="528" y="106" class="ta b s13">(i) MCP server registered under the name svweave (step 2)</text>
+<text x="528" y="126" class="tx s12 mono">claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave</text>
+<text x="548" y="144" class="tx s12 mono">--root /ABS/PATH/TO/PROJECT serve --transport stdio</text>
+<text x="528" y="165" class="mu s12">or .mcp.json (-s project); Codex: [mcp_servers.svweave]; one entry only</text>
+<rect x="516" y="186" width="628" height="72" rx="8" class="chip"/>
+<text x="528" y="206" class="tx b s13">(ii) specialist agent (step 3)</text>
+<text x="528" y="226" class="tx s12 mono">.claude/agents/svweave-mcp.md   name: svweave-mcp</text>
+<text x="528" y="246" class="mu s12">copied over any older copy; the name is what the snippet routes to</text>
+<rect x="516" y="266" width="628" height="72" rx="8" class="chip"/>
+<text x="528" y="286" class="tx b s13">(iii) routing block in AGENTS.md or CLAUDE.md (step 4)</text>
+<text x="528" y="306" class="tx s12 mono">&lt;!-- svweave:begin --&gt; ... &lt;!-- svweave:end --&gt;</text>
+<text x="528" y="326" class="mu s12">markers present: replace that block; else append once</text>
+<text x="512" y="366" class="mu s12">check (step 5): /mcp shows svweave connected; svw_status outcome OK</text>
+<path d="M364,116 L512,122" class="l" marker-end="url(#mg)"/>
+<text x="392" y="108" class="mu s12">register</text>
+<path d="M364,212 L512,212" class="l" marker-end="url(#mg)"/>
+<text x="392" y="204" class="mu s12">copy</text>
+<path d="M364,308 L512,308" class="l" marker-end="url(#mg)"/>
+<text x="392" y="300" class="mu s12">insert</text>
+<line x1="24" y1="412" x2="1176" y2="412" class="lf"/>
+<text x="40" y="440" class="tx b s16">At run time</text>
+<text x="1160" y="440" class="mu s12" text-anchor="end">Claude Code or Codex; each client starts its own gateway process</text>
+<rect x="40" y="456" width="250" height="128" rx="8" class="n"/>
+<text x="52" y="478" class="tx b s14">Main agent</text>
+<text x="52" y="502" class="mu s12">Claude Code or Codex session</text>
+<text x="52" y="521" class="mu s12">reads the AGENTS.md block:</text>
+<text x="52" y="540" class="mu s12">HDL structure question?</text>
+<text x="52" y="559" class="mu s12">route it, do not grep</text>
+<rect x="330" y="456" width="250" height="128" rx="8" class="n"/>
+<text x="342" y="478" class="tx b s14">svweave-mcp specialist</text>
+<text x="342" y="502" class="tx s12 mono">.claude/agents/svweave-mcp.md</text>
+<text x="342" y="521" class="tx s12 mono">tools: mcp__svweave__svw_*</text>
+<text x="342" y="540" class="mu s12">plus Read, Grep, Glob</text>
+<text x="342" y="559" class="mu s12">cites build_id, freshness</text>
+<rect x="620" y="456" width="250" height="128" rx="8" class="n"/>
+<text x="632" y="478" class="tx b s14">mcp__svweave__svw_*</text>
+<text x="632" y="502" class="mu s12">14 tools over MCP stdio</text>
+<text x="632" y="521" class="mu s12">the client launches</text>
+<text x="632" y="540" class="tx s12 mono">svweave --root P serve</text>
+<text x="632" y="559" class="mu s12">no raw backend servers</text>
+<rect x="910" y="456" width="250" height="128" rx="8" class="a"/>
+<text x="922" y="478" class="ta b s14">SVWeave gateway</text>
+<text x="922" y="502" class="mu s12">one process per client</text>
+<text x="922" y="521" class="mu s12">builds and answers from</text>
+<text x="922" y="540" class="mu s12">one immutable build</text>
+<text x="922" y="559" class="mu s12">3 sandboxed backends</text>
+<path d="M290,496 L330,496" class="la" marker-end="url(#ma)"/>
+<path d="M580,496 L620,496" class="la" marker-end="url(#ma)"/>
+<path d="M870,496 L910,496" class="la" marker-end="url(#ma)"/>
+<path d="M1035,584 L1035,614 L165,614 L165,586" class="l" marker-end="url(#mg)"/>
+<text x="600" y="608" class="mu s12" text-anchor="middle">one JSON envelope per call: build_id, snapshot_id, freshness, analysis_coverage</text>
+<text x="40" y="640" class="tx b s14">The specialist's workflow: build first, then query that build</text>
+<rect x="40" y="654" width="208" height="70" rx="8" class="chip"/>
+<text x="52" y="676" class="tx b s13">1 svw_status</text>
+<text x="52" y="696" class="mu s12">backend health and, per</text>
+<text x="52" y="714" class="mu s12">profile, the current build</text>
+<path d="M248,689 L268,689" class="l" marker-end="url(#mg)"/>
+<rect x="268" y="654" width="208" height="70" rx="8" class="chip"/>
+<text x="280" y="676" class="tx b s13">2 svw_build {profile}</text>
+<text x="280" y="696" class="mu s12">returns a job_id at once</text>
+<text x="280" y="714" class="mu s12">CLI: svweave build</text>
+<path d="M476,689 L496,689" class="l" marker-end="url(#mg)"/>
+<rect x="496" y="654" width="208" height="70" rx="8" class="chip"/>
+<text x="508" y="676" class="tx b s13">3 svw_job {job_id}</text>
+<text x="508" y="696" class="mu s12">poll to SUCCEEDED; read</text>
+<text x="508" y="714" class="mu s12">completeness, published</text>
+<path d="M704,689 L724,689" class="l" marker-end="url(#mg)"/>
+<rect x="724" y="654" width="208" height="70" rx="8" class="chip"/>
+<text x="736" y="676" class="tx b s13">4 query with build_id</text>
+<text x="736" y="696" class="mu s12">svw_symbol, references,</text>
+<text x="736" y="714" class="mu s12">hierarchy, impact, ...</text>
+<path d="M932,689 L952,689" class="l" marker-end="url(#mg)"/>
+<rect x="952" y="654" width="208" height="70" rx="8" class="chip"/>
+<text x="964" y="676" class="tx b s13">5 optional svw_edit</text>
+<text x="964" y="696" class="mu s12">prepare, validate, abort</text>
+<text x="964" y="714" class="mu s12">only if editing enabled</text>
+<rect x="40" y="752" width="540" height="112" rx="8" class="n"/>
+<text x="52" y="774" class="tx b s14">What the agent may do (through the gateway)</text>
+<text x="52" y="798" class="mu s12">read: all query tools, svw_status, svw_evidence</text>
+<text x="52" y="817" class="mu s12">start and poll builds: svw_build, svw_job</text>
+<text x="52" y="836" class="mu s12">svw_edit prepare / validate / abort when editing is enabled</text>
+<text x="52" y="855" class="mu s12">in svweave.yaml and in the trusted policy (off by default)</text>
+<rect x="620" y="752" width="540" height="112" rx="8" class="w"/>
+<text x="632" y="774" class="tw b s14">What it can never do: approve</text>
+<text x="632" y="798" class="mu s12">no approve tool and no approval field over MCP</text>
+<text x="632" y="817" class="tx s12">a human runs svweave edit approve --transaction T</text>
+<text x="632" y="836" class="tx s12">--patch-hash H on a real terminal (TTY)</text>
+<text x="632" y="855" class="mu s12">then edit commit (CLI or svw_edit commit) checks that record</text>
+<path d="M580,808 L620,808" class="lw" marker-end="url(#mw)"/>
+<text x="40" y="892" class="mu s12">Client boundary not qualified: a client's own shell or file tools can bypass the gateway (docs/security.md section 4).</text>
+<text x="40" y="912" class="mu s12">Setup details: README steps 1 to 5 and docs/agents/svweave-mcp-specialist.md, section "Installing into a project".</text>
+</svg>

@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 850" width="100%" role="img" aria-labelledby="t d">
+<title id="t">SVWeave analysis tools</title>
+<desc id="d">One published build, identified by build_id, holds the immutable snapshot bytes, the elaborated instance tree under the tops, the declarations with their resolved references, and the direct port associations. Four tools read it. Impact (svw_impact, svweave query impact) takes one declaration or instance and returns, for a module or interface, its instances, dependents up to --depth and dependencies; for a port, its connection sites and dependents; for a net, variable or parameter, its resolved references and port connections; for an instance, its ancestors, subtree and connections. Diff impact (svw_diff_impact, svweave query diff-impact) reads git diff -U0 from --base (HEAD) to --head (the working tree), maps the old-side lines onto the snapshot bytes and returns the changed declarations, their modules' instances and dependents, and changed ports with their connection sites, per file aligned or flagged approximate. Rename preview (svw_rename_preview, svweave query rename-preview) is read-only: it lists every edit, each verified against the snapshot bytes, plus a diff, blockers, warnings and a lexical scan of other occurrences, and returns an edit_request for the controlled edit loop when nothing blocks. Graph export (svweave graph export, CLI only) writes one static HTML file with the instance tree and the connections derived from port associations. Every answer is one envelope with build_id, completeness, freshness and limitations; counts are not risk scores and absence from a partial, stale or truncated answer is not proof of absence.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="850" class="bg"/>
+<text x="40" y="32" class="tx b s16">Analysis tools: four read-only views of one published build</text>
+<text x="1160" y="32" class="mu s12" text-anchor="end">nothing here writes the source tree</text>
+<rect x="40" y="52" width="1120" height="118" rx="8" class="a"/>
+<text x="52" y="74" class="ta b s14">One build: build_id = hash(snapshot_id, config_id, toolchain_id, schema version)</text>
+<text x="1148" y="74" class="mu s12" text-anchor="end">COMPLETE or PARTIAL; CURRENT, STALE or HISTORICAL</text>
+<rect x="56" y="88" width="260" height="70" rx="8" class="chip"/>
+<text x="68" y="108" class="tx b s13">immutable snapshot</text>
+<text x="68" y="128" class="mu s12">bytes + inventory of every</text>
+<text x="68" y="146" class="mu s12">input file at build time</text>
+<rect x="332" y="88" width="260" height="70" rx="8" class="chip"/>
+<text x="344" y="108" class="tx b s13">instance tree</text>
+<text x="344" y="128" class="mu s12">elaborated by slang under</text>
+<text x="344" y="146" class="mu s12">the profile's tops</text>
+<rect x="608" y="88" width="260" height="70" rx="8" class="chip"/>
+<text x="620" y="108" class="tx b s13">declarations + references</text>
+<text x="620" y="128" class="mu s12">statically resolved by slang;</text>
+<text x="620" y="146" class="mu s12">unresolved ones are listed</text>
+<rect x="884" y="88" width="260" height="70" rx="8" class="chip"/>
+<text x="896" y="108" class="tx b s13">port associations</text>
+<text x="896" y="128" class="mu s12">direct port connections:</text>
+<text x="896" y="146" class="mu s12">actual expression, signals</text>
+<path d="M172,170 L172,214" class="l" marker-end="url(#mg)"/>
+<path d="M457,170 L457,214" class="l" marker-end="url(#mg)"/>
+<path d="M742,170 L742,214" class="l" marker-end="url(#mg)"/>
+<path d="M1027,170 L1027,214" class="l" marker-end="url(#mg)"/>
+<text x="180" y="198" class="mu s12">tree, references, ports</text>
+<text x="465" y="198" class="mu s12">bytes, declarations, tree</text>
+<text x="750" y="198" class="mu s12">references, bytes</text>
+<text x="1035" y="198" class="mu s12">tree, ports</text>
+<rect x="40" y="214" width="265" height="440" rx="8" class="n"/>
+<text x="52" y="236" class="tx b s14">Impact</text>
+<text x="52" y="256" class="tx s12 mono">svw_impact</text>
+<text x="52" y="275" class="tx s12 mono">svweave query impact</text>
+<text x="52" y="298" class="ta b s12">input: one target</text>
+<text x="52" y="317" class="mu s12">--name, --symbol, --file + --byte,</text>
+<text x="52" y="335" class="mu s12">or --instance; --depth</text>
+<text x="52" y="357" class="ta b s12">returns</text>
+<text x="52" y="376" class="mu s12">module / interface: every</text>
+<text x="52" y="394" class="mu s12">instance, dependents (up to</text>
+<text x="52" y="412" class="mu s12">--depth), dependencies, refs</text>
+<text x="52" y="430" class="mu s12">port: each connection site</text>
+<text x="52" y="448" class="mu s12">(actual, signals, file:line),</text>
+<text x="52" y="466" class="mu s12">uses further down, dependents</text>
+<text x="52" y="484" class="mu s12">net, variable, parameter:</text>
+<text x="52" y="502" class="mu s12">resolved refs, connections</text>
+<text x="52" y="520" class="mu s12">instance: ancestors, subtree,</text>
+<text x="52" y="538" class="mu s12">its own port connections</text>
+<text x="52" y="560" class="tw b s12">limits</text>
+<text x="52" y="579" class="mu s12">ambiguous name:</text>
+<text x="52" y="597" class="mu s12">AMBIGUOUS_SYMBOL + candidates</text>
+<text x="52" y="615" class="mu s12">never-instantiated module:</text>
+<text x="52" y="633" class="mu s12">no dependents in this build</text>
+<rect x="325" y="214" width="265" height="440" rx="8" class="n"/>
+<text x="337" y="236" class="tx b s14">Git diff impact</text>
+<text x="337" y="256" class="tx s12 mono">svw_diff_impact</text>
+<text x="337" y="275" class="tx s12 mono">svweave query diff-impact</text>
+<text x="337" y="298" class="ta b s12">input: git diff -U0</text>
+<text x="337" y="317" class="mu s12">--base (HEAD) to --head</text>
+<text x="337" y="335" class="mu s12">(default: the working tree);</text>
+<text x="337" y="353" class="mu s12">fixed argv, no shell, size cap</text>
+<text x="337" y="375" class="ta b s12">maps OLD-side lines</text>
+<text x="337" y="394" class="mu s12">onto the snapshot bytes:</text>
+<text x="337" y="412" class="mu s12">per file aligned (bytes equal</text>
+<text x="337" y="430" class="mu s12">the base) or approximate</text>
+<text x="337" y="452" class="ta b s12">returns</text>
+<text x="337" y="471" class="mu s12">changed declarations, their</text>
+<text x="337" y="489" class="mu s12">modules' instances and</text>
+<text x="337" y="507" class="mu s12">dependents; changed ports</text>
+<text x="337" y="525" class="mu s12">with their connection sites</text>
+<text x="337" y="547" class="tw b s12">limits</text>
+<text x="337" y="566" class="mu s12">files outside the build: listed</text>
+<text x="337" y="584" class="mu s12">headers: no re-expansion</text>
+<text x="337" y="602" class="mu s12">STALE by definition, exit</text>
+<text x="337" y="620" class="mu s12">code unchanged</text>
+<rect x="610" y="214" width="265" height="440" rx="8" class="n"/>
+<text x="622" y="236" class="tx b s14">Rename preview</text>
+<text x="622" y="256" class="tx s12 mono">svw_rename_preview</text>
+<text x="622" y="275" class="tx s12 mono">svweave query rename-preview</text>
+<text x="622" y="298" class="ta b s12">edit set, each span verified</text>
+<text x="622" y="317" class="mu s12">declaration, resolved refs,</text>
+<text x="622" y="335" class="mu s12">.old(expr) formal names,</text>
+<text x="622" y="353" class="mu s12">end-label, bind targets;</text>
+<text x="622" y="371" class="mu s12">bytes at the span = old name</text>
+<text x="622" y="393" class="ta b s12">returns (read-only)</text>
+<text x="622" y="412" class="mu s12">diff, blockers, warnings,</text>
+<text x="622" y="430" class="mu s12">other lexical occurrences,</text>
+<text x="622" y="448" class="mu s12">edit_request when ready</text>
+<text x="622" y="470" class="tw b s12">blocks rather than guesses</text>
+<text x="622" y="489" class="mu s12">unresolved refs, .* and .name,</text>
+<text x="622" y="507" class="mu s12">macro sites, name collision,</text>
+<text x="622" y="525" class="mu s12">build not COMPLETE + CURRENT,</text>
+<text x="622" y="543" class="mu s12">named parameter overrides</text>
+<rect x="895" y="214" width="265" height="440" rx="8" class="n"/>
+<text x="907" y="236" class="tx b s14">Graph export</text>
+<text x="907" y="256" class="tx s12 mono">svweave graph export</text>
+<text x="907" y="275" class="tx s12 mono">--build B   (CLI only)</text>
+<text x="907" y="298" class="ta b s12">writes one static file</text>
+<text x="907" y="317" class="mu s12">.svweave/exports/</text>
+<text x="907" y="335" class="mu s12">graph-&lt;build&gt;.html</text>
+<text x="907" y="357" class="ta b s12">shows</text>
+<text x="907" y="376" class="mu s12">instance tree (collapse,</text>
+<text x="907" y="394" class="mu s12">search, pan and zoom);</text>
+<text x="907" y="412" class="mu s12">dashed: two instances use the</text>
+<text x="907" y="430" class="mu s12">same signal declaration in a</text>
+<text x="907" y="448" class="mu s12">direct port association,</text>
+<text x="907" y="466" class="mu s12">oriented by port direction</text>
+<text x="907" y="488" class="tw b s12">bounds</text>
+<text x="907" y="507" class="mu s12">hubs over --max-fanout (16)</text>
+<text x="907" y="525" class="mu s12">listed, not drawn; at most</text>
+<text x="907" y="543" class="mu s12">--max-instances (5000),</text>
+<text x="907" y="561" class="mu s12">shallowest first</text>
+<text x="907" y="579" class="mu s12">file://, strict CSP, no server;</text>
+<text x="907" y="597" class="mu s12">not a netlist</text>
+<path d="M172,654 L172,694" class="l" marker-end="url(#mg)"/>
+<path d="M457,654 L457,694" class="l" marker-end="url(#mg)"/>
+<rect x="40" y="694" width="550" height="90" rx="8" class="n"/>
+<text x="52" y="716" class="tx b s14">JSON envelope (CLI and MCP alike)</text>
+<text x="52" y="738" class="mu s12">build_id, snapshot_id, completeness, freshness, limitations;</text>
+<text x="52" y="757" class="mu s12">lists capped with complete totals; counts, never a risk score</text>
+<path d="M742,654 L742,694" class="la" marker-end="url(#ma)"/>
+<text x="750" y="680" class="ta s12">edit_request</text>
+<rect x="610" y="694" width="265" height="90" rx="8" class="a"/>
+<text x="622" y="716" class="ta b s14">Controlled edit loop</text>
+<text x="622" y="738" class="mu s12">edit prepare --spec: candidate,</text>
+<text x="622" y="757" class="mu s12">slang check, human approval</text>
+<path d="M1027,654 L1027,694" class="l" marker-end="url(#mg)"/>
+<rect x="895" y="694" width="265" height="90" rx="8" class="n"/>
+<text x="907" y="716" class="tx b s14">Browser, from disk</text>
+<text x="907" y="738" class="mu s12">completeness and freshness</text>
+<text x="907" y="757" class="mu s12">are shown on the page</text>
+<text x="40" y="816" class="mu s12">Absence from a PARTIAL, STALE or truncated answer is not proof of absence. Details: the four subsections below and ADR-014.</text>
+</svg>

@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1110" width="100%" role="img" aria-labelledby="t d">
+<title id="t">SVWeave installation and supply chain</title>
+<desc id="d">Three install paths feed one installer. (a) Online: python3.12 scripts/bootstrap_locked.py --create-venv downloads every artifact of the lock. (b) GitHub reachable but not PyPI: the committed vendor/ package is checked with sha256sum -c SHA256SUMS run inside vendor/, the uv cache, the Serena git bundle and a standalone CPython 3.12.15 are unpacked into .toolchain/state, .toolchain/serena-src and .toolchain/runtime, and the installer runs with --artifact-dir vendor/downloads --create-venv --python .toolchain/runtime/python/bin/python3; slang, Verible, codebase-memory-mcp and uvm-core are still downloaded from GitHub and verified. (c) Fully offline: --fetch-only on a connected host fills the artifact cache, the Serena checkout and the uv cache, the repository with .toolchain/ is copied, and --offline --create-venv --venv-dir .venv installs from the cache only. The installer, scripts/bootstrap_locked.py driven by toolchain.lock.json, runs in order: the pinned uv 0.12.23 (tarball and extracted binary verified, then used for every uv command), the backend archives (sha256 before extraction, path traversal rejected, binaries verified again), the gateway venv (created by the installer on python3.12 or --python, 31 hash-locked wheels with --no-index --require-hashes, source tree linked in), and Serena v1.7.0 (pinned commit, 8 hash-pinned build wheels, uv sync --frozen --no-dev --no-build-isolation). Success prints a JSON report with ok true and exit 0; a failure gives ok false and exit 2. The result is .toolchain/ with uv, runtime, slang, verible, cbm, uvm-core, serena-src, serena-venv, state and downloads, plus the gateway .venv. Then bootstrap_locked.py --verify-only, svweave init (trusted policy outside the repository), svweave doctor, svweave doctor --probe and the demo build.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="1110" class="bg"/>
+<text x="40" y="32" class="tx b s16">Installation: three paths into one locked installer</text>
+<text x="1160" y="32" class="mu s12" text-anchor="end">every artifact is checked against toolchain.lock.json before use</text>
+<rect x="40" y="52" width="360" height="252" rx="8" class="n"/>
+<text x="52" y="74" class="tx b s14">(a) Online</text>
+<text x="52" y="96" class="mu s12">PyPI and GitHub reachable</text>
+<text x="52" y="115" class="tx s12 mono">python3.12 scripts/bootstrap_locked.py</text>
+<text x="82" y="134" class="tx s12 mono">--create-venv</text>
+<text x="52" y="172" class="mu s12">the installer downloads every artifact</text>
+<text x="52" y="191" class="mu s12">of the lock and verifies its sha256</text>
+<text x="52" y="229" class="mu s12">optional dev tools: hash-pinned wheels</text>
+<text x="52" y="248" class="tx s12 mono">vendor/downloads/wheelhouse-dev</text>
+<text x="52" y="267" class="mu s12">installed with the pinned uv, no index</text>
+<rect x="420" y="52" width="360" height="252" rx="8" class="n"/>
+<text x="432" y="74" class="tx b s14">(b) Offline wheels from vendor/</text>
+<text x="432" y="96" class="mu s12">GitHub reachable, PyPI not (a cluster)</text>
+<text x="432" y="115" class="tx s12 mono">(cd vendor &amp;&amp; sha256sum -c SHA256SUMS)</text>
+<text x="432" y="134" class="mu s12">unpack by hand into .toolchain/:</text>
+<text x="432" y="153" class="tx s12 mono">uv-cache.tar.gz   -&gt; state/uv-cache</text>
+<text x="432" y="172" class="tx s12 mono">serena-src.bundle -&gt; serena-src/</text>
+<text x="432" y="191" class="tx s12 mono">cpython-3.12.15   -&gt; runtime/python</text>
+<text x="432" y="210" class="tx s12 mono">--artifact-dir vendor/downloads</text>
+<text x="432" y="229" class="tx s12 mono">--create-venv --python</text>
+<text x="447" y="248" class="tx s12 mono">.toolchain/runtime/python/bin/python3</text>
+<text x="432" y="267" class="mu s12">slang, Verible, cbm, uvm-core: still</text>
+<text x="432" y="286" class="mu s12">downloaded from GitHub and verified</text>
+<rect x="800" y="52" width="360" height="252" rx="8" class="n"/>
+<text x="812" y="74" class="tx b s14">(c) Fully offline, two hosts</text>
+<text x="812" y="96" class="mu s12">1. connected host (git, python3.12):</text>
+<text x="834" y="115" class="tx s12 mono">bootstrap_locked.py --fetch-only</text>
+<text x="832" y="134" class="mu s12">fills downloads/ (archives, uv tarball,</text>
+<text x="832" y="153" class="mu s12">both wheelhouses), serena-src/ and</text>
+<text x="832" y="172" class="mu s12">state/uv-cache; installs only the uv</text>
+<text x="812" y="191" class="mu s12">2. copy the repository with .toolchain/</text>
+<text x="812" y="210" class="mu s12">3. offline host, same architecture:</text>
+<text x="834" y="229" class="tx s12 mono">--offline --create-venv</text>
+<text x="834" y="248" class="tx s12 mono">--venv-dir .venv</text>
+<text x="832" y="267" class="mu s12">no network at all: a missing or wrong</text>
+<text x="832" y="286" class="mu s12">artifact is an error, never a download</text>
+<path d="M220,304 L220,352" class="l" marker-end="url(#mg)"/>
+<text x="228" y="334" class="mu s12">downloads allowed</text>
+<path d="M600,304 L600,352" class="l" marker-end="url(#mg)"/>
+<text x="608" y="334" class="mu s12">reuses vendor/ files with the locked hash</text>
+<path d="M980,304 L980,352" class="l" marker-end="url(#mg)"/>
+<text x="988" y="334" class="mu s12">cache only</text>
+<rect x="40" y="352" width="1120" height="350" rx="8" class="a"/>
+<text x="52" y="376" class="ta b s14 mono">scripts/bootstrap_locked.py, driven by toolchain.lock.json</text>
+<text x="1148" y="376" class="mu s12" text-anchor="end">runs in this order; the only code that uses the network</text>
+<rect x="56" y="392" width="1088" height="56" rx="8" class="chip"/>
+<text x="68" y="415" class="tx b s13">1  pinned uv 0.12.23</text>
+<text x="290" y="414" class="mu s12">first download: the tarball's sha256 is checked against lock section uv before it is opened, the extracted</text>
+<text x="290" y="433" class="mu s12">binary again; every uv command runs it (UV_PYTHON_DOWNLOADS=never). --uv PATH is reported unverified</text>
+<rect x="56" y="456" width="1088" height="56" rx="8" class="chip"/>
+<text x="68" y="479" class="tx b s13">2  backend archives</text>
+<text x="290" y="478" class="mu s12">slang v12.0, Verible, codebase-memory-mcp v0.11.0 (portable build), uvm-core 2020.3.1: sha256 before</text>
+<text x="290" y="497" class="mu s12">extraction; absolute or parent-traversing members rejected; extracted binaries verified again</text>
+<rect x="56" y="520" width="1088" height="56" rx="8" class="chip"/>
+<text x="68" y="543" class="tx b s13">3  gateway venv .venv</text>
+<text x="290" y="542" class="mu s12">--create-venv: made with the pinned uv on python3.12 or --python, only if missing; 31 hash-locked wheels</text>
+<text x="290" y="561" class="mu s12">(pyslang 12.0.0, mcp 2.3.0, ...) with --no-index --require-hashes; this source tree linked in (.pth)</text>
+<rect x="56" y="584" width="1088" height="56" rx="8" class="chip"/>
+<text x="68" y="607" class="tx b s13">4  Serena v1.7.0</text>
+<text x="290" y="606" class="mu s12">pinned commit checked out (uv.lock and LICENSE hashes checked); 8 hash-pinned build wheels installed with</text>
+<text x="290" y="625" class="mu s12">--no-index --require-hashes; uv sync --frozen --no-dev --no-build-isolation. --skip-serena leaves it out</text>
+<rect x="56" y="652" width="536" height="38" rx="8" class="chip"/>
+<text x="68" y="676" class="tx s12">success: ok: true, exit 0; one JSON report (also --report FILE)</text>
+<rect x="608" y="652" width="536" height="38" rx="8" class="w"/>
+<text x="620" y="676" class="tw s12">failure: ok: false, exit 2, errors[]; never skipped or substituted</text>
+<path d="M310,702 L310,742" class="l" marker-end="url(#mg)"/>
+<path d="M890,702 L890,742" class="l" marker-end="url(#mg)"/>
+<rect x="40" y="742" width="540" height="318" rx="8" class="n"/>
+<text x="52" y="764" class="tx b s14">Result: .toolchain/ and .venv (both git-ignored)</text>
+<text x="68" y="788" class="tx s12 mono">uv/</text>
+<text x="196" y="788" class="mu s12">pinned uv 0.12.23 binary</text>
+<text x="68" y="809" class="tx s12 mono">runtime/</text>
+<text x="196" y="809" class="mu s12">CPython 3.12.15, path (b) only, unpacked by hand</text>
+<text x="68" y="830" class="tx s12 mono">slang/</text>
+<text x="196" y="830" class="mu s12">slang v12.0 CLI (diagnostics reproduction only)</text>
+<text x="68" y="851" class="tx s12 mono">verible/</text>
+<text x="196" y="851" class="mu s12">Verible language server, used by Serena</text>
+<text x="68" y="872" class="tx s12 mono">cbm/</text>
+<text x="196" y="872" class="mu s12">codebase-memory-mcp v0.11.0, static build</text>
+<text x="68" y="893" class="tx s12 mono">uvm-core/</text>
+<text x="196" y="893" class="mu s12">Accellera UVM 2020.3.1 for the UVM profile</text>
+<text x="68" y="914" class="tx s12 mono">serena-src/</text>
+<text x="196" y="914" class="mu s12">pinned Serena checkout (commit 949a27ef)</text>
+<text x="68" y="935" class="tx s12 mono">serena-venv/</text>
+<text x="196" y="935" class="mu s12">Serena venv, Python 3.12</text>
+<text x="68" y="956" class="tx s12 mono">state/</text>
+<text x="196" y="956" class="mu s12">uv-cache: Serena's locked dependencies</text>
+<text x="68" y="977" class="tx s12 mono">downloads/</text>
+<text x="196" y="977" class="mu s12">artifact cache (unless --artifact-dir)</text>
+<line x1="56" y1="992" x2="564" y2="992" class="lf"/>
+<text x="56" y="1012" class="tx b s12 mono">.venv/</text>
+<text x="196" y="1012" class="mu s12">gateway venv: 31 wheels, bin/svweave</text>
+<text x="196" y="1031" class="mu s12">this source tree linked in, not copied</text>
+<rect x="620" y="742" width="540" height="318" rx="8" class="n"/>
+<text x="632" y="764" class="tx b s14">Then check the install</text>
+<rect x="636" y="778" width="508" height="48" rx="8" class="chip"/>
+<text x="648" y="797" class="ta b s13">1</text>
+<text x="668" y="797" class="tx s12 mono">.venv/bin/python scripts/bootstrap_locked.py --verify-only</text>
+<text x="668" y="816" class="mu s12">no network; uv, binaries, wheels, Serena venv vs the lock</text>
+<rect x="636" y="832" width="508" height="48" rx="8" class="chip"/>
+<text x="648" y="851" class="ta b s13">2</text>
+<text x="668" y="851" class="tx s12 mono">svweave init</text>
+<text x="668" y="870" class="mu s12">.svweave/ + trusted policy.json outside the repo, no overwrite</text>
+<rect x="636" y="886" width="508" height="48" rx="8" class="chip"/>
+<text x="648" y="905" class="ta b s13">3</text>
+<text x="668" y="905" class="tx s12 mono">svweave doctor</text>
+<text x="668" y="924" class="mu s12">config, policy, toolchain hashes, bwrap; client_boundary WARN</text>
+<rect x="636" y="940" width="508" height="48" rx="8" class="chip"/>
+<text x="648" y="959" class="ta b s13">4</text>
+<text x="668" y="959" class="tx s12 mono">svweave doctor --probe</text>
+<text x="668" y="978" class="mu s12">starts each backend once with a real fixture query (slow)</text>
+<rect x="636" y="994" width="508" height="48" rx="8" class="chip"/>
+<text x="648" y="1013" class="ta b s13">5</text>
+<text x="668" y="1013" class="tx s12 mono">svweave build --profile rtl_demo</text>
+<text x="668" y="1032" class="mu s12">shipped demo: exit 0, COMPLETE, published: true</text>
+<text x="40" y="1092" class="mu s12">Long form: docs/install.md; the committed offline package: vendor/README.md. After the install nothing downloads.</text>
+</svg>

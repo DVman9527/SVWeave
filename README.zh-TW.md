@@ -155,6 +155,10 @@ SVWeave/
 
 所有指令都在儲存庫根目錄執行。依你的主機網路狀況選擇其中一條路徑。
 
+<p align="center"><img src="docs/images/install-flow.svg" alt="安裝流程。上方三條路徑：(a) 線上，python3.12 scripts/bootstrap_locked.py --create-venv，安裝程式下載鎖定檔中的每個 artifact 並驗證其 sha256，選用的開發工具 wheel 取自 vendor/downloads/wheelhouse-dev；(b) 可連 GitHub 但不能連 PyPI，先以 (cd vendor &amp;&amp; sha256sum -c SHA256SUMS) 檢查 vendor/，把 uv-cache.tar.gz、serena-src.bundle 與 CPython 3.12.15 壓縮檔解開到 .toolchain/state/uv-cache、.toolchain/serena-src 與 .toolchain/runtime/python，再以 --artifact-dir vendor/downloads --create-venv --python .toolchain/runtime/python/bin/python3 執行安裝程式，slang、Verible、codebase-memory-mcp 與 uvm-core 仍從 GitHub 下載並驗證；(c) 完全離線，在連網主機上以 --fetch-only 填好 .toolchain/downloads、serena-src 與 state/uv-cache，連同 .toolchain/ 複製整個儲存庫，再以 --offline --create-venv --venv-dir .venv 在無網路下從快取安裝。三條路徑都進入由 toolchain.lock.json 驅動的 scripts/bootstrap_locked.py，依序執行四個步驟：1 固定版本的 uv 0.12.23，壓縮檔的 sha256 在開啟前檢查，解開後的執行檔再檢查一次，之後每個 uv 指令都用它，並設定 UV_PYTHON_DOWNLOADS=never（--uv PATH 會被標為未驗證）；2 後端壓縮檔 slang v12.0、Verible、codebase-memory-mcp v0.11.0 portable 與 uvm-core 2020.3.1，解壓前檢查、拒絕路徑穿越，執行檔再檢查一次；3 閘道 venv .venv，以固定版本的 uv 建在 python3.12 或 --python 上，以 --no-index --require-hashes 安裝 31 個雜湊鎖定的 wheel，並把原始碼樹連結進去；4 Serena v1.7.0，取自固定的 commit，檢查 uv.lock 與 LICENSE 的雜湊，安裝 8 個雜湊固定的建置 wheel，再執行 uv sync --frozen --no-dev --no-build-isolation。成功為 ok true、結束碼 0，並產生一份 JSON 報告；失敗為 ok false、結束碼 2 並列出 errors，絕不略過或替換。左下：產生的 .toolchain/，含 uv、runtime、slang、verible、cbm、uvm-core、serena-src、serena-venv、state 與 downloads，以及閘道 .venv。右下：檢查步驟 bootstrap_locked.py --verify-only、svweave init、svweave doctor、svweave doctor --probe 與 svweave build --profile rtl_demo。" width="100%"></p>
+
+*不論走哪一條路徑，做事的都是同一個安裝程式，由鎖定檔決定什麼可以被接受：固定版本的 uv 是第一個下載的東西，在它的雜湊相符之前不會執行任何其他東西；每個壓縮檔與 wheel 在開啟前都會與 `toolchain.lock.json` 比對；閘道 venv 與 Serena venv 都由安裝程式自己建立，後者以雜湊固定的建置 wheel、不使用建置隔離來建置。路徑 (b) 的差別只在檔案來源（`vendor/`，因 sha256 相符而被重用），路徑 (c) 的差別只在何時使用網路（只有 `--fetch-only` 那一次）。每個步驟與旗標在下文逐一說明；右下角的檢查就是[驗證安裝](#驗證安裝)。*
+
 **(a) 可連上 PyPI 與 GitHub 的主機**
 
 ```bash
@@ -222,6 +226,10 @@ svweave build --profile rtl_demo   # the shipped demo: exit 0
 ### 連接你的設計專案與 AI 用戶端
 
 這些步驟在**目標**專案（你想分析的設計）中執行，由工程師或負責安裝的 AI 進行；為 AI 撰寫的相同步驟位於 `docs/agents/svweave-mcp-specialist.md` 的「Installing into a project」一節。下文中，`/ABS/PATH` 是這個 SVWeave checkout（因此 `/ABS/PATH/.venv/bin/svweave` 就是執行檔），`/ABS/PATH/TO/PROJECT` 是目標專案的根目錄，也就是存放其 `svweave.yaml` 的目錄。每個步驟都是冪等的。
+
+<p align="center"><img src="docs/images/ai-integration.svg" alt="接上設計專案與 AI 用戶端。上方：從 SVWeave checkout 有三樣東西進入目標設計專案：(i) 以 svweave 名稱註冊的 MCP 伺服器，指令為 claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio，或以 -s project 寫入 .mcp.json，或 Codex 的 [mcp_servers.svweave] 表格，只能有一個項目；(ii) 專門代理人 .claude/agents/svweave-mcp.md，name 為 svweave-mcp，複製自 docs/agents/svweave-mcp-specialist.md；(iii) docs/agents/AGENTS.snippet.md 中位於 svweave:begin 與 svweave:end 標記之間的區塊，插入 AGENTS.md 或 CLAUDE.md：已有區塊就取代，否則附加一次。步驟 1（svweave.yaml 工作區、外部根目錄、第一次建置）最先做，步驟 5 檢查 /mcp 顯示 svweave 已連線，且 svw_status 回傳 OK。中間：執行時，主代理人（Claude Code 或 Codex）讀取 AGENTS.md 區塊，把 HDL 結構問題交給 svweave-mcp 專門代理人；它透過每個用戶端各一個的閘道行程，以 MCP stdio 呼叫 14 個 mcp__svweave__svw_* 工具；每次呼叫回傳一個 JSON 回應封包，含 build_id、snapshot_id、freshness 與 analysis_coverage。專門代理人的工作流程：svw_status、回傳 job_id 的 svw_build、輪詢 svw_job 直到 SUCCEEDED、以 build_id 查詢，以及選用的 svw_edit。下方：啟用編輯時，代理人可以讀取、建置，以及準備、驗證或中止編輯；它永遠不能核准：提交前必須由人類在真正的終端機上執行 svweave edit approve。" width="100%"></p>
+
+*把 SVWeave 安裝進一個專案，會在那裡留下三樣東西，全都以 `svweave` 這個名稱連結在一起：MCP 註冊（`--root` 把該閘道綁定到單一專案）、專門代理人與路由區塊。正是這個區塊讓專案的主代理人把 SystemVerilog 結構問題交給專門代理人，而不是自己 grep；專門代理人則先建置、再查詢那次建置，提出編輯時停在 `validate`，因為核准只存在於人類的終端機上。這些用戶端設定都不在 SVWeave 測試套件的範圍內（見[在 Claude Code 與 Codex 中使用 SVWeave](#在-claude-code-與-codex-中使用-svweave)）。*
 
 **1. 把 SVWeave 指向專案。** SVWeave 不必位於設計之內：把 `svweave.yaml` 放在一個工作區目錄中，並把設計以**外部根目錄**的方式接上（在 `svweave.yaml` 中宣告時不帶 `path`，在 `svweave.local.yaml` 中對應到絕對路徑，並把該路徑加入受信任 `policy.json` 的 `allowed_roots`）：`docs/manifest.md` 第 2b 節有確切的 YAML，以及與模擬器命令列的差異（嚴格的 filelist、不接受模擬器選項、`timescale`、多個頂層、加密 IP、UVM）。在該工作區中：
 
@@ -338,6 +346,10 @@ SVWeave 絕不會修改用戶端的設定。請在你自己的用戶端加入類
 ## 分析工具：影響範圍、diff 影響、重新命名預覽、圖譜
 
 四者都只讀取一個建置，而且會明白標示：回應封包帶有建置 id、完整度、新鮮度與限制，清單有數量上限但附上完整總數，而且它們回報的任何東西都不是風險分數。
+
+<p align="center"><img src="docs/images/analysis-tools.svg" alt="分析工具。上方：一次建置，build_id 為 snapshot_id、config_id、toolchain_id 與結構描述版本的雜湊，完整度為 COMPLETE 或 PARTIAL，新鮮度為 CURRENT、STALE 或 HISTORICAL；內含不可變的快照位元組、在 profile 頂層之下展開的實例樹、帶有靜態解析參照的宣告，以及直接的埠關聯。四個欄位讀取它。影響範圍（svw_impact、svweave query impact）：以 --name、--symbol、--file 加 --byte 或 --instance 指定一個目標；對模組或介面回傳每個實例、--depth 層內的相依者、相依項與參照，對埠回傳每個連接處與相依者，對 net、變數或參數回傳已解析的參照與連接，對實例回傳其祖先、子樹與埠連接；名稱有歧義時回傳 AMBIGUOUS_SYMBOL。Git diff 影響（svw_diff_impact、svweave query diff-impact）：從 --base HEAD 到 --head（預設為工作樹）的 git diff -U0，固定 argv、不經 shell、有大小上限；舊側的行對應到快照位元組，逐檔為 aligned 或 approximate；回傳變更的宣告、其模組的實例與相依者，以及變更的埠與其連接處；建置之外的檔案只列出，標頭檔不重新展開。重新命名預覽（svw_rename_preview、svweave query rename-preview），唯讀：宣告、已解析的參照、具名連接的形式名稱、結尾標籤與 bind 目標，每一處都與快照位元組核對；回傳 diff、阻擋條件、警告、其他字面出現處，以及就緒時的 edit_request；遇到未解析參照、.* 與 .name 連接、巨集位置、名稱衝突、非 COMPLETE 且 CURRENT 的建置，以及具名參數覆寫時會阻擋。圖譜匯出（svweave graph export --build B，僅限 CLI）：一個靜態檔 .svweave/exports/graph-build.html，含實例樹，以及在直接埠關聯中使用同一個訊號宣告的實例之間的虛線連線；扇出超過 --max-fanout 16 的節點只列出，最多 --max-instances 5000 個、由淺到深，以 file:// 開啟、嚴格 CSP，不是 netlist。下方：影響範圍與 diff 影響回傳 JSON 回應封包，重新命名預覽以其 edit_request 交給受控編輯流程，圖譜匯出則直接從磁碟以瀏覽器開啟。" width="100%"></p>
+
+*這四個工具都是同一次已儲存建置的不同視角；沒有一個會重新展開設計或碰觸原始碼樹。它們的差別在於起點（一個宣告或實例、一個 git diff、一個重新命名目標、整棵樹），以及交出去的東西：一個回應封包、一個只有[受控編輯工作流程](#受控編輯工作流程)才能套用的 `edit_request`，或一個靜態 HTML 頁面。每個工具都沿用該次建置的完整度與新鮮度，所以 `PARTIAL` 或 `STALE` 的建置得到的答案會如實標明；重新命名預覽只在 `COMPLETE`、`CURRENT` 的建置上才會回報「就緒」。*
 
 ### 影響範圍（`svweave query impact`、`svw_impact`）
 
@@ -911,6 +923,12 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 * 讀取限制在允許的根目錄內，並檢查符號連結目標；呈現出來的字串會經過遮蔽，結果大小也有上限。
 
 **不**保證的事項：以相同 UID 執行且擁有不受限 shell 的代理人可以讀取 `approval.key` 並偽造核准，或直接編輯工作區；而具備自己 shell 或檔案工具的 MCP 用戶端可以寫入原始碼樹。因此 `svweave doctor` 永遠回報 `client_boundary: not qualified`，且編輯預設為關閉。`bwrap` 沒有資源限制或 seccomp 過濾器。本機索引並非端到端離線：回傳給雲端模型用戶端的程式碼片段會離開這部機器。細節：`docs/security.md`。
+
+<p align="center"><img src="docs/images/backend-sandbox.svg" alt="後端沙箱與傳輸上限。左側為受信任的閘道：security/sandbox.py 中的 SandboxRunner 建立一個 bwrap 參數陣列（絕不是 shell 字串），以 validate_spec 檢查可寫範圍；沒有可用的 bwrap 時回報 BACKEND_UNAVAILABLE，除非已允許降級模式，並標示為 degraded_no_isolation。有上限的 MCP stdio 傳輸保留 SDK stdio_client 的契約，但以每次 64 KiB 讀取原始位元組，每行 JSON-RPC 最多接受 16 MiB，每個工具結果最多 16 Mi 字元；固定版本的後端都在此之下（cbm 自己拒絕超過約 10 MiB 的回應，Serena 把每個回答截斷到 150,000 字元）。溢位時：1 終止後端的行程群組（先 SIGTERM，再 SIGKILL）並回收；2 造成溢位的呼叫失敗，行過長為 BACKEND_UNAVAILABLE、reason message_too_large，結果過長為 OUTPUT_LIMIT、reason result_too_large；3 結果過長的情況下，同一後端上的其他呼叫以 BACKEND_UNAVAILABLE、reason backend_terminated 失敗。stderr 寫入只在主機上的日誌，非協定的 stdout 行為 protocol_error，協定版本必須與固定的版本相符。右側為 bwrap 沙箱，每個後端行程一個：namespace 旗標 --die-with-parent、--new-session、--unshare-user、--unshare-pid、--unshare-ipc、--unshare-uts、--unshare-cgroup-try、--unshare-net；/usr 唯讀，/bin、/sbin、/lib 與 /lib64 為指向它的符號連結，只有少數 /etc 檔案、/proc 與 /dev，不 bind $HOME；私有的 tmpfs /tmp，codebase-memory-mcp 在其中取得 /tmp/cbm-rt 作為 CBM_RUNTIME_DIR，因為 unix socket 路徑必須符合約 108 位元組的 sockaddr_un；唯讀 bind 固定版本的工具鏈、venv 直譯器的執行檔、stdlib 與 libpython，以及快照，venv 的 bin/python 符號連結鏈只在 mount_providing 找不到已顯示它的掛載時，才以 --symlink 重建；可讀寫的 bind 只有候選副本與後端的工作目錄；會被拒絕的：受保護的原始碼本身或其周圍的可寫 bind、可寫的系統目錄或 $HOME，以及同時以兩種方式 bind 的路徑；後端行程以 /usr/bin/env -i 加上明確的環境變數允許清單啟動。" width="100%"></p>
+
+*兩道控制在後端邊界交會。沙箱決定後端行程能看到與寫入什麼：一個有 namespace、沒有網路的 `/usr` 與少數 `/etc` 檔案視圖，唯讀 bind 它所需要的工具鏈、直譯器與快照，且只有兩個目錄可寫：它的候選副本（Serena）與它自己的工作目錄；原始碼由 `validate_spec()` 保護，預設根本不掛載。傳輸則決定後端能讓閘道在記憶體中保留多少資料：MCP SDK 的讀取器沒有行長上限，所以閘道透過自己的有上限讀取器讀取後端輸出，並在回報過大的訊息或結果之前先終止後端。*
+
+圖中有兩個容易忽略的細節。codebase-memory-mcp 透過 `CBM_RUNTIME_DIR` 底下的 unix socket 協調，而 socket 路徑一旦超過核心的 `sockaddr_un` 上限（約 108 位元組）就會失敗，較深的工作區路徑很容易超過；因此沙箱在它短暫存在的 `/tmp` 上給它一個短的私有目錄 `/tmp/cbm-rt`。唯讀 bind 是依實際路徑進行的，所以如果 venv 的直譯器要經過一條符號連結鏈才能到達（python-build-standalone 執行環境有 `bin/python3 -> python3.12`），中間的連結就會不見；Serena 沙箱會以 `--symlink` 重建它們，但只在沒有任何 bind 已經顯示該連結的地方，因為落在 bind 內的連結會被建立在主機上（`mount_providing()`）。上限與原因：`docs/security.md` 第 3 與第 6 節。
 
 ## 已知限制
 

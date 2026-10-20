@@ -155,6 +155,10 @@ SVWeave/
 
 所有命令都在仓库根目录运行。按你的主机网络状况选择其中一条路径。
 
+<p align="center"><img src="docs/images/install-flow.svg" alt="安装流程。上方三条路径：(a) 在线，python3.12 scripts/bootstrap_locked.py --create-venv，安装程序下载锁文件中的每个 artifact 并校验其 sha256，可选的开发工具 wheel 取自 vendor/downloads/wheelhouse-dev；(b) 能访问 GitHub 但不能访问 PyPI，先用 (cd vendor &amp;&amp; sha256sum -c SHA256SUMS) 检查 vendor/，把 uv-cache.tar.gz、serena-src.bundle 和 CPython 3.12.15 压缩包解压到 .toolchain/state/uv-cache、.toolchain/serena-src 和 .toolchain/runtime/python，再以 --artifact-dir vendor/downloads --create-venv --python .toolchain/runtime/python/bin/python3 运行安装程序，slang、Verible、codebase-memory-mcp 和 uvm-core 仍从 GitHub 下载并校验；(c) 完全离线，在联网主机上用 --fetch-only 填好 .toolchain/downloads、serena-src 和 state/uv-cache，连同 .toolchain/ 复制整个仓库，再以 --offline --create-venv --venv-dir .venv 在无网络下从缓存安装。三条路径都进入由 toolchain.lock.json 驱动的 scripts/bootstrap_locked.py，依次执行四个步骤：1 锁定版本的 uv 0.12.23，压缩包的 sha256 在打开前检查，解压后的可执行文件再检查一次，之后每条 uv 命令都用它，并设置 UV_PYTHON_DOWNLOADS=never（--uv PATH 会被标为未校验）；2 后端压缩包 slang v12.0、Verible、codebase-memory-mcp v0.11.0 portable 和 uvm-core 2020.3.1，解压前检查、拒绝路径穿越，可执行文件再检查一次；3 网关 venv .venv，用锁定版本的 uv 建在 python3.12 或 --python 上，以 --no-index --require-hashes 安装 31 个哈希锁定的 wheel，并把源代码树链接进去；4 Serena v1.7.0，取自锁定的 commit，检查 uv.lock 和 LICENSE 的哈希，安装 8 个哈希锁定的构建 wheel，再运行 uv sync --frozen --no-dev --no-build-isolation。成功为 ok true、退出码 0，并生成一份 JSON 报告；失败为 ok false、退出码 2 并列出 errors，绝不跳过或替换。左下：生成的 .toolchain/，含 uv、runtime、slang、verible、cbm、uvm-core、serena-src、serena-venv、state 和 downloads，以及网关 .venv。右下：检查步骤 bootstrap_locked.py --verify-only、svweave init、svweave doctor、svweave doctor --probe 和 svweave build --profile rtl_demo。" width="100%"></p>
+
+*不论走哪条路径，干活的都是同一个安装程序，由锁文件决定什么可以被接受：锁定版本的 uv 是第一个下载的东西，在它的哈希匹配之前不会运行任何其他东西；每个压缩包和 wheel 在打开前都会与 `toolchain.lock.json` 比对；网关 venv 和 Serena venv 都由安装程序自己创建，后者用哈希锁定的构建 wheel、不使用构建隔离来构建。路径 (b) 的区别只在文件来源（`vendor/`，因 sha256 匹配而被复用），路径 (c) 的区别只在何时使用网络（只有 `--fetch-only` 那一次）。每个步骤和参数在下文逐一说明；右下角的检查就是[验证安装](#验证安装)。*
+
 **(a) 能访问 PyPI 和 GitHub 的主机**
 
 ```bash
@@ -222,6 +226,10 @@ svweave build --profile rtl_demo   # the shipped demo: exit 0
 ### 连接你的设计项目与 AI 客户端
 
 这些步骤在**目标**项目（你想分析的设计）中运行，由工程师或负责安装的 AI 执行；为 AI 编写的相同步骤位于 `docs/agents/svweave-mcp-specialist.md` 的"Installing into a project"一节。下文中，`/ABS/PATH` 是这个 SVWeave 检出（因此 `/ABS/PATH/.venv/bin/svweave` 就是可执行文件），`/ABS/PATH/TO/PROJECT` 是目标项目的根目录，即存放其 `svweave.yaml` 的目录。每一步都是幂等的。
+
+<p align="center"><img src="docs/images/ai-integration.svg" alt="接入设计项目与 AI 客户端。上方：从 SVWeave 检出有三样东西进入目标设计项目：(i) 以 svweave 名称注册的 MCP 服务器，命令为 claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio，或以 -s project 写入 .mcp.json，或 Codex 的 [mcp_servers.svweave] 表，只能有一个条目；(ii) 专用智能体 .claude/agents/svweave-mcp.md，name 为 svweave-mcp，复制自 docs/agents/svweave-mcp-specialist.md；(iii) docs/agents/AGENTS.snippet.md 中位于 svweave:begin 和 svweave:end 标记之间的区块，插入 AGENTS.md 或 CLAUDE.md：已有区块就替换，否则追加一次。步骤 1（svweave.yaml 工作区、外部根、第一次构建）最先做，步骤 5 检查 /mcp 显示 svweave 已连接，且 svw_status 返回 OK。中间：运行时，主智能体（Claude Code 或 Codex）读取 AGENTS.md 区块，把 HDL 结构问题交给 svweave-mcp 专用智能体；它通过每个客户端各一个的网关进程，以 MCP stdio 调用 14 个 mcp__svweave__svw_* 工具；每次调用返回一个 JSON 信封，含 build_id、snapshot_id、freshness 和 analysis_coverage。专用智能体的工作流程：svw_status、返回 job_id 的 svw_build、轮询 svw_job 直到 SUCCEEDED、以 build_id 查询，以及可选的 svw_edit。下方：启用编辑时，智能体可以读取、构建，以及准备、验证或中止编辑；它永远不能审批：提交前必须由人在真正的终端上运行 svweave edit approve。" width="100%"></p>
+
+*把 SVWeave 安装到一个项目，会在那里留下三样东西，全都以 `svweave` 这个名称关联在一起：MCP 注册（`--root` 把该网关绑定到单个项目）、专用智能体和路由区块。正是这个区块让项目的主智能体把 SystemVerilog 结构问题交给专用智能体，而不是自己 grep；专用智能体则先构建、再查询那次构建，提出编辑时停在 `validate`，因为审批只存在于人的终端上。这些客户端配置都不在 SVWeave 测试套件的范围内（见[在 Claude Code 和 Codex 中使用 SVWeave](#在-claude-code-和-codex-中使用-svweave)）。*
 
 **1. 把 SVWeave 指向项目。** SVWeave 不必位于设计之内：把 `svweave.yaml` 放在一个工作区目录中，并把设计作为**外部根**挂接进来（在 `svweave.yaml` 中声明时不带 `path`，在 `svweave.local.yaml` 中映射到绝对路径，并把该路径加入受信 `policy.json` 的 `allowed_roots`）：`docs/manifest.md` 第 2b 节有确切的 YAML，以及与仿真器命令行的差异（严格的 filelist、不接受仿真器选项、`timescale`、多个顶层、加密 IP、UVM）。在该工作区中：
 
@@ -338,6 +346,10 @@ SVWeave 从不修改客户端的配置。请把类似下面的条目加入你自
 ## 分析工具：影响分析、diff 影响分析、重命名预览、图
 
 这四个工具都读取一个构建并明确说明这一点：信封携带构建 id、完整性、新鲜度和限制，列表有上限但附带完整总数，它们报告的任何内容都不是风险评分。
+
+<p align="center"><img src="docs/images/analysis-tools.svg" alt="分析工具。上方：一次构建，build_id 为 snapshot_id、config_id、toolchain_id 和模式版本的哈希，完整性为 COMPLETE 或 PARTIAL，新鲜度为 CURRENT、STALE 或 HISTORICAL；其中包含不可变的快照字节、在 profile 顶层之下展开的实例树、带有静态解析引用的声明，以及直接的端口关联。四列读取它。影响分析（svw_impact、svweave query impact）：用 --name、--symbol、--file 加 --byte 或 --instance 指定一个目标；对模块或接口返回每个实例、--depth 层内的依赖方、依赖项和引用，对端口返回每个连接处和依赖方，对 net、变量或参数返回已解析的引用和连接，对实例返回其祖先、子树和端口连接；名称有歧义时返回 AMBIGUOUS_SYMBOL。Git diff 影响分析（svw_diff_impact、svweave query diff-impact）：从 --base HEAD 到 --head（默认为工作树）的 git diff -U0，固定 argv、不经 shell、有大小上限；旧侧的行映射到快照字节，逐文件为 aligned 或 approximate；返回变更的声明、其模块的实例和依赖方，以及变更的端口和其连接处；构建之外的文件只列出，头文件不重新展开。重命名预览（svw_rename_preview、svweave query rename-preview），只读：声明、已解析的引用、具名连接的形式名称、结尾标签和 bind 目标，每一处都与快照字节核对；返回 diff、阻断项、警告、其他字面出现处，以及就绪时的 edit_request；遇到未解析引用、.* 和 .name 连接、宏位置、名称冲突、非 COMPLETE 且 CURRENT 的构建，以及具名参数覆盖时会阻断。图导出（svweave graph export --build B，仅限 CLI）：一个静态文件 .svweave/exports/graph-build.html，含实例树，以及在直接端口关联中使用同一个信号声明的实例之间的虚线连线；扇出超过 --max-fanout 16 的节点只列出，最多 --max-instances 5000 个、由浅到深，以 file:// 打开、严格 CSP，不是 netlist。下方：影响分析和 diff 影响分析返回 JSON 信封，重命名预览以其 edit_request 交给受控编辑流程，图导出则直接从磁盘用浏览器打开。" width="100%"></p>
+
+*这四个工具都是同一次已存储构建的不同视角；没有一个会重新展开设计或触碰源代码树。它们的区别在于起点（一个声明或实例、一个 git diff、一个重命名目标、整棵树），以及交出去的东西：一个信封、一个只有[受控编辑工作流](#受控编辑工作流)才能应用的 `edit_request`，或一个静态 HTML 页面。每个工具都沿用该次构建的完整性和新鲜度，所以 `PARTIAL` 或 `STALE` 的构建得到的答案会如实标明；重命名预览只在 `COMPLETE`、`CURRENT` 的构建上才会报告“就绪”。*
 
 ### 影响分析（`svweave query impact`、`svw_impact`）
 
@@ -911,6 +923,12 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 * 读取限制在允许的根之内，并检查符号链接目标；对外暴露的字符串会被脱敏，结果有大小上限。
 
 **不**保证的内容：以相同 UID 运行且拥有不受限 shell 的智能体可以读取 `approval.key` 并伪造审批，或直接编辑工作区；拥有自己 shell 或文件工具的 MCP 客户端可以写入源码树。因此 `svweave doctor` 始终报告 `client_boundary: not qualified`，编辑默认关闭。`bwrap` 没有资源限制或 seccomp 过滤器。本地索引并非端到端离线：返回给云端模型客户端的代码片段会离开本机。详情：`docs/security.md`。
+
+<p align="center"><img src="docs/images/backend-sandbox.svg" alt="后端沙箱与传输上限。左侧为受信的网关：security/sandbox.py 中的 SandboxRunner 构建一个 bwrap 参数数组（绝不是 shell 字符串），用 validate_spec 检查可写范围；没有可用的 bwrap 时报告 BACKEND_UNAVAILABLE，除非已允许降级模式，并标记为 degraded_no_isolation。有上限的 MCP stdio 传输保留 SDK stdio_client 的契约，但以每次 64 KiB 读取原始字节，每行 JSON-RPC 最多接受 16 MiB，每个工具结果最多 16 Mi 字符；锁定版本的后端都在此之下（cbm 自己拒绝超过约 10 MiB 的响应，Serena 把每个回答截断到 150,000 字符）。溢出时：1 终止后端的进程组（先 SIGTERM，再 SIGKILL）并回收；2 造成溢出的调用失败，行过长为 BACKEND_UNAVAILABLE、reason message_too_large，结果过长为 OUTPUT_LIMIT、reason result_too_large；3 结果过长的情况下，同一后端上的其他调用以 BACKEND_UNAVAILABLE、reason backend_terminated 失败。stderr 写入只在主机上的日志，非协议的 stdout 行为 protocol_error，协议版本必须与锁定的版本一致。右侧为 bwrap 沙箱，每个后端进程一个：namespace 参数 --die-with-parent、--new-session、--unshare-user、--unshare-pid、--unshare-ipc、--unshare-uts、--unshare-cgroup-try、--unshare-net；/usr 只读，/bin、/sbin、/lib 和 /lib64 为指向它的符号链接，只有少数 /etc 文件、/proc 和 /dev，不 bind $HOME；私有的 tmpfs /tmp，codebase-memory-mcp 在其中得到 /tmp/cbm-rt 作为 CBM_RUNTIME_DIR，因为 unix socket 路径必须符合约 108 字节的 sockaddr_un；只读 bind 锁定版本的工具链、venv 解释器的可执行文件、stdlib 和 libpython，以及快照，venv 的 bin/python 符号链接链只在 mount_providing 找不到已显示它的挂载时，才用 --symlink 重建；可读写的 bind 只有候选副本和后端的工作目录；会被拒绝的：受保护的源代码本身或其周围的可写 bind、可写的系统目录或 $HOME，以及同时以两种方式 bind 的路径；后端进程以 /usr/bin/env -i 加上明确的环境变量允许列表启动。" width="100%"></p>
+
+*两道控制在后端边界交汇。沙箱决定后端进程能看到和写入什么：一个有 namespace、没有网络的 `/usr` 和少数 `/etc` 文件视图，只读 bind 它所需要的工具链、解释器和快照，且只有两个目录可写：它的候选副本（Serena）和它自己的工作目录；源代码由 `validate_spec()` 保护，默认根本不挂载。传输则决定后端能让网关在内存中保留多少数据：MCP SDK 的读取器没有行长上限，所以网关通过自己的有上限读取器读取后端输出，并在报告过大的消息或结果之前先终止后端。*
+
+图中有两个容易忽略的细节。codebase-memory-mcp 通过 `CBM_RUNTIME_DIR` 下的 unix socket 协调，而 socket 路径一旦超过内核的 `sockaddr_un` 上限（约 108 字节）就会失败，较深的工作区路径很容易超过；因此沙箱在它临时存在的 `/tmp` 上给它一个短的私有目录 `/tmp/cbm-rt`。只读 bind 是按真实路径进行的，所以如果 venv 的解释器要经过一条符号链接链才能到达（python-build-standalone 运行环境有 `bin/python3 -> python3.12`），中间的链接就会丢失；Serena 沙箱会用 `--symlink` 重建它们，但只在没有任何 bind 已经显示该链接的地方，因为落在 bind 内的链接会被创建在主机上（`mount_providing()`）。上限与原因：`docs/security.md` 第 3 和第 6 节。
 
 ## 已知限制
 

@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="100%" role="img" aria-labelledby="t d">
+<title id="t">Backend sandbox and transport bounds</title>
+<desc id="d">Left, the gateway: the SandboxRunner builds a bwrap argument array (never a shell string) and refuses to start a backend without bwrap unless degraded mode was explicitly allowed and flagged; the MCP client talks to the backend over a bounded stdio transport that reads stdout in 64 KiB chunks and accepts at most 16 MiB per JSON-RPC message and 16 Mi characters per tool result. On an overflow the backend's process group is terminated first (SIGTERM, then SIGKILL); then the call fails with BACKEND_UNAVAILABLE message_too_large or OUTPUT_LIMIT result_too_large, and other calls on that backend fail with BACKEND_UNAVAILABLE backend_terminated. Stderr goes to a host-only log. Right, the bwrap sandbox around one backend process (codebase-memory-mcp, Serena with Verible, or the pyslang worker): --die-with-parent, --new-session, --unshare-user, -pid, -ipc, -uts, --unshare-cgroup-try and --unshare-net; /usr bound read-only with /bin, /sbin, /lib and /lib64 as symlinks into it; only a minimal list of /etc files; /proc and /dev; a private tmpfs /tmp, where codebase-memory-mcp gets the short socket directory /tmp/cbm-rt because a unix socket path must fit the about 108-byte sockaddr_un limit. Read-only binds: the pinned toolchain or venv, the interpreter's executable, stdlib and libpython, and the snapshot; the interpreter's intermediate symlinks are recreated with --symlink only where no mount already shows them (mount_providing). Read-write binds: only the candidate copy (Serena) and the backend's own work directory. The original source is a protected path and never writable; system directories and $HOME are refused as writable binds. The environment is cleared with /usr/bin/env -i and set from an explicit allowlist.</desc>
+<style>
+svg{font-family:system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif}
+.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace}.b{font-weight:600}.s12{font-size:12px}.s13{font-size:13px}.s14{font-size:14px}.s16{font-size:16px}.s22{font-size:22px}
+.mono.b{font-weight:600}
+.bg{fill:#ffffff}
+.n{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2}
+.chip{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2}
+.a{fill:#ddf4ff;stroke:#0969da;stroke-width:1.6}
+.w{fill:#ffebe9;stroke:#cf222e;stroke-width:1.6}
+.tb{fill:#f8f4ff;fill-opacity:.55;stroke:#8250df;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#8c959f;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#1f2328}
+.mu{fill:#59636e}
+.ta{fill:#0550ae}
+.tt{fill:#6639ba}
+.tw{fill:#a40e26}
+.l{fill:none;stroke:#6e7781;stroke-width:1.6}
+.la{fill:none;stroke:#0969da;stroke-width:2.2}
+.lw{fill:none;stroke:#cf222e;stroke-width:1.8}
+.lt{fill:none;stroke:#8250df;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#d0d7de;stroke-width:1}
+.mg{fill:#6e7781}
+.ma{fill:#0969da}
+.mw{fill:#cf222e}
+.mt{fill:#8250df}
+.fa{fill:#0969da}
+.fw{fill:#cf222e}
+.fn{fill:#6e7781}
+@media (prefers-color-scheme: dark){
+.bg{fill:#0d1117}
+.n{fill:#161b22;stroke:#3d444d;stroke-width:1.2}
+.chip{fill:#0d1117;stroke:#3d444d;stroke-width:1.2}
+.a{fill:#0c2d4d;stroke:#58a6ff;stroke-width:1.6}
+.w{fill:#3d1418;stroke:#ff7b72;stroke-width:1.6}
+.tb{fill:#bc8cff;fill-opacity:.07;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:7 5}
+.dash{fill:none;stroke:#7d8590;stroke-width:1.3;stroke-dasharray:5 4}
+.tx{fill:#e6edf3}
+.mu{fill:#9198a1}
+.ta{fill:#79c0ff}
+.tt{fill:#d2a8ff}
+.tw{fill:#ffa198}
+.l{fill:none;stroke:#8b949e;stroke-width:1.6}
+.la{fill:none;stroke:#58a6ff;stroke-width:2.2}
+.lw{fill:none;stroke:#ff7b72;stroke-width:1.8}
+.lt{fill:none;stroke:#bc8cff;stroke-width:1.6;stroke-dasharray:6 4}
+.lf{fill:none;stroke:#30363d;stroke-width:1}
+.mg{fill:#8b949e}
+.ma{fill:#58a6ff}
+.mw{fill:#ff7b72}
+.mt{fill:#bc8cff}
+.fa{fill:#58a6ff}
+.fw{fill:#ff7b72}
+.fn{fill:#8b949e}
+}
+</style>
+<defs>
+<marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mg" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="ma" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mw" d="M0,0 L10,5 L0,10 z"/></marker>
+<marker id="mt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="mt" d="M0,0 L10,5 L0,10 z"/></marker>
+</defs>
+<rect width="1200" height="1000" class="bg"/>
+<text x="40" y="32" class="tx b s16">Backend sandbox and transport bounds</text>
+<text x="1160" y="32" class="mu s12" text-anchor="end">security/sandbox.py, adapters/bounded_stdio.py, adapters/mcp_client.py</text>
+<rect x="40" y="52" width="420" height="820" rx="8" class="n"/>
+<text x="52" y="74" class="tx b s14">SVWeave gateway (trusted)</text>
+<rect x="56" y="90" width="388" height="150" rx="8" class="chip"/>
+<text x="68" y="112" class="tx b s13">SandboxRunner</text>
+<text x="432" y="112" class="mu s12 mono" text-anchor="end">security/sandbox.py</text>
+<text x="68" y="134" class="mu s12">builds one bwrap argv, never a shell string</text>
+<text x="68" y="153" class="mu s12">validate_spec(): write-surface rules (right)</text>
+<text x="68" y="172" class="mu s12">no usable bwrap: BACKEND_UNAVAILABLE, unless</text>
+<text x="68" y="191" class="mu s12">degraded mode was allowed; then the envelope</text>
+<text x="68" y="210" class="mu s12">and health carry degraded_no_isolation</text>
+<rect x="56" y="256" width="388" height="188" rx="8" class="a"/>
+<text x="68" y="278" class="ta b s13">Bounded MCP stdio transport</text>
+<text x="68" y="300" class="mu s12">same contract as the SDK's stdio_client; only the</text>
+<text x="68" y="319" class="mu s12">stdout reader differs: raw bytes, 64 KiB reads,</text>
+<text x="68" y="338" class="mu s12">buffer never above the limit plus one read</text>
+<text x="68" y="357" class="tx s12">message: 16 MiB per JSON-RPC line</text>
+<text x="68" y="376" class="tx s12">result: 16 Mi characters per tool result</text>
+<text x="68" y="395" class="mu s12">pinned backends stay below: cbm itself refuses</text>
+<text x="68" y="414" class="mu s12">responses over ~10 MiB, Serena truncates each</text>
+<text x="68" y="433" class="mu s12">answer to 150,000 characters</text>
+<rect x="56" y="460" width="388" height="224" rx="8" class="w"/>
+<text x="68" y="482" class="tw b s13">On overflow, in this order</text>
+<text x="68" y="504" class="tx s12">1  terminate the backend's process group</text>
+<text x="88" y="523" class="mu s12">SIGTERM, then SIGKILL; the client reaps it</text>
+<text x="68" y="542" class="tx s12">2  fail the offending call</text>
+<text x="88" y="561" class="mu s12">line too long: BACKEND_UNAVAILABLE</text>
+<text x="108" y="580" class="mu s12">reason message_too_large</text>
+<text x="88" y="599" class="mu s12">result too long: OUTPUT_LIMIT</text>
+<text x="108" y="618" class="mu s12">reason result_too_large</text>
+<text x="68" y="637" class="tx s12">3  other calls on that backend (result case):</text>
+<text x="88" y="656" class="mu s12">BACKEND_UNAVAILABLE,</text>
+<text x="108" y="675" class="mu s12">reason backend_terminated</text>
+<rect x="56" y="698" width="388" height="112" rx="8" class="chip"/>
+<text x="68" y="720" class="tx b s13">Other launch rules</text>
+<text x="68" y="742" class="mu s12">stderr: host-only log file (redacted tail)</text>
+<text x="68" y="761" class="mu s12">non-protocol stdout line: BACKEND_UNAVAILABLE,</text>
+<text x="68" y="780" class="mu s12">reason protocol_error</text>
+<text x="68" y="799" class="mu s12">protocol revision must match the pinned one</text>
+<text x="52" y="836" class="mu s12">Raw codebase-memory-mcp and Serena servers are</text>
+<text x="52" y="854" class="mu s12">never registered with the client.</text>
+<path d="M444,165 L528,165" class="l" marker-end="url(#mg)"/>
+<text x="468" y="156" class="mu s12">argv</text>
+<path d="M528,330 L444,330" class="la" marker-end="url(#ma)"/>
+<text x="468" y="321" class="ta s12">stdout</text>
+<path d="M444,360 L528,360" class="l" marker-end="url(#mg)"/>
+<text x="468" y="378" class="mu s12">stdin</text>
+<rect x="528" y="52" width="632" height="820" rx="8" class="tb"/>
+<text x="540" y="74" class="tt b s14">bwrap sandbox: one per backend process</text>
+<text x="1148" y="74" class="tt b s12" text-anchor="end">TB2</text>
+<rect x="544" y="88" width="600" height="70" rx="8" class="chip"/>
+<text x="556" y="109" class="tx b s13">Namespaces</text>
+<text x="556" y="130" class="tx s12 mono">--die-with-parent --new-session --unshare-user --unshare-pid</text>
+<text x="556" y="149" class="tx s12 mono">--unshare-ipc --unshare-uts --unshare-cgroup-try --unshare-net</text>
+<rect x="544" y="166" width="600" height="108" rx="8" class="chip"/>
+<text x="556" y="187" class="tx b s13">System view, read-only</text>
+<text x="556" y="208" class="tx s12">--ro-bind /usr; /bin /sbin /lib /lib64 as symlinks into usr</text>
+<text x="556" y="227" class="mu s12">/etc: only ld.so.cache, ld.so.conf(.d), passwd, group,</text>
+<text x="556" y="246" class="mu s12">nsswitch.conf, localtime, alternatives; --proc /proc --dev /dev</text>
+<text x="556" y="265" class="mu s12">$HOME is not bound; cbm and Serena get a HOME in their work dir</text>
+<rect x="544" y="282" width="600" height="90" rx="8" class="chip"/>
+<text x="556" y="303" class="tx b s13">Private /tmp (--tmpfs /tmp): ephemeral, invisible to the host</text>
+<text x="556" y="324" class="tx s12 mono">cbm: --dir /tmp/cbm-rt for CBM_RUNTIME_DIR</text>
+<text x="556" y="343" class="mu s12">its unix socket path must fit sockaddr_un (about 108 bytes); a</text>
+<text x="556" y="362" class="mu s12">deep workspace path would not</text>
+<rect x="544" y="380" width="600" height="148" rx="8" class="chip"/>
+<text x="556" y="401" class="tx b s13">Read-only binds (--ro-bind)</text>
+<text x="556" y="422" class="mu s12">pinned toolchain: cbm binary dir; serena-venv, serena-src, Verible</text>
+<text x="556" y="441" class="mu s12">interpreter of a venv: its executable, stdlib dir and libpython*,</text>
+<text x="556" y="460" class="mu s12">not the whole prefix; the immutable snapshot (cbm, slang worker)</text>
+<text x="556" y="479" class="tx s12">--symlink recreates the venv's bin/python chain, e.g.</text>
+<text x="556" y="498" class="tx s12">python3 -&gt; python3.12, only where mount_providing()</text>
+<text x="556" y="517" class="mu s12">finds no mount that already shows the link</text>
+<rect x="544" y="536" width="600" height="90" rx="8" class="a"/>
+<text x="556" y="557" class="ta b s13">Read-write binds (--bind): only these two</text>
+<text x="556" y="578" class="mu s12">the candidate copy .svweave/candidates/&lt;txn&gt; (Serena edits)</text>
+<text x="556" y="597" class="mu s12">the backend's work dir .svweave/backends/&lt;b&gt;/work (HOME, caches);</text>
+<text x="556" y="616" class="mu s12">its logs, mappings and context file stay host-only</text>
+<rect x="544" y="634" width="600" height="108" rx="8" class="w"/>
+<text x="556" y="655" class="tw b s13">Refused by validate_spec()</text>
+<text x="556" y="676" class="mu s12">original source (protected_paths) as or around a writable bind;</text>
+<text x="556" y="695" class="mu s12">it is not mounted at all by default</text>
+<text x="556" y="714" class="mu s12">writable /, /usr, /etc, /proc, /dev, /bin, /lib*, $HOME or a parent</text>
+<text x="556" y="733" class="mu s12">the same path bound read-only and read-write</text>
+<rect x="544" y="750" width="600" height="106" rx="8" class="chip"/>
+<text x="556" y="771" class="tx b s13">Backend process</text>
+<text x="556" y="792" class="tx s12 mono">-- /usr/bin/env -i KEY=VALUE ... &lt;backend argv&gt;</text>
+<text x="556" y="811" class="mu s12">environment cleared (bwrap 0.4.0 has no --clearenv), then an</text>
+<text x="556" y="830" class="mu s12">explicit allowlist per backend, e.g. PATH, HOME, XDG_*, LANG</text>
+<text x="556" y="849" class="mu s12">codebase-memory-mcp | Serena + Verible LSP | pyslang worker</text>
+<text x="40" y="906" class="mu s12">Not guaranteed: bwrap applies no CPU, memory or pids limit and no seccomp filter; memory is limited for the HDL worker only</text>
+<text x="40" y="924" class="mu s12">(RLIMIT_AS). The sandbox protects against backend behaviour, not against an MCP client with its own shell (docs/security.md 3, 4, 6).</text>
+<line x1="40" y1="956" x2="100" y2="956" class="la" marker-end="url(#ma)"/>
+<text x="110" y="960" class="tx s12">protocol messages from the backend (bounded)</text>
+<line x1="470" y1="956" x2="530" y2="956" class="l" marker-end="url(#mg)"/>
+<text x="540" y="960" class="tx s12">launch and requests</text>
+<line x1="720" y1="956" x2="780" y2="956" class="lt"/>
+<text x="790" y="960" class="tx s12">trust boundary TB2 (sandbox)</text>
+</svg>
