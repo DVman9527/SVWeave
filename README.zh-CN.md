@@ -877,7 +877,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 .venv/bin/python scripts/qualify.py                                     # release gates G0-G5
 ```
 
-唯一的自定义标记是 `integration`（真实的锁定版后端）。`SVWEAVE_REQUIRE_BACKENDS=1` 把缺失的后端从跳过变为失败；`qualify.py` 总是设置它，并把被跳过的测试视为门禁失败。mock 仅用于单元测试和故障注入测试。静态检查：`.venv/bin/ruff check .`、`.venv/bin/mypy` 和 `.venv/bin/svweave schema emit --check`。
+唯一的自定义标记是 `integration`（真实的锁定版后端）。`SVWEAVE_REQUIRE_BACKENDS=1` 把缺失的后端从跳过变为失败；`qualify.py` 总是设置它，并把被跳过的测试视为门禁失败。mock 仅用于单元测试和故障注入测试。DEP-01 干净环境测试（`tests/integration/test_dep01_cleanroom.py`）还需要 `.toolchain/` 下的缓存 artifact（从 `vendor/` 安装后：`ln -s ../vendor/downloads .toolchain/downloads`），以及 `PATH` 上第一个 `python3` 为 3.11 及以上；见 `docs/install.md` 的“Running DEP-01”。静态检查：`.venv/bin/ruff check .`、`.venv/bin/mypy` 和 `.venv/bin/svweave schema emit --check`。
 
 **门禁。** `scripts/qualify.py` 根据实际结果计算 G0 至 G5，并写入 `.svweave/qualification/report.{json,md}`：G0 锁定文件校验、后端探测和沙箱测试；G1 清单、快照、配置和路径策略；G2 语义测试套件（真实的 pyslang 和 UVM）；G3 后端测试套件和 MCP 契约；G4 编辑安全和全部关键变异；G5 每个 P0 测试套件都没有 FAIL、BLOCKED 和 SKIP，验收测试，覆盖率至少 85% 语句和 80% 分支，文档检查，以及符合计划 22.3 预算的基准测试。由未运行步骤计算出的门禁为 `NOT_EVALUATED`，绝不是 PASS。只有当每个门禁都通过且没有未关闭的阻断项时，发布决定才是 `ACCEPTED_STATIC_PREVIEW`；否则为带原因的 `BLOCKED`。
 

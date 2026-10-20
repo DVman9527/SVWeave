@@ -7,7 +7,12 @@ svweave source tree (``src/``) and lock (no .toolchain, no .venv). ``scripts/boo
 a local Serena checkout, a copy of the uv cache) and links ``src/`` into the fresh venv while running
 under ``bwrap --unshare-net``; then ``scripts/probe_backends.py`` of the FRESH install probes pyslang,
 cbm and Serena, also without network (the MCP probes use svweave's bounded stdio transport). Evidence (no host paths) is
-compared with / written to ``evidence/dep01/cleanroom.json`` (``SVWEAVE_WRITE_EVIDENCE=1``)."""
+compared with / written to ``evidence/dep01/cleanroom.json`` (``SVWEAVE_WRITE_EVIDENCE=1``).
+
+Host prerequisites (docs/install.md, "Running DEP-01"): the cached artifacts under ``.toolchain/``
+(``downloads/`` -- after a ``vendor/`` install, ``ln -s ../vendor/downloads .toolchain/downloads`` --
+``serena-src/`` and ``state/uv-cache/``), and ``python3`` on ``PATH`` >= 3.11 (it runs the installer
+inside the sandbox)."""
 
 from __future__ import annotations
 

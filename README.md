@@ -1267,7 +1267,10 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 The only custom marker is `integration` (real pinned backends). `SVWEAVE_REQUIRE_BACKENDS=1` turns
 a missing backend from a skip into a failure; `qualify.py` always sets it and treats a skipped test
-as a failed gate. Mocks are for unit and fault-injection tests only. Static checks:
+as a failed gate. Mocks are for unit and fault-injection tests only. The DEP-01 clean-room test
+(`tests/integration/test_dep01_cleanroom.py`) also needs the cached artifacts under `.toolchain/`
+(after a `vendor/` install: `ln -s ../vendor/downloads .toolchain/downloads`) and a `python3` >= 3.11
+first on `PATH`; see `docs/install.md`, "Running DEP-01". Static checks:
 `.venv/bin/ruff check .`, `.venv/bin/mypy` and `.venv/bin/svweave schema emit --check`.
 
 **Gates.** `scripts/qualify.py` computes G0 to G5 from the actual results and writes

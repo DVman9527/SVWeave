@@ -877,7 +877,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 .venv/bin/python scripts/qualify.py                                     # release gates G0-G5
 ```
 
-唯一的自訂標記是 `integration`（真實的固定版本後端）。`SVWEAVE_REQUIRE_BACKENDS=1` 會把缺少後端從略過（skip）變成失敗；`qualify.py` 一律設定它，並把被略過的測試視為失敗的關卡。模擬物件（mock）只用於單元測試與錯誤注入測試。靜態檢查：`.venv/bin/ruff check .`、`.venv/bin/mypy` 與 `.venv/bin/svweave schema emit --check`。
+唯一的自訂標記是 `integration`（真實的固定版本後端）。`SVWEAVE_REQUIRE_BACKENDS=1` 會把缺少後端從略過（skip）變成失敗；`qualify.py` 一律設定它，並把被略過的測試視為失敗的關卡。模擬物件（mock）只用於單元測試與錯誤注入測試。DEP-01 乾淨環境測試（`tests/integration/test_dep01_cleanroom.py`）另外需要 `.toolchain/` 之下的快取 artifact（從 `vendor/` 安裝後：`ln -s ../vendor/downloads .toolchain/downloads`），以及 `PATH` 上第一個 `python3` 為 3.11 以上；見 `docs/install.md` 的「Running DEP-01」。靜態檢查：`.venv/bin/ruff check .`、`.venv/bin/mypy` 與 `.venv/bin/svweave schema emit --check`。
 
 **關卡（Gates）。** `scripts/qualify.py` 依實際結果計算 G0 至 G5，並寫入 `.svweave/qualification/report.{json,md}`：G0 為 lock 已驗證、後端探測與沙箱測試；G1 為 manifest、快照、設定與路徑政策；G2 為語意測試套件（真實的 pyslang 與 UVM）；G3 為後端測試套件與 MCP 契約；G4 為編輯安全性與所有關鍵變異；G5 為每個 P0 測試套件都沒有 FAIL、BLOCKED 與 SKIP、驗收測試、至少 85% 述句與 80% 分支的覆蓋率、文件檢查，以及在計畫 22.3 預算之內的基準測試。由未執行的步驟所算出的關卡為 `NOT_EVALUATED`，絕不是 PASS。只有在每個關卡都通過且沒有任何開放的阻擋條件時，發行決定才會是 `ACCEPTED_STATIC_PREVIEW`；否則為 `BLOCKED` 並附上原因。
 

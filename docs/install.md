@@ -123,6 +123,25 @@ namespace) and then probes all three backends from the fresh install. Evidence:
 `evidence/dep01/cleanroom.json`. That is a network-isolated clean-room run on the build host, not a
 run on a separate physical air-gapped machine.
 
+Running DEP-01 needs two things on the host (otherwise it skips, or fails under
+`SVWEAVE_REQUIRE_BACKENDS=1`):
+
+* **The cached artifacts under `.toolchain/`**: `.toolchain/downloads/` with `wheelhouse/`,
+  `serena-build-wheelhouse/` and the uv tarball, plus `.toolchain/serena-src/` and
+  `.toolchain/state/uv-cache/`. A `--fetch-only` run creates all of them. After an install from
+  `vendor/` (path (b)), `serena-src` and `uv-cache` already exist and the artifacts are in
+  `vendor/downloads/`; link them instead of downloading:
+  `ln -s ../vendor/downloads .toolchain/downloads`.
+* **`python3` on `PATH` must be Python 3.11 or newer**: the test runs
+  `python3 scripts/bootstrap_locked.py` inside the sandbox, and the installer needs 3.11. On hosts
+  whose `python3` is older (RHEL 8: 3.6), put a newer one first on `PATH` for the test run only:
+
+  ```bash
+  mkdir -p /tmp/dep01-py && ln -sf /usr/bin/python3.12 /tmp/dep01-py/python3
+  PATH=/tmp/dep01-py:$PATH SVWEAVE_REQUIRE_BACKENDS=1 \
+      .venv/bin/python -m pytest tests/integration/test_dep01_cleanroom.py
+  ```
+
 What DEP-01 does not cover: its clean room holds `scripts/`, `fixtures/`, `src/` and the lock only,
 so it does not exercise the `--fetch-only` Serena cache or the `svweave` CLI itself (it does exercise
 the offline linking of `src/` into the fresh venv, which the probes need for the bounded MCP stdio
