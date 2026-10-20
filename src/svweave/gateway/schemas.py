@@ -24,6 +24,7 @@ TOOL_NAMES = (
     "svw_hierarchy",
     "svw_connections",
     "svw_impact",
+    "svw_diff_impact",
     "svw_assertions",
     "svw_evidence",
     "svw_edit",
@@ -39,6 +40,13 @@ JOB_ID = {
 }
 PROFILE = {"type": "string", "pattern": "^[A-Za-z0-9_.-]{1,64}$"}
 LIMIT = {"type": "integer", "minimum": 1, "maximum": 500, "default": 100}
+#: a git revision as a plain token (no option, no whitespace, no control character, no ".." range)
+GIT_REF = {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 200,
+    "pattern": r"^(?!.*\.\.)[A-Za-z0-9_][A-Za-z0-9._/@^~+:-]*$",
+}
 CURSOR = {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^[A-Za-z0-9_.-]+$"}
 REL_PATH = {
     "type": "string",
@@ -161,6 +169,16 @@ INPUT: dict[str, dict[str, Any]] = {
         oneOf=_one_of(
             ["symbol_id"], ["location"], ["name"], ["instance_id"], ["instance_path"]
         ),
+    ),
+    "svw_diff_impact": _obj(
+        {
+            "build_id": HEX64,
+            "base": GIT_REF,
+            "head": GIT_REF,
+            "depth": {"type": "integer", "minimum": 1, "maximum": 20, "default": 3},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
+        },
+        ["build_id"],
     ),
     "svw_assertions": _obj(
         {
@@ -316,6 +334,16 @@ DATA: dict[str, dict[str, Any]] = {
     "svw_references": {"type": "object", "properties": _PAGED},
     "svw_hierarchy": {"type": "object", "properties": {**_PAGED, "roots": {"type": "array"}}},
     "svw_connections": {"type": "object", "properties": _PAGED},
+    "svw_diff_impact": {
+        "type": "object",
+        "properties": {
+            "base": {"type": "string"},
+            "head": {"type": "string"},
+            "summary": {"type": "object"},
+            "truncated_lists": {"type": "array"},
+            "note": {"type": "string"},
+        },
+    },
     "svw_impact": {
         "type": "object",
         "properties": {

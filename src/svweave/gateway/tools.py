@@ -196,6 +196,18 @@ def _impact(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     )
 
 
+def _diff_impact(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
+    return services.diff_impact(
+        s,
+        rid,
+        build_id=a["build_id"],
+        base=a.get("base", "HEAD"),
+        head=a.get("head"),
+        depth=a.get("depth", 3),
+        limit=a.get("limit"),
+    )
+
+
 def _assertions(s: Session, rid: str, a: dict[str, Any]) -> Envelope:
     return services.assertions(
         s,
@@ -330,6 +342,18 @@ for _t in (
         "a risk score, absence is not proof of absence on PARTIAL/STALE results." + _COMMON,
         _RO,
         _impact,
+    ),
+    _spec(
+        "svw_diff_impact",
+        "Git diff impact",
+        "What a git diff touches in a build: changed declarations, their owning modules, the "
+        "instances and dependent definitions, changed ports with their connection sites. base "
+        "(default HEAD) is the revision the build was made from, head defaults to the working "
+        "tree; the repository is the project root. Runs a read-only `git diff`. Old-side lines are "
+        "mapped onto the build's snapshot: exact only for files marked aligned. Header/macro "
+        "changes are not re-expanded. Counts, not a risk score." + _COMMON,
+        _RO,
+        _diff_impact,
     ),
     _spec(
         "svw_assertions",

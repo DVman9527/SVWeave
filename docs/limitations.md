@@ -220,3 +220,22 @@ evidence). Measured gaps on the fixtures:
 * The page is a snapshot of one build and does not refresh. Layout is a plain tree; very large
   designs need `--max-instances` or collapsing to stay readable.
 * Only the user's browser renders it; the viewer is not part of the qualification gates.
+
+## 9. Impact and diff impact
+
+* `svweave query impact` and `svw_impact` use the elaborated instance tree and resolved references
+  of ONE build. A module never instantiated under the build's tops (inactive generate, never loaded
+  library member) has no instances and no dependents here. Counts are counts, not a risk score.
+* `svweave query diff-impact` / `svw_diff_impact` map the OLD-side lines of `git diff -U0` onto the
+  build's snapshot. That is exact only for a file whose snapshot bytes equal the base revision
+  (`files[].aligned`); otherwise it is flagged approximate. A new file is not in the build.
+* A change inside an included header or a macro definition is attributed to declarations in that
+  file only; the files that include it are not re-expanded. Changed files that are not part of the
+  build (testbench, docs) are listed under `unmapped_files`, not analysed.
+* A diff is read against a workspace that has changed since the build, so the command never exits 5
+  for STALE; `freshness` in the envelope still says so.
+* The tool runs `git diff` / `git cat-file` with a fixed argument list (no shell, no external diff
+  driver, no textconv, no fsmonitor, no optional locks) in the project root; revisions are plain
+  tokens (no leading `-`, no `..`). `--repo` exists on the CLI only and must stay inside the policy's
+  allowed roots.
+

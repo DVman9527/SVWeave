@@ -20,6 +20,7 @@ READ_ONLY = {
     "svw_hierarchy",
     "svw_connections",
     "svw_impact",
+    "svw_diff_impact",
     "svw_assertions",
     "svw_evidence",
 }
@@ -27,7 +28,7 @@ READ_ONLY = {
 
 def test_exactly_the_planned_tools() -> None:
     assert set(TOOLS) == set(schemas.TOOL_NAMES)
-    assert len(TOOLS) == 12 and "svw_edit" in TOOLS
+    assert len(TOOLS) == 13 and "svw_edit" in TOOLS
     assert not any("approv" in t for t in TOOLS)  # approval is never an MCP tool
 
 

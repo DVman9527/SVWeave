@@ -147,3 +147,27 @@ def test_impact_parity_for_a_module_a_port_and_an_instance(built: Built) -> None
         m, _ = call(gw, "svw_impact", {"build_id": built.build_id, "depth": 2, **mcp_args})
         assert normalize(c) == normalize(m), cli_args
         assert m["data"]["target"] and m["data"]["summary"], cli_args
+
+
+def test_diff_impact_parity_with_a_real_git_change(built: Built) -> None:
+    import subprocess
+
+    root = built.ws.root
+    env = {"PATH": "/usr/bin:/bin", "HOME": str(root), "GIT_CONFIG_NOSYSTEM": "1",
+           "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+           "GIT_COMMITTER_EMAIL": "t@t"}
+
+    def git(*a: str) -> None:
+        subprocess.run(["git", "-C", str(root), *a], check=True, capture_output=True, env=env)
+
+    (root / ".gitignore").write_text(".svweave/\n")
+    git("init", "-q", "-b", "main")
+    git("add", "-A")
+    git("commit", "-q", "-m", "base")  # the committed files are exactly what the build captured
+    lane = root / "fixtures/demo/rtl/demo_lane.sv"
+    lane.write_text(lane.read_text().replace("assign ready_o = ready_i;", "assign ready_o = ~ready_i;"))
+    code, c = cli_env(root, "query", "diff-impact", "--build", built.build_id, "--depth", "2")
+    m, _ = call(make_gateway(built.opts), "svw_diff_impact", {"build_id": built.build_id, "depth": 2})
+    assert code == 0 and normalize(c) == normalize(m)
+    assert [d["qualified_name"] for d in m["data"]["affected_definitions"]] == ["demo_lane"]
+    assert m["data"]["files"][0]["aligned"] is True and m["freshness"] == "STALE"

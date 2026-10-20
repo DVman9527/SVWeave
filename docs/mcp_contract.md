@@ -45,6 +45,7 @@ no approve tool over MCP: approval is a trusted local CLI step only.
 | `svw_hierarchy` | `build_id` | one of `instance_id`/`instance_path`/`top`; `depth`, `limit`, `cursor` | Pre-order instance tree. | read-only |
 | `svw_connections` | `build_id` + one of `instance_id`/`instance_path` | `port`, `limit`, `cursor` | Direct formal/actual associations. | read-only |
 | `svw_impact` | `build_id` + one of `symbol_id`, `location`, `name`, `instance_id`/`instance_path` | `depth` (1-20, default 3), `limit` (per list, default 50) | What a change touches (instances, dependents/dependencies, port connection sites, references). A port and its implicit net are one target. Lists are capped; totals are complete. | read-only |
+| `svw_diff_impact` | `build_id` | `base` (default `HEAD`), `head` (default the working tree), `depth`, `limit` | What a git diff touches in the build: affected declarations and modules, their instances and dependents, changed ports with connection sites. Old-side lines are mapped onto the build's snapshot; `files[].aligned` says when that is exact. Plain revisions only (no options, no ranges); the repository is the project root. | read-only (runs `git diff`) |
 | `svw_assertions` | `build_id` | `scope`, `kind` (`source`/`bind`/`elaborated`), `limit`, `cursor` | Static SVA inventory; execution status is never represented. | read-only |
 | `svw_evidence` | one of `build_id`/`evidence_id` | `type`, `limit`, `cursor` | Static record, imported external records, NOT_RUN/EXTERNAL_DECLARED state per kind. | read-only |
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from svweave.application import diff_impact as diff_impact_mod
 from svweave.application import edit as edit_mod
 from svweave.application import evidence as evidence_mod
 from svweave.application import graph, queries
@@ -288,6 +289,30 @@ def impact(
         byte=byte,
         name=name,
         instance=instance,
+        depth=depth,
+        limit=limit,
+    )
+
+
+def diff_impact(
+    session: Session,
+    request_id: str,
+    *,
+    build_id: str,
+    base: str = "HEAD",
+    head: str | None = None,
+    repo: str | None = None,
+    depth: int = 3,
+    limit: int | None = None,
+) -> Envelope:
+    clean_text(base=base, head=head, repo=repo)
+    return diff_impact_mod.diff_impact(
+        session.opts,
+        build_id,
+        request_id,
+        base=base,
+        head=head,
+        repo=repo,
         depth=depth,
         limit=limit,
     )

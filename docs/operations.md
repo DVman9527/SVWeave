@@ -26,7 +26,10 @@ Editing stays disabled during all of this (and in M3 it does not exist at all).
    `svweave evidence import --manifest evidence.json`, inspect with `svweave query evidence --build B`.
 5. Editing (disabled by default; see `docs/editing.md`):
 
-6. Draw it: `svweave graph export --build B` writes one self-contained HTML page under
+6. Before a change lands: `svweave query diff-impact --build B` maps your `git diff` (base `HEAD`, working
+   tree) onto the build: changed declarations, modules, instances, dependents. Build from the base
+   revision so the lines align; the answer marks each file `aligned` or approximate.
+7. Draw it: `svweave graph export --build B` writes one self-contained HTML page under
    `.svweave/exports/` (hierarchy plus port-association connections, nothing served, ADR-014).
 
 ```text

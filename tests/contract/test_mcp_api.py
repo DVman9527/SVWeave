@@ -72,6 +72,10 @@ BAD_INPUTS: list[tuple[str, dict[str, Any]]] = [
     ("svw_impact", {"build_id": H, "name": "m", "instance_path": "t"}),  # two targets
     ("svw_impact", {"build_id": H, "name": "m", "depth": 0}),
     ("svw_impact", {"build_id": H, "name": "m", "limit": 501}),
+    ("svw_diff_impact", {"build_id": H, "base": "--output=x"}),  # an option, not a revision
+    ("svw_diff_impact", {"build_id": H, "head": "a..b"}),
+    ("svw_diff_impact", {"build_id": H, "base": "a b"}),
+    ("svw_diff_impact", {"build_id": H, "repo": "/etc"}),  # no filesystem root is accepted
     ("svw_build", {}),  # profile required
     ("svw_build", {"profile": "p", "reuse": "yes"}),
     ("svw_build", {"profile": "p; rm -rf /"}),

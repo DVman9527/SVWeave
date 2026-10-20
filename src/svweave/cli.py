@@ -88,6 +88,20 @@ def query_exit_code(env: Envelope, allow_stale: bool, allow_partial: bool) -> in
     return None
 
 
+def _diff_flags(f: Callable[..., Any]) -> Callable[..., Any]:
+    """Like :func:`_query_flags` for ``diff-impact``: a diff is read against a workspace that has
+    changed since the build, so STALE is the expected state and never changes the exit code (the
+    envelope still reports ``freshness``). ``--allow-partial`` keeps its meaning."""
+
+    @click.option("--allow-partial", is_flag=True, help="Exit 0 for a PARTIAL build (default 3).")
+    @functools.wraps(f)
+    def wrapper(st: _State, *a: Any, allow_partial: bool, **kw: Any) -> Any:
+        st.query_policy = (True, allow_partial)
+        return f(st, *a, **kw)
+
+    return wrapper
+
+
 def _query_flags(f: Callable[..., Any]) -> Callable[..., Any]:
     """Adds --allow-stale/--allow-partial to a query command (apply BELOW @pass_state)."""
 
@@ -506,6 +520,42 @@ def query_impact(
                 byte=byte,
                 name=name,
                 instance=instance,
+                depth=depth,
+                limit=limit,
+            )
+        )
+    )
+
+
+@query_grp.command("diff-impact")
+@_build_opt
+@click.option("--base", default="HEAD", show_default=True, help="Git revision the build was made from.")
+@click.option("--head", default=None, help="Git revision of the change (default: the working tree).")
+@click.option("--repo", default=None, help="Git repository directory (default: the project root).")
+@click.option("--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels.")
+@click.option("--limit", type=int, default=None, help="Items per list (default 50, max 500).")
+@pass_state
+@_diff_flags
+def query_diff_impact(
+    st: _State,
+    build_id: str,
+    base: str,
+    head: str | None,
+    repo: str | None,
+    depth: int,
+    limit: int | None,
+) -> None:
+    """What a git diff touches in a build: declarations, modules, instances, dependents."""
+    sess = st.session()
+    st.emit(
+        st.run(
+            lambda rid: services.diff_impact(
+                sess,
+                rid,
+                build_id=build_id,
+                base=base,
+                head=head,
+                repo=repo,
                 depth=depth,
                 limit=limit,
             )

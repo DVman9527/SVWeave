@@ -480,13 +480,13 @@ def _twins(rows: list[sqlite3.Row]) -> list[sqlite3.Row] | None:
     return sorted(rows, key=lambda r: (r["kind"] != "port", r["declaration_id"]))
 
 
-def _fit(data: dict[str, Any], budget: int) -> list[str]:
+def _fit(data: dict[str, Any], budget: int, keys: tuple[str, ...] = _LISTS) -> list[str]:
     """Shrink the list sections until the JSON fits ``budget``; returns the keys that were cut. A
     cut list keeps its ``*_total``/``summary`` figures, so the omission is visible."""
     cut: list[str] = []
     while len(json.dumps(data, default=str).encode("utf-8")) > budget:
         key = max(
-            (k for k in _LISTS if isinstance(data.get(k), list) and len(data[k]) > 1),
+            (k for k in keys if isinstance(data.get(k), list) and len(data[k]) > 1),
             key=lambda k: len(json.dumps(data[k], default=str)),
             default=None,
         )

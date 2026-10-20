@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "base": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "^(?!.*\\.\\.)[A-Za-z0-9_][A-Za-z0-9._/@^~+:-]*$",
+      "type": "string"
+    },
+    "build_id": {
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "depth": {
+      "default": 3,
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "head": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "^(?!.*\\.\\.)[A-Za-z0-9_][A-Za-z0-9._/@^~+:-]*$",
+      "type": "string"
+    },
+    "limit": {
+      "default": 50,
+      "maximum": 500,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "build_id"
+  ],
+  "type": "object"
+}
