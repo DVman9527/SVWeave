@@ -25,6 +25,7 @@ class SandboxGateTests(unittest.TestCase):
         command = step["run"]
         self.assertIn("capability = probe_host(refresh=True)", command)
         self.assertEqual(command.count("probe_host(refresh=True)"), 1)
+        self.assertIn("date -u '+%Y-%m-%d %H:%M:%S.%6N UTC'", command)
         self.assertIn('timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at"', command)
         for probe_status, diagnostic_status in [(0, 0), (7, 0), (7, 1), (7, 124)]:
             with (
@@ -59,7 +60,7 @@ class SandboxGateTests(unittest.TestCase):
                 called = root / "diagnostics-called"
                 self.assertEqual(called.exists(), probe_status != 0)
                 if called.exists():
-                    self.assertRegex(called.read_text(), r"\d{4}-\d{2}-\d{2} .* UTC")
+                    self.assertRegex(called.read_text(), r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC")
 
     def test_SEC_05_diagnostics_shell_syntax(self) -> None:
         result = subprocess.run(
@@ -72,6 +73,7 @@ class SandboxGateTests(unittest.TestCase):
 
     def test_SEC_05_kernel_audit_read_is_supported_and_bounded(self) -> None:
         script = (ROOT / "scripts/ci_sandbox_diagnostics.sh").read_text()
+        self.assertIn("date -u '+%Y-%m-%d %H:%M:%S.%6N UTC'", script)
         argv = shlex.split(script[script.index("sudo -n journalctl"):].replace("\\\n", " "))
         self.assertEqual(argv[:4], ["sudo", "-n", "journalctl", "-k"])
         self.assertNotIn("--kernel", argv)

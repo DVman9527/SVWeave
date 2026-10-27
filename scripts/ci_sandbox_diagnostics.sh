@@ -3,7 +3,7 @@
 # Read-only commands only: no policy changes, extra namespace probes, or environment dump.
 set -uo pipefail
 probe_started_at=${1:?mandatory probe start time required}
-probe_finished_at=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+probe_finished_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
 
 read_diagnostic() {
   printf '\n--- %s ---\n' "$1"
