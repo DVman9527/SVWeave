@@ -58,7 +58,9 @@ jobs:
       - name: Install and verify the mandatory worker sandbox
         run: |
           sudo apt-get update && sudo apt-get install -y bubblewrap
-          .venv/bin/python - <<'PY'
+          probe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          echo "Mandatory worker sandbox probe started: $probe_started_at"
+          if .venv/bin/python - <<'PY'
           from svweave.security.sandbox import probe_host
 
           capability = probe_host(refresh=True)
@@ -66,6 +68,14 @@ jobs:
               raise SystemExit(f"Mandatory worker sandbox unavailable: {capability.reason}")
           print(f"Mandatory worker sandbox ready: {capability.version}")
           PY
+          then
+            :
+          else
+            probe_status=$?
+            # Diagnostics are bounded and read-only; they never repair or replace this gate.
+            timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" || true
+            exit "$probe_status"
+          fi
       - name: Unit tests
         run: .venv/bin/python -m pytest tests/unit -q --no-cov
       - name: Contract tests
