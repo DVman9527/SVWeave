@@ -18,6 +18,7 @@ from svweave.adapters.serena import SerenaAdapter
 from svweave.adapters.serena import config as scfg
 from svweave.adapters.serena.guard import apply_exact_range
 from svweave.application import search as S
+from svweave.config.execution import ExecutionPolicy, ExecutionSelection, resolve_execution
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.states import BackendAvailability, Completeness
 from svweave.orchestration import doctor_checks
@@ -386,6 +387,7 @@ def test_f7_registry_for_workspace_and_doctor_wire_protected_roots(tmp_path: Pat
     ws = SimpleNamespace(
         roots=[SimpleNamespace(abs=tmp_path / "rtl"), SimpleNamespace(abs=None), SimpleNamespace(abs=tmp_path / "ip")],
         state_dir=tmp_path / ".svweave",
+        execution=resolve_execution(ExecutionSelection(), ExecutionPolicy()),
     )
     reg = BackendRegistry.for_workspace(ws, toolchain(), sandbox=SandboxRunner(capability=CAP))
     assert reg.protected_paths == (tmp_path / "rtl", tmp_path / "ip")

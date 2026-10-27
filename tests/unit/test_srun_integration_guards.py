@@ -105,7 +105,9 @@ def test_SRUN_20_remote_registry_never_falls_back_local(ws: Ws) -> None:
     from svweave.orchestration.registry import BackendRegistry
     with pytest.raises(SvwError) as err:
         BackendRegistry.for_workspace(remote(ws).load())
+    assert err.value.code is ErrorCode.BACKEND_UNAVAILABLE
     assert err.value.details["reason"] == "srun_mcp_not_supported"
+    assert err.value.details["submitted"] is False
 
 
 @pytest.mark.parametrize("operation", ["validate", "approve", "commit"])
