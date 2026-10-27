@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 import tempfile
 import unittest
@@ -68,3 +69,13 @@ class SandboxGateTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_SEC_05_kernel_audit_read_is_supported_and_bounded(self) -> None:
+        script = (ROOT / "scripts/ci_sandbox_diagnostics.sh").read_text()
+        argv = shlex.split(script[script.index("sudo -n journalctl"):].replace("\\\n", " "))
+        self.assertEqual(argv[:4], ["sudo", "-n", "journalctl", "-k"])
+        self.assertNotIn("--kernel", argv)
+        self.assertEqual(argv[argv.index("--since") + 1], "$probe_started_at")
+        self.assertEqual(argv[argv.index("--until") + 1], "$probe_finished_at")
+        self.assertIn("--lines=100", argv)
+        self.assertIn("--grep=apparmor|audit|DENIED|bwrap|bubblewrap|seccomp", argv)

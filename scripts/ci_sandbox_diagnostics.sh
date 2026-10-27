@@ -35,6 +35,6 @@ read_diagnostic 'Loaded bwrap AppArmor profiles' \
 read_diagnostic 'Packaged bwrap AppArmor policy (not necessarily loaded)' \
   cat /etc/apparmor.d/bwrap
 read_diagnostic 'Kernel audit/security entries during the mandatory probe (last 100 matches)' \
-  sudo -n journalctl --kernel --no-pager --output=short-iso \
+  sudo -n journalctl -k --no-pager --output=short-iso \
   --since "$probe_started_at" --until "$probe_finished_at" --lines=100 \
   --grep='apparmor|audit|DENIED|bwrap|bubblewrap|seccomp'
