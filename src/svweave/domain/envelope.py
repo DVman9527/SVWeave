@@ -11,7 +11,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from svweave.domain.errors import BLOCKING_CODES, SvwError
 from svweave.domain.states import Completeness, EvidenceKind, Freshness
 
-SCHEMA_VERSION = "1.0"
+# Output envelope only. Manifest/config/semantic schema versions are independent.
+# 1.1 adds reference_coverage; strict 1.0 output-schema consumers must upgrade.
+SCHEMA_VERSION = "1.1"
 
 
 class Outcome(StrEnum):

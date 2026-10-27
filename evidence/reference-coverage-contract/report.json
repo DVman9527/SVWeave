@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-27",
+  "source_commit": "0525bdc22f981b0c21a1b05ead783f4b50d86de3",
+  "source_state": "dirty: explicit envelope 1.1 migration and documentation correction",
+  "source_hashes": {
+    "src/svweave/domain/envelope.py": "518a4440e0792c926a457346caa133f2ebbb6be594d915e91b69e46c860fa905",
+    "src/svweave/adapters/slang/coverage.py": "4a988fe31083598131e9b9f990e0eee988a8a86f78ef5d0c1650e985afa77084",
+    "src/svweave/adapters/slang/ingest.py": "055ff30c9986d993bdb6b5c7db9d3c90b3aa37cac69c835ddaf2be27d82c3aa4",
+    "src/svweave/application/build.py": "ef72f0b3ffbf038a297e0322cc108830d2cb4cb433f80cc4d3fea93625dd64f0",
+    "src/svweave/application/semantic_common.py": "3021b7ac9083e2ab7ab65933f3f9fb5ac4e6ead68d1eede04a27aa5b548b43a1",
+    "src/svweave/application/queries.py": "d6d20980cb6b39c254749de0357dc1e99d87115919adfcfa8af1abebb56c16d5",
+    "src/svweave/application/impact.py": "b0aa452009dbfa660cc520e054c404a57f66cc471aa68cd742d71f8ea4eeefce",
+    "src/svweave/application/rename.py": "6afee6e1763ab07e64eb54d6813f1979f0536da0aa91536759fd728f9ebf98eb",
+    "tests/unit/test_domain.py": "a3cca5e59cf334a658e85d1db7610502eff24a283539c21c0fc44776b1e76851",
+    "tests/unit/test_reference_coverage.py": "0600e0f79943fc503917e9bc5ebf8a8607fb24186706fdffa2cc863c844a4387",
+    "tests/integration/test_reference_coverage.py": "b20f34924ce57559094618380bf63545b2863e91d5acd3ad75669b91a8c961c7"
+  },
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "host": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "pydantic": "2.13.4",
+  "local_synthetic_smoke": {
+    "status": "PASS",
+    "assertions": 31,
+    "command": "PYTHONPATH=src python evidence/reference-coverage-contract/local_smoke.py"
+  },
+  "schema_generation_comparison": "PASS with system dependencies, not pinned verification",
+  "strict_1_0_rejection_and_1_1_migration_check": "PASS against e7684ad schema; old strict clients must upgrade",
+  "previous_fast_ci": {
+    "sha": "0525bdc22f981b0c21a1b05ead783f4b50d86de3",
+    "url": "https://github.com/DVman9527/SVWeave/actions/runs/40467190687",
+    "status": "PASS: ruff, mypy, schema, unit, contract; does NOT cover dirty envelope 1.1 migration"
+  },
+  "current_migration_pinned_checks": "NOT_RUN; pending next CI",
+  "real_slang_targeted_integration": "NOT_RUN; mandatory local sandbox blocked, CI dispatch authorization pending",
+  "query_smoke": "BLOCKED at local import by missing mcp_types; no backend started",
+  "native_verilator": "NOT_RUN; separate validation harness, pending authorized CI dispatch/evidence",
+  "simulation": "NOT_RUN",
+  "formal": "NOT_RUN",
+  "coverage": "NOT_RUN"
+}

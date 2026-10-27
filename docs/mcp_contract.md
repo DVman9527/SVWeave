@@ -71,12 +71,21 @@ Every result (success and failure) is the plan 14.5 envelope, delivered both as 
 
 `schema_version, request_id, outcome (OK|PARTIAL|BLOCKED|ERROR), workspace_id, snapshot_id,
 build_id, profile, freshness (CURRENT|STALE|HISTORICAL|UNKNOWN), analysis_coverage {completeness,
-scope, basis, unresolved_count, limitations}, provenance {backend, toolchain_id, evidence_kind},
+scope, basis, unresolved_count, limitations, reference_coverage}, provenance {backend, toolchain_id, evidence_kind},
 data, pagination {limit, next_cursor, truncated}, warnings, error {code, message, details}`.
 
 Client rules: with `PARTIAL`, `STALE`, `HISTORICAL` or `truncated=true`, an item missing from the
 page is NOT proven absent. `analysis_coverage` is about the extraction/query scope, not UVM
 functional coverage.
+
+**Output envelope 1.1 migration (HDL-R01):** `reference_coverage` adds machine-readable
+feature/scope/query limits independently of build completeness. Its v1
+`absence_proof_supported` is always false, including for a COMPLETE/OK result; unavailable old
+metadata is UNKNOWN. Strict 1.0 output validators reject this new field, even when null:
+clients must upgrade to the 1.1 output schemas before consuming these responses. New readers
+still accept historical 1.0 payloads without it; old-reader/new-payload compatibility is not
+claimed. Manifest/config/lock/semantic-store versions and input schemas are unchanged.
+See [coverage details](supported_features.md#machine-readable-reference-coverage-hdl-r01-output-envelope-11).
 
 ### Three kinds of outcome
 

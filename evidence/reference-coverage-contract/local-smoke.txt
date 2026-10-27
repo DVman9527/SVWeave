@@ -1,0 +1,1 @@
+PASS: 31 independent pure Python/ingest/storage/envelope smoke assertions; no backend or pytest invoked

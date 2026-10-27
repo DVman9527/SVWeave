@@ -118,6 +118,7 @@ def test_HDL_COV_01_historical_missing_or_unknown_metadata_is_unknown(
     assert cov.status == "UNKNOWN" and cov.observations is None
     assert "coverage_metadata_unavailable" in cov.blockers
     old = env.model_dump(mode="json")
+    old["schema_version"] = "1.0"
     del old["analysis_coverage"]["reference_coverage"]
     assert Envelope.model_validate(old).schema_version == "1.0"  # existing payloads still parse
 

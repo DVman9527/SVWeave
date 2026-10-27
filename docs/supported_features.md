@@ -1,9 +1,11 @@
 # Supported features and limitations (M2 semantic core)
 
 Status: implemented in `src/svweave/adapters/slang/`, `application/build.py`,
-`application/queries.py`. Everything below was exercised against the pinned **pyslang 12.0.0**
-(ADR-003) on `fixtures/language`, `fixtures/demo` and `fixtures/uvm` with the real UVM 2020.3.1
-library. Goldens: `fixtures/expected/` (hand-written, see its README). Plan references are to
+`application/queries.py`. Existing semantic tests target pinned **pyslang 12.0.0** (ADR-003),
+`fixtures/language`, `fixtures/demo` and the real UVM 2020.3.1 library. This is an implementation
+inventory, not evidence that every feature has passed on the current source revision. New
+HDL-COV-01/02 cases await pinned CI; see the coverage contract below and its dated evidence.
+Goldens: `fixtures/expected/` (hand-written, see its README). Plan references are to
 `SVWeave_plan.md`.
 
 This is a **static** semantic core. Nothing here represents simulation, formal proof, UVM
@@ -52,8 +54,10 @@ analysis `PARTIAL`, diagnostics `HAS_ERRORS` (SEM-07).
   is spelled. Any occurrence in a **project** file makes the build `PARTIAL` (a reason is stored
   and "negative reference conclusions" are not claimed, plan 10.4). Occurrences in files of an
   **external source root** (`@root/...`, for example the pinned UVM library) are counted and
-  listed in `analysis_coverage.limitations` only. The verdict therefore never depends on which
-  instance slang happened to visit first.
+  listed in `analysis_coverage.limitations` without blocking, **except extractor exceptions,
+  which block regardless of origin**. The verdict therefore never depends on which instance
+  slang happened to visit first. Systematic omissions that were never visited need not increment
+  any occurrence counter; a zero count does not establish complete references.
 
 Warnings, `dynamic_unresolved` virtual calls, generic classes never specialized, definitions not
 elaborated, `ifdef-disabled regions and unloaded library members are **limitations**, not
@@ -105,7 +109,7 @@ with no published build serves its latest stored one), also while a newer build 
 or failed, because only a fully validated build moves the published pointer; `HISTORICAL` = not
 current and not the served build (another build of the profile is published, which may be a newer
 build or an older one re-published by build reuse; or this build was never published while
-another is), or the snapshot was garbage-collected), `analysis_coverage{completeness, scope, basis, unresolved_count, limitations}`,
+another is), or the snapshot was garbage-collected), `analysis_coverage{completeness, scope, basis, unresolved_count, limitations, reference_coverage}`,
 `provenance{backend: slang, toolchain_id, evidence_kind: HDL_STATIC_RESOLVED}`, pagination.
 
 | CLI | Service | Notes |
@@ -164,6 +168,46 @@ never block); the former `report_only` value had no effect and was removed.
 
 ## 4. Known limitations and capabilities NOT implemented
 
+### Machine-readable reference coverage (HDL-R01; output envelope 1.1)
+
+Build completeness and reference coverage are independent. A successful `COMPLETE` / `OK`
+build can have `analysis_coverage.reference_coverage.status=PARTIAL`; positive indexed edges
+remain available. This does not change publication or turn every build into a failure.
+
+The reference contract (`contract_version="1"`) exposes:
+
+| Field | Meaning |
+|---|---|
+| `features` | Elaborated occurrences and aggregate-member type coverage are `PARTIAL`; packed/unpacked dimensions, return-type names and class scope-prefix names are `UNSUPPORTED`. These are capability boundaries, not per-symbol occurrence counts. |
+| `scopes` | Elaborated bodies are `PARTIAL`; inactive branches, unused generic bodies, unelaborated definitions, unloaded library members and call-only specialization bodies are `NOT_SEARCHED`. |
+| `observations` | Recorded unsupported nodes and dropped references, separately for project/external origins; unresolved/dynamic references; counts by gap/inactive-region kind. Zero observed entries is not an exhaustive census of omitted references. Dependency-inventory library gaps are included before summary generation. |
+| `query`, `searched_scope`, `depth_limit` | Reference/impact/rename-preview context, logical path-prefix restriction and bounded impact depth; the existing references `data.searched_scope` remains available. |
+| `result_truncated`, `blockers` | Explicit truncation and stable reasons including known omissions, unsearched scopes, unsupported/dropped occurrences, partial/blocked builds, non-current freshness, restricted query scope and preceding cursor pages. A final page does not prove earlier pages empty. |
+| `absence_proof_supported` | Always `false` in contract v1. Empty references/impact cannot prove unused, safe-to-delete or complete-rename status, even for a COMPLETE build. A rename candidate still needs the controlled validation/approval/CAS flow. |
+
+Historical reports without valid v1 metadata return `status=UNKNOWN`, `observations=null` and
+`coverage_metadata_unavailable`; they are not silently upgraded to complete coverage. Existing
+prose limitations, warnings and stale/truncation safeguards remain in place. Non-semantic/error
+envelopes can leave `reference_coverage=null`, which is also not proof of absence.
+
+**Client upgrade:** output envelope version is now **1.1**. Strict 1.0 schemas forbid the new
+field (even when null); clients must use the updated output schemas. The new reader still accepts
+historical 1.0 payloads without the field, which is not a promise that old strict readers accept
+1.1. Manifest, config, lock and semantic-store schema versions are unchanged. See
+[MCP migration notes](mcp_contract.md#envelope).
+
+Implementation: `adapters/slang/coverage.py`, `ingest.py`, `application/build.py`,
+`semantic_common.py`, `queries.py`, `impact.py`, `rename.py` and `domain/envelope.py`.
+Requirement mapping: **HDL-COV-01/02** in `tests/unit/test_reference_coverage.py` and
+`tests/integration/test_reference_coverage.py`; strict-client migration in
+`tests/unit/test_domain.py::test_HDL_COV_01_output_version_requires_strict_schema_upgrade`.
+The four integration cases cover dimension/type omissions with retained positive calls,
+inactive/unloaded scopes, and project/external unsupported nodes through the real mandatory
+worker. Their presence is not a PASS: pinned execution evidence is pending. Local pure checks
+and their limits are recorded in `evidence/reference-coverage-contract/`.
+
+### Extraction boundaries
+
 These are reported as limitations/gaps in the outputs; none is emulated with regular expressions.
 
 * No "find all references" index exists in pyslang (ADR-003). References are the occurrences found
@@ -177,7 +221,8 @@ These are reported as limitations/gaps in the outputs; none is emulated with reg
   names, class names used only as scope prefixes (`Cls::member`), enum/struct member type names,
   `export`/`import` of DPI beyond the declaration, clocking-block signals, bind
   target instance lists (`bind mod : inst_list`), checker instances, primitives, config blocks
-  (counted in `unsupported_nodes`).
+  (some encountered unsupported nodes are counted in `unsupported_nodes`; these systematic
+  omissions are **not** all guaranteed to increment that inventory).
 * Multiple (macro-expanded) origins of one occurrence are reported as candidates; picking one is
   an edit concern (M4).
 * `explicit_groups` compilation units use slang `-C` files; groups may not declare library
@@ -250,4 +295,8 @@ Verilator 5.052 JSON AST artifacts can be imported and inspected separately from
 index. Official regression goldens exercise class/member/method/type and selected reference,
 module and port node inventory. This is `EXTERNAL_DECLARED`, `PARTIAL`, unbound to any build;
 it does not establish resolved references or close unvisited-body/runtime UVM gaps.
+The separate `scripts/verify_verilator_native.py` static lint/JSON verification harness is
+explicit opt-in test infrastructure, not a product runtime backend. Actual native verification
+is `NOT_RUN` pending an authorized CI dispatch/result; the local mandatory sandbox probe is
+BLOCKED (`NETLINK_ROUTE` permissions). Harness preparation or pure tests are not native PASS.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).

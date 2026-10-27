@@ -16,7 +16,7 @@ timing or signoff result (plan 4.3).
 | Limitation | Detail |
 |---|---|
 | Linux only | Qualified host class: Linux x86_64 with unprivileged user namespaces and `bwrap`. macOS and Windows are not qualified (plan 4.2, P1). The pinned codebase-memory-mcp is the `linux-amd64-portable` static build. |
-| No EDA runner | There is no simulator, formal or EDA-compile invocation. `eda_compile`, `simulation`, `formal` and `coverage` are `NOT_RUN` unless the user imports external evidence (`svweave evidence import`), which is stored as `EXTERNAL_DECLARED` and is never verified by SVWeave. |
+| No product EDA runner | Product runtime does not invoke a simulator, formal or EDA compiler. A separate explicitly authorized native static-lint/JSON validation harness is test infrastructure, not EDA signoff or a query backend. `eda_compile`, `simulation`, `formal` and `coverage` remain separate; imported external evidence (`svweave evidence import`) is `EXTERNAL_DECLARED` and not verified by SVWeave. |
 | No incremental build | Every build is a full parse and elaboration (ADR-006). An edit triggers a full rebuild. There is no claim that changing one file is cheaper. |
 | Not a language-server replacement | No LSP, no semantic rename, no refactoring beyond the controlled edit flow. |
 | Not implemented (plan 4.3) | Bit-level connectivity, clock/reset domain analysis, CDC/RDC/timing/power, encrypted source recovery, UVM factory/`config_db` resolution, SVA proof, coverage closure, VHDL/AMS/mixed-language. |
@@ -31,11 +31,24 @@ timing or signoff result (plan 4.3).
   specializations reached only as the static scope of a call (for example the body behind
   `uvm_config_db#(int)::set`). A missing reference is therefore not proof of absence; every
   reference result states its searched scope.
-* **Unsupported reference kinds** (not extracted, counted in `unsupported_nodes`): packed and
+* **Build COMPLETE is not complete reference coverage (HDL-R01).** Output envelope **1.1**
+  adds `analysis_coverage.reference_coverage`: explicit feature/scope statuses, observed
+  project/external unsupported/drop counts, query scope/depth/truncation and blocker codes.
+  The current contract always has `absence_proof_supported=false`; empty references or impact
+  do not prove unused/safe-to-delete status or a complete rename. Positive indexed occurrences
+  remain usable; this does not make all builds PARTIAL. Old/malformed coverage metadata is
+  `UNKNOWN`, not complete; zero observed gaps is not evidence of exhaustive traversal. Non-current
+  freshness, partial/blocked builds, truncation and unsearched scopes never relax this boundary.
+  Strict 1.0 output clients must upgrade schemas; the new reader's ability to read old 1.0
+  payloads does not make new 1.1 payloads valid under old strict schemas. See the
+  [contract and test mapping](supported_features.md#machine-readable-reference-coverage-hdl-r01-output-envelope-11).
+* **Known reference omissions** (not exhaustively counted in `unsupported_nodes`): packed and
   unpacked dimension expressions, subroutine return-type names, class names used only as scope
   prefixes (`Cls::member`), enum/struct member type names, `export` and `import` of DPI beyond the
   declaration, clocking-block signals, bind target instance lists
-  (`bind mod : inst_list`), checker instances, primitives, config blocks.
+  (`bind mod : inst_list`), checker instances, primitives, config blocks. Only encountered
+  unsupported node kinds/dropped occurrences are counted; an unvisited construct can be missing
+  without contributing a count. No new references are invented by the coverage contract.
 * **UVM call metadata is a bounded static inventory.** `context.uvm` recognizes an explicit
   resolved `uvm_pkg` API allowlist, not arbitrary wrappers or library authenticity. Written
   named/ordered/empty arguments are associated with formals, without evaluating values or
@@ -58,9 +71,10 @@ timing or signoff result (plan 4.3).
   (`timescale: <1|10|100><unit>/<1|10|100><unit>` -> `--timescale`, and `std:
   1364-2005|1800-2017|1800-2023|latest` -> `--std`); they are part of `config_id` and listed in
   the build's `semantic_deviations`. No other slang flag can be passed through.
-* **The ignorable filelist option allowlist is fixed** (not configurable). Any other unknown
-  option blocks the build (`UNSUPPORTED_OPTION`); ignorable ones are recorded in the ledger and
-  are not part of `config_id`.
+* **Ignored filelist options are restricted.** Built-in output-only options are allowlisted;
+  profiles can also explicitly declare zero-argument runtime options in `ignored_options`.
+  Declared names enter config identity and all ignored occurrences enter the ledger. Other
+  unknown options block with `UNSUPPORTED_OPTION`; this is not arbitrary flag passthrough.
 * **Encrypted / protected sources and implicit blackboxes are never COMPLETE.** A `` `pragma
   protect `` envelope is skipped by slang and an empty-bodied module that has ports is an implicit
   blackbox: both add a blocking coverage gap (`protected_envelope`, `empty_module_body`) and the
@@ -174,8 +188,9 @@ evidence). Measured gaps on the fixtures:
   through the gateway.
 * Serena's symbol cache can lag behind exact-range edits made outside Serena. The adapter detects
   a stale view and raises `EDIT_CONFLICT` (`serena_stale_view`).
-* Not supported: renames, deletes, new files, binary files, symlinks, hardlinked targets, edits to
-  filelists and generated inputs.
+* No general automatic semantic rename is supported; the separate read-only rename preview
+  below can prepare a candidate request, not prove exhaustive references. Deletes, new files,
+  binary files, symlinks, hardlinked targets, and edits to filelists/generated inputs are unsupported.
 * Snapshots of non-base validate profiles are not pinned against `cache gc`.
 * Several file replacements are not one atomic transaction. Per-file atomic replace, a write-ahead
   journal and a cooperative lock are provided; other editors can observe an intermediate state.
@@ -282,9 +297,13 @@ evidence). Measured gaps on the fixtures:
 ## Optional external Verilator inventory
 
 The Verilator JSON importer is an unbound, `EXTERNAL_DECLARED` / `PARTIAL` static inventory,
-not an executed backend or an extension of slang's resolved-reference coverage. It never runs
+not a product runtime compiler backend or an extension of slang's resolved-reference coverage. It never runs
 simulation, resolves UVM runtime behavior, or changes edit eligibility. The JSON format is
-pinned to 5.052; no native integration or additional UVM coverage is claimed. See
+pinned to 5.052. A separate explicit `scripts/verify_verilator_native.py` validation harness
+uses mandatory sandboxing for real static lint/JSON checks; it does not run during product
+queries/imports or change slang authority. Actual native validation remains **NOT_RUN** pending
+authorized CI dispatch/evidence; the local sandbox probe is **BLOCKED** by `NETLINK_ROUTE`
+permissions. No native PASS or additional UVM reference coverage is claimed. See
 [static supplement scope and evidence](verilator_static_supplement.md).
 
 ## Slurm is not yet a supported execution backend

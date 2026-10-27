@@ -4,10 +4,12 @@ import re
 import uuid
 
 import pytest
+from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from svweave.domain import ids
 from svweave.domain.envelope import (
+    AnalysisCoverage,
     Envelope,
     Outcome,
     error_envelope,
@@ -187,7 +189,7 @@ def test_API_01_envelope_shape_and_strictness() -> None:
         "warnings",
         "error",
     ]
-    assert d["schema_version"] == "1.0" and d["freshness"] == "UNKNOWN"
+    assert d["schema_version"] == "1.1" and d["freshness"] == "UNKNOWN"
     assert d["pagination"] == {"limit": 100, "next_cursor": None, "truncated": False}
     with pytest.raises(ValidationError):
         Envelope.model_validate({"request_id": "r", "outcome": "OK", "surprise": 1})
@@ -195,6 +197,32 @@ def test_API_01_envelope_shape_and_strictness() -> None:
         Envelope.model_validate({"request_id": "r", "outcome": "MAYBE"})
     assert new_request_id().startswith("req-")
     assert '"outcome": "OK"' in env.to_json()
+
+
+def test_HDL_COV_01_output_version_requires_strict_schema_upgrade() -> None:
+    # Frozen AnalysisCoverage shape from envelope 1.0 (e7684ad), not today's schema:
+    # even reference_coverage=null was forbidden by its additionalProperties:false.
+    old_schema = {
+        "type": "object", "additionalProperties": False, "required": ["completeness"],
+        "properties": {
+            "completeness": {"enum": ["COMPLETE", "PARTIAL", "BLOCKED"]},
+            "scope": {"type": ["string", "null"]},
+            "basis": {"type": ["string", "null"]},
+            "unresolved_count": {"type": "integer"},
+            "limitations": {"type": "array", "items": {"type": "string"}},
+        },
+    }
+    env = Envelope(request_id="r", outcome=Outcome.OK,
+                   analysis_coverage=AnalysisCoverage(completeness=Completeness.COMPLETE))
+    payload = env.model_dump(mode="json")
+    assert payload["schema_version"] == "1.1"
+    assert not Draft202012Validator(old_schema).is_valid(payload["analysis_coverage"])
+    assert Draft202012Validator(Envelope.model_json_schema()).is_valid(payload)
+    # New readers can still read historical 1.0 payloads; this is NOT the reverse guarantee.
+    payload["schema_version"] = "1.0"
+    del payload["analysis_coverage"]["reference_coverage"]
+    assert Draft202012Validator(old_schema).is_valid(payload["analysis_coverage"])
+    assert Envelope.model_validate(payload).schema_version == "1.0"
 
 
 def test_error_envelope_blocked_vs_error() -> None:
