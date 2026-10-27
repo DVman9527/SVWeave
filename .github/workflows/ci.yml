@@ -58,6 +58,7 @@ jobs:
       - name: Install and verify the mandatory worker sandbox
         run: |
           sudo apt-get update && sudo apt-get install -y bubblewrap
+          .venv/bin/python scripts/ci_prepare_bwrap_apparmor.py
           probe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
           echo "Mandatory worker sandbox probe started: $probe_started_at"
           if .venv/bin/python - <<'PY'

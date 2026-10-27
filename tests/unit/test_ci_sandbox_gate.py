@@ -38,7 +38,10 @@ class SandboxGateTests(unittest.TestCase):
                 # Pure shell-control test: no apt, sandbox, sudo, or host diagnostics run.
                 for name, body in {
                     "sudo": "exit 0",
-                    ".venv/bin/python": f"cat >/dev/null\nexit {probe_status}",
+                    ".venv/bin/python": (
+                        'if [[ "$1" == scripts/ci_prepare_bwrap_apparmor.py ]]; then exit 0; fi\n'
+                        f"cat >/dev/null\nexit {probe_status}"
+                    ),
                     "scripts/ci_sandbox_diagnostics.sh": (
                         'printf "%s\\n" "$1" > diagnostics-called\n'
                         f"exit {diagnostic_status}"
