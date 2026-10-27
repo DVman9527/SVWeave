@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """M0 pyslang capability spike (SVW-002).
 
-Runs each build in a separate child process (``--one <build>``) so that peak RSS
+Runs each build in a mandatory sandboxed child process so that peak RSS
 and wall time are measured per build, mirroring the planned out-of-process HDL
 worker (plan §7.1).  Results are printed as JSON and written to
 ``.svweave/spike/pyslang/result.json`` plus ``evidence/m0/pyslang_spike.json``.
@@ -361,48 +361,44 @@ def child(build: str, root: Path, uvm_src: Path, fixture_root: Path) -> dict:
 # parent orchestration
 # --------------------------------------------------------------------------
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default=str(REPO), help="cwd for the build (fixture paths are relative)")
-    ap.add_argument("--fixture-root", default=None, help="dir containing demo/ and uvm/ (default <root>/fixtures)")
-    ap.add_argument("--uvm-src", default=str(REPO / ".toolchain/uvm-core/src"))
-    ap.add_argument("--out", default=str(REPO / ".svweave/spike/pyslang/result.json"))
-    ap.add_argument("--evidence", default=str(REPO / "evidence/m0/pyslang_spike.json"))
-    ap.add_argument("--only", default="demo_L2,demo_L4,uvm")
-    ap.add_argument("--one", default=None, help=argparse.SUPPRESS)
-    ap.add_argument("--timeout", type=float, default=300)
-    a = ap.parse_args()
-    root = Path(a.root).resolve()
-    fixture_root = Path(a.fixture_root).resolve() if a.fixture_root else root / "fixtures"
-    uvm_src = Path(a.uvm_src).resolve()
-
-    if a.one:
-        res = child(a.one, root, uvm_src, fixture_root)
-        sys.stdout.write(json.dumps(res, default=str))
-        return 0
+def run_probe(builds, root: Path, fixture_root: Path, uvm_src: Path, timeout=300) -> dict:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _sandbox import python_spec, run
 
     results = {"tool": "pyslang_spike", "python": sys.version.split()[0], "builds": {}}
-    for b in a.only.split(","):
+    for b in builds:
         t0 = time.monotonic()
-        before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
-        cmd = [sys.executable, "-I", str(Path(__file__).resolve()), "--one", b, "--root", str(root),
-               "--fixture-root", str(fixture_root), "--uvm-src", str(uvm_src)]
+        script = Path(__file__).resolve()
+        # This is an internal worker entry, not an unisolated CLI --one mode. The parent
+        # calls SandboxRunner before any pyslang import/source parse can occur.
+        code = ("import json,resource,runpy,sys;from pathlib import Path;"
+                "m=runpy.run_path(sys.argv[1]);"
+                "r=m['child'](sys.argv[2],*[Path(p) for p in sys.argv[3:]]);"
+                "r['worker_peak_rss_kib']=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss;"
+                "print(json.dumps(r,default=str))")
+        cmd = [sys.executable, "-I", "-c", code, str(script), b, str(root),
+               str(uvm_src), str(fixture_root)]
+        sources = [script, fixture_root / ("uvm" if b == "uvm" else "demo")]
+        if b == "uvm":
+            sources.append(uvm_src)
+        spec = python_spec(sources=sources, cwd=root)
         try:
-            p = subprocess.run(cmd, capture_output=True, text=True, timeout=a.timeout)
+            p = run(spec, cmd, timeout=timeout)
             wall = time.monotonic() - t0
             # ru_maxrss of RUSAGE_CHILDREN = max over all waited children (KiB on Linux)
             after = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
             entry = {"returncode": p.returncode, "wall_s": round(wall, 3),
                      "peak_rss_kib_children_max": after,
-                     "peak_rss_note": ("exact for this build" if after > before else
-                                       "<= previous child max (ru_maxrss is a running max)"),
+                     "peak_rss_note": "launcher children running maximum; worker RSS is recorded separately",
                      "stderr_tail": p.stderr[-2000:]}
             if p.returncode == 0:
                 entry["result"] = json.loads(p.stdout)
+                entry["peak_rss_kib_worker"] = entry["result"]["worker_peak_rss_kib"]
             else:
                 entry["stdout_tail"] = p.stdout[-2000:]
         except subprocess.TimeoutExpired as e:
-            entry = {"returncode": None, "error": f"timeout after {a.timeout}s", "stderr_tail": str(e.stderr)[-2000:]}
+            entry = {"returncode": None, "error": f"timeout after {timeout}s", "stderr_tail": str(e.stderr)[-2000:]}
+        entry["isolation"] = "bwrap"
         results["builds"][b] = entry
 
     # summary checks (facts, not judgements)
@@ -428,6 +424,26 @@ def main() -> int:
                            "file": m["name_loc"]["file"], "offset": m["name_loc"]["file_offset"]}
                           for m in r["run_phase_methods"]]
     results["summary"] = s
+
+    return results
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", default=str(REPO), help="cwd for the build (fixture paths are relative)")
+    ap.add_argument("--fixture-root", default=None, help="dir containing demo/ and uvm/ (default <root>/fixtures)")
+    ap.add_argument("--uvm-src", default=str(REPO / ".toolchain/uvm-core/src"))
+    ap.add_argument("--out", default=str(REPO / ".svweave/spike/pyslang/result.json"))
+    ap.add_argument("--evidence", default=str(REPO / "evidence/m0/pyslang_spike.json"))
+    ap.add_argument("--only", default="demo_L2,demo_L4,uvm")
+    ap.add_argument("--timeout", type=float, default=300)
+    a = ap.parse_args()
+    root = Path(a.root).resolve()
+    fixture_root = Path(a.fixture_root).resolve() if a.fixture_root else root / "fixtures"
+    uvm_src = Path(a.uvm_src).resolve()
+
+    results = run_probe(a.only.split(","), root, fixture_root, uvm_src, a.timeout)
+    bl = results["builds"]
 
     for path in (a.out, a.evidence):
         if path:

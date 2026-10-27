@@ -3,7 +3,7 @@
 # Rules: no secrets, no self-hosted runners, no pushes/PRs/branch-protection changes (plan 23.4).
 # Untrusted PRs only get the fast job; additional validation is manual (workflow_dispatch).
 # Network is confined to explicit installation/bootstrap steps. Native source analysis runs
-# in the mandatory sandbox. Legacy full qualification is BLOCKED until its probes are isolated.
+# in the mandatory sandbox. Isolated backend validation is not full release qualification.
 #
 # PIN BEFORE USE: the `uses:` references below are TAGS for readability. Before this workflow is
 # enabled, replace each with the full commit SHA of the reviewed release (for example
@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       real_backends:
-        description: "BLOCKED: legacy full qualification needs probe isolation refactor"
+        description: "Run isolated pinned backend validation (not full qualification or release)"
         type: boolean
         default: false
       native_verilator:
@@ -89,7 +89,7 @@ jobs:
       # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
 
   real-backends:
-    name: BLOCKED legacy full qualification (probe isolation refactor required)
+    name: isolated pinned backend validation (not full qualification)
     if: github.event_name == 'workflow_dispatch' && inputs.real_backends
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -104,10 +104,30 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Block legacy probes until mandatory isolation is implemented
+      - name: Record exact validation identity
         run: |
-          echo "BLOCKED: legacy probe_backends.py uses unisolated source-analysis subprocesses; full qualification requires the sandbox refactor. Use native_verilator for the isolated validation subset." >&2
-          exit 1
+          python - <<'PY_IDENTITY'
+          import hashlib
+          import json
+          import platform
+          import subprocess
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from _bench_common import source_identity
+          out = Path(".svweave/ci")
+          out.mkdir(parents=True, exist_ok=True)
+          identity = {
+              "source_identity": source_identity(),
+              "git_status": subprocess.check_output(["git", "status", "--porcelain"], text=True),
+              "lock_sha256": hashlib.sha256(Path("toolchain.lock.json").read_bytes()).hexdigest(),
+              "workflow_sha256": hashlib.sha256(Path(".github/workflows/ci.yml").read_bytes()).hexdigest(),
+              "platform": platform.platform(),
+              "python": sys.version,
+              "scope": "isolated backend validation only; not full qualification, release or EDA simulation",
+          }
+          (out / "identity.json").write_text(json.dumps(identity, indent=2) + "\n")
+          PY_IDENTITY
       - name: Install package and the pinned toolchain (network only here, hashes verified)
         run: |
           python -m pip install --upgrade pip==24.3.1 uv==0.5.11
@@ -137,6 +157,9 @@ jobs:
             timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" || true
             exit "$probe_status"
           fi
+      - name: Required native probe isolation regressions (fail closed)
+        run: |
+          .venv/bin/python -m pytest tests/unit/test_ci_probe_isolation.py tests/integration/test_int_probe_isolation.py -q --no-cov --junitxml=.svweave/ci/junit_probe_isolation.xml
       - name: Backend contract probe
         run: .venv/bin/python scripts/probe_backends.py --out .svweave/ci/capability_report.json
       - name: Integration, fault injection and acceptance (skips are failures)
@@ -154,6 +177,9 @@ jobs:
           name: svweave-evidence
           path: |
             .svweave/ci/
+            .svweave/probe/run-*/pyslang_result.json
+            .svweave/probe/run-*/slang_cli-*/
+            .svweave/probe/run-*/*_stderr.log
             evidence/mutation/
             .svweave/bench/*.json
           include-hidden-files: true

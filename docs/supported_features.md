@@ -203,8 +203,13 @@ Requirement mapping: **HDL-COV-01/02** in `tests/unit/test_reference_coverage.py
 `tests/unit/test_domain.py::test_HDL_COV_01_output_version_requires_strict_schema_upgrade`.
 The four integration cases cover dimension/type omissions with retained positive calls,
 inactive/unloaded scopes, and project/external unsupported nodes through the real mandatory
-worker. Their presence is not a PASS: pinned execution evidence is pending. Local pure checks
-and their limits are recorded in `evidence/reference-coverage-contract/`.
+worker. All four passed in the 21-case real-worker semantic/UVM subset of
+[run 40474142649](https://github.com/DVman9527/SVWeave/actions/runs/40474142649), exact source
+`305e8c30747ba2eeb1b53a66eaa29e8255d8e245`, with zero failures/errors/skips. See the
+[retained JUnit and evidence mapping](../evidence/verilator-native-run40474142649/README.md).
+This verifies the explicit coverage boundary, not extraction of the missing references or
+full qualification. Earlier local pure checks and their then-current limits are preserved
+in `evidence/reference-coverage-contract/`.
 
 ### Extraction boundaries
 
@@ -288,6 +293,10 @@ library, with reordered named config-db arguments, type/instance overrides, regi
 creates with named and empty arguments, and non-UVM same-name methods. Its gateway test
 is `test_UVM_02_03_named_arguments_and_same_name_negative`. Pure formatter tests do not
 substitute for running this integration test on a host with mandatory bwrap isolation.
+That case, UVM-01/02/03 and the pinned-library smoke profile passed in the exact-source
+21-case semantic/UVM subset above; see [semantic JUnit](../evidence/verilator-native-run40474142649/junit-semantic-uvm.xml).
+These are real **slang/pyslang** static UVM checks, not native Verilator UVM acceptance,
+runtime execution or a complete inventory of all UVM references.
 
 ## Optional external static inventory
 
@@ -296,9 +305,23 @@ index. Official regression goldens exercise class/member/method/type and selecte
 module and port node inventory. This is `EXTERNAL_DECLARED`, `PARTIAL`, unbound to any build;
 it does not establish resolved references or close unvisited-body/runtime UVM gaps.
 The separate `scripts/verify_verilator_native.py` static lint/JSON verification harness is
-explicit opt-in test infrastructure, not a product runtime backend. Initial native run 40471175289 executed pinned Verilator inside the mandatory CI sandbox,
-but its aggregate result is FAIL: the legacy fixture exposed macro-expanded columns that do
-not address original source tokens. The revised oracle and new macro-free case await a fresh
-native run. Local execution remains BLOCKED (`NETLINK_ROUTE` permissions); replay tests do not
-retroactively change the failed run to PASS. See `evidence/verilator-native-run40471175289/`.
+explicit opt-in test infrastructure, not a product runtime backend.
+[Run 40474142649](../evidence/verilator-native-run40474142649/README.md) at
+`305e8c30747ba2eeb1b53a66eaa29e8255d8e245` passed all **five** native checks with zero skips:
+HDL-VLT-01/02/05 are three real lint/JSON/import-query positives; HDL-VLT-03/04 are two
+specific expected-error rejections, not successful compiles of invalid designs. Native UVM,
+simulation, formal and coverage remain `NOT_RUN`.
+
+Initial native run [40471175289](../evidence/verilator-native-run40471175289/README.md)
+remains **FAIL**: the legacy fixture exposed macro-expanded columns that do not address
+original source tokens. Those locations remain **UNVERIFIED**, never trusted edit bindings;
+the new macro-free positive and exact discrepancy check do not change that limitation.
+Local execution remains BLOCKED (`NETLINK_ROUTE` permissions). The native result neither
+merges references into slang nor completes HDL-R02/R04 or full qualification. The retained
+supplement JUnit reports 195 parent tests plus 75 pytest subtest outcomes (270 aggregate),
+not 270 named testcases. Subsequent unpublished accounting/probe-isolation changes were
+reconstructed and freshly checked: 133 local pure checks passed; 10 pytest-dependent checks
+remain `BLOCKED_ENV` and four native boundary cases remain `NOT_RUN`. Authorized parent-owned
+publication/dispatch follows final review. The old run does not validate these newer changes;
+full qualification remains blocked.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).

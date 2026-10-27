@@ -22,7 +22,6 @@ import argparse
 import difflib
 import json
 import resource
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -130,17 +129,16 @@ ignored_memory_patterns: []
 
 
 def prepare(state: Path, candidate_root: Path) -> dict:
-    home = state / "home"
-    serena_home = home / ".serena"
-    projects_dir = state / "projects"
-    serena_home.mkdir(parents=True, exist_ok=True)
-    (serena_home / "serena_config.yml").write_text(serena_config_yml(projects_dir))
-    ctx = state / "svweave_spike_context.yml"
-    ctx.write_text(CONTEXT_YML)
-    proj_data = projects_dir / candidate_root.name / ".serena"
-    proj_data.mkdir(parents=True, exist_ok=True)
-    (proj_data / "project.yml").write_text(PROJECT_YML)
-    return {"serena_home": str(serena_home), "context_file": str(ctx), "project_yml": str(proj_data / "project.yml")}
+    from _sandbox import probe_spec  # load local package path before the shared config helper
+    from svweave.adapters.serena.config import SerenaPaths, check_candidate
+
+    candidate_root = check_candidate(candidate_root)
+    paths = SerenaPaths(state)
+    # Validate writable scope before writing config (standalone CLI paths are untrusted).
+    probe_spec(sources=(candidate_root,), writable=(paths.work,))
+    paths.prepare(candidate_root)
+    return {"serena_home": str(paths.serena_home), "context_file": str(paths.context_file),
+            "project_yml": str(paths.projects_dir / candidate_root.name / ".serena/project.yml")}
 
 
 def changed_line_ranges(a: str, b: str) -> list[dict]:
@@ -154,6 +152,9 @@ def changed_line_ranges(a: str, b: str) -> list[dict]:
 
 
 async def run(a) -> dict:
+    from _sandbox import checked_text, serena_spec
+    if a.wrap:
+        raise ValueError("arbitrary --wrap is no longer supported; isolation is mandatory")
     cand_parent = Path(a.candidate).resolve()
     manifest_orig = tree_manifest(REPO / "fixtures")
     cand_manifest = make_copy([REPO / "fixtures/demo", REPO / "fixtures/uvm"], cand_parent / "fixtures")
@@ -171,18 +172,15 @@ async def run(a) -> dict:
                 "candidate": str(project), "candidate_manifest_before": cand_manifest,
                 "verible_filelist": verible_filelist}
     command = exe
-    if a.wrap:
-        prefix = json.loads(a.wrap)
-        command, args = prefix[0], prefix[1:] + [exe] + args
-        ev["wrapped_argv"] = [command, *args]
-
-    vls = subprocess.run([str(TOOLCHAIN / "verible/bin/verible-verilog-ls"), "--version"], capture_output=True,
-                         text=True, timeout=10)
-    ev["verible_ls_version"] = vls.stdout.strip() or vls.stderr.strip()
+    # This historical edit spike may write only its disposable candidate copy. The
+    # qualification probe instead binds its fixture copy read-only.
+    spec = serena_spec(TOOLCHAIN, state, project, cfg["context_file"], env, edit_candidate=True)
+    ev["verible_ls_version"] = checked_text(
+        spec, [str(TOOLCHAIN / "verible/bin/verible-verilog-ls"), "--version"], timeout=10)
 
     orig_text = (project / UVM_REL).read_text()
     async with mcp_session(command, args, env, str(project), Path(a.out) / "serena_stderr.log",
-                           read_timeout=a.timeout) as (s, init, timings):
+                           read_timeout=a.timeout, sandbox=spec) as (s, init, timings):
         ev["initialize"] = init
         ev["timings"] = timings
         tools = await list_all_tools(s)
@@ -250,9 +248,10 @@ def pyslang_ranges() -> dict:
     global _PYSLANG_RANGES
     if _PYSLANG_RANGES is None:
         outp = REPO / ".svweave/spike/serena/pyslang_original_uvm.json"
-        subprocess.run([sys.executable, "-I", str(REPO / "scripts/spikes/pyslang_spike.py"), "--only", "uvm",
-                        "--out", str(outp), "--evidence", ""], capture_output=True, text=True, timeout=300)
-        r = json.loads(outp.read_text())
+        from pyslang_spike import run_probe
+        r = run_probe(["uvm"], REPO, REPO / "fixtures", TOOLCHAIN / "uvm-core/src")
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        outp.write_text(json.dumps(r, indent=2) + "\n")
         _PYSLANG_RANGES = {x["qualified"]: [x["decl_range"]["start"]["file_offset"], x["decl_range"]["end_offset"]]
                            for x in r["builds"]["uvm"]["result"]["same_name_methods"]}
     return _PYSLANG_RANGES
@@ -311,12 +310,13 @@ async def attempt_edit(s, project, calls, name_path, old, new, timeout, target_q
 
 
 def validate_candidate(cand_parent: Path, out: Path) -> dict:
-    p = subprocess.run([sys.executable, "-I", str(REPO / "scripts/spikes/pyslang_spike.py"), "--only", "uvm",
-                        "--root", str(cand_parent), "--out", str(out), "--evidence", ""],
-                       capture_output=True, text=True, timeout=300)
-    res = {"returncode": p.returncode, "stdout_tail": p.stdout[-1500:]}
+    from pyslang_spike import run_probe
+    report = run_probe(["uvm"], cand_parent, cand_parent / "fixtures", TOOLCHAIN / "uvm-core/src")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=2) + "\n")
+    r = report["builds"]["uvm"]
+    res = {"returncode": r["returncode"]}
     try:
-        r = json.loads(out.read_text())["builds"]["uvm"]
         rr = r["result"]
         res.update({"wall_s": r["wall_s"], "peak_rss_kib": r["peak_rss_kib_children_max"],
                     "diagnostics_count": rr["diagnostics_count"], "errors": rr["diagnostics_errors"],

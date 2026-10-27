@@ -18,7 +18,8 @@ import argparse
 import datetime as dt
 import json
 import os
-import subprocess
+import importlib.metadata
+import tempfile
 import sys
 import time
 from pathlib import Path
@@ -31,7 +32,6 @@ from _required_backends import required_backend_errors  # noqa: E402
 
 sys.path.insert(0, str(REPO / "scripts/spikes"))
 from _mcp_common import (  # noqa: E402
-    STATE,
     TOOLCHAIN,
     call,
     canonical_json,
@@ -47,6 +47,9 @@ from _mcp_common import (  # noqa: E402
     tree_manifest,
     write_verible_filelist,
 )
+
+from _sandbox import checked_text, probe_spec, python_spec, run, serena_spec  # noqa: E402
+from svweave.security import safeio  # noqa: E402
 
 PROBE = REPO / ".svweave/probe"
 CBM_REQUIRED = ["index_repository", "index_status", "search_graph", "get_graph_schema", "get_code_snippet"]
@@ -74,14 +77,15 @@ def probe_pyslang() -> dict:
     t0 = time.monotonic()
     rep: dict = {"backend": "pyslang", "kind": "in-process binding run in a child worker process"}
     try:
-        v = subprocess.run([sys.executable, "-I", "-c", "import pyslang;print(pyslang.__version__)"],
-                           capture_output=True, text=True, timeout=60)
-        rep["version"] = v.stdout.strip()
+        from pyslang_spike import run_probe
+
+        rep["version"] = checked_text(python_spec(),
+            [sys.executable, "-I", "-c", "import pyslang;print(pyslang.__version__)"], timeout=60)
+        before = {name: tree_manifest(REPO / "fixtures" / name) for name in ("demo", "uvm")}
         out = PROBE / "pyslang_result.json"
-        p = subprocess.run([sys.executable, "-I", str(REPO / "scripts/spikes/pyslang_spike.py"),
-                            "--only", "demo_L2,demo_L4,uvm", "--out", str(out), "--evidence", ""],
-                           capture_output=True, text=True, timeout=600)
-        r = json.loads(out.read_text())
+        r = run_probe(["demo_L2", "demo_L4", "uvm"], REPO, REPO / "fixtures",
+                      TOOLCHAIN / "uvm-core/src", timeout=600)
+        out.write_text(json.dumps(r, indent=2) + "\n")  # host-only evidence, never backend-writable
         b = r["builds"]
         s = r["summary"]
         checks = [
@@ -99,10 +103,14 @@ def probe_pyslang() -> dict:
                 s.get("uvm_error_count") == 0 and len({x["hier"] for x in s.get("run_phase") or []}) == 2,
                 s.get("run_phase")),
         ]
+        after = {name: tree_manifest(REPO / "fixtures" / name) for name in before}
+        rep["source_manifest_sha256"] = {"before": sha256_bytes(canonical_json(before)),
+                                         "after": sha256_bytes(canonical_json(after))}
+        checks.append(chk("original fixture sources unchanged", before == after, rep["source_manifest_sha256"]))
         rep["checks"] = checks
-        rep["measurements"] = {k: {"wall_s": v.get("wall_s"), "peak_rss_kib": v.get("peak_rss_kib_children_max")}
+        rep["measurements"] = {k: {"wall_s": v.get("wall_s"), "peak_rss_kib": v.get("peak_rss_kib_worker")}
                                for k, v in b.items()}
-        rep["status"] = classify(checks, alive=p.returncode == 0)
+        rep["status"] = classify(checks, alive=all(v.get("returncode") == 0 for v in b.values()))
     except Exception as e:
         rep["status"] = "UNAVAILABLE"
         rep["error"] = f"{type(e).__name__}: {e}"
@@ -119,17 +127,28 @@ def probe_slang_cli() -> dict:
         rep["error"] = "binary missing"
         return rep
     rep["binary_sha256"] = sha256_file(exe)
-    rep["version"] = subprocess.run([str(exe), "--version"], capture_output=True, text=True, timeout=10).stdout.strip()
-    dbg = PROBE / "slang_cli"
-    dbg.mkdir(parents=True, exist_ok=True)
+    rep["version"] = checked_text(probe_spec(tools=(exe,)), [str(exe), "--version"], timeout=10)
+    before = tree_manifest(REPO / "fixtures/demo")
+    dbg = Path(tempfile.mkdtemp(prefix="slang_cli-", dir=PROBE))
     argv = [str(exe), "-f", "fixtures/demo/filelists/rtl.f", "-I", "fixtures/demo/include", "-DSVW_DEMO=1",
             "--single-unit", "--top", "demo_top", "--ast-json", str(dbg / "design.ast.json"),
             "--ast-json-source-info", "--all-deps", str(dbg / "dependencies.txt")]
-    p = subprocess.run(argv, capture_output=True, text=True, timeout=60, cwd=REPO)
-    deps = (dbg / "dependencies.txt").read_text().split() if (dbg / "dependencies.txt").exists() else []
+    spec = probe_spec(sources=(REPO / "fixtures/demo",), tools=(exe,), writable=(dbg,), cwd=REPO)
+    p = run(spec, argv, timeout=60)
+    try:
+        raw_deps = safeio.read_regular_under(dbg, "dependencies.txt", max_bytes=1024 * 1024 + 1)
+    except FileNotFoundError:
+        raw_deps = b""
+    if len(raw_deps) > 1024 * 1024:
+        raise ValueError("slang dependency evidence exceeds 1 MiB")
+    deps = raw_deps.decode().split()
     checks = [chk("plan §10.6 command: build succeeded with 0 errors", p.returncode == 0 and "0 errors" in p.stdout,
                   p.stdout[-400:]),
               chk("--all-deps lists the include header", "fixtures/demo/include/demo_defs.svh" in deps, deps)]
+    after = tree_manifest(REPO / "fixtures/demo")
+    rep["source_manifest_sha256"] = {"before": sha256_bytes(canonical_json(before)),
+                                     "after": sha256_bytes(canonical_json(after))}
+    checks.append(chk("original fixture sources unchanged", before == after, rep["source_manifest_sha256"]))
     rep.update({"argv": argv, "checks": checks, "status": classify(checks, alive=True),
                 "paired_with_pyslang": "slang 12.0.0+545f88b2e / pyslang 12.0.0 (same release tag v12.0)"})
     return rep
@@ -140,14 +159,17 @@ async def _probe_cbm() -> dict:
     sys.path.insert(0, str(REPO / "scripts/spikes"))
     from cbm_spike import configure_state
     binary = TOOLCHAIN / "cbm/codebase-memory-mcp"
-    state = STATE / "cbm_probe"
+    state = PROBE / "cbm_state"
     env = cbm_env(state)
     rep: dict = {"backend": "codebase-memory-mcp", "binary": str(binary), "binary_sha256": sha256_file(binary)}
     rep["state_config"] = configure_state(binary, env, state)["config_list"]
     snap = PROBE / "cbm_snapshot"
     manifest = make_copy([REPO / "fixtures/demo", REPO / "fixtures/uvm"], snap / "fixtures")
     rep["snapshot_manifest_sha256"] = sha256_bytes(canonical_json(manifest))
-    async with mcp_session(str(binary), [], env, None, PROBE / "cbm_stderr.log", read_timeout=180) as (s, init, tm):
+    spec = probe_spec(sources=(snap / "fixtures",), tools=(binary,), writable=(state,),
+                      env=env, tmp_dirs=("/tmp/cbm-rt",))
+    async with mcp_session(str(binary), [], env, None, PROBE / "cbm_stderr.log",
+                           read_timeout=180, sandbox=spec) as (s, init, tm):
         rep["alive"] = True
         rep["initialize"] = init
         rep["protocol_version"] = init.get("protocolVersion")
@@ -183,7 +205,9 @@ async def _probe_cbm() -> dict:
         ]
         rep["checks"] = checks
         rep["gateway_must_not_expose"] = [n for n in CBM_NOT_EXPOSED_BY_GATEWAY if n.split(":")[0] in names]
-    rep["status"] = classify(rep["checks"], alive=True)
+    rep["snapshot_unchanged_by_probe"] = tree_manifest(snap / "fixtures") == manifest
+    rep["checks"].append(chk("read-only fixture snapshot unchanged", rep["snapshot_unchanged_by_probe"], None))
+    rep["status"] = classify(rep["checks"], alive=rep["snapshot_unchanged_by_probe"])
     return rep
 
 
@@ -200,7 +224,7 @@ def probe_cbm() -> dict:
 # ---------------------------------------------------------------- serena
 async def _probe_serena() -> dict:
     from serena_spike import prepare
-    state = STATE / "serena_probe"
+    state = PROBE / "serena_state"
     cand = PROBE / "serena_candidate"
     manifest = make_copy([REPO / "fixtures/demo", REPO / "fixtures/uvm"], cand / "fixtures")
     project = cand / "fixtures"
@@ -210,20 +234,20 @@ async def _probe_serena() -> dict:
     env = serena_env(state)
     exe = TOOLCHAIN / "serena-venv/bin/serena"
     vls = TOOLCHAIN / "verible/bin/verible-verilog-ls"
+    spec = serena_spec(TOOLCHAIN, state, project, cfg["context_file"], env)
     rep: dict = {"backend": "serena", "exe": str(exe), "config": cfg, "verible_filelist": rep_filelist,
                  "verible_ls": str(vls), "verible_ls_sha256": sha256_file(vls),
-                 "verible_ls_version": subprocess.run([str(vls), "--version"], capture_output=True, text=True,
-                                                      timeout=10).stdout.strip(),
-                 "serena_version": subprocess.run([str(TOOLCHAIN / "serena-venv/bin/python"), "-I", "-c",
-                                                   "import importlib.metadata as m;print(m.version('serena-agent'))"],
-                                                  capture_output=True, text=True, timeout=30).stdout.strip(),
-                 "which_verible_in_serena_env": subprocess.run(["/usr/bin/which", "verible-verilog-ls"], env=env,
-                                                               capture_output=True, text=True).stdout.strip()}
+                 "verible_ls_version": checked_text(spec, [str(vls), "--version"], timeout=10),
+                 "serena_version": checked_text(spec, [str(TOOLCHAIN / "serena-venv/bin/python"), "-I", "-c",
+                                              "import importlib.metadata as m;print(m.version('serena-agent'))"],
+                                       timeout=30),
+                 "which_verible_in_serena_env": checked_text(spec, ["/usr/bin/which", "verible-verilog-ls"])}
     args = ["start-mcp-server", "--project", str(project), "--context", cfg["context_file"], "--transport", "stdio",
             "--enable-web-dashboard", "false", "--open-web-dashboard", "false", "--enable-gui-log-window", "false",
             "--log-level", "INFO", "--tool-timeout", "120"]
     rep["args"] = args
-    async with mcp_session(str(exe), args, env, str(project), PROBE / "serena_stderr.log", read_timeout=180) as (s, init, tm):
+    async with mcp_session(str(exe), args, env, str(project), PROBE / "serena_stderr.log",
+                           read_timeout=180, sandbox=spec) as (s, init, tm):
         rep["alive"] = True
         rep["initialize"] = init
         rep["protocol_version"] = init.get("protocolVersion")
@@ -261,7 +285,8 @@ async def _probe_serena() -> dict:
         ]
         rep["checks"] = checks
     rep["candidate_unchanged_by_probe"] = tree_manifest(project) == manifest
-    rep["status"] = classify(rep["checks"], alive=True)
+    rep["checks"].append(chk("read-only fixture copy unchanged", rep["candidate_unchanged_by_probe"], None))
+    rep["status"] = classify(rep["checks"], alive=rep["candidate_unchanged_by_probe"])
     return rep
 
 
@@ -276,18 +301,19 @@ def probe_serena() -> dict:
 
 
 def main() -> int:
+    global PROBE
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(PROBE / "capability_report.json"))
     ap.add_argument("--only", default="pyslang,slang_cli,cbm,serena")
     a = ap.parse_args()
     PROBE.mkdir(parents=True, exist_ok=True)
+    PROBE = Path(tempfile.mkdtemp(prefix="run-", dir=PROBE))
     fns = {"pyslang": probe_pyslang, "slang_cli": probe_slang_cli, "cbm": probe_cbm, "serena": probe_serena}
     report: dict = {"schema_version": "1.0", "generated_at": dt.datetime.now(dt.UTC).isoformat(),
                     "generator": "scripts/probe_backends.py", "platform": "linux-x86_64",
                     "qualification_state": "UNQUALIFIED",
-                    "mcp_client_sdk": subprocess.run([sys.executable, "-I", "-c",
-                                                      "import importlib.metadata as m;print(m.version('mcp'))"],
-                                                     capture_output=True, text=True).stdout.strip(),
+                    "mcp_client_sdk": importlib.metadata.version("mcp"),
+                    "isolation": "mandatory_bwrap", "probe_artifacts": str(PROBE),
                     "backends": {}}
     lock = REPO / "toolchain.lock.json"
     if lock.exists():
@@ -295,7 +321,10 @@ def main() -> int:
         report["toolchain_lock_components_sha256"] = sha256_bytes(
             canonical_json(json.loads(lock.read_text())["components"]))
     for name in a.only.split(","):
-        report["backends"][name] = fns[name]()  # sequential: one heavy process at a time
+        try:
+            report["backends"][name] = fns[name]()  # sequential: one heavy process at a time
+        except Exception as e:
+            report["backends"][name] = {"status": "UNAVAILABLE", "error": f"{type(e).__name__}: {e}"}
     report["summary"] = {k: v.get("status") for k, v in report["backends"].items()}
     report["required_backend_errors"] = required_backend_errors(report["summary"])
     report["limitations"] = [

@@ -232,6 +232,20 @@ evidence). Measured gaps on the fixtures:
   not a statement about other hosts or real projects, and no token-saving claim is made (plan 22.4
   has not been executed).
 * SVWeave's own license is not decided (plan 3.2): **TBD by owner**.
+* Latest bounded evidence: [run 40474142649](../evidence/verilator-native-run40474142649/README.md)
+  at `305e8c30747ba2eeb1b53a66eaa29e8255d8e245` passed five native Verilator static
+  checks and 21 real slang semantic/UVM tests, each with zero failures/errors/skips. The
+  separate supplement/gate suite has 195 parent testcase nodes plus 75 pytest 9.1.1 subtest
+  outcomes (270 producer-reported aggregate), not 270 independently named tests. At that
+  source, the strict qualification parser rejects the count mismatch; raw XML is preserved.
+  This is not a current full three-backend qualification or a waiver/license signoff.
+  Subsequent unpublished accounting/probe-isolation changes were reconstructed and freshly
+  checked: **133 local pure checks PASS** (103 accounting + 30 isolation), with **10 pytest-
+  dependent checks BLOCKED_ENV**, not 143 PASS. Strict JUnit equality remains; no missing
+  subtests are inferred as PASS. The proposed gate is mandatory host sandbox → required
+  native boundary tests → successful backend probe, not an unconditional bypass. Four HDL-CI-05
+  native cases remain `NOT_RUN`; authorized parent-owned publication/dispatch follows final
+  review. Full qualification remains **BLOCKED / UNQUALIFIED**.
 
 ## 8. Graph export (ADR-014)
 
@@ -301,12 +315,20 @@ not a product runtime compiler backend or an extension of slang's resolved-refer
 simulation, resolves UVM runtime behavior, or changes edit eligibility. The JSON format is
 pinned to 5.052. A separate explicit `scripts/verify_verilator_native.py` validation harness
 uses mandatory sandboxing for real static lint/JSON checks; it does not run during product
-queries/imports or change slang authority. Initial native run 40471175289 actually executed under CI isolation; its aggregate result is
-**FAIL**, because the legacy fixture exposed producer columns after macro expansion that do
-not address original source tokens. Those locations remain UNVERIFIED, never edit bindings.
-The revised harness and new macro-free case await a fresh native run; replay is not native PASS.
-The local sandbox remains **BLOCKED** by `NETLINK_ROUTE` permissions. No full native PASS or
-additional UVM reference coverage is claimed. See
+queries/imports or change slang authority. The revised harness passed its bounded five-case
+subset in [run 40474142649](../evidence/verilator-native-run40474142649/README.md), exact source
+`305e8c30747ba2eeb1b53a66eaa29e8255d8e245`: three real lint/JSON/import-query positives
+(HDL-VLT-01/02/05) and two expected-error rejections (HDL-VLT-03/04), zero skips.
+This is not full Verilator-language or project qualification.
+
+Initial native run [40471175289](../evidence/verilator-native-run40471175289/README.md)
+remains **FAIL**, because the legacy fixture exposed producer columns after macro expansion
+that do not address original source tokens. Those locations remain **UNVERIFIED**, never
+edit bindings. The new passing run explicitly checks that discrepancy; it does not correct
+or promote producer locations. No authoritative merged references or additional Verilator
+UVM reference coverage is claimed. The separate 21-case slang semantic/UVM regression is
+not native Verilator UVM acceptance. Simulation/formal/coverage remain `NOT_RUN`.
+The local sandbox remains **BLOCKED** by `NETLINK_ROUTE` permissions. See
 [static supplement scope and evidence](verilator_static_supplement.md).
 
 ## Slurm is not yet a supported execution backend

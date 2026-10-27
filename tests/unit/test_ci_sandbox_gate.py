@@ -30,18 +30,27 @@ class SandboxGateTests(unittest.TestCase):
         for job in workflow["jobs"].values():
             self.assertNotIn("apparmor_restrict_unprivileged_userns=0", str(job))
 
-    def test_HDL_CI_01_legacy_unisolated_probe_is_blocked_before_execution(self) -> None:
+    def test_HDL_CI_01_native_isolation_gate_precedes_all_backend_probes(self) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        steps = workflow["jobs"]["real-backends"]["steps"]
-        guard = next(i for i, step in enumerate(steps)
-                     if step.get("name") == "Block legacy probes until mandatory isolation is implemented")
-        probe = next(i for i, step in enumerate(steps)
-                     if step.get("name") == "Backend contract probe")
-        self.assertLess(guard, probe)
-        result = subprocess.run(["bash", "-c", steps[guard]["run"]], capture_output=True,
-                                text=True, check=False)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("BLOCKED", result.stderr)
+        job = workflow["jobs"]["real-backends"]
+        steps = job["steps"]
+        names = [step.get("name") for step in steps]
+        host = names.index("Install and verify the mandatory worker sandbox")
+        boundary = names.index("Required native probe isolation regressions (fail closed)")
+        probe = names.index("Backend contract probe")
+        self.assertLess(host, boundary)
+        self.assertLess(boundary, probe)
+        self.assertIn("test_ci_probe_isolation.py", steps[boundary]["run"])
+        self.assertIn("test_int_probe_isolation.py", steps[boundary]["run"])
+        self.assertIn("--junitxml=.svweave/ci/junit_probe_isolation.xml", steps[boundary]["run"])
+        self.assertNotIn("|| true", steps[boundary]["run"])
+        self.assertNotIn("continue-on-error", job)
+        for step in steps[host:probe + 1]:
+            self.assertNotIn("continue-on-error", step)
+            self.assertNotIn("if", step)  # default success-only chaining, never always() on probes
+        self.assertEqual(job["env"]["SVWEAVE_REQUIRE_BACKENDS"], "1")
+        self.assertIn("not full qualification", job["name"])
+        self.assertIn("Record exact validation identity", names)
         native = str(workflow["jobs"]["native-verilator"])
         self.assertNotIn("scripts/probe_backends.py", native)
         self.assertIn("SVWEAVE_REQUIRE_BACKENDS", native)
@@ -59,7 +68,9 @@ class SandboxGateTests(unittest.TestCase):
             self.assertNotIn(".svweave/", paths)
             self.assertEqual(upload["with"]["if-no-files-found"], "error")
 
-    def test_SEC_05_probe_status_survives_best_effort_diagnostics(self) -> None:
+    def _assert_probe_status_survives_diagnostics(
+        self, probe_status: int, diagnostic_status: int, setup_status: int,
+    ) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         step = next(
             step
@@ -71,47 +82,55 @@ class SandboxGateTests(unittest.TestCase):
         self.assertEqual(command.count("probe_host(refresh=True)"), 1)
         self.assertIn("date -u '+%Y-%m-%d %H:%M:%S.%6N UTC'", command)
         self.assertIn('timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at"', command)
-        for probe_status, diagnostic_status, setup_status in [
-            (0, 0, 0), (7, 0, 0), (7, 1, 0), (7, 124, 0), (0, 0, 9)
-        ]:
-            with (
-                self.subTest(probe_status=probe_status, diagnostic_status=diagnostic_status,
-                             setup_status=setup_status),
-                tempfile.TemporaryDirectory() as directory,
-            ):
-                root = Path(directory)
-                (root / ".venv/bin").mkdir(parents=True)
-                (root / "scripts").mkdir()
-                # Pure shell-control test: no apt, sandbox, sudo, or host diagnostics run.
-                for name, body in {
-                    "sudo": "exit 0",
-                    ".venv/bin/python": (
-                        'if [[ "$1" == scripts/ci_prepare_bwrap_apparmor.py ]]; then '
-                        f'exit {setup_status}; fi\n'
-                        f"cat >/dev/null\nexit {probe_status}"
-                    ),
-                    "scripts/ci_sandbox_diagnostics.sh": (
-                        'printf "%s\\n" "$1" > diagnostics-called\n'
-                        f"exit {diagnostic_status}"
-                    ),
-                }.items():
-                    script = root / name
-                    script.write_text(f"#!/bin/bash\n{body}\n")
-                    script.chmod(0o700)
-                result = subprocess.run(
-                    ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", command],
-                    cwd=root,
-                    env={**os.environ, "PATH": f"{root}:{os.environ['PATH']}"},
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                    timeout=10,
-                )
-                self.assertEqual(result.returncode, setup_status or probe_status, result.stderr)
-                called = root / "diagnostics-called"
-                self.assertEqual(called.exists(), not setup_status and probe_status != 0)
-                if called.exists():
-                    self.assertRegex(called.read_text(), r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".venv/bin").mkdir(parents=True)
+            (root / "scripts").mkdir()
+            # Pure shell-control test: no apt, sandbox, sudo, or host diagnostics run.
+            for name, body in {
+                "sudo": "exit 0",
+                ".venv/bin/python": (
+                    'if [[ "$1" == scripts/ci_prepare_bwrap_apparmor.py ]]; then '
+                    f'exit {setup_status}; fi\n'
+                    f"cat >/dev/null\nexit {probe_status}"
+                ),
+                "scripts/ci_sandbox_diagnostics.sh": (
+                    'printf "%s\\n" "$1" > diagnostics-called\n'
+                    f"exit {diagnostic_status}"
+                ),
+            }.items():
+                script = root / name
+                script.write_text(f"#!/bin/bash\n{body}\n")
+                script.chmod(0o700)
+            result = subprocess.run(
+                ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", command],
+                cwd=root,
+                env={**os.environ, "PATH": f"{root}:{os.environ['PATH']}"},
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10,
+            )
+            self.assertEqual(result.returncode, setup_status or probe_status, result.stderr)
+            called = root / "diagnostics-called"
+            self.assertEqual(called.exists(), not setup_status and probe_status != 0)
+            if called.exists():
+                self.assertRegex(called.read_text(), r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC")
+
+    def test_SEC_05_passing_probe_preserves_status(self) -> None:
+        self._assert_probe_status_survives_diagnostics(0, 0, 0)
+
+    def test_SEC_05_failed_probe_successful_diagnostics_preserves_status(self) -> None:
+        self._assert_probe_status_survives_diagnostics(7, 0, 0)
+
+    def test_SEC_05_failed_probe_failed_diagnostics_preserves_status(self) -> None:
+        self._assert_probe_status_survives_diagnostics(7, 1, 0)
+
+    def test_SEC_05_failed_probe_timed_out_diagnostics_preserves_status(self) -> None:
+        self._assert_probe_status_survives_diagnostics(7, 124, 0)
+
+    def test_SEC_05_failed_setup_preserves_status(self) -> None:
+        self._assert_probe_status_survives_diagnostics(0, 0, 9)
 
     def test_SEC_05_diagnostics_shell_syntax(self) -> None:
         result = subprocess.run(

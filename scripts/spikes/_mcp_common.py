@@ -5,12 +5,10 @@ Not a product adapter: this only records what the upstream servers actually retu
 
 from __future__ import annotations
 
-import atexit
 import hashlib
 import json
 import os
 import shutil
-import tempfile
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -96,7 +94,7 @@ def parse_json_text(s: str) -> Any:
 
 @asynccontextmanager
 async def mcp_session(command: str, args: list[str], env: dict[str, str], cwd: str | None,
-                      errlog_path: Path, read_timeout: float = 120.0):
+                      errlog_path: Path, read_timeout: float = 120.0, *, sandbox):
     """Spawn an MCP stdio server and yield (session, init_result_dict, timings)."""
     import mcp_types as types
     from mcp.client.session import ClientSession
@@ -106,12 +104,18 @@ async def mcp_session(command: str, args: list[str], env: dict[str, str], cwd: s
     # this probe's memory without limit either (it feeds the G0 gate through probe_backends.py)
     from svweave.adapters.bounded_stdio import bounded_stdio_client
 
+    from _sandbox import LAUNCH_ENV, wrap
+
+    if dict(sandbox.env) != env or sandbox.chdir != (Path(cwd).resolve() if cwd else None):
+        raise ValueError("MCP launch environment/cwd must match the explicit sandbox spec")
+    wrapped = wrap(sandbox, [command, *args])
     errlog_path.parent.mkdir(parents=True, exist_ok=True)
     errlog = open(errlog_path, "w")
-    params = StdioServerParameters(command=command, args=args, env=env, cwd=cwd)
+    params = StdioServerParameters(command=wrapped.argv[0], args=wrapped.argv[1:],
+                                   env=LAUNCH_ENV, cwd=None)
     t0 = time.monotonic()
     try:
-        async with bounded_stdio_client(params, errlog=errlog) as (r, w):
+        async with bounded_stdio_client(params, errlog=errlog, inherit_default_environment=False) as (r, w):
             async with ClientSession(r, w, read_timeout_seconds=read_timeout,
                                      client_info=types.Implementation(name="svweave-m0-spike",
                                                                       version="0.0.0")) as s:
@@ -154,17 +158,6 @@ def write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, indent=2, default=str, ensure_ascii=False) + "\n")
 
 
-def _short_runtime_dir() -> str:
-    # cbm's daemon socket lives below CBM_RUNTIME_DIR and cbm refuses to start ("secure daemon
-    # endpoint could not be created") when the socket path exceeds sockaddr_un's ~108 bytes, which
-    # .toolchain/state/... in a deep checkout does; the gateway uses a short dir for the same reason
-    # (svweave.adapters.codebase_memory.config.SANDBOX_RUNTIME_DIR / make_host_runtime_dir)
-    d = tempfile.mkdtemp(prefix="svwcbm-")
-    os.chmod(d, 0o700)
-    atexit.register(shutil.rmtree, d, True)
-    return d
-
-
 def cbm_env(state: Path | None = None) -> dict[str, str]:
     s = state or (STATE / "cbm")
     return {
@@ -173,25 +166,15 @@ def cbm_env(state: Path | None = None) -> dict[str, str]:
         "XDG_CONFIG_HOME": str(s / "home/.config"),
         "XDG_CACHE_HOME": str(s / "cache"),
         "CBM_CACHE_DIR": str(s / "cache"),
-        "CBM_RUNTIME_DIR": _short_runtime_dir(),
+        "CBM_RUNTIME_DIR": "/tmp/cbm-rt",
         "LANG": "C.UTF-8",
     }
 
 
 def serena_env(state: Path | None = None) -> dict[str, str]:
+    from svweave.adapters.serena.config import SerenaPaths
     s = state or (STATE / "serena")
-    # pinned Verible FIRST on PATH so SolidLSP never downloads (systemverilog_server.py checks PATH first)
-    return {
-        "PATH": f"{TOOLCHAIN / 'verible/bin'}:{TOOLCHAIN / 'serena-venv/bin'}:/usr/bin:/bin",
-        "HOME": str(s / "home"),
-        "SERENA_HOME": str(s / "home/.serena"),
-        "XDG_CONFIG_HOME": str(s / "home/.config"),
-        "XDG_CACHE_HOME": str(s / "cache"),
-        "XDG_DATA_HOME": str(s / "data"),
-        "LANG": "C.UTF-8",
-        "PYTHONNOUSERSITE": "1",
-        "UV_NO_SYNC": "1",
-    }
+    return SerenaPaths(s).env(TOOLCHAIN / "verible/bin", TOOLCHAIN / "serena-venv")
 
 
 def proc_tree_hwm(root_pid: int | None = None) -> list[dict]:

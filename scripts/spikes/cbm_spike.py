@@ -44,6 +44,9 @@ QUERIES = ["demo_lane", "demo_top", "stream_hold_sva", "svw_driver", "svw_monito
 
 
 async def run(a) -> dict:
+    from _sandbox import probe_spec
+    if a.wrap:
+        raise ValueError("arbitrary --wrap is no longer supported; isolation is mandatory")
     snap = Path(a.snapshot).resolve()
     if not a.no_copy:
         manifest = make_copy([REPO / "fixtures/demo", REPO / "fixtures/uvm"], snap / "fixtures")
@@ -63,14 +66,11 @@ async def run(a) -> dict:
         args.append(f"--tool-profile={a.tool_profile}")
     ev["server_args"] = args
     command = str(binary)
-    if a.wrap:
-        # isolation wrapper (e.g. bwrap) given as JSON argv prefix
-        prefix = json.loads(a.wrap)
-        command, args = prefix[0], prefix[1:] + [str(binary)] + args
-        ev["wrapped_argv"] = [command, *args]
+    spec = probe_spec(sources=(snap / "fixtures",), tools=(binary,), writable=(state,),
+                      env=env, tmp_dirs=("/tmp/cbm-rt",))
 
     async with mcp_session(command, args, env, None, out_dir / "cbm_stderr.log",
-                           read_timeout=a.timeout) as (s, init, timings):
+                           read_timeout=a.timeout, sandbox=spec) as (s, init, timings):
         ev["initialize"] = init
         ev["timings"] = timings
         tools = await list_all_tools(s)
@@ -158,16 +158,23 @@ async def run(a) -> dict:
 
 def configure_state(binary: Path, env: dict, state: Path) -> dict:
     """Idempotently persist safe settings in the DEDICATED state: no HTTP UI, no watchers, no auto-index."""
-    import subprocess
-    for sub in ("home", "cache", "runtime"):
-        (state / sub).mkdir(parents=True, exist_ok=True)
+    from _sandbox import probe_spec, run
+    from svweave.security import safeio
+    spec = probe_spec(tools=(binary,), writable=(state,), env=env, tmp_dirs=("/tmp/cbm-rt",))
+    state.mkdir(parents=True, exist_ok=True)
+    for sub in ("home", "cache"):
+        safeio.ensure_private_dir(state, sub)
     state.chmod(0o700)
     out = {}
     for k, v in (("ui_enabled", "false"), ("auto_watch", "false"), ("watcher_enabled", "false"),
                  ("auto_index", "false")):
-        p = subprocess.run([str(binary), "config", "set", k, v], env=env, capture_output=True, text=True, timeout=30)
+        p = run(spec, [str(binary), "config", "set", k, v], timeout=30)
+        if p.returncode:
+            raise RuntimeError(f"cbm safe config {k} failed: {p.stderr[-1000:]}")
         out[k] = {"rc": p.returncode, "stdout": p.stdout.strip()}
-    p = subprocess.run([str(binary), "config", "list"], env=env, capture_output=True, text=True, timeout=30)
+    p = run(spec, [str(binary), "config", "list"], timeout=30)
+    if p.returncode:
+        raise RuntimeError(f"cbm config list failed: {p.stderr[-1000:]}")
     out["config_list"] = p.stdout
     return out
 

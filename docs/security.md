@@ -182,6 +182,34 @@ SVWeave never pushes, creates PRs, changes branch protection or configures secre
 workflow uses no secrets and no self-hosted runner. Untrusted pull requests must not reach private
 EDA licence environments or company source. Real-backend jobs run only on manual dispatch.
 
+### Qualification probe isolation (HDL-R10)
+
+`scripts/probe_backends.py` routes all native backend processes through the mandatory
+`SandboxRunner` boundary in `scripts/spikes/_sandbox.py`, including version/config helpers,
+pyslang per-build workers, slang CLI and both MCP servers. Source and exact tool/runtime inputs
+are read-only (including Serena's locked editable source tree); only dedicated state and CLI
+artifact directories are writable. Environments are explicit, host secrets are not inherited,
+and runtime networking is disabled. Unknown runtime layouts and unavailable isolation fail
+closed; no degraded-mode flag or custom `--wrap` prefix bypasses this boundary.
+
+Host orchestration and metadata-only lock verification remain trusted host code, not HDL
+parsing. Each probe invocation creates a fresh `run-*` directory; the host writes its reports,
+checks before/after source manifests, and rejects symlink/oversized dependency evidence.
+One-shot native stdout/stderr and MCP stdout messages are bounded. MCP stderr goes to a
+host-owned file and is not currently size-capped; no bound is claimed for that file.
+Source immutability failure is never an accepted degraded subset.
+The historical standalone `isolation_probe.py` and `verible_lsp_probe.py` experiments are **not**
+part of qualification or this guarantee; the former's old custom-wrapper calls are now refused.
+Do not use either as an alternative to the reviewed probe path.
+
+The manual backend-validation job requires the host sandbox gate and
+`tests/integration/test_int_probe_isolation.py` before any backend probe. Its native checks cover
+read-only inputs, a distinct network namespace, secret exclusion, and detached-descendant
+cleanup on timeout/output overflow. Pure boundary regressions live in
+`tests/unit/test_ci_probe_isolation.py`; both modules map to G0. A green job is isolated backend
+validation, not a release decision or a substitute for `scripts/qualify.py`, owner waivers,
+license sign-off, or EDA qualification.
+
 ## 8. Reporting issues
 
 Report security problems privately to the repository owner (contact: TBD by owner). Include the

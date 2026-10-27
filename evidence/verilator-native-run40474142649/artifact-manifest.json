@@ -1,0 +1,570 @@
+{
+  "schema_version": "svw-retained-artifact-manifest-1",
+  "run_id": 40474142649,
+  "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40474142649",
+  "source_commit": "305e8c30747ba2eeb1b53a66eaa29e8255d8e245",
+  "artifact_name": "svweave-native-verilator-evidence",
+  "artifact_id": 12720067577,
+  "artifact_url": "https://github.com/DVman9527/SVWeave/actions/runs/40474142649/artifacts/12720067577",
+  "artifact_zip_sha256_previously_observed_in_upload_log": "1ed1700b766d5ab71a455da28e626a2de625f887d95a7ad4b2944a14da1ff31c",
+  "members": [
+    {
+      "artifact_path": ".svweave/ci/identity.json",
+      "sha256": "d21f029518bb189ab5b7d095505d34c2bee691ab754874b3b55e269bdfc4f282",
+      "bytes": 588,
+      "retained_path": "identity.json",
+      "copied": true
+    },
+    {
+      "artifact_path": ".svweave/ci/junit_gates_supplement.xml",
+      "sha256": "94c8fc95d8db8be881f1ead70c06945ed9fa1ceaaf9d2c3b9f6d1e10e1411d7a",
+      "bytes": 28731,
+      "retained_path": "junit-gates-supplement.xml",
+      "copied": true
+    },
+    {
+      "artifact_path": ".svweave/ci/junit_semantic_uvm.xml",
+      "sha256": "104f260a98215e3f2ee9e58ad2a99117bee8b1a1941805526f468f92d4b829d4",
+      "bytes": 3126,
+      "retained_path": "junit-semantic-uvm.xml",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/design.tree.json",
+      "sha256": "c151404beb7aa086992aa9e958982e9bf76abf52dbbba809da1b5e19cfd44cdb",
+      "bytes": 6583,
+      "retained_path": "HDL-VLT-01/design.tree.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/design.tree.meta.json",
+      "sha256": "98d7a75b32ccddd7f7f68b788195dfca4206182011fb677d99a80efc1cd985c8",
+      "bytes": 1959,
+      "retained_path": "HDL-VLT-01/design.tree.meta.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/import.json",
+      "sha256": "12bb7af0bbb71c228de5b305ae7f6664c0c47efc7f008c44bf7994f57f3449e9",
+      "bytes": 2018,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/inventory.json",
+      "sha256": "55a7d096f66a031c862d7000fbe681891e6fb77a82edc6e560573d872dcd16dc",
+      "bytes": 14485,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/json.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/json.stdout.log",
+      "sha256": "ee5b1b598c0042649a11ab50c0b16f2e798ff5422e9f7931d3fdddec7401cd43",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/lint.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/lint.stdout.log",
+      "sha256": "45f6bbc9192b158821935949b70882c39820e2e083292b9e094d28000524832c",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/negative-query.json",
+      "sha256": "c08b02b3d418935814ff3f602a3e8dadfdc9074d6aefc0bc1cf94464496214aa",
+      "bytes": 2180,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-01/query.json",
+      "sha256": "d76740ed7d47754ba638cfbb7027844b374e1b71dd864c22687237cc5ce857fe",
+      "bytes": 2763,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/design.tree.json",
+      "sha256": "36784e3759c194ad0b9f67b2e64ad674f3e71778a06794a14e73b6ba402d5562",
+      "bytes": 7827,
+      "retained_path": "HDL-VLT-02/design.tree.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/design.tree.meta.json",
+      "sha256": "b8d7c698cd5d328b1c6078fb44395acc8b0662b122cb6be3bae2036f987f689c",
+      "bytes": 2107,
+      "retained_path": "HDL-VLT-02/design.tree.meta.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/import.json",
+      "sha256": "7d11f473197888f09e9550ab9aea9e126fc302ba89b5e9f2bcf7d72c6c142f77",
+      "bytes": 2018,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/inventory.json",
+      "sha256": "2253715c9eabb5e0994a74d64fc3353b8434ab447bf7bd6d9d8d9d25785433e2",
+      "bytes": 14991,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/json.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/json.stdout.log",
+      "sha256": "3e18b26d354bd25c6f31e3824723c1e64a496500beca94f5971fb9c65e848b32",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/lint.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/lint.stdout.log",
+      "sha256": "cae7959fc5cd05d9f5a0a5731e941381cb5f7c9d71946afa80253fdfd7c62ed4",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/negative-query.json",
+      "sha256": "5aa05fb11108a8b918da566ebcbdb1bb66ce93c4e0cbb385e96fbd601629dd54",
+      "bytes": 2180,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-02/query.json",
+      "sha256": "5b3f5bc6de3a567b87dd6671cc58cef6df53d02d2ef5af9f892768ebb6ce3309",
+      "bytes": 2760,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-03/json.stderr.log",
+      "sha256": "a2312b310adbb3e01334ed3d58a779ea30819c094efd9ad786cb2c566f19b186",
+      "bytes": 1042,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-03/json.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-03/lint.stderr.log",
+      "sha256": "a2312b310adbb3e01334ed3d58a779ea30819c094efd9ad786cb2c566f19b186",
+      "bytes": 1042,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-03/lint.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-04/json.stderr.log",
+      "sha256": "8be6200201e51be96886606100c429368d0aeea4cb50015115da075b3492b7eb",
+      "bytes": 373,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-04/json.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-04/lint.stderr.log",
+      "sha256": "8be6200201e51be96886606100c429368d0aeea4cb50015115da075b3492b7eb",
+      "bytes": 373,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-04/lint.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/design.tree.json",
+      "sha256": "2629e136c10a9ed0868ae86c993eab209649a9527330039f08161f56e756d85a",
+      "bytes": 4388,
+      "retained_path": "HDL-VLT-05/design.tree.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/design.tree.meta.json",
+      "sha256": "02f66e5fe0cf0ca16f9fcd04619bc797ffaf4a211da2ed76073d56f5ec47dcd1",
+      "bytes": 1466,
+      "retained_path": "HDL-VLT-05/design.tree.meta.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/import.json",
+      "sha256": "632ea77a0f26b1c5543064b450ed174c2d4c9f054f426f889fbc0f92e3afa739",
+      "bytes": 2018,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/inventory.json",
+      "sha256": "993a6865ef522d1271797a97ecf5dfa4814bf487b2c3de303c99f618828e748f",
+      "bytes": 9118,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/json.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/json.stdout.log",
+      "sha256": "2625b4c6d041c006100d1ad9f27452ec9a08ad0f168140c5c1e6f68527fadf2c",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/lint.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/lint.stdout.log",
+      "sha256": "143c4b90acb19b572ebe217c25d5c7f5900105530e0e990eae93ba524a660406",
+      "bytes": 312,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/negative-query.json",
+      "sha256": "d481c1730aad0fd69a076410abe9ce3a497b1aff309369f2fce0674b5808e07d",
+      "bytes": 2179,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/HDL-VLT-05/query.json",
+      "sha256": "09a8f3dd3c6d6548998ea4f96eaa8a6373f856cd9f1c298e86eddb1d91047ff3",
+      "bytes": 2758,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/.svweave/supplements/verilator/2c3f753c0e2bb6b9881796621094d749bb2737f6521c20083c0d0928645105f7/meta.json",
+      "sha256": "98d7a75b32ccddd7f7f68b788195dfca4206182011fb677d99a80efc1cd985c8",
+      "bytes": 1959,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/.svweave/supplements/verilator/2c3f753c0e2bb6b9881796621094d749bb2737f6521c20083c0d0928645105f7/record.json",
+      "sha256": "2c3f753c0e2bb6b9881796621094d749bb2737f6521c20083c0d0928645105f7",
+      "bytes": 10385,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/.svweave/supplements/verilator/2c3f753c0e2bb6b9881796621094d749bb2737f6521c20083c0d0928645105f7/tree.json",
+      "sha256": "c151404beb7aa086992aa9e958982e9bf76abf52dbbba809da1b5e19cfd44cdb",
+      "bytes": 6583,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/meta.json",
+      "sha256": "98d7a75b32ccddd7f7f68b788195dfca4206182011fb677d99a80efc1cd985c8",
+      "bytes": 1959,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/svweave.yaml",
+      "sha256": "7e1c99c27843fbed79ed8e70d8ef367646e28d86029aba77e87c3b9383f09c3e",
+      "bytes": 1236,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-01/tree.json",
+      "sha256": "c151404beb7aa086992aa9e958982e9bf76abf52dbbba809da1b5e19cfd44cdb",
+      "bytes": 6583,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/.svweave/supplements/verilator/c8a39e07c3548cdfe68f1fd5e215adfa11b251dd1fcf9e35352c039abf257ac7/meta.json",
+      "sha256": "b8d7c698cd5d328b1c6078fb44395acc8b0662b122cb6be3bae2036f987f689c",
+      "bytes": 2107,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/.svweave/supplements/verilator/c8a39e07c3548cdfe68f1fd5e215adfa11b251dd1fcf9e35352c039abf257ac7/record.json",
+      "sha256": "c8a39e07c3548cdfe68f1fd5e215adfa11b251dd1fcf9e35352c039abf257ac7",
+      "bytes": 10813,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/.svweave/supplements/verilator/c8a39e07c3548cdfe68f1fd5e215adfa11b251dd1fcf9e35352c039abf257ac7/tree.json",
+      "sha256": "36784e3759c194ad0b9f67b2e64ad674f3e71778a06794a14e73b6ba402d5562",
+      "bytes": 7827,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/meta.json",
+      "sha256": "b8d7c698cd5d328b1c6078fb44395acc8b0662b122cb6be3bae2036f987f689c",
+      "bytes": 2107,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/svweave.yaml",
+      "sha256": "5ffff0d64cd8fed19ca945625746678006347d49a0614a4a9b8d8c0e7f5aadc6",
+      "bytes": 1236,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-02/tree.json",
+      "sha256": "36784e3759c194ad0b9f67b2e64ad674f3e71778a06794a14e73b6ba402d5562",
+      "bytes": 7827,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/.svweave/supplements/verilator/a8e0943e183ce8d20d339208369838d01b15ec3c2acf7766b141668b5b3d32f2/meta.json",
+      "sha256": "02f66e5fe0cf0ca16f9fcd04619bc797ffaf4a211da2ed76073d56f5ec47dcd1",
+      "bytes": 1466,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/.svweave/supplements/verilator/a8e0943e183ce8d20d339208369838d01b15ec3c2acf7766b141668b5b3d32f2/record.json",
+      "sha256": "a8e0943e183ce8d20d339208369838d01b15ec3c2acf7766b141668b5b3d32f2",
+      "bytes": 6670,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/.svweave/supplements/verilator/a8e0943e183ce8d20d339208369838d01b15ec3c2acf7766b141668b5b3d32f2/tree.json",
+      "sha256": "2629e136c10a9ed0868ae86c993eab209649a9527330039f08161f56e756d85a",
+      "bytes": 4388,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/meta.json",
+      "sha256": "02f66e5fe0cf0ca16f9fcd04619bc797ffaf4a211da2ed76073d56f5ec47dcd1",
+      "bytes": 1466,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/svweave.yaml",
+      "sha256": "cef19372a200f36eae05afaa3a5270a9cf132c244f6a79b195213e3d2cc449a5",
+      "bytes": 1236,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/import-workspaces/HDL-VLT-05/tree.json",
+      "sha256": "2629e136c10a9ed0868ae86c993eab209649a9527330039f08161f56e756d85a",
+      "bytes": 4388,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/junit.xml",
+      "sha256": "b61c9854df27304df5b16326343bb502723eb53e71a77670d998279993472985",
+      "bytes": 423,
+      "retained_path": "native-junit.xml",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/report.json",
+      "sha256": "964bad926e1a33bb2ed500fba217cb1ce6a82c5495d128a674a290c5604b486a",
+      "bytes": 51968,
+      "retained_path": "native-report.json",
+      "copied": true
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_class.sv",
+      "sha256": "15182bf6658ca29c5a9704f623e4df874362a3558331ec0042e32784a8b64b07",
+      "bytes": 319,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_defs.vh",
+      "sha256": "bc5a9afc8523ff802c2e969354bc34cce2e480d5bdb99bccea138c35509fb076",
+      "bytes": 85,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_legacy.v",
+      "sha256": "bcd9cc55e188c93e3af27fc813796fe4e214872d612600b24ecb35a9eb15f5d8",
+      "bytes": 414,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_missing.sv",
+      "sha256": "7c9236e49f74e1ff9182648f15575b795253feed2f7a84709f7120eebc39f7f1",
+      "bytes": 65,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_plain.v",
+      "sha256": "f7905803d34ac34feb0692fb6a02d15a9c3d507d3220585c93dcab7aa573c770",
+      "bytes": 192,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/sources/native_syntax.sv",
+      "sha256": "e5ffd66b66a2f18dbfd24c1935924dfaf9a3be1e8d560828d4ad7c6207d742f1",
+      "bytes": 50,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/trusted-test-policies/HDL-VLT-01.json",
+      "sha256": "e27431cf11b08c797b8a8dc5809c41625a9adb011e59537de7c911c914943142",
+      "bytes": 260,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/trusted-test-policies/HDL-VLT-02.json",
+      "sha256": "e894d46fdc0adeb4447e0ecbb5d75fda9ef8f27b71cb21edd49943f9a4898016",
+      "bytes": 260,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/trusted-test-policies/HDL-VLT-05.json",
+      "sha256": "a0e78e4c0d725ee093eb87761c93e289fbd3bd129281f05b4f32a9a7b1bed22b",
+      "bytes": 260,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/version/version.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native/version/version.stdout.log",
+      "sha256": "f4f2a41c0a43718fc2b2909696315c1e4e2eb31936e34c7a5c384f9f59277dc3",
+      "bytes": 62,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/build-0.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/build-1.log",
+      "sha256": "6bd4783f8d80b1c294aec3782dcca5671941c2e2aed4dff4b174b79edf514665",
+      "bytes": 6269,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/build-2.log",
+      "sha256": "0406fbcc2cbe1c99d3f45743b2c45c9ca48c8530b3a7075c76816e07d8ca4dbd",
+      "bytes": 67573,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/fetch-0.log",
+      "sha256": "86f9da71ef320d36f359ad950cd3c1371d4afa55d88375c3779929e45465a85c",
+      "bytes": 676,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/fetch-1.log",
+      "sha256": "4608dddca8bbefed21c6c3bbccbc0fde0f4a207526b22e2370a1cbf47647c0ea",
+      "bytes": 120,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/fetch-2.log",
+      "sha256": "87db7403b907c058a637a4db8bbc56c19e903e18df68e1045d55c7ad65b806d7",
+      "bytes": 36,
+      "retained_path": null,
+      "copied": false
+    },
+    {
+      "artifact_path": "evidence/verilator-native-bootstrap/report.json",
+      "sha256": "b866c6bfbae6eb26e008e003314846dadeea9a8ffded1af81d4a87809b3b0d64",
+      "bytes": 6324,
+      "retained_path": "bootstrap-report.json",
+      "copied": true
+    }
+  ],
+  "job_log_retention": {
+    "copied": false,
+    "note": "The pre-recovery review observed pytest9.1.1 and the artifact upload metadata. A fresh gh run view --log returned zero bytes during recovery, so no log excerpt is retained or represented as newly verified. Per-member hashes above are freshly computed from the actual downloaded artifact."
+  },
+  "retention_note": "Reconstructed after workspace recovery from the freshly downloaded original artifact. Only members with copied=true are retained here; others are hashed but not copied into the repository. Raw retained reports and JUnit are byte-identical to the downloaded artifact; counts are not normalized."
+}

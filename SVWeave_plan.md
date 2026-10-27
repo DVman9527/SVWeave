@@ -1935,3 +1935,38 @@ Release decision: ACCEPTED_STATIC_PREVIEW | BLOCKED
 
 **本次收斂結果：維持 developer preview／UNQUALIFIED 的保守定位，先補證據與 reference coverage，再補高頻 Verilog／SystemVerilog 語意；不是移除 slang、加入模擬器或擴寫成 full-language signoff 工具。**
 
+### 30.8 進度追加：bounded native／semantic 證據與仍未完成的 qualification（2026-10-27）
+
+**已有可核對的限定範圍 PASS：native Verilator 5 個檢查、real slang semantic/UVM 21 個測試；完整 qualification 仍為 BLOCKED／UNQUALIFIED。** 本段是依後續授權工作的進度追加；原第 1–29 節及 30.1–30.7 的初次盤點完整保留，其中「目前」「尚未執行」「不新增 native runner」是當時範圍／狀態，不能改寫歷史 FAIL／NOT_RUN。後續明確授權的 native static harness 是獨立測試基礎設施，不是 product runtime backend，也沒有加入 simulation。
+
+本段與對應 current docs 在本次 workspace recovery 後，依目前 repository、重新取得的原 CI artifact 與已核對的歷史進度**重建**；不是宣稱遺失的未提交工作或其 local checks 已自動恢復。重新建構的 next-slice code 必須重跑適用檢查，不能把先前 local PASS 或舊 SHA 的 native PASS 移植成新證據。
+
+#### 30.8.1 exact-source 證據與計數
+
+- [run 40474142649](https://github.com/DVman9527/SVWeave/actions/runs/40474142649) 已成功完成，對應 **`305e8c30747ba2eeb1b53a66eaa29e8255d8e245`**。
+- Frozen lock SHA-256 維持 **`ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9`**；mandatory backend pins 未升級。Verilator 5.052 使用獨立 optional pin `ea338be98e1e838d3518809ce8899f85a009963c`，不取代 slang。
+- [保留證據與 requirement mapping](evidence/verilator-native-run40474142649/README.md)、[artifact member SHA-256 manifest](evidence/verilator-native-run40474142649/artifact-manifest.json) 提供原 artifact 路徑、保留範圍及可核對的 hashes。[安裝前 identity](evidence/verilator-native-run40474142649/identity.json) 的 Git status 為 clean；稍後 [native report](evidence/verilator-native-run40474142649/native-report.json) 記錄 `?? evidence/verilator-native-bootstrap/` 的生成證據，兩者原樣保留。
+
+| 範圍／Test IDs | 可宣告結果 | 證據與不能推論的事項 |
+|---|---|---|
+| Native positive：**HDL-VLT-01/02/05** | **3 PASS**：1364-2005 `.v/.vh` macro／parameter／hierarchy、1800-2017 typedef/class、macro-free 1364-2005 hierarchy；real lint＋real JSON 均接受，實際產物經 import/store/query 通過。 | [native-report.json](evidence/verilator-native-run40474142649/native-report.json)、[native-junit.xml](evidence/verilator-native-run40474142649/native-junit.xml)、[fixture expectations](fixtures/verilator/native/README.md)。只驗證列出的 subset，不是完整 HDL-R04 slang Verilog matrix。 |
+| Native negative：**HDL-VLT-03/04** | **2 PASS**：missing module、syntax error 在兩模式被特定 expected error 拒絕；不是無效設計 compile 成功。Native 合計 **5 cases、0 failure/error/skip**。 | 同上；任意 crash、missing executable、sandbox denial 不得當 expected rejection，失敗 compile 產物不匯入。 |
+| **HDL-COV-01/02、SEM-01–10、UVM-01/02/03、repo profiles** | **21 PASS，0 failure/error/skip**，含 4 個 coverage cases、`test_UVM_02_03_named_arguments_and_same_name_negative` 與 pinned UVM smoke profile。 | [semantic JUnit](evidence/verilator-native-run40474142649/junit-semantic-uvm.xml)；`test_reference_coverage.py`、`test_sem.py`、`test_repo_profiles.py`、`test_uvm.py`。這是 mandatory worker 的 **slang/pyslang UVM static** 證據，**不是 native Verilator UVM** 或 UVM runtime 驗收。 |
+| **HDL-CI-01/02/03、SEC-05、HDL-COV-01/02** 與 supplement／metadata／ingest／impact／rename guards | **195 parent testcase nodes＋75 pytest 9.1.1 subtest outcomes＝270 producer aggregate**；failure/error/skip 均為 0。 | [原始 supplement JUnit](evidence/verilator-native-run40474142649/junit-gates-supplement.xml) 保留 `tests="270"` 與 195 nodes，不能寫成 270 個獨立命名測試。75 由 exact-source loops（5＋31＋5＋34）及 pinned producer 行為核對；double-quiet log 沒有印出這句總結。`305e8c3` 的 strict `qualify.parse_junit` 仍拒絕 mismatch，不能視為 qualification parser PASS。 |
+
+歷史 [run 40471175289](evidence/verilator-native-run40471175289/README.md)（`d709bb92f22768c95db0f534e93dd90f43670354`）仍為 **FAIL**：Verilog native lint/JSON 接受，但舊 harness 過度假設 source-token columns，該次 import/query 未執行。後續 PASS 是新 run 驗證修正後 oracle，不是 replay 或改寫舊報告。Macro-expanded `u_leaf` columns 在原文仍選到 `IVE_WI`、top ports 仍選到 `_`；**source binding 維持 UNVERIFIED，不可作 edit location**。Macro-free positive 是獨立對照，不提供一般 macro mapper。
+
+#### 30.8.2 requirement／phase 進度與剩餘 gate
+
+| Requirement／Phase | 已有進度 | 尚未完成／驗收界線 |
+|---|---|---|
+| **HDL-R01/R12；Phase A** | `analysis_coverage.reference_coverage` 已實作 feature／scope／observations／query bounds／blockers，`absence_proof_supported=false`；4 個 HDL-COV-01/02 real cases 在上述 SHA 通過。[Features](docs/supported_features.md#machine-readable-reference-coverage-hdl-r01-output-envelope-11)／[limitations](docs/limitations.md) 已同步。 | Contract 說明缺口，不補出 dimension/type/reference 遺漏，不將 COMPLETE 變成 absence proof。Output envelope **1.1** 明確升版；strict 1.0 clients 必須遷移 schema，新 reader 能讀舊 payload 不代表舊 strict client 可讀新 1.1。 |
+| **HDL-R08；Phase A 的既有 UVM regression** | 先前因本機 sandbox BLOCKED 的 named-argument/same-name-negative、UVM-01/02/03、pinned-library smoke 已取得上述 real slang PASS。 | 不擴大 generic-body traversal、phase、factory outcome、config-db resolution；完整 R08 新 coverage/backlog 未因此完成。 |
+| **HDL-R10；Phase A／D** | 已發布 baseline 使用 narrow official bwrap profile、mandatory fail-closed probe，required mode 防 skip／xfail／collection-skip 假綠有 HDL-CI-01/02/03。後續 unpublished named-case accounting／probe isolation 已依審查方向重建，fresh local checks **133 PASS**（103 accounting＋30 isolation），另 **10 pytest-dependent cases BLOCKED_ENV**，不是 143 PASS：subtest matrices 改成獨立命名 cases、保留 strict JUnit equality，不推算未序列化 subtests 為 PASS。 | 歷史 `305e8c3` full real-backends job 在 legacy unsandboxed probes 前主動 BLOCKED；proposed next-slice 改為 mandatory host sandbox → required native boundary tests → backend probe 的 success-only gates，不能無條件移除 blocker。4 個 HDL-CI-05 native boundary cases **NOT_RUN**。已授權的 publication／dispatch 由 parent 在 fresh checks／final review 後執行；舊 run 不驗證新 dirty code。 |
+| **HDL-R02/R04/R05/R07/R09；Phase B** | Coverage contract、baseline、native fixture 對照可協助定位缺口。 | dimension／return-type／class-prefix refs、完整 `.v/.vh`＋slang 1364-2005 golden matrix、related-symbol/port identity、context/location matrix **大部分仍是 roadmap**；不因 3 個 Verilator positives 或 21-case regression 宣告完成。 |
+| **HDL-R03/R06/R08/R09；Phase C** | 既有受限 inventory／resolved static call metadata 保留。 | unvisited/call-only generic bodies、clocking／bind/checker／DPI／其他特殊節點仍依 30.5 逐項驗收；runtime resolution 仍 `not_computed`。 |
+| **HDL-R11；Phase E** | 後續授權的 optional native harness 完成 5-case bounded static validation，實際產物與 source-location negative 可追溯。 | `EXTERNAL_DECLARED/PARTIAL`、snapshot/build-unbound 不變；不合併到 slang 權威 references、不提高 completeness／rename/edit eligibility。Native Verilator UVM、protected preparation end-to-end 未驗收。 |
+| **Phase D／release** | 保留 exact-source targeted 證據，沒有代簽 owner 決策。 | 尚缺目前修改版的完整 real probes、integration／fault injection／acceptance／mutation／必要 benchmark 及 `scripts/qualify.py` 計算報告；owner G0 waiver／ADR-012／license signoff 未完成。**BLOCKED／UNQUALIFIED** 不變。 |
+
+本機 `NETLINK_ROUTE` sandbox restriction 仍在；上述 PASS 來自已授權 hosted CI，不代表本機已能安全執行。本次 progress／evidence 重建只讀取既有產物，未重新安裝、啟動 backend、dispatch CI、commit／push。後續變更須另列 source identity、fresh checks 與適用授權；不得降低隔離、忽略錯誤或修改原始 evidence counts 取得綠燈。**Simulation、formal、RTL coverage、native Verilator UVM acceptance 均維持 NOT_RUN；無 owner waiver／license signoff。**
+

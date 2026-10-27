@@ -5,8 +5,10 @@
 This is an **external artifact importer and inventory query**, not an automatic Verilator
 backend and not a replacement for slang. It does not run Verilator, build a simulator,
 evaluate assertions, or execute HDL. The separately authorized native verification harness
-below can test actual static output without changing this importer contract. UVM coverage
-gains remain **NOT_RUN / unverified**. Existing mandatory isolation rules are unchanged.
+below has passed the bounded five-case static subset documented below, without changing
+this importer contract. Additional **Verilator** UVM coverage gains remain **NOT_RUN /
+unverified**; the separately reported real slang UVM tests do not change that status.
+Existing mandatory isolation rules are unchanged.
 
 The importer accepts the **5.052** JSON format only. That is a declared format version,
 not proof of which executable generated a file. Both artifact hashes identify the exact
@@ -127,8 +129,39 @@ does not mean the deliberately invalid designs compiled. Simulation/formal/cover
 
 Local preparation evidence is in `evidence/verilator-native-preflight/`: the dot host's real
 bwrap probe is **BLOCKED** by `NETLINK_ROUTE` permissions and native execution was not attempted
-there. Only a subsequently retained CI `report.json` with passing native cases establishes a
-native result; the presence of this harness or its unit-test success does not.
+there. The subsequently retained exact-source CI result below establishes the bounded
+native result; harness presence, local replay or unit-test success alone does not.
+
+### Measured native result: run 40474142649
+
+[Run 40474142649](https://github.com/DVman9527/SVWeave/actions/runs/40474142649), source
+`305e8c30747ba2eeb1b53a66eaa29e8255d8e245`, completed the native harness with **5 cases,
+0 failures/errors/skips**. HDL-VLT-01/02/05 accepted the three valid fixtures in real lint
+and JSON modes and then passed importer/storage/query checks on those emitted bytes.
+HDL-VLT-03/04 passed only because both modes rejected the missing-module/syntax fixtures
+with their specific expected errors. They are not successful compiles of invalid designs.
+
+[Retained reports, raw JSON, identity, JUnit and hash manifest](../evidence/verilator-native-run40474142649/README.md)
+map each claim to its exact artifact and original member path. The same job passed
+**21 real slang/pyslang semantic/UVM cases**, including HDL-COV-01/02 and
+`test_UVM_02_03_named_arguments_and_same_name_negative`, with zero failures/errors/skips.
+Those are **not native Verilator UVM tests**. The gate/supplement suite separately records
+**195 parent testcase nodes + 75 pytest 9.1.1 subtest outcomes = 270 aggregate**, with
+zero failures/errors/skips. Raw counts are not normalized: at this source, the strict
+qualification parser rejects that aggregate-versus-node difference.
+
+Subsequent unpublished accounting/isolation changes were reconstructed after workspace
+recovery and freshly checked: **133 local pure checks PASS** (103 accounting + 30 isolation);
+**10 pytest-dependent checks BLOCKED_ENV**, not 143 PASS. Accounting uses independently named
+cases, not relaxed JUnit equality or inferred passing subtests. The proposed workflow gates
+backend probes behind mandatory host sandbox and required native boundary tests. Four HDL-CI-05
+native cases remain **NOT_RUN**; authorized parent-owned publication/dispatch follows final
+review. These newer changes are not verified by the older exact-source run.
+
+This native PASS does not prove all original source spans, reconstruct erased references,
+populate slang's authoritative index, extend UVM generic-body traversal, or change edit
+eligibility. Simulation/formal/coverage/native-UVM acceptance remain `NOT_RUN` and full
+qualification remains **BLOCKED / UNQUALIFIED**, with owner waiver/license decisions open.
 
 ### Observed native macro-location limitation
 
@@ -144,8 +177,10 @@ are therefore explicitly **UNVERIFIED for original source tokens**, not trusted 
 The raw locations and failed report are preserved, not rewritten. The revised test checks
 the exact macro-column discrepancy as negative provenance evidence, retains exact-token
 checks on unaffected locations, and adds a separate macro-free cell positive fixture.
-Replaying the retained actual JSON tests this correction without running a compiler;
-only a subsequent native run establishes the revised harness's end-to-end result.
+Replaying the retained actual JSON tested this correction without running a compiler.
+The subsequent native run 40474142649 above established the revised harness's bounded
+end-to-end result, including HDL-VLT-05. It did not rewrite the failed run 40471175289,
+remove `UNVERIFIED` from macro-expanded locations, or establish a general source mapper.
 
 ## Explicit protected-source preparation (static only)
 
@@ -194,8 +229,10 @@ protection in every textual branch is conservatively skipped. Prepare each sourc
 explicitly. A new output directory changes relative include lookup; callers must preserve the
 original include search context. Macro-generated protection directives are unsupported. Neither
 the authoritative slang pipeline nor its mandatory process sandbox is changed or bypassed.
-Native-tool/end-to-end qualification remains **NOT_RUN / blocked by the existing host sandbox
-restriction**, not covered by these pure preparation/API tests.
+The **protected-source preparation path's** native-tool/end-to-end qualification remains
+**NOT_RUN**; the successful five-case native run above contains no protected-source case.
+Local execution also remains blocked by the existing host sandbox restriction. Pure
+preparation/API tests do not certify downstream compile behavior across encrypted gaps.
 
 ### Requirement-to-test mapping
 

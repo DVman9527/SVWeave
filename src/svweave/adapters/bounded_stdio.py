@@ -91,6 +91,7 @@ async def bounded_stdio_client(
     *,
     max_message_bytes: int = MAX_MESSAGE_BYTES,
     stats: TransportStats | None = None,
+    inherit_default_environment: bool = True,
 ) -> AsyncGenerator[TransportStreams, None]:
     """Drop-in for ``mcp.client.stdio.stdio_client`` with a per-message length limit."""
     if max_message_bytes < 1:
@@ -103,7 +104,7 @@ async def bounded_stdio_client(
     process = await _create_platform_compatible_process(
         command=command,
         args=server.args,
-        env=get_default_environment() | (server.env or {}),
+        env=(get_default_environment() if inherit_default_environment else {}) | (server.env or {}),
         errlog=errlog,
         cwd=server.cwd,
     )

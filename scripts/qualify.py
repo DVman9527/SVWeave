@@ -106,7 +106,8 @@ GATE_MODULES: dict[str, list[str]] = {
            "test_edit_crash", "test_edt_flow", "test_int_hardening", "test_adapters_hardening",
            "test_adapters_redaction", "test_sandbox", "test_int_sandbox"],
     "G0": ["test_int_sandbox", "test_sandbox", "test_ci_sandbox_gate", "test_ci_bwrap_apparmor",
-           "test_ci_qualification", "test_ci_required_backends"],
+           "test_ci_qualification", "test_ci_required_backends", "test_ci_probe_isolation",
+           "test_int_probe_isolation"],
 }
 
 
@@ -144,7 +145,12 @@ def git(*args: str) -> str | None:
 
 
 def parse_junit(path: Path) -> dict[str, Any]:
-    """Counts and per-module results from a pytest junit xml."""
+    """Count independently named testcases, never inferred or unreported subtests.
+
+    Pytest 9.1.1 can include unittest.subTest outcomes in suite totals without
+    serializing distinct testcase nodes. Such a report is incomplete evidence,
+    not permission to relax equality: qualification matrices use named tests.
+    """
     res: dict[str, Any] = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0, "modules": {},
                            "failed_tests": [], "skipped_tests": []}
     if not path.is_file():
@@ -155,6 +161,18 @@ def parse_junit(path: Path) -> dict[str, Any]:
         return {**res, "invalid": f"{type(exc).__name__}: {exc}"}
     if root.tag not in {"testsuite", "testsuites"}:
         return {**res, "invalid": f"unexpected JUnit root: {root.tag}"}
+    seen: set[tuple[str, str]] = set()
+    for tc in root.iter("testcase"):
+        classname, name = tc.get("classname", ""), tc.get("name", "")
+        if not classname.strip() or not name.strip():
+            return {**res, "invalid": "JUnit testcase missing classname or name"}
+        identity = (classname, name)
+        if identity in seen:
+            return {**res, "invalid": f"duplicate JUnit testcase: {classname}::{name}"}
+        seen.add(identity)
+        outcomes = [child for child in tc if child.tag in {"failure", "error", "skipped"}]
+        if len(outcomes) > 1:
+            return {**res, "invalid": f"multiple JUnit outcomes: {classname}::{name}"}
     for suite in root.iter():
         if suite.tag not in {"testsuite", "testsuites"}:
             continue
