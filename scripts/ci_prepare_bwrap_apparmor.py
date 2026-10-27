@@ -7,6 +7,7 @@ No policy is synthesized, existing policy replaced, or global restriction disabl
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import shlex
@@ -72,11 +73,35 @@ def validate_download_uri(output: str) -> None:
     require(len(lines) == 1, "Expected exactly one authenticated Ubuntu package URI")
     uri = urlparse(shlex.split(lines[0])[0])
     host = uri.hostname or ""
+    # No userinfo, query, fragment, or raw APT output in failure diagnostics.
+    origin = json.dumps({"scheme": uri.scheme, "host": host, "path": uri.path[:500]})
     require(uri.scheme in {"http", "https"} and (
         host in {"archive.ubuntu.com", "security.ubuntu.com", "ports.ubuntu.com"}
         or host.endswith(".archive.ubuntu.com")
     ) and uri.path.startswith(("/ubuntu/pool/", "/ubuntu-ports/pool/")),
-        "Package download is not from the official Ubuntu archive")
+        f"Package download is not from the official Ubuntu archive: {origin}")
+
+
+def describe_runner_mirror_list() -> None:
+    """Read only the runner's fixed mirror-list path; this does not grant it trust."""
+    path = Path("/etc/apt/apt-mirrors.txt")
+    try:
+        metadata = path.stat()
+        with path.open() as stream:
+            content = stream.read(4096)
+        origins = []
+        for line in content.splitlines()[:32]:
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            uri = urlparse(line.split()[0])
+            origins.append({"scheme": uri.scheme, "host": uri.hostname, "path": uri.path[:500]})
+        print("Untrusted runner mirror-list evidence: " + json.dumps({
+            "path": str(path), "uid": metadata.st_uid, "gid": metadata.st_gid,
+            "mode": oct(metadata.st_mode & 0o777), "size": metadata.st_size,
+            "origins": origins,
+        }), flush=True)
+    except (OSError, ValueError) as exc:
+        print(f"Runner mirror-list evidence unavailable: {type(exc).__name__}", flush=True)
 
 
 def check_conflicts(policy_dir: Path, loaded_profiles: str) -> None:
@@ -120,7 +145,11 @@ def main() -> None:
            "-o", "Acquire::AllowInsecureRepositories=false")
     with tempfile.TemporaryDirectory(prefix="svweave-ubuntu-profile-") as directory:
         staging = Path(directory)
-        validate_download_uri(run(*apt, "--print-uris", "download", "apparmor-profiles", cwd=staging))
+        try:
+            validate_download_uri(run(*apt, "--print-uris", "download", "apparmor-profiles", cwd=staging))
+        except RuntimeError:
+            describe_runner_mirror_list()
+            raise
         run(*apt, "download", "apparmor-profiles", cwd=staging)
         packages = list(staging.glob("*.deb"))
         require(len(packages) == 1, "Expected exactly one Ubuntu package")

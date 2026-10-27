@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -70,3 +71,27 @@ class OfficialBwrapPolicyTests(unittest.TestCase):
         self.assertNotIn('"-r", str(target)', script)
         self.assertNotIn("sysctl -w", script)
         self.assertNotIn("allow_degraded", script)
+
+    def test_SEC_05_rejected_uri_diagnostic_omits_credentials_query_and_fragment(self) -> None:
+        with self.assertRaises(RuntimeError) as raised:
+            MODULE.validate_download_uri(
+                "'https://user:password@evil.example/p.deb?token=secret#private' p.deb 12 hash"
+            )
+        message = str(raised.exception)
+        self.assertIn('"host": "evil.example"', message)
+        self.assertIn('"path": "/p.deb"', message)
+        for secret in ("user", "password", "token", "secret", "private"):
+            self.assertNotIn(secret, message)
+
+    def test_SEC_05_mirror_evidence_is_read_only_and_omits_uri_secrets(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "apt-mirrors.txt"
+            content = "https://user:password@archive.ubuntu.com/ubuntu?token=secret#private\tpriority:1\n"
+            path.write_text(content)
+            output = io.StringIO()
+            with patch.object(MODULE, "Path", return_value=path), patch("sys.stdout", output):
+                MODULE.describe_runner_mirror_list()
+            self.assertEqual(path.read_text(), content)
+            self.assertIn('"host": "archive.ubuntu.com"', output.getvalue())
+            for secret in ("password", "token", "secret", "private"):
+                self.assertNotIn(secret, output.getvalue())
