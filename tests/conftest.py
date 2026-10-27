@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -113,3 +114,13 @@ def _isolated_config_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pa
     xdg.mkdir()
     monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
     return xdg
+
+
+@pytest.fixture
+def isolated_git(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Use real Git with only repository configuration; never modify runner/user config."""
+    from tests.git_support import isolated_git_launcher
+
+    launcher = isolated_git_launcher(tmp_path / "git-bin")
+    monkeypatch.setenv("PATH", str(launcher.parent), prepend=os.pathsep)
+    return launcher

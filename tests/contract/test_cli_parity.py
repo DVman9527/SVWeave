@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import shlex
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -149,11 +152,11 @@ def test_impact_parity_for_a_module_a_port_and_an_instance(built: Built) -> None
         assert m["data"]["target"] and m["data"]["summary"], cli_args
 
 
-def test_diff_impact_parity_with_a_real_git_change(built: Built) -> None:
+def test_diff_impact_parity_with_a_real_git_change(built: Built, isolated_git: Path) -> None:
     import subprocess
 
     root = built.ws.root
-    env = {"PATH": "/usr/bin:/bin", "HOME": str(root), "GIT_CONFIG_NOSYSTEM": "1",
+    env = {"PATH": os.environ["PATH"], "HOME": str(root), "GIT_CONFIG_NOSYSTEM": "1",
            "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
            "GIT_COMMITTER_EMAIL": "t@t"}
 
@@ -174,6 +177,25 @@ def test_diff_impact_parity_with_a_real_git_change(built: Built) -> None:
         assert normalize(c) == normalize(m)
         assert [d["qualified_name"] for d in m["data"]["affected_definitions"]] == ["demo_lane"]
         assert m["data"]["files"][0]["aligned"] is True and m["freshness"] == "STALE"
+        # Isolating host Git LFS must not suppress malicious repository-local filters.
+        marker = root / "filter-must-not-run"
+        attributes = root / ".gitattributes"
+        previous_attributes = attributes.read_bytes() if attributes.exists() else None
+        git("config", "filter.evil.clean", f"touch {shlex.quote(str(marker))}; cat")
+        try:
+            attributes.write_text("*.sv filter=evil\n")
+            code, c = cli_env(root, "query", "diff-impact", "--build", built.build_id, "--depth", "2")
+            m, is_error = call(make_gateway(built.opts), "svw_diff_impact", {"build_id": built.build_id, "depth": 2})
+            assert code == 6 and is_error and normalize(c) == normalize(m)
+            assert c["error"]["details"]["reason"] == "git_filters_configured"
+            assert c["error"]["details"]["filters"] == ["filter.evil.clean"]
+            assert not marker.exists()
+        finally:
+            git("config", "--remove-section", "filter.evil")
+            if previous_attributes is None:
+                attributes.unlink(missing_ok=True)
+            else:
+                attributes.write_bytes(previous_attributes)
     finally:
         lane.write_bytes(original)
 
