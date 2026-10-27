@@ -1,0 +1,16 @@
+{
+  "files": {
+    "d": {
+      "filename": "t_constraint_json_only.v",
+      "realpath": "t_constraint_json_only.v",
+      "language": "1800-2023"
+    },
+    "a": {
+      "filename": "<built-in>",
+      "realpath": "<built-in>",
+      "language": "1800-2023"
+    }
+  },
+  "pointers": {},
+  "ptrFieldNames": []
+}

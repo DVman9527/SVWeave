@@ -47,3 +47,12 @@ embedded graph UI.
 
 - Third-party code statically linked into the slang binary, the pyslang native module, and the Verible static binaries.
 - Transitive Python dependencies of the Serena venv (`uv.lock` SHA-256 48f88af6...) and of the gateway venv (mcp 2.3.0 dependencies).
+
+## Verilator static interchange test fixtures (not an installed backend)
+
+`fixtures/verilator/` includes unchanged regression AST goldens and associated test sources from
+Verilator v5.052, commit `ea338be98e1e838d3518809ce8899f85a009963c`. Original notices,
+upstream license texts, SHA-256 checksums and per-file provenance are retained in that directory.
+Test drivers use LGPL-3.0-only OR Artistic-2.0; test HDL carries its own CC0-1.0 notice.
+The metadata adapters are explicitly hand-authored test data, not upstream tool output.
+No Verilator executable or runtime library is bundled or installed by the importer.

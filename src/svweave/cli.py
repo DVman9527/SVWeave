@@ -957,6 +957,73 @@ def edit_show(st: _State, transaction_id: str) -> None:
     st.emit(st.run(lambda rid: edit_mod.show(st.opts, rid, transaction_id=transaction_id)))
 
 
+@cli.group("supplement")
+def supplement_grp() -> None:
+    """Optional external static inventories (never authoritative semantic or runtime evidence)."""
+
+
+@supplement_grp.command("prepare-source")
+@click.option("--source", required=True, type=click.Path(path_type=Path, dir_okay=False))
+@pass_state
+@_query_flags
+def supplement_prepare_source_cmd(st: _State, source: Path) -> None:
+    """Create a PARTIAL derived source with protected envelopes blanked; no compiler runs."""
+    from svweave.application.source_preparation import prepare_source
+
+    st.emit(st.run(lambda rid: prepare_source(st.opts, source, rid)))
+
+
+@supplement_grp.command("verilator")
+@click.option("--tree", required=True, type=click.Path(path_type=Path, dir_okay=False))
+@click.option("--meta", required=True, type=click.Path(path_type=Path, dir_okay=False))
+@click.option(
+    "--tool-version", required=True, help="Declared producer version; only 5.052 supported."
+)
+@pass_state
+def supplement_verilator_cmd(st: _State, tree: Path, meta: Path, tool_version: str) -> None:
+    """Import existing Verilator JSON without running Verilator. Exit 0 means import stored."""
+    from svweave.application.supplement import import_verilator
+
+    st.emit(st.run(lambda rid: import_verilator(st.opts, tree, meta, tool_version, rid)))
+
+
+@supplement_grp.command("show")
+@click.option("--supplement", "supplement_id", required=True)
+@click.option("--name", default=None, help="Case-sensitive name substring filter.")
+@click.option("--node-type", default=None, help="Exact producer node type filter.")
+@click.option("--source-file", default=None, help="Exact declared source filename (never opened).")
+@click.option("--offset", default=0, type=click.IntRange(min=0))
+@click.option("--limit", default=20, type=click.IntRange(1, 100))
+@pass_state
+@_query_flags
+def supplement_show_cmd(
+    st: _State,
+    supplement_id: str,
+    name: str | None,
+    node_type: str | None,
+    source_file: str | None,
+    offset: int,
+    limit: int,
+) -> None:
+    """Read/filter a stored inventory. PARTIAL exits 3 unless --allow-partial is supplied."""
+    from svweave.application.supplement import show_verilator
+
+    st.emit(
+        st.run(
+            lambda rid: show_verilator(
+                st.opts,
+                supplement_id,
+                rid,
+                name=name,
+                node_type=node_type,
+                source_file=source_file,
+                offset=offset,
+                limit=limit,
+            )
+        )
+    )
+
+
 def main() -> None:
     cli(prog_name="svweave")
 

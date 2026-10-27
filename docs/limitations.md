@@ -36,6 +36,14 @@ timing or signoff result (plan 4.3).
   prefixes (`Cls::member`), enum/struct member type names, `export` and `import` of DPI beyond the
   declaration, clocking-block signals, bind target instance lists
   (`bind mod : inst_list`), checker instances, primitives, config blocks.
+* **UVM call metadata is a bounded static inventory.** `context.uvm` recognizes an explicit
+  resolved `uvm_pkg` API allowlist, not arbitrary wrappers or library authenticity. Written
+  named/ordered/empty arguments are associated with formals, without evaluating values or
+  filling defaults. Only 16 arguments are captured, with count/truncation and missing-syntax
+  flags; expression text retains the existing size cap. `runtime_resolution=not_computed`
+  applies even to factory `create` and config-db `get`. This does not extend traversal to
+  previously unvisited generic bodies, or infer phase execution. See the UVM static call
+  metadata section in `docs/supported_features.md`.
 * **Virtual dispatch.** A call through a handle is `dynamic_unresolved`; the static target is the
   declared method and the overriding methods are listed as candidates. None is chosen.
 * **Macros.** Locations in macro bodies are shared by every expansion; a location query there
@@ -270,3 +278,11 @@ evidence). Measured gaps on the fixtures:
   of the same name in the same scope is a blocker, one in a nested scope a warning. Capture by a
   same-named declaration visible from an outer scope or an imported package is not analysed.
 
+
+## Optional external Verilator inventory
+
+The Verilator JSON importer is an unbound, `EXTERNAL_DECLARED` / `PARTIAL` static inventory,
+not an executed backend or an extension of slang's resolved-reference coverage. It never runs
+simulation, resolves UVM runtime behavior, or changes edit eligibility. The JSON format is
+pinned to 5.052; no native integration or additional UVM coverage is claimed. See
+[static supplement scope and evidence](verilator_static_supplement.md).

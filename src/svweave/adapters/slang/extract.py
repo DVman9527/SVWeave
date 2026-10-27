@@ -30,6 +30,7 @@ from svweave.adapters.slang.protocol import (
     EXTRACTOR_VERSION,
     WorkerRequest,
 )
+from svweave.adapters.slang.uvm_calls import call_metadata, classify_uvm_call, text_is_truncated
 
 SK = ast.SymbolKind
 EK = ast.ExpressionKind
@@ -816,18 +817,46 @@ class Extractor:
         sub = n.subroutine
         idx = self.decl_for(sub)
         args: list[str | None] = []
+        written: list[dict[str, Any]] = []
+        argument_count = 0
+        uvm_kind = classify_uvm_call(sub.lexicalPath) if idx is not None else None
         arglist = getattr(n.syntax, "arguments", None) if n.syntax is not None else None
         if arglist is not None:
             # arguments as WRITTEN (n.arguments also contains slang-inserted default values)
             for a in list(arglist.parameters):
                 if isinstance(a, parsing.Token):
                     continue  # list separator
+                argument_count += 1
                 if len(args) < 16:
                     args.append(self.loc.text(self.loc.range(a.sourceRange)))
+                    if uvm_kind is not None:
+                        kind = {
+                            syn.SyntaxKind.NamedArgument: "named",
+                            syn.SyntaxKind.OrderedArgument: "ordered",
+                            syn.SyntaxKind.EmptyArgument: "empty",
+                        }.get(a.kind, "unknown")
+                        expr = getattr(a, "expr", None)
+                        expr_loc = self.loc.range(expr.sourceRange) if expr is not None else None
+                        written.append({
+                            "kind": kind,
+                            "name": a.name.valueText if kind == "named" else None,
+                            "expression": self.loc.text(expr_loc),
+                            "text_truncated": text_is_truncated(expr_loc, self.loc.max_text),
+                        })
         elif n.syntax is None:
+            argument_count = len(n.arguments)
             for a in list(n.arguments)[:16]:
                 args.append(self.loc.text(self.loc.range(a.sourceRange)))
-        ctx: dict[str, Any] = {"args": args, "callee": sub.hierarchicalPath}
+        ctx: dict[str, Any] = {
+            "args": args, "callee": sub.hierarchicalPath,
+            "argument_count": argument_count, "args_truncated": argument_count > len(args),
+        }
+        if uvm_kind is not None:
+            ctx["uvm"] = call_metadata(
+                uvm_kind, sub.lexicalPath, sub.hierarchicalPath,
+                [a.name for a in sub.arguments], written,
+                syntax_available=n.syntax is not None, argument_count=argument_count,
+            )
         status = "resolved_static"
         reason = None
         if sub.isVirtual and not self._static_dispatch(left):

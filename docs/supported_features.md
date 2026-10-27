@@ -210,3 +210,44 @@ These are reported as limitations/gaps in the outputs; none is emulated with reg
   registry); the cross-process job manager is M3.
 * The worker fault-injection hook (`WorkerRequest.test_fault`) is set only by the explicit
   `test_fault=` keyword of `run_build`/`run_worker`; no configuration field maps to it.
+
+
+### UVM static call metadata (UVM-02 / UVM-03)
+
+Recognized calls additionally expose `context.uvm` through the existing references query:
+`api`, `operation`, resolved lexical `declaration`, `specialization_path`, and written
+`arguments`. Each argument retains syntax kind, optional source name, expression text,
+associated formal name, and any association issue. Named arguments are associated by name,
+not source order; ordered and explicitly empty arguments retain their positions. Omitted
+arguments are not filled with defaults or evaluated. Existing `context.args` remains the
+as-written text list. Calls also expose `argument_count` and `args_truncated`.
+
+The allowlist recognizes `uvm_pkg::uvm_config_db::{set,get,exists,wait_modified}`,
+component/factory/default-factory type and instance override APIs, and object/component
+registry `create`, `set_type_override`, and `set_inst_override`. Recognition uses the
+resolved declaration, not the spelling at the call site; a user method named `set` is not
+classified. This namespace allowlist is not authentication of a replacement `uvm_pkg`.
+
+`evidence=static_call_site` and `runtime_resolution=not_computed` are always explicit.
+There is no config-db matching, precedence calculation, factory outcome, runtime topology,
+or phase execution inference. Only visited, resolved call sites are eligible; this does
+not expand generic-body traversal. At most 16 written arguments are captured per call;
+`arguments_truncated` and `syntax_available` distinguish incomplete/missing syntax.
+Expression text has the existing `max_text_bytes` cap (ellipsis on truncation); each
+argument reports `text_truncated` from its byte span (`null` when unavailable, including
+empty arguments). List truncation flags do not imply untruncated expression text. Expressions
+are never evaluated and literal wildcards remain text.
+
+Regression example: `fixtures/uvm/svw_uvm_static_calls.sv` imports the real pinned UVM
+library, with reordered named config-db arguments, type/instance overrides, registry
+creates with named and empty arguments, and non-UVM same-name methods. Its gateway test
+is `test_UVM_02_03_named_arguments_and_same_name_negative`. Pure formatter tests do not
+substitute for running this integration test on a host with mandatory bwrap isolation.
+
+## Optional external static inventory
+
+Verilator 5.052 JSON AST artifacts can be imported and inspected separately from the slang
+index. Official regression goldens exercise class/member/method/type and selected reference,
+module and port node inventory. This is `EXTERNAL_DECLARED`, `PARTIAL`, unbound to any build;
+it does not establish resolved references or close unvisited-body/runtime UVM gaps.
+See [the format, trust boundary and evidence](verilator_static_supplement.md).

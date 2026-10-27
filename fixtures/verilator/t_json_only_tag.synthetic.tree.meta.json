@@ -1,0 +1,16 @@
+{
+  "files": {
+    "d": {
+      "filename": "t_json_only_tag.v",
+      "realpath": "t_json_only_tag.v",
+      "language": "1800-2023"
+    },
+    "a": {
+      "filename": "<built-in>",
+      "realpath": "<built-in>",
+      "language": "1800-2023"
+    }
+  },
+  "pointers": {},
+  "ptrFieldNames": []
+}

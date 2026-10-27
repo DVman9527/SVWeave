@@ -217,3 +217,58 @@ def test_UVM_03_config_db_sites_keep_type_wildcard_and_context(ext: tuple[Ws, ob
     assert len(mine) == sum(1 for c in g["calls"] if c["op"] == "set")
     dumped = json.dumps(q.data).lower()
     assert "matched" not in dumped and "hit" not in dumped
+
+
+@pytest.fixture(scope="module")
+def static_calls(tmp_path_factory: pytest.TempPathFactory, xdg_home: Path) -> tuple[Ws, object]:
+    return _make(
+        tmp_path_factory, xdg_home, "uvm_static_calls", ["svw_uvm_static_calls.sv"],
+        "svw_uvm_static_calls_top",
+    )
+
+
+def test_UVM_02_03_named_arguments_and_same_name_negative(static_calls: tuple[Ws, object]) -> None:
+    """Exercises the real gateway, worker, ingestion and references query; no direct parser."""
+    w, env = static_calls
+    bid = env.build_id  # type: ignore[attr-defined]
+    assert bid and env.data["diagnostic_outcome"] == "NO_ERRORS"  # type: ignore[attr-defined]
+    rows = decl_rows(w, bid)
+    by_id = {r["declaration_id"]: r for r in rows}
+    calls = [r for r in ref_rows(w, bid) if r["kind"] == "call"
+             and r["file"].endswith("svw_uvm_static_calls.sv")]
+    relevant = [r for r in calls if json.loads(r["context"]).get("uvm")]
+    assert len(relevant) == 8
+    for r in relevant:
+        ctx = json.loads(r["context"])
+        meta = ctx["uvm"]
+        assert meta["runtime_resolution"] == "not_computed"
+        assert meta["evidence"] == "static_call_site"
+        assert meta["syntax_available"] and not meta["arguments_truncated"]
+        assert all(a["association_issue"] is None for a in meta["arguments"])
+        assert by_id[r["target_id"]]["file"].startswith("@uvm/")
+        assert meta["declaration"] == by_id[r["target_id"]]["qualified_name"]
+    cfg = [json.loads(r["context"])["uvm"] for r in relevant
+           if json.loads(r["context"])["uvm"]["api"] == "config_db"]
+    assert {m["operation"] for m in cfg} == {"set", "get"}
+    setter = next(m for m in cfg if m["operation"] == "set")
+    assert "int" in setter["specialization_path"]
+    assert {a["formal"]: a["expression"] for a in setter["arguments"]} == {
+        "value": "32", "field_name": '"width"', "cntxt": "this", "inst_name": '"env.*"',
+    }
+    creates = [json.loads(r["context"])["uvm"] for r in relevant
+               if json.loads(r["context"])["uvm"]["operation"] == "create"]
+    assert len(creates) == 2
+    named = next(m for m in creates if m["arguments"][0]["kind"] == "named")
+    assert [a["formal"] for a in named["arguments"]] == ["parent", "name"]
+    ordered = next(m for m in creates if m["arguments"][0]["kind"] == "ordered")
+    assert ordered["arguments"][1]["kind"] == "empty"
+    assert ordered["arguments"][1]["formal"] == "parent"
+    assert ordered["arguments"][1]["expression"] is None
+    negatives = [r for r in calls if r["target_id"] in by_id
+                 and "::local_db::" in by_id[r["target_id"]]["qualified_name"]]
+    assert len(negatives) == 2
+    assert all("uvm" not in json.loads(r["context"]) for r in negatives)
+    # Metadata survives ingestion and the public references query.
+    declaration = next(r for r in rows if r["qualified_name"] == "uvm_pkg::uvm_config_db::set")
+    response = Q.references(opts(w), bid, declaration["symbol_id"], "r")
+    assert any(i["context"].get("uvm") == setter for i in response.data["items"])
