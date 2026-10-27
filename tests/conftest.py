@@ -14,6 +14,8 @@ import yaml
 from svweave.config.context import WorkspaceContext
 from svweave.config.trusted import policy_path_for
 
+pytest_plugins = ["tests.required_backends"]
+
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
 

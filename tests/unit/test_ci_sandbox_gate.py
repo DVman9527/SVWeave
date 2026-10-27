@@ -15,6 +15,50 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class SandboxGateTests(unittest.TestCase):
+    def test_HDL_CI_01_all_jobs_use_identical_mandatory_sandbox_gate(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        commands = []
+        for name in ("fast", "real-backends", "native-verilator"):
+            steps = workflow["jobs"][name]["steps"]
+            command = next(step["run"] for step in steps
+                           if step.get("name") == "Install and verify the mandatory worker sandbox")
+            commands.append(command)
+            self.assertIn("scripts/ci_prepare_bwrap_apparmor.py", command)
+            self.assertNotIn("sysctl", command)
+            self.assertNotIn("allow_degraded", command)
+        self.assertEqual(len(set(commands)), 1)
+        for job in workflow["jobs"].values():
+            self.assertNotIn("apparmor_restrict_unprivileged_userns=0", str(job))
+
+    def test_HDL_CI_01_legacy_unisolated_probe_is_blocked_before_execution(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["real-backends"]["steps"]
+        guard = next(i for i, step in enumerate(steps)
+                     if step.get("name") == "Block legacy probes until mandatory isolation is implemented")
+        probe = next(i for i, step in enumerate(steps)
+                     if step.get("name") == "Backend contract probe")
+        self.assertLess(guard, probe)
+        result = subprocess.run(["bash", "-c", steps[guard]["run"]], capture_output=True,
+                                text=True, check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("BLOCKED", result.stderr)
+        native = str(workflow["jobs"]["native-verilator"])
+        self.assertNotIn("scripts/probe_backends.py", native)
+        self.assertIn("SVWEAVE_REQUIRE_BACKENDS", native)
+        self.assertIn("--junitxml=", native)
+
+    def test_HDL_CI_01_hidden_junit_and_identity_artifacts_are_explicitly_retained(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        for name in ("real-backends", "native-verilator"):
+            upload = next(step for step in workflow["jobs"][name]["steps"]
+                          if step.get("uses", "").startswith("actions/upload-artifact@"))
+            self.assertEqual(upload["if"], "always()")
+            self.assertIs(upload["with"]["include-hidden-files"], True)
+            paths = upload["with"]["path"].splitlines()
+            self.assertIn(".svweave/ci/", paths)
+            self.assertNotIn(".svweave/", paths)
+            self.assertEqual(upload["with"]["if-no-files-found"], "error")
+
     def test_SEC_05_probe_status_survives_best_effort_diagnostics(self) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         step = next(
@@ -27,9 +71,12 @@ class SandboxGateTests(unittest.TestCase):
         self.assertEqual(command.count("probe_host(refresh=True)"), 1)
         self.assertIn("date -u '+%Y-%m-%d %H:%M:%S.%6N UTC'", command)
         self.assertIn('timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at"', command)
-        for probe_status, diagnostic_status in [(0, 0), (7, 0), (7, 1), (7, 124)]:
+        for probe_status, diagnostic_status, setup_status in [
+            (0, 0, 0), (7, 0, 0), (7, 1, 0), (7, 124, 0), (0, 0, 9)
+        ]:
             with (
-                self.subTest(probe_status=probe_status, diagnostic_status=diagnostic_status),
+                self.subTest(probe_status=probe_status, diagnostic_status=diagnostic_status,
+                             setup_status=setup_status),
                 tempfile.TemporaryDirectory() as directory,
             ):
                 root = Path(directory)
@@ -39,7 +86,8 @@ class SandboxGateTests(unittest.TestCase):
                 for name, body in {
                     "sudo": "exit 0",
                     ".venv/bin/python": (
-                        'if [[ "$1" == scripts/ci_prepare_bwrap_apparmor.py ]]; then exit 0; fi\n'
+                        'if [[ "$1" == scripts/ci_prepare_bwrap_apparmor.py ]]; then '
+                        f'exit {setup_status}; fi\n'
                         f"cat >/dev/null\nexit {probe_status}"
                     ),
                     "scripts/ci_sandbox_diagnostics.sh": (
@@ -59,9 +107,9 @@ class SandboxGateTests(unittest.TestCase):
                     check=False,
                     timeout=10,
                 )
-                self.assertEqual(result.returncode, probe_status, result.stderr)
+                self.assertEqual(result.returncode, setup_status or probe_status, result.stderr)
                 called = root / "diagnostics-called"
-                self.assertEqual(called.exists(), probe_status != 0)
+                self.assertEqual(called.exists(), not setup_status and probe_status != 0)
                 if called.exists():
                     self.assertRegex(called.read_text(), r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC")
 

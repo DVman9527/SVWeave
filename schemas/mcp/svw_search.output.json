@@ -25,6 +25,17 @@
           "title": "Limitations",
           "type": "array"
         },
+        "reference_coverage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceCoverage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "scope": {
           "anyOf": [
             {
@@ -183,6 +194,190 @@
         }
       },
       "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceCoverage": {
+      "additionalProperties": false,
+      "description": "HDL-R01 v1: coverage of the reference index, independent of build success.\n\nA COMPLETE build can have a PARTIAL reference index. Zero observed gaps is not\nevidence of exhaustive traversal. This contract never authorizes negative reference,\nimpact, unused-symbol or safe-deletion conclusions, nor complete-rename claims.",
+      "properties": {
+        "absence_proof_supported": {
+          "const": false,
+          "default": false,
+          "title": "Absence Proof Supported",
+          "type": "boolean"
+        },
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "contract_version": {
+          "const": "1",
+          "default": "1",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "depth_limit": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth Limit"
+        },
+        "features": {
+          "additionalProperties": {
+            "enum": [
+              "PARTIAL",
+              "UNSUPPORTED",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          },
+          "title": "Features",
+          "type": "object"
+        },
+        "observations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReferenceObservations"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "query": {
+          "anyOf": [
+            {
+              "enum": [
+                "references",
+                "impact",
+                "rename_preview"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Query"
+        },
+        "result_truncated": {
+          "default": false,
+          "title": "Result Truncated",
+          "type": "boolean"
+        },
+        "scopes": {
+          "additionalProperties": {
+            "enum": [
+              "PARTIAL",
+              "NOT_SEARCHED",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          },
+          "title": "Scopes",
+          "type": "object"
+        },
+        "searched_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Searched Scope"
+        },
+        "status": {
+          "enum": [
+            "PARTIAL",
+            "UNKNOWN"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "features",
+        "scopes"
+      ],
+      "title": "ReferenceCoverage",
+      "type": "object"
+    },
+    "ReferenceObservations": {
+      "additionalProperties": false,
+      "description": "Recorded occurrences, not an exhaustive census of omitted source references.",
+      "properties": {
+        "dropped_references_external": {
+          "minimum": 0,
+          "title": "Dropped References External",
+          "type": "integer"
+        },
+        "dropped_references_project": {
+          "minimum": 0,
+          "title": "Dropped References Project",
+          "type": "integer"
+        },
+        "dynamic_references": {
+          "minimum": 0,
+          "title": "Dynamic References",
+          "type": "integer"
+        },
+        "inactive_regions": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Inactive Regions",
+          "type": "object"
+        },
+        "scope_gaps": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Scope Gaps",
+          "type": "object"
+        },
+        "unresolved_references": {
+          "minimum": 0,
+          "title": "Unresolved References",
+          "type": "integer"
+        },
+        "unsupported_nodes_external": {
+          "minimum": 0,
+          "title": "Unsupported Nodes External",
+          "type": "integer"
+        },
+        "unsupported_nodes_project": {
+          "minimum": 0,
+          "title": "Unsupported Nodes Project",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "unsupported_nodes_project",
+        "unsupported_nodes_external",
+        "dropped_references_project",
+        "dropped_references_external",
+        "unresolved_references",
+        "dynamic_references",
+        "scope_gaps",
+        "inactive_regions"
+      ],
+      "title": "ReferenceObservations",
       "type": "object"
     }
   },

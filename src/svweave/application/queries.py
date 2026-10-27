@@ -209,6 +209,8 @@ def _page(
         warnings=warns + ["x" * 160],
         extra_limits=extra_limits,
         freshness=s.fresh(),
+        reference_query="references" if tool == "references" else None,
+        reference_scope=params.get("scope") if tool == "references" else None,
     )
     budget = MAX_RESPONSE_BYTES - len(skeleton.to_json(indent=None).encode("utf-8")) - 1024
     kept = fit_items(items, budget)
@@ -237,6 +239,8 @@ def _page(
             warnings=warns,
             extra_limits=extra_limits,
             freshness=s.fresh(),
+            reference_query="references" if tool == "references" else None,
+            reference_scope=params.get("scope") if tool == "references" else None,
         )
     )
 
@@ -277,6 +281,11 @@ def flag_oversize(env: Envelope, key: str = "items") -> Envelope:
     if not ph:
         return env
     env.pagination.truncated = True
+    if env.analysis_coverage is not None and env.analysis_coverage.reference_coverage is not None:
+        refs = env.analysis_coverage.reference_coverage
+        refs.result_truncated = True
+        if "result_truncated" not in refs.blockers:
+            refs.blockers.append("result_truncated")
     env.data["oversize_items"] = [
         {"id": i.get("id"), "reason": "item_exceeds_response_cap", "size_bytes": i.get("size_bytes")}
         for i in ph

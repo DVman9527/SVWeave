@@ -15,6 +15,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from svweave.adapters.slang.coverage import reference_coverage
+from svweave.domain.envelope import ReferenceObservations
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.ids import canonical_hash, sha256_hex
 from svweave.domain.states import Completeness, DiagnosticOutcome
@@ -211,9 +213,13 @@ def ingest(
     job_id: str,
     tops: list[str],
     stubs: list[dict[str, str]] | None = None,
+    *,
+    extra_gaps: list[dict[str, Any]] | None = None,
 ) -> Ingested:
     """``stubs`` are the manifest's declared stub records (module, original_ip, model_sha256,
-    replaced_scope; plan 16.5). A declared stub is still a PARTIAL boundary, but a recorded one."""
+    replaced_scope; plan 16.5). A declared stub is still a PARTIAL boundary, but a recorded one.
+    ``extra_gaps`` are dependency-inventory gaps, e.g. snapshot library members never loaded;
+    include them before computing rows AND coverage, including on verified rebuilds."""
     ids = _Ids(snap, build_id)
     decls = result["declarations"]
     # ---- declarations
@@ -563,7 +569,7 @@ def ingest(
             }
         )
     gaps = _classify_gaps(
-        result["gaps"],
+        [*result["gaps"], *(extra_gaps or [])],
         result["diagnostics"],
         stubs or [],
         {str(i.get("definition")) for i in result["instances"]},
@@ -587,11 +593,13 @@ def ingest(
     urows: list[dict[str, Any]] = []
     project_unsupported: dict[str, int] = {}
     external_unsupported: dict[str, int] = {}
+    unsupported_origins = {"project": 0, "external": 0}
     for n, u in enumerate(result["unsupported_nodes"]):
         sample = _slim_loc(u["sample"], ids)
         scope_u = u.get("scope")
         if scope_u is None:  # older DTO: derive from the sample
             scope_u = "external" if sample and str(sample["file"]).startswith("@") else "project"
+        unsupported_origins["project" if scope_u == "project" else "external"] += u["count"]
         exc = u["kind"].startswith("extractor_exception")
         in_scope = int(exc or scope_u == "project")
         bucket = project_unsupported if in_scope else external_unsupported
@@ -719,6 +727,12 @@ def ingest(
     unsup_summary: dict[str, int] = {}
     for u in result["unsupported_nodes"]:
         unsup_summary[u["kind"]] = unsup_summary.get(u["kind"], 0) + u["count"]
+    gap_counts: dict[str, int] = {}
+    inactive_counts: dict[str, int] = {}
+    for g in gap_rows:
+        gap_counts[g["kind"]] = gap_counts.get(g["kind"], 0) + 1
+    for x in xrows:
+        inactive_counts[x["kind"]] = inactive_counts.get(x["kind"], 0) + 1
     summary = {
         "declarations": len(drows),
         "references": len(rrows),
@@ -737,6 +751,16 @@ def ingest(
         "dropped_refs_project": project_drops,
         "dropped_refs_external": external_drops,
         "source_hash": sha256_hex(build_id),
+        "reference_coverage": reference_coverage(ReferenceObservations(
+            unsupported_nodes_project=unsupported_origins["project"],
+            unsupported_nodes_external=unsupported_origins["external"],
+            dropped_references_project=project_drops,
+            dropped_references_external=external_drops,
+            unresolved_references=unresolved,
+            dynamic_references=dynamic,
+            scope_gaps=gap_counts,
+            inactive_regions=inactive_counts,
+        )).model_dump(mode="json"),
     }
     return Ingested(
         rows={

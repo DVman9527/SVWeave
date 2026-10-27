@@ -4,8 +4,9 @@
 
 This is an **external artifact importer and inventory query**, not an automatic Verilator
 backend and not a replacement for slang. It does not run Verilator, build a simulator,
-evaluate assertions, or execute HDL. Native-tool integration and UVM coverage gains remain
-**NOT_RUN / unverified**. Existing mandatory isolation rules are unchanged.
+evaluate assertions, or execute HDL. The separately authorized native verification harness
+below can test actual static output without changing this importer contract. UVM coverage
+gains remain **NOT_RUN / unverified**. Existing mandatory isolation rules are unchanged.
 
 The importer accepts the **5.052** JSON format only. That is a declared format version,
 not proof of which executable generated a file. Both artifact hashes identify the exact
@@ -87,6 +88,47 @@ These are unit/interchange tests, not UVM acceptance or design validation.
 - [Verilator JSON-only options](https://verilator.org/guide/latest/exe_verilator.html#cmdoption-json-only): downstream parser/elaboration output; evolving format. XML options were removed in 5.046.
 - [Pinned 5.052 AST and metadata format](https://github.com/verilator/verilator/blob/ea338be98e1e838d3518809ce8899f85a009963c/docs/internals.rst): node fields, location encoding and metadata mapping.
 - [Class-language limitations](https://verilator.org/guide/latest/languages.html#class): class support is limited and under active development; it is not a promise of broader support than slang.
+
+## Separately authorized native static verification
+
+`scripts/verify_verilator_native.py` runs the **real** pinned 5.052 executable through
+mandatory `SandboxRunner`, first with `--lint-only`, then separately with `--json-only`
+and explicit tree/metadata filenames. It imports and queries those exact output bytes.
+This is an opt-in test harness, not a new application backend or automatic compiler runner.
+The earlier byte-identical upstream goldens and synthetic metadata tests remain interchange
+tests; they do not count as native verification.
+
+After explicit authorization, the manual GitHub-hosted `native-verilator` CI job installs
+build dependencies and invokes the separate install-phase network boundary
+`scripts/bootstrap_verilator.py`. It fetches only the official repository's pinned commit,
+checks the commit/tree/archive SHA-256 from `fixtures/verilator/native/pin.json`, and builds
+the optimized compiler under network-disabled bwrap. No system-wide Verilator installation,
+simulation executable, solver, or UVM runtime is needed. The bootstrap refuses non-GitHub-hosted
+environments and does not modify the frozen mandatory backend lock.
+
+```bash
+.venv/bin/python scripts/bootstrap_verilator.py --destination "$RUNNER_TEMP/svweave-verilator-5.052" --output evidence/verilator-native-bootstrap
+.venv/bin/python scripts/verify_verilator_native.py --verilator-root "$RUNNER_TEMP/svweave-verilator-5.052" --output evidence/verilator-native
+```
+
+The `.v/.vh` 1364-2005 hierarchy/macro/parameter fixture, 1800-2017 typedef/class fixture,
+missing-module negative and syntax negative are specified in
+`fixtures/verilator/native/README.md` (HDL-VLT-01–04). Real JSON source-token and
+artifact-local pointer checks are deliberately fixture-specific, not an upgrade of general
+imported locations to trusted edit locations. No claim is made about erased source references,
+all SystemVerilog classes, assertions, UVM, design correctness, or runtime behavior.
+
+The report records source revision/dirty state, lock/fixture/harness/tool hashes, exact commands,
+sandbox argv, version, host, stdout/stderr hashes and native artifacts. `junit.xml` treats missing
+prerequisites and invariant failures as failures, never skips. Negative fixture verification can
+pass only when the actual compiler rejects with the specific expected error. A passing harness
+does not mean the deliberately invalid designs compiled. Simulation/formal/coverage remain
+`NOT_RUN`; release qualification remains a separate decision.
+
+Local preparation evidence is in `evidence/verilator-native-preflight/`: the dot host's real
+bwrap probe is **BLOCKED** by `NETLINK_ROUTE` permissions and native execution was not attempted
+there. Only a subsequently retained CI `report.json` with passing native cases establishes a
+native result; the presence of this harness or its unit-test success does not.
 
 ## Explicit protected-source preparation (static only)
 

@@ -504,20 +504,19 @@ def _run_job(
             )
         return _blocked(ctx, db, run, build_row, rec, result, dep, outcome, nm, source_map)
 
-    ing = ingest(result, rec, build_id, job_id, list(nm.top_modules), stubs=nm.stubs)
     gaps_extra = [
         {
-            "build_id": build_id,
-            "ord": len(ing.rows["coverage_gaps"]) + n,
             "kind": "library_member_not_loaded",
             "name": rel,
             "detail": "library member present in the "
             "search path but never read by slang (not instantiated); its contents are not analysed",
-            "data": "{}",
         }
-        for n, rel in enumerate(dep["library_members_not_loaded"])
+        for rel in dep["library_members_not_loaded"]
     ]
-    ing.rows["coverage_gaps"].extend(gaps_extra)
+    ing = ingest(
+        result, rec, build_id, job_id, list(nm.top_modules), stubs=nm.stubs,
+        extra_gaps=gaps_extra,
+    )
     if had_complete:
         return _verified_rerun(ctx, db, run, request_id, build_id, ing, outcome)
     if gaps_extra:

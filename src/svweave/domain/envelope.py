@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,12 +25,48 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ReferenceObservations(_Strict):
+    """Recorded occurrences, not an exhaustive census of omitted source references."""
+
+    unsupported_nodes_project: int = Field(ge=0)
+    unsupported_nodes_external: int = Field(ge=0)
+    dropped_references_project: int = Field(ge=0)
+    dropped_references_external: int = Field(ge=0)
+    unresolved_references: int = Field(ge=0)
+    dynamic_references: int = Field(ge=0)
+    scope_gaps: dict[str, int]
+    inactive_regions: dict[str, int]
+
+
+class ReferenceCoverage(_Strict):
+    """HDL-R01 v1: coverage of the reference index, independent of build success.
+
+    A COMPLETE build can have a PARTIAL reference index. Zero observed gaps is not
+    evidence of exhaustive traversal. This contract never authorizes negative reference,
+    impact, unused-symbol or safe-deletion conclusions, nor complete-rename claims.
+    """
+
+    contract_version: Literal["1"] = "1"
+    status: Literal["PARTIAL", "UNKNOWN"]
+    features: dict[str, Literal["PARTIAL", "UNSUPPORTED", "UNKNOWN"]]
+    scopes: dict[str, Literal["PARTIAL", "NOT_SEARCHED", "UNKNOWN"]]
+    observations: ReferenceObservations | None = None
+    query: Literal["references", "impact", "rename_preview"] | None = None
+    searched_scope: str | None = None
+    depth_limit: int | None = Field(default=None, ge=1)
+    result_truncated: bool = False
+    absence_proof_supported: Literal[False] = False
+    blockers: list[str] = Field(default_factory=list)
+
+
 class AnalysisCoverage(_Strict):
     completeness: Completeness
     scope: str | None = None
     basis: str | None = None
     unresolved_count: int = 0
     limitations: list[str] = Field(default_factory=list)
+    # Additive/defaulted: historical envelopes without this field still validate.
+    reference_coverage: ReferenceCoverage | None = None
 
 
 class Provenance(_Strict):

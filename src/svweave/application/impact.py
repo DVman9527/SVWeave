@@ -40,7 +40,7 @@ from svweave.application.queries import (
 )
 from svweave.application.semantic_common import build_envelope
 from svweave.domain.cursor import MAX_RESPONSE_BYTES, check_limit
-from svweave.domain.envelope import Envelope, ErrorInfo, Outcome
+from svweave.domain.envelope import Envelope, ErrorInfo, Outcome, Pagination
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.storage.semantic import loads
 
@@ -634,6 +634,8 @@ def impact(
                         },
                     ),
                     freshness=s.fresh(),
+                    reference_query="impact",
+                    reference_depth=depth,
                 )
             decl = rows[0]
             ids = [str(t["declaration_id"]) for t in twins] if twins else [str(decl["declaration_id"])]
@@ -664,14 +666,21 @@ def impact(
                 f"truncated: {', '.join(cut)} cut to fit the response cap; the *_total and summary "
                 "figures are complete, items not listed must not be assumed absent"
             )
+        truncated = bool(cut)
         for k in ("instances", "connections", "signal_uses"):  # descendants are grouped: see below
             tot = data.get(f"{k}_total")
             if isinstance(tot, int) and isinstance(data.get(k), list) and tot > len(data[k]):
+                truncated = True
                 warns.append(f"{k}: {len(data[k])} of {tot} listed (limit {lim})")
+        ref_summary = data.get("references_summary", {})
+        for key, total_key in (("references", "total"), ("files", "distinct_files")):
+            if ref_summary.get(total_key, 0) > len(data.get(key, [])):
+                truncated = True
         groups = data.get("descendants")
         if isinstance(groups, list) and isinstance(data.get("descendants_total"), int):
             shown = sum(int(g.get("instances", 0)) for g in groups)
             if shown < data["descendants_total"]:
+                truncated = True
                 warns.append(
                     f"descendants: {len(groups)} definition group(s) cover {shown} of "
                     f"{data['descendants_total']} instances (limit {lim} groups)"
@@ -685,4 +694,7 @@ def impact(
             warnings=warns,
             extra_limits=[*_gap_limits(s), IMPACT_NOTE],
             freshness=s.fresh(),
+            pagination=Pagination(limit=lim, truncated=truncated),
+            reference_query="impact",
+            reference_depth=depth,
         )

@@ -1,0 +1,13 @@
+test_HDL_VLT_bootstrap_refuses_local_install_without_network_or_probe (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_bootstrap_refuses_local_install_without_network_or_probe) ... ok
+test_HDL_VLT_commands_are_static_and_explicit_language (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_commands_are_static_and_explicit_language) ... ok
+test_HDL_VLT_junit_has_no_skip_or_aggregate_false_pass (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_junit_has_no_skip_or_aggregate_false_pass) ... ok
+test_HDL_VLT_missing_isolation_never_starts_native (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_missing_isolation_never_starts_native) ... ok
+test_HDL_VLT_rejection_requires_specific_error_not_arbitrary_nonzero (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_rejection_requires_specific_error_not_arbitrary_nonzero) ... ok
+test_HDL_VLT_runtime_binds_readonly_sources_no_network (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_runtime_binds_readonly_sources_no_network) ... ok
+test_HDL_VLT_valid_source_must_not_hide_compiler_failure (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_valid_source_must_not_hide_compiler_failure) ... ok
+test_HDL_VLT_workflow_evidence_subdirectory_is_only_write_exemption (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_workflow_evidence_subdirectory_is_only_write_exemption) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.021s
+
+OK

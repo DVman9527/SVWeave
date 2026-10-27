@@ -53,6 +53,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _bench_common import source_identity, validate_benchmark  # noqa: E402
+from _required_backends import required_backend_errors  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 PY = str(REPO / ".venv" / "bin" / "python")
@@ -96,7 +97,7 @@ GATE_MODULES: dict[str, list[str]] = {
            "test_repo_profiles", "test_run_artifacts_freshness"],
     "G2": ["test_sem", "test_loc", "test_sva", "test_uvm", "test_build_identity",
            "test_extractor_dto", "test_domain", "test_semantic_envelope", "test_cursor",
-           "test_cli_semantic", "test_api_semantic"],
+           "test_cli_semantic", "test_api_semantic", "test_reference_coverage", "test_uvm_call_metadata"],
     "G3": ["test_int_cbm", "test_int_serena", "test_int_registry", "test_int_leaks",
            "test_gateway_stdio", "test_adapters_cbm", "test_adapters_serena",
            "test_adapters_mcp_client", "test_adapters_orchestration", "test_adapters_search",
@@ -104,7 +105,8 @@ GATE_MODULES: dict[str, list[str]] = {
     "G4": ["test_edit_commit", "test_edit_machine", "test_edit_prepare", "test_edit_validate",
            "test_edit_crash", "test_edt_flow", "test_int_hardening", "test_adapters_hardening",
            "test_adapters_redaction", "test_sandbox", "test_int_sandbox"],
-    "G0": ["test_int_sandbox", "test_sandbox"],
+    "G0": ["test_int_sandbox", "test_sandbox", "test_ci_sandbox_gate", "test_ci_bwrap_apparmor",
+           "test_ci_qualification", "test_ci_required_backends"],
 }
 
 
@@ -147,7 +149,29 @@ def parse_junit(path: Path) -> dict[str, Any]:
                            "failed_tests": [], "skipped_tests": []}
     if not path.is_file():
         return {**res, "missing": True}
-    root = ET.parse(path).getroot()
+    try:
+        root = ET.parse(path).getroot()
+    except (ET.ParseError, OSError) as exc:
+        return {**res, "invalid": f"{type(exc).__name__}: {exc}"}
+    if root.tag not in {"testsuite", "testsuites"}:
+        return {**res, "invalid": f"unexpected JUnit root: {root.tag}"}
+    for suite in root.iter():
+        if suite.tag not in {"testsuite", "testsuites"}:
+            continue
+        cases = list(suite.iter("testcase"))
+        observed = {"tests": len(cases),
+                    "failures": sum(tc.find("failure") is not None for tc in cases),
+                    "errors": sum(tc.find("error") is not None for tc in cases),
+                    "skipped": sum(tc.find("skipped") is not None for tc in cases)}
+        for key, count in observed.items():
+            if key not in suite.attrib:
+                continue
+            try:
+                declared = int(suite.attrib[key])
+            except ValueError:
+                return {**res, "invalid": f"invalid JUnit {key} count"}
+            if declared != count:
+                return {**res, "invalid": f"JUnit {key} count mismatch: {declared} != {count}"}
     for tc in root.iter("testcase"):
         mod = (tc.get("classname") or "").split(".")
         mod = [m for m in mod if m.startswith("test_")]
@@ -170,6 +194,23 @@ def parse_junit(path: Path) -> dict[str, Any]:
             res["passed"] += 1
             m["passed"] += 1
     return res
+
+
+def suite_result_errors(result: dict[str, Any]) -> list[str]:
+    """A report must be present, valid, nonempty and entirely passing."""
+    why = []
+    if result.get("rc") != 0:
+        why.append(f"pytest exit {result.get('rc')}")
+    if result.get("missing"):
+        why.append("JUnit report missing")
+    if result.get("invalid"):
+        why.append(f"invalid JUnit report: {result['invalid']}")
+    for key in ("failed", "errors", "skipped"):
+        if result.get(key):
+            why.append(f"{result[key]} {key}")
+    if result.get("passed", 0) == 0:
+        why.append("zero tests passed")
+    return why
 
 
 def gate_from_modules(suites: dict[str, dict[str, Any]], modules: list[str]) -> dict[str, Any]:
@@ -219,7 +260,7 @@ def step_lock(out: Path) -> dict[str, Any]:
 def step_probe(out: Path) -> dict[str, Any]:
     dest = out / "capability_report.json"
     r = sh([PY, "scripts/probe_backends.py", "--out", str(dest)], out / "logs" / "probe.log",
-           timeout=1800)
+           {"SVWEAVE_REQUIRE_BACKENDS": "1"}, timeout=1800)
     summary: dict[str, str] = {}
     if dest.is_file():
         summary = json.loads(dest.read_text()).get("summary", {})
@@ -403,14 +444,7 @@ def compute_gates(R: dict[str, Any]) -> dict[str, Any]:
         s = suites.get(name)
         if not s or s.get("missing_dir"):
             return False, [f"suite {name}: directory missing or not run"]
-        why = []
-        if s.get("rc") != 0:
-            why.append(f"suite {name}: pytest exit {s.get('rc')}")
-        for k in ("failed", "errors", "skipped"):
-            if s.get(k):
-                why.append(f"suite {name}: {s[k]} {k}")
-        if s.get("passed", 0) == 0:
-            why.append(f"suite {name}: zero tests passed")
+        why = [f"suite {name}: {message}" for message in suite_result_errors(s)]
         return not why, why
 
     def modules_gate(g: str) -> tuple[bool, list[str]]:
@@ -424,6 +458,9 @@ def compute_gates(R: dict[str, Any]) -> dict[str, Any]:
             why.append("no results for modules: " + ", ".join(c["modules_missing"]))
         if c["passed"] == 0:
             why.append(f"no passing test for {g}")
+        for name, suite in suites.items():
+            if set(suite.get("modules", {})) & set(GATE_MODULES[g]):
+                why += [f"suite {name}: {message}" for message in suite_result_errors(suite)]
         return not why, why
 
     # G0
@@ -437,12 +474,9 @@ def compute_gates(R: dict[str, Any]) -> dict[str, Any]:
         if lock["null_or_empty_fields"]:
             why.append("null/empty lock fields: " + ", ".join(lock["null_or_empty_fields"][:5]))
         sm = probe.get("summary", {})
-        for b in ("pyslang", "slang_cli"):
-            if sm.get(b) != "READY":
-                why.append(f"{b} is {sm.get(b)}, need READY")
-        for b in ("cbm", "serena"):
-            if sm.get(b) in (None, "UNAVAILABLE"):
-                why.append(f"{b} is {sm.get(b)}")
+        if probe.get("rc") != 0:
+            why.append(f"backend probe exit {probe.get('rc')}")
+        why += required_backend_errors(sm)
         ok, w = modules_gate("G0") if tests_ran else (False, ["isolation tests not run"])
         why += w
         degraded: dict[str, Any] = {}
@@ -522,8 +556,7 @@ def compute_gates(R: dict[str, Any]) -> dict[str, Any]:
             if docs["schema_emit_check"]["rc"] != 0:
                 why.append("schema emit --check failed")
             dt_ = docs["doc_tests"]
-            if dt_["rc"] != 0 or dt_.get("failed") or dt_.get("errors") or dt_.get("skipped"):
-                why.append("docs command/sample tests failed or skipped")
+            why += [f"docs command/sample tests: {message}" for message in suite_result_errors(dt_)]
             if docs["required_files_missing"]:
                 why.append("missing docs: " + ", ".join(docs["required_files_missing"]))
             if docs["readme_claims_mit_for_svweave"]:
@@ -643,6 +676,11 @@ def _mods_ok(suites: dict[str, Any], mods: list[str]) -> str:
     if c["failed"] or c["errors"] or c["skipped"] or c["modules_missing"]:
         return f"FAIL/INCOMPLETE ({c['passed']} passed, {c['failed']} failed, {c['errors']} errors, " \
                f"{c['skipped']} skipped, missing {c['modules_missing']})"
+    for name, suite in suites.items():
+        if isinstance(suite, dict) and set(suite.get("modules", {})) & set(mods):
+            reasons = suite_result_errors(suite)
+            if reasons:
+                return f"FAIL/INCOMPLETE (suite {name}: {'; '.join(reasons)})"
     return f"PASS ({c['passed']} tests, real backends, no skips)"
 
 

@@ -8,8 +8,11 @@ import os
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
+from pydantic import ValidationError
+
+from svweave.adapters.slang.coverage import reference_coverage
 from svweave.config.context import WorkspaceContext
 from svweave.domain.envelope import (
     AnalysisCoverage,
@@ -18,6 +21,7 @@ from svweave.domain.envelope import (
     Outcome,
     Pagination,
     Provenance,
+    ReferenceCoverage,
 )
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.ids import is_sha256_hex, sha256_hex
@@ -254,12 +258,21 @@ def coverage_of(
     if comp != Completeness.COMPLETE and rep["reasons"]:
         limits.append("Partial analysis: " + "; ".join(rep["reasons"]))
     limits = cap_limitations(limits)
+    # Historical reports need no migration, but missing/unknown metadata cannot mean
+    # complete reference coverage. Never derive it from build COMPLETE or zero counts.
+    stats = rep.get("stats")
+    saved_refs = stats.get("reference_coverage") if isinstance(stats, dict) else None
+    try:
+        refs = ReferenceCoverage.model_validate(saved_refs)
+    except ValidationError:
+        refs = reference_coverage()
     return AnalysisCoverage(
         completeness=comp,
         scope=rep["scope"],
         basis=BASIS,
         unresolved_count=rep["unresolved_count"],
         limitations=limits,
+        reference_coverage=refs,
     )
 
 
@@ -284,6 +297,9 @@ def build_envelope(
     outcome: Outcome | None = None,
     error: ErrorInfo | None = None,
     freshness: Freshness | None = None,
+    reference_query: Literal["references", "impact", "rename_preview"] | None = None,
+    reference_scope: str | None = None,
+    reference_depth: int | None = None,
 ) -> Envelope:
     comp = Completeness(build["completeness"])
     if outcome is None:
@@ -306,6 +322,31 @@ def build_envelope(
         )
     if comp == Completeness.PARTIAL:
         warns.append("analysis is PARTIAL: absence from this result is not proof of absence")
+    coverage = coverage_of(db, build, extra_limits)
+    refs = coverage.reference_coverage
+    if refs is not None:
+        refs.query = reference_query
+        refs.searched_scope = reference_scope or "all analysed source files"
+        refs.depth_limit = reference_depth
+        refs.result_truncated = bool(pagination and pagination.truncated)
+        if comp != Completeness.COMPLETE:
+            refs.blockers.append(f"build_{comp.value.lower()}")
+        if fr != Freshness.CURRENT:
+            refs.blockers.append(f"freshness_{fr.value.lower()}")
+        if refs.result_truncated:
+            refs.blockers.append("result_truncated")
+        if reference_query == "references" and data.get("offset", 0):
+            refs.blockers.append("previous_pages_not_in_result")
+        if reference_scope:
+            refs.blockers.append("query_scope_restricted")
+        if reference_depth is not None:
+            refs.blockers.append("bounded_hierarchy_depth")
+        if reference_query:
+            warns.append(
+                f"reference coverage is {refs.status}: known omissions and unsearched scopes "
+                "prevent proof of no references, no impact, unused symbols or a complete rename; "
+                "positive indexed occurrences remain usable"
+            )
     return Envelope(
         request_id=request_id,
         outcome=outcome,
@@ -314,7 +355,7 @@ def build_envelope(
         build_id=build["build_id"],
         profile=build["profile"],
         freshness=fr,
-        analysis_coverage=coverage_of(db, build, extra_limits),
+        analysis_coverage=coverage,
         provenance=provenance_of(build),
         data=data,
         pagination=pagination or Pagination(),

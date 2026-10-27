@@ -1,9 +1,9 @@
 # SVWeave CI (plan 22.1, 23.4).
 #
 # Rules: no secrets, no self-hosted runners, no pushes/PRs/branch-protection changes (plan 23.4).
-# Untrusted PRs only get the fast job; the real-backend job is manual (workflow_dispatch) and
-# needs network ONLY in the bootstrap step, which verifies every artifact against
-# toolchain.lock.json before use.
+# Untrusted PRs only get the fast job; additional validation is manual (workflow_dispatch).
+# Network is confined to explicit installation/bootstrap steps. Native source analysis runs
+# in the mandatory sandbox. Legacy full qualification is BLOCKED until its probes are isolated.
 #
 # PIN BEFORE USE: the `uses:` references below are TAGS for readability. Before this workflow is
 # enabled, replace each with the full commit SHA of the reviewed release (for example
@@ -17,7 +17,11 @@ on:
   workflow_dispatch:
     inputs:
       real_backends:
-        description: "Run the real-backend integration/acceptance job (downloads the pinned toolchain)"
+        description: "BLOCKED: legacy full qualification needs probe isolation refactor"
+        type: boolean
+        default: false
+      native_verilator:
+        description: "Run pinned native Verilator static lint/JSON and importer regressions (no simulation)"
         type: boolean
         default: false
 
@@ -85,7 +89,7 @@ jobs:
       # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
 
   real-backends:
-    name: real backends (integration, fault injection, acceptance)
+    name: BLOCKED legacy full qualification (probe isolation refactor required)
     if: github.event_name == 'workflow_dispatch' && inputs.real_backends
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -100,12 +104,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Check unprivileged user namespaces (bwrap)
+      - name: Block legacy probes until mandatory isolation is implemented
         run: |
-          sudo apt-get update && sudo apt-get install -y bubblewrap
-          # Ubuntu 24.04 restricts unprivileged user namespaces for bwrap; enable for this job only.
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
-          bwrap --ro-bind / / true
+          echo "BLOCKED: legacy probe_backends.py uses unisolated source-analysis subprocesses; full qualification requires the sandbox refactor. Use native_verilator for the isolated validation subset." >&2
+          exit 1
       - name: Install package and the pinned toolchain (network only here, hashes verified)
         run: |
           python -m pip install --upgrade pip==24.3.1 uv==0.5.11
@@ -113,21 +115,147 @@ jobs:
           uv pip install --python .venv/bin/python -e '.[dev]'
           .venv/bin/python scripts/bootstrap_locked.py
           .venv/bin/python scripts/bootstrap_locked.py --verify-only
+      - name: Install and verify the mandatory worker sandbox
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap
+          .venv/bin/python scripts/ci_prepare_bwrap_apparmor.py
+          probe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
+          echo "Mandatory worker sandbox probe started: $probe_started_at"
+          if .venv/bin/python - <<'PY'
+          from svweave.security.sandbox import probe_host
+
+          capability = probe_host(refresh=True)
+          if not capability.available:
+              raise SystemExit(f"Mandatory worker sandbox unavailable: {capability.reason}")
+          print(f"Mandatory worker sandbox ready: {capability.version}")
+          PY
+          then
+            :
+          else
+            probe_status=$?
+            # Diagnostics are bounded and read-only; they never repair or replace this gate.
+            timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" || true
+            exit "$probe_status"
+          fi
       - name: Backend contract probe
-        run: .venv/bin/python scripts/probe_backends.py
+        run: .venv/bin/python scripts/probe_backends.py --out .svweave/ci/capability_report.json
       - name: Integration, fault injection and acceptance (skips are failures)
         run: |
-          .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov
+          .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov --junitxml=.svweave/ci/junit_required.xml
       - name: Critical mutation suite (plan 20.5)
         run: .venv/bin/python scripts/mutation_suite.py
       - name: Small-scale benchmark (smoke only; not the plan 22.3 reference run)
         run: .venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30
-      - name: Upload qualification evidence (no source text)
+      - name: Upload validation evidence (not a full qualification)
+        if: always()
         # TODO(pin): actions/upload-artifact -> full commit SHA
         uses: actions/upload-artifact@v4
         with:
           name: svweave-evidence
           path: |
+            .svweave/ci/
             evidence/mutation/
             .svweave/bench/*.json
-          if-no-files-found: ignore
+          include-hidden-files: true
+          if-no-files-found: error
+
+  native-verilator:
+    name: isolated native Verilator and real-worker semantic validation
+    if: github.event_name == 'workflow_dispatch' && inputs.native_verilator
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      SVWEAVE_REQUIRE_BACKENDS: "1"
+    steps:
+      # TODO(pin): actions/checkout -> full commit SHA
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # TODO(pin): actions/setup-python -> full commit SHA
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Record exact validation identity
+        run: |
+          python - <<'PY_IDENTITY'
+          import hashlib
+          import json
+          import platform
+          import subprocess
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from _bench_common import source_identity
+          out = Path(".svweave/ci")
+          out.mkdir(parents=True, exist_ok=True)
+          identity = {
+              "source_identity": source_identity(),
+              "git_status": subprocess.check_output(["git", "status", "--porcelain"], text=True),
+              "lock_sha256": hashlib.sha256(Path("toolchain.lock.json").read_bytes()).hexdigest(),
+              "workflow_sha256": hashlib.sha256(Path(".github/workflows/ci.yml").read_bytes()).hexdigest(),
+              "platform": platform.platform(),
+              "python": sys.version,
+              "scope": "targeted static validation only; not full qualification or simulation",
+          }
+          (out / "identity.json").write_text(json.dumps(identity, indent=2) + "\n")
+          PY_IDENTITY
+      - name: Install package and pinned analysis toolchain
+        run: |
+          python -m pip install --upgrade pip==24.3.1 uv==0.5.11
+          uv venv --python 3.12 .venv
+          uv pip install --python .venv/bin/python -e '.[dev]'
+          .venv/bin/python scripts/bootstrap_locked.py
+          .venv/bin/python scripts/bootstrap_locked.py --verify-only
+      - name: Install and verify the mandatory worker sandbox
+        id: mandatory_sandbox
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap
+          .venv/bin/python scripts/ci_prepare_bwrap_apparmor.py
+          probe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
+          echo "Mandatory worker sandbox probe started: $probe_started_at"
+          if .venv/bin/python - <<'PY'
+          from svweave.security.sandbox import probe_host
+
+          capability = probe_host(refresh=True)
+          if not capability.available:
+              raise SystemExit(f"Mandatory worker sandbox unavailable: {capability.reason}")
+          print(f"Mandatory worker sandbox ready: {capability.version}")
+          PY
+          then
+            :
+          else
+            probe_status=$?
+            # Diagnostics are bounded and read-only; they never repair or replace this gate.
+            timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" || true
+            exit "$probe_status"
+          fi
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf flex bison help2man perl python3 make g++ git libfl-dev zlib1g-dev
+      - name: Build official pinned Verilator inside mandatory network-disabled sandbox
+        run: |
+          .venv/bin/python scripts/bootstrap_verilator.py --destination "$RUNNER_TEMP/svweave-verilator-5.052" --output evidence/verilator-native-bootstrap
+      - name: Verify actual Verilator lint, JSON and importer query (no simulation)
+        run: |
+          .venv/bin/python scripts/verify_verilator_native.py --verilator-root "$RUNNER_TEMP/svweave-verilator-5.052" --output evidence/verilator-native
+      - name: Required real-worker semantic and pinned UVM regressions
+        if: ${{ !cancelled() && steps.mandatory_sandbox.outcome == 'success' }}
+        run: |
+          .venv/bin/python -m pytest tests/integration/test_reference_coverage.py tests/integration/test_sem.py tests/integration/test_repo_profiles.py tests/integration/test_uvm.py -q --no-cov --junitxml=.svweave/ci/junit_semantic_uvm.xml
+      - name: Required CI gates and supplement regressions
+        if: ${{ !cancelled() && steps.mandatory_sandbox.outcome == 'success' }}
+        run: |
+          .venv/bin/python -m pytest tests/unit/test_ci_sandbox_gate.py tests/unit/test_ci_bwrap_apparmor.py tests/unit/test_ci_qualification.py tests/unit/test_ci_required_backends.py tests/unit/test_verilator_importer.py tests/unit/test_supplement_application.py tests/unit/test_uvm_call_metadata.py tests/unit/test_verilator_native_harness.py tests/unit/test_reference_coverage.py tests/unit/test_semantic_envelope.py tests/unit/test_slang_ingest.py tests/unit/test_impact_pure.py tests/unit/test_rename_pure.py -q --no-cov --junitxml=.svweave/ci/junit_gates_supplement.xml
+      - name: Upload exact-source native and semantic validation evidence
+        if: always()
+        # TODO(pin): actions/upload-artifact -> full commit SHA
+        uses: actions/upload-artifact@v4
+        with:
+          name: svweave-native-verilator-evidence
+          path: |
+            .svweave/ci/
+            evidence/verilator-native-bootstrap/
+            evidence/verilator-native/
+          include-hidden-files: true
+          if-no-files-found: error

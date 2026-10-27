@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import subprocess
 import sys
 import time
@@ -25,6 +26,9 @@ from pathlib import Path
 import anyio
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "scripts"))
+from _required_backends import required_backend_errors  # noqa: E402
+
 sys.path.insert(0, str(REPO / "scripts/spikes"))
 from _mcp_common import (  # noqa: E402
     STATE,
@@ -293,6 +297,7 @@ def main() -> int:
     for name in a.only.split(","):
         report["backends"][name] = fns[name]()  # sequential: one heavy process at a time
     report["summary"] = {k: v.get("status") for k, v in report["backends"].items()}
+    report["required_backend_errors"] = required_backend_errors(report["summary"])
     report["limitations"] = [
         f"{b}: {c['check']}" for b, v in report["backends"].items() for c in v.get("checks", []) if not c["pass"]]
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
@@ -301,7 +306,8 @@ def main() -> int:
     text = text.replace(str(REPO), "${REPO}").replace(str(Path.home()), "${HOME}")
     Path(a.out).write_text(text)
     print(json.dumps({"summary": report["summary"], "limitations": report["limitations"]}, indent=2))
-    return 0
+    return int(os.environ.get("SVWEAVE_REQUIRE_BACKENDS") == "1"
+               and bool(report["required_backend_errors"]))
 
 
 if __name__ == "__main__":

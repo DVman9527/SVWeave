@@ -1,0 +1,60 @@
+{
+  "schema_version": "svw-native-verilator-preflight-1",
+  "date": "2026-10-27",
+  "status": "BLOCKED",
+  "source_commit": "e7684adadd6b6ec7ba0dc126fba6d868cc53e329",
+  "source_state": "dirty multi-agent working tree; source hashes below identify this prepared slice",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "host": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "native_verilator": "NOT_RUN",
+  "simulation": "NOT_RUN",
+  "formal": "NOT_RUN",
+  "coverage": "NOT_RUN",
+  "sandbox_probe": {
+    "observed_at_utc": "2026-10-27T07:10:29Z",
+    "command": "PYTHONPATH=src python: probe_host(refresh=True)",
+    "available": false,
+    "bwrap_path": "/usr/bin/bwrap",
+    "version": "bubblewrap 0.12.0",
+    "reason": "bwrap: loopback: Failed to create NETLINK_ROUTE socket: Operation not permitted",
+    "retries": 0,
+    "security_settings_modified": false,
+    "degraded_execution": false
+  },
+  "tool_inventory": {
+    "verilator_on_PATH": false,
+    "compiled_verilator_bin": false,
+    "official_source_checkout": "/workspace/shared/verilator-v5.052-official",
+    "missing_build_tools": [
+      "autoconf",
+      "flex",
+      "bison",
+      "help2man"
+    ]
+  },
+  "official_source_identity": {
+    "commit": "ea338be98e1e838d3518809ce8899f85a009963c",
+    "tree": "21357af5972974181919bf9e3ba06ccf455fa6f1",
+    "git_archive_tar_sha256": "8bbdd703b0edce79a1c4d9bd83838975ed9d65b27e58b8c308a2963fb6ecd8c3"
+  },
+  "local_guards": {
+    "command": "PYTHONPATH=src python -m unittest tests.unit.test_verilator_native_harness -v",
+    "status": "PASS",
+    "tests": 8,
+    "native_evidence": false,
+    "dependencies": "available host Python; not frozen repository dev environment",
+    "log_sha256": "cbaaadd9f02592246dfb63004f8278958c0e13cccdfd4ac47f27a9cf0271cda3"
+  },
+  "prepared_source_sha256": {
+    "scripts/bootstrap_verilator.py": "62dfe5e1339d16ddfa792ff3b938aa6ac52571e7009e20289f798c4102105a5f",
+    "scripts/verify_verilator_native.py": "9023656ff0bd1c7a4260c99616e5b451b81a1dc11e8241b5f1fc8c7585799c08",
+    "tests/unit/test_verilator_native_harness.py": "3322558f9fde9bf534d6d67b56076a334bc1775b5d5d7526f528eff560e8d499",
+    "fixtures/verilator/native/README.md": "16817ed098c1f0c6910f93bdd2453c025ae5195f12d07fddb4d4b4872068def0",
+    "fixtures/verilator/native/native_class.sv": "15182bf6658ca29c5a9704f623e4df874362a3558331ec0042e32784a8b64b07",
+    "fixtures/verilator/native/native_defs.vh": "bc5a9afc8523ff802c2e969354bc34cce2e480d5bdb99bccea138c35509fb076",
+    "fixtures/verilator/native/native_legacy.v": "bcd9cc55e188c93e3af27fc813796fe4e214872d612600b24ecb35a9eb15f5d8",
+    "fixtures/verilator/native/native_missing.sv": "7c9236e49f74e1ff9182648f15575b795253feed2f7a84709f7120eebc39f7f1",
+    "fixtures/verilator/native/native_syntax.sv": "e5ffd66b66a2f18dbfd24c1935924dfaf9a3be1e8d560828d4ad7c6207d742f1",
+    "fixtures/verilator/native/pin.json": "7f3f2f8bfa77f6fe5ec03e0977ffb84eb43f516e54f03e7d836152725a2c9fdb"
+  }
+}

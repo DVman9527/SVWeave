@@ -1814,3 +1814,124 @@ Release decision: ACCEPTED_STATIC_PREVIEW | BLOCKED
 
 **讓 AI 能對同一份 SystemVerilog build，完成可追溯的「找程式 → 查語意 → 提修改 → 驗證 → 批准 → 套用」，同時在不知道、不完整、過期或未執行驗證時，明確停止推論與寫入。**
 
+---
+
+<a id="s30"></a>
+## 30. Verilog／SystemVerilog 支援盤點與補強計畫（2026-10-27）
+
+### 30.1 結論、範圍與本次交付
+
+**目前足以作為「指定 profile、受限語法範圍」的靜態閱讀／導航 developer preview；還不足以宣稱完整 Verilog／SystemVerilog 支援，也不足以把空 references、影響清單或靜態 build 成功當成完整性／設計正確性的保證。**
+
+現有能力不是從零開始：slang elaboration、scope-aware declarations、hierarchy／generate／parameters、direct port associations、SVA inventory、UVM 靜態 call metadata、snapshot／provenance 與受控編輯均已有實作。主要不足是 **SVWeave 自己的抽取覆蓋率、legacy Verilog 的獨立驗證矩陣、未展開程式碼的範圍表示，以及目前版本的真實後端驗收證據**，不是簡單換掉 parser 就能解決。
+
+| 使用目的 | 本次判斷 |
+|---|---|
+| 依確定 top／filelist／defines／parameters 查已展開 RTL 的宣告、階層、直接連接 | 有實作與既有 fixtures，可在明示限制下使用；不能延伸為所有專案皆已 qualification。 |
+| 找「所有」引用、證明未使用、完整 rename／跨 profile impact | 不足；references 存在已知類型與遍歷缺口，preview 不是可安全自動套用的證明。 |
+| UVM class／inheritance／factory、config-db 呼叫位置 | 有受限靜態 inventory；最新 metadata 的專用真實 UVM integration 尚缺目前版本通過證據。 |
+| 完整 IEEE Verilog／SystemVerilog 相容、商用工具等價、SoC／VIP 導入 | 未建立這種資格；需要分語法／profile 的測試及授權專案 pilot。 |
+| 模擬、SVA proof、functional coverage、UVM runtime resolution | 不在本次補強範圍，不是要用靜態分析補成的功能；仍分別為 `NOT_RUN`／外部證據。 |
+
+本節依使用者明確要求追加至既有 `SVWeave_plan.md`，保留原第 1–29 節與歷史敘述，不覆寫原規格；原文的「預定」「尚未執行」與本節的程式碼現況應依日期分讀。本次只做程式碼／測試／文件盤點和計畫，**沒有實作下列 backlog、執行後端、修改依賴或 CI、commit／push**。新增 Test ID 與路徑標為「擬新增」者尚不存在，全部待辦驗收仍是 `NOT_RUN`；本節不是 qualification report，也不構成執行未授權操作的批准。
+
+### 30.2 證據基線與驗證狀態
+
+| 項目 | 可核對證據與正確解讀 |
+|---|---|
+| 本次盤點基線 | clean HEAD `e7684adadd6b6ec7ba0dc126fba6d868cc53e329`；本節追加後僅計畫文件變更。 |
+| Frozen toolchain | `toolchain.lock.json` SHA-256：`ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9`；slang／pyslang 12.0.0、Serena 1.7.0、codebase-memory-mcp 0.11.0，狀態仍 `UNQUALIFIED`。不因本計畫而升級。 |
+| 最新 CI | [run 40459448181](https://github.com/DVman9527/SVWeave/actions/runs/40459448181)，對應上述 SHA：fast checks **PASS**；real-backends job **SKIPPED，不是 PASS**。fast job 包含 ruff／mypy／schema／unit／contract（`.github/workflows/ci.yml`）；`tests/contract/conftest.py::built` 會做 real demo build，因此不能反向宣稱 fast 完全沒有碰 slang，但它不等於完整三後端 integration／acceptance。 |
+| 歷史 qualification | `evidence/qualification/report.md`／`report.json`（2026-10-14）記錄 920 tests、G1–G5 PASS，基線卻是 `b6ba45c747cb479cc975a5177794171791f994e0 +dirty`，lock 為 `5c02676b048119d50c2705d65e8d90e906f0f46f3325906e418849a62b3e828c`。不能移植成目前 SHA 的結果；該報告自己仍是 `Release decision: BLOCKED`，G0 waiver／ADR-012／license review 未完成。 |
+| 最新 UVM 增補 | `evidence/uvm-static-call-metadata/report.md`（2026-10-22）：53 focused pure tests PASS；專用 real UVM regression `test_UVM_02_03_named_arguments_and_same_name_negative` 因 mandatory bwrap 不可用而 **BLOCKED／NOT_RUN**。目前 fast CI 綠燈沒有提供這個 integration case 的通過證據。 |
+| Verilator supplement | `evidence/verilator-static-supplement/README.md`：importer／application／UVM metadata／ingest 合計 102 focused tests PASS，屬 unit／interchange；native Verilator integration、額外 UVM coverage **NOT_RUN**。不得拿 `.v` JSON golden 解碼代替 slang 的 Verilog 語意驗收。 |
+| 本次檢查方式 | 只讀 Git identity、檔案與現有 evidence；未重跑上述 tests 或任何 HDL backend。文件追加只驗證原內容完整保留、差異範圍、路徑與 `git diff --check`。 |
+
+**執行前置阻擋：目前不可直接 dispatch real-backends workflow。** `.github/workflows/ci.yml:107` 尚有 `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true`，會全域放寬主機安全限制；fast job 已採 `scripts/ci_prepare_bwrap_apparmor.py` 的 narrow official bwrap profile 路徑，但 real-backends 尚未對齊。先經授權修正該 job、保留 mandatory sandbox probe／fail-closed，再取得適用的執行授權；不得直接跑舊 job、關閉全域 AppArmor 限制、改走 in-process extraction 或 degraded fallback 迴避隔離。
+
+### 30.3 已實作、有限支援、尚未驗證的能力矩陣
+
+「已實作」表示在本次 HEAD 找到實際 code／test，不表示這次重新執行通過；「有限支援」與「未驗證」也不等於 slang 本身不支援該語法。
+
+| 領域 | 目前狀態與界線 | 主要程式碼／既有測試 |
+|---|---|---|
+| Manifest／preprocessing context | ordered inputs、`-f/-F`、include／define／library、single／per-file／explicit CU、top parameters 已實作；未知選項 fail closed。`std` 可選 `1364-2005/1800-2017/1800-2023/latest`，但不是逐標準完整驗證。 | `config/models.py::LanguageOptions/Profile`、`manifest/resolver.py`、`manifest/slang_args.py`、`adapters/slang/args.py`；`tests/unit/test_manifest.py`、`test_slang_args.py`、`tests/integration/test_build_identity.py`。 |
+| 宣告／階層／直接連接 | modules／interfaces／packages／classes／task／function、parameter specialization、generate、instance arrays、escaped names、port styles 有實作／fixtures；不是 bit-level netlist、driver/load 或 transitive dataflow。 | `adapters/slang/extract.py`、`extract.py::_walk_instance/_port_bindings`、`application/queries.py`；`tests/integration/test_sem.py`、`test_instance_arrays.py`、`test_extractor_dto.py`；`fixtures/language/sem*`。 |
+| Reference index | 訪問已 elaborated 的 source occurrences，有靜態／dynamic／unresolved 分類與 searched scope；不完整，詳見 G1–G3。`COMPLETE` 不代表所有語法／所有程式碼的 references 都完整。 | `adapters/slang/ingest.py::STATIC_LIMITATIONS`、`extract.py`；`application/queries.py:574–590` 已有 scope 與空結果警示；`test_sem.py`、`test_slang_ingest.py`。 |
+| Source location／macro | original byte spans、UTF-8／LSP 轉換、spelling／expansion／display location、ambiguous macro／token-paste 拒絕有實作。不是任意 macro 可安全重寫。 | `adapters/slang/locator.py`、`domain/locations.py`；`tests/integration/test_loc.py`、`tests/unit/test_locations.py`、`test_edit_slang_symbol.py`。 |
+| Source `defparam`／VCS compat | **已實作，不應再列成完全缺失**：可解析 defparam target reference；slang elaboration 反映 override 值；未解析 target 保留 unsupported。`compat: vcs` 為顯式 profile deviation，不保證所有 VCS extensions。 | `extract.py::_h_defparam`、`manifest/slang_args.py::language_args`；`tests/integration/test_vcs_compat_defparam.py`，包括 `string.match()` 仍報錯的 negative case。 |
+| UVM | pinned UVM classes／inheritance／virtual dispatch candidates、factory／config-db allowlisted resolved call metadata 已實作；16 arguments 等 bounds 有標示。未涵蓋所有 wrappers／generic bodies，也不推論 runtime。 | `adapters/slang/uvm_calls.py`、`extract.py`；`tests/unit/test_uvm_call_metadata.py`、`tests/integration/test_uvm.py`、`fixtures/uvm/svw_uvm_static_calls.sv`。最新 integration 狀態見 30.2。 |
+| SVA／constraints／coverage／DPI | property／sequence／assertion／bind inventory、constraint／covergroup declarations、部分 DPI signature 有實作；checker instances／bind target lists／clocking references 等仍有缺口。不是 assertion execution、constraint solving、coverage measurement 或 foreign-code 執行。 | `adapters/slang/extract.py::_sva_sources/_binds/_record_assertion`、`extract.py`；`tests/integration/test_sva.py`、`test_sem.py`；`fixtures/language/sem_classmembers`、`sva02_unresolved`。 |
+| Graph／editing／rename | graph 是候選來源；Serena function-only、task／constructor 可用 slang_symbol 受控路徑；rename 是 read-only preview，仍需 candidate validation／人類批准／CAS。不能說 task 全不可編輯，也不能把 slang edit 計為 Serena 能力。 | `application/impact.py`、`rename.py`、`editing/`；`docs/adr/ADR-012-*`、`ADR-013-*`；`tests/integration/test_rename_preview.py`、`test_edt_slang_symbol.py`、`test_int_serena.py`。 |
+| Encrypted IP／Verilator | encrypted/stub boundary 保持 PARTIAL；prepare-source 只產生保留 offsets 的衍生 bytes 與 UNKNOWN gap report。Verilator 只讀取外部 5.052 JSON，`EXTERNAL_DECLARED/PARTIAL`、unbound，不執行工具。 | `application/source_preparation.py`、`application/supplement.py`、`adapters/verilator/`；`tests/unit/test_protected_source.py`、`test_verilator_importer.py`、`test_supplement_application.py`。 |
+
+以上程式碼路徑除 `tests/`、`fixtures/`、`docs/` 外均相對於 `src/svweave/`。
+
+### 30.4 主要不足與優先順序
+
+| Gap | 優先 | 不足、實際影響與證據 | 處理方向 |
+|---|---|---|---|
+| G1：coverage 判讀粒度不足 | P0 | `ingest.py:24–33` 固定列出 dimension／return-type／class scope-prefix omissions；`658–672` 僅因實際收集到的 unsupported／dropped occurrences 等判 PARTIAL。這些系統性遺漏並未證明每次都會計數，不能把 build `COMPLETE` 視為 reference 完整。 | 先建立 feature／query／scope coverage contract、負向結論 gate，再擴大抽取；保留既有 searched-scope／empty-result 警示。 |
+| G2：重要型別／常數依賴抽取不足 | P1 | packed/unpacked dimensions、subroutine return-type、`Class::member` 前綴、enum／struct member type 等未完整建 reference，可能漏掉改 width／typedef／class 名的影響。見 `extract.py::_h_subroutine/_type_ref`、`ingest.py::STATIC_LIMITATIONS`、`docs/supported_features.md` §4。 | 逐種建立手審 source-span golden 與 resolved target；不能用 folded numeric width 或字串比對捏造 semantic edge。 |
+| G3：只遍歷特定 elaborated scope | P1 | unused generic bodies、未展開 definitions／library、inactive branches、只作 static-call scope 的 class specialization body 不在完整 reference 遍歷內。見 `docs/supported_features.md` §4、SEM-10。 | 明列 source-only／inactive／elaborated coverage，先補可由 pinned API 正確取得的 call-only specialization；不能靠強制 instantiate 全部 generic 改變 build。 |
+| G4：legacy Verilog 專用證據不足 | P1 | `fixtures/language` 是 `.sv/.svh`；本次未找到 `.v/.vh`＋1364 mode 的專用 slang golden matrix。接受副檔名或 std knob 不等於實測 ANSI/non-ANSI ports、implicit nets、signed widths、UDP/config/specify 等。 | 建立明確受支援／僅 inventory／unsupported 的 legacy corpus；先覆蓋一般 RTL，不以完整 gate-level/timing 語意為交付目標。 |
+| G5：port／internal symbol 對使用者不一致 | P1 | `output reg` 可有 port 與 variable 雙 declaration；`docs/manifest.md` 說明 port query 可能零 references。`queries.py::references` 查單一 declaration；`impact.py::_twins/_with_twins` 與 rename 已有部分 twin 處理，但不是統一 reference 模型。 | 定義可追溯 alias／related-symbol 查詢契約；不能單靠同名合併跨 scope／instance 訊號；空 port refs 不得解讀為 unused。 |
+| G6：較少見 SV／SVA／library 語法 | P2；真實目標 profile 用到者升 P1 | clocking-block signals、bind target instance lists、checker instances、primitive/config blocks、DPI import/export 邊界未完整抽取；explicit CU groups 含 library inputs 直接 `CAPABILITY_MISMATCH`（`adapters/slang/args.py:63–70`）。 | 先建立最小 fixture 與 unsupported inventory，再按 pilot 需要補 semantic API；不可宣稱 declarations 可見即完整支援全部 references。 |
+| G7：真實導入 context 差異 | P1 | macro 組合 include 未必在 snapshot directive scan 發現，dependency leak 會阻擋；vendor filelists 不能任意吞選項；profile 的 language_mode 目前固定 `systemverilog`，std 是全 profile knob，未提供已驗證的 per-file mode/library mapping。 | 測 manifest→snapshot→worker end-to-end 的 context parity；保留 fail-closed，沒有 API 證據就記支援限制，不強加 free-form flags。 |
+| G8：目前版 qualification 與文件落差 | P0 | fast PASS／real job SKIPPED；歷史報告 identity 不同；latest UVM wiring 有歷史 sandbox blocker。`docs/limitations.md` 的「ignored options 不可配置」已落後 `Profile.ignored_options`；泛稱所有 omission 都會計 unsupported 也須修正。 | 安全 CI gate、zero-skip evidence、目前 SHA 的 integration／acceptance、claim-to-test 文件同步；不得只增加語法而不重新 qualification。 |
+
+**不列為靜態支援缺陷的 non-goals：**UVM factory 真正選擇、config-db 命中與 precedence、phase scheduling、runtime virtual dispatch、simulation、formal、coverage closure、bit-level connectivity、CDC/RDC、encrypted source 解密。slang 保留為權威 semantic backend；不以 Verilator 取代，也不把外部 JSON inventory 當作 G1–G7 已補齊。
+
+### 30.5 可拆 issue 的 requirement → test → acceptance 對照
+
+下表每列都是待辦；「既有」測試是回歸錨點，不代表已覆蓋新需求。新 tests 必須經受限真實 worker／gateway 驗證，不可以為了避開 sandbox 而直接呼叫 extractor。Golden 由小型 source 手工核對並附語意理由，不由被測 extractor 自動批准；採 closed-scope 對照，同時檢查缺少與多餘的 declarations/references，不只 assert 某個節點存在。新增 tests 必須接入 `scripts/qualify.py` 的 requirement-module mapping，而非僅存放於 tests 目錄。
+
+| 新 requirement／原規格關聯 | 交付與可測 acceptance criteria | 程式碼位置／測試映射 |
+|---|---|---|
+| **HDL-R01：query coverage 可判讀**（SVW-R06/R12；§10.4） | 對已知 dimension/type omission、inactive branch、unloaded library、project/external-root unsupported 各有 fixture；正向 edge 仍可讀，但 unknown／未搜尋範圍不得支持「無引用／無影響／可刪除」。即使 build COMPLETE，回應仍可辨識該功能 coverage。與舊 envelope／schema 保持相容或明確版本化；truncation／STALE 不放寬。 | `adapters/slang/ingest.py`、`application/queries.py`、`semantic_common.py`、`impact.py`、`rename.py`；既有 `tests/unit/test_slang_ingest.py`、`test_semantic_envelope.py`、`test_rename_pure.py`、`tests/integration/test_sem.py`；擬新增 **HDL-COV-01/02**：`tests/integration/test_reference_coverage.py`。 |
+| **HDL-R02：補 dimensions 與 type references**（SVW-R05/R06） | packed/unpacked range 內每個 parameter、typedef return type、class scope prefix、enum/struct member type 的 target、scope、source bytes 精確符合 golden；nested typedef／同名 scopes／macro／重複 specialization 不錯連或重複。不可由常數折疊結果反推原引用；binding API 無法提供者明示 unsupported。 | `adapters/slang/extract.py`、`locator.py`、`protocol.py`、`ingest.py`；擬新增 `fixtures/language/refs_types_dims/`、人工 golden、`tests/integration/test_reference_types.py`，**HDL-REF-01..04**；保留 SEM-01/02、LOC-01/02 回歸。 |
+| **HDL-R03：未遍歷 scope 與 specialization**（SVW-R06/R09；SEM-10） | 同一 generic class「作型別使用」「只由 `C#(T)::f()` 呼叫」「完全 unused」三組對照；可解析者 target 正確、declaration 不膨脹、source occurrence 去重且 specialization context 可追溯。inactive code 不冒充 active；未訪問 body 有可查限制，資源上限／循環不造成無界遍歷。 | `adapters/slang/extract.py`、`extract.py::_drain_specs/_do_spec`、`application/queries.py`；既有 `fixtures/language/sem02_paramclass/`、`fixtures/language/sem10_unused/`、`tests/integration/test_uvm.py`；擬新增 `tests/integration/test_generic_scope_coverage.py`，**HDL-SCOPE-01..03**。 |
+| **HDL-R04：legacy Verilog qualification**（SVW-R02/R06/R07/R08；§4.4） | `.v`＋included `.vh` 在明確 `std: 1364-2005` 下測 ANSI/non-ANSI ports、wire/reg/implicit-net 規則、signed width、continuous/procedural assignment 的引用、function/task、generate、parameter/defparam、library lookup；可見宣告／reference／hierarchy／diagnostics 對上手審 golden。對 SV-only syntax 在 Verilog mode 的接受/拒絕行為與 pinned driver 一致；mode 改變 config/build ID，不能由 suffix 猜 mode。UDP/specify/config 若不支援須明示，不要求模擬 timing。 | `config/models.py`、`manifest/slang_args.py`、`adapters/slang/args.py`；既有 `test_vcs_compat_defparam.py`、`test_build_identity.py`；擬新增 `fixtures/verilog/`、`tests/integration/test_verilog_modes.py`，**HDL-VLOG-01..05**。 |
+| **HDL-R05：port identity 與 related refs**（SVW-R06/R08） | `output reg`、non-ANSI ports、inout、interface/modport、兩個同名不同 scope/instance signals：選 port 或 internal symbol 可解釋相關 declarations／ref scope；合併若提供須明示 basis 並可回溯，不偷併同名 symbol。named/positional/implicit/wildcard/open/concat/array associations 不遺失原 expression；不產生 bit-level connectivity 承諾。 | `adapters/slang/extract.py::_port_bindings`、`application/queries.py`、`impact.py::_twins`、`rename.py`；既有 SEM-05/06、`test_instance_arrays.py`、`test_impact.py`、`test_rename_preview.py`；擬新增 `tests/integration/test_port_symbol_identity.py`，**HDL-PORT-01/02**。 |
+| **HDL-R06：SVA／clocking／DPI／特殊節點**（SVW-R06/R10/R12） | clocking signal、`bind mod : instance_list`、checker、DPI import/export、primitive/config 各有正/負 fixture；逐項選「resolved static inventory」或帶 kind/location/reason 的 unsupported，不靜默消失。bind source 與 elaborated target 分離、unknown target 明確診斷；SVA execution/proof 始終 NOT_RUN。 | `adapters/slang/extract.py`、`extract.py::_sva_sources/_binds`、`ingest.py`；既有 `test_sva.py`、SEM classmembers、`test_extractor_dto.py`；擬新增 `tests/integration/test_static_language_edges.py`，**HDL-EDGE-01..06**。 |
+| **HDL-R07：build context parity**（SVW-R02/R03/R04；BLD/SNP） | 對單一／per-file／explicit CU、include 順序、macro include、同檔不同 CU、top-scoped override、std/timescale/compat 建 identity 與診斷對照；macro include 要麼被合法完整 capture，要麼明確 BLOCKED，絕不漏依賴仍 publish。group＋library 沒有經 probe 的解法前繼續拒絕；新可忽略選項不能吞 source/argument，所有 deviation 入 ledger。 | `manifest/resolver.py`、`snapshot/capture.py`、`adapters/slang/args.py`、`application/build.py`；既有 `test_manifest.py`、`test_snapshot.py`、`test_slang_args.py`、`test_fix_round_b.py`、`test_build_identity.py`；擬新增 `tests/integration/test_build_context_matrix.py`，**HDL-BLD-01..04**。 |
+| **HDL-R08：最新 UVM wiring 真實驗收**（SVW-R09；UVM-01/02/03） | 在 pinned 2020.3.1 UVM 下，named/ordered/empty/omitted args、allowlisted factory/config-db calls、同名非 UVM `set/get` negative、args truncation 的 real parser→DTO→storage→query 結果符合 unit contract；未知 wrappers 保留一般 call，不假分類。`static_call_site`／`runtime_resolution=not_computed` 不變，不能填 defaults、推測 config 命中。 | `adapters/slang/uvm_calls.py`、`extract.py`、`application/queries.py`；**優先重跑既有** `tests/integration/test_uvm.py::test_UVM_02_03_named_arguments_and_same_name_negative` 與 `tests/unit/test_uvm_call_metadata.py`；新增 corner fixtures 對應 **HDL-UVM-01/02**。 |
+| **HDL-R09：下游 impact／rename／edit 不超額宣稱**（SVW-R08/R11/R13/R14/R15） | G1–G7 新 positive edges 會出現在 impact/preview，未支援／macro／ambiguous／inactive 範圍不變成安全負向判斷。header/macro 的 includer 影響須標候選或重建驗證；outer/imported-scope shadowing 負測須比較 candidate reference target，不能只看無 compiler error。Serena task/constructor 不可假成功；slang_symbol 保持 distinct provenance。candidate 重建失敗、錯 scope、STALE、未批准或 CAS mismatch 均不寫 original；graph candidate 永不升格為 resolved edge。 | `application/impact.py`、`diff_impact.py`、`rename.py`、`editing/`；既有 `test_impact.py`、`test_diff_impact.py`、`test_rename_preview.py`、`test_edt_slang_symbol.py`、`test_int_serena.py`、`tests/fault_injection/`；擬新增 **HDL-SAFE-01/02** 到相關 suites，涉及 write safety 的新規則亦納入 `scripts/mutation_suite.py`。 |
+| **HDL-R10：安全且不可假綠的 CI／qualification**（SVW-R11/R19/R20；§22/23） | real job 移除全域 userns 限制關閉操作，對齊 approved narrow bwrap profile 與 mandatory probe；測 sandbox 不可用時確實 FAIL/BLOCKED。當 `SVWEAVE_REQUIRE_BACKENDS=1` 缺 UVM/任何 mandatory backend，不可經 skipif 綠燈；required tests 的 skip/error/fail 均阻 gate。保存 exact SHA／source identity／lock／test counts／JUnit／probe／qualification report。 | `.github/workflows/ci.yml`、`scripts/ci_prepare_bwrap_apparmor.py`、`scripts/qualify.py`、`tests/integration/conftest.py`、`tests/integration/test_repo_profiles.py::test_shipped_uvm_smoke_profile_builds_against_the_pinned_library`；既有 `tests/unit/test_ci_sandbox_gate.py`、`test_ci_bwrap_apparmor.py`；擬新增 **HDL-CI-01..03**：workflow safety、missing-UVM fail、zero-skip result parsing。 |
+| **HDL-R11：Verilator／protected supplement 不污染權威索引**（SVW-R12/R18；§10.1/16.5） | 既有 import、hash/tamper/path/resource bounds、erased WIDTH-reference negative、source preparation offset/UNKNOWN tests 持續通過。即使 supplement 與 slang 名稱相同也不可寫入 resolved references、改 completeness/published build 或提高 edit eligibility；不啟動 Verilator、不執行 simulation。額外 coverage 只能另做逐項證據比較，不能預設補洞。 | `application/supplement.py`、`source_preparation.py`、`adapters/verilator/`；既有 `test_verilator_importer.py`、`test_supplement_application.py`、`test_protected_source.py`；擬新增 cross-store negative **HDL-SUP-01**。 |
+| **HDL-R12：文件／宣告同步**（SVW-R01/R12/R20；DOC） | 每個宣告都有 feature、profile/std、實作位置、positive/negative test、最近 evidence SHA／狀態；區分 implemented／partial／unsupported／not validated。修正 ignored-options、reference counting、task editing／rename-preview 等過時表述，不改原歷史規格來偽造過去狀態；README 三語與 capability/limitations 一致。 | `docs/supported_features.md`、`docs/limitations.md`、`docs/manifest.md`、`README*.md`、`capability_report.json`；既有 `tests/unit/test_gateway_cli.py::test_DOC_01_*`、schema tests；擬新增 **HDL-DOC-01** feature-to-evidence consistency check。 |
+
+### 30.6 分階段補強與 gate
+
+依賴順序：**A → B → C → D**；E 為獨立可選 supplement 保護，不能替 A–D 解鎖。以 gate 而非未量測工期承諾進度；一般 RTL 與高頻 type references 優先於較罕見語法。
+
+| Phase | 優先／需求 | 工作與完成 gate |
+|---|---|---|
+| **A：先建立可信 baseline** | P0；R01/R08/R10/R12 | 先修復 real CI 安全前置條件並獲適用授權；先分類已知 coverage，避免 COMPLETE 被誤讀；修復 required mode 的 skip 漏洞，建立 feature→test→evidence 表。在合法 sandbox host 跑既有 pinned semantic/UVM／三後端 suites，取得目前 source 的逐項結果。缺 host、依賴、授權或 pending sign-off 就記 BLOCKED；不能用 fast 綠燈越過。 |
+| **B：常用 RTL 與型別依賴** | P1；R02/R04/R05/R07/R09 | 先寫手審 positive/negative fixtures，再逐項補 dimension/type refs、legacy Verilog mode matrix、port identity、build context。每個 issue 必須經真實 worker→gateway query 驗證、location/source bytes 精確、舊 SEM/LOC/BLD/SNP 不回歸；只針對通過 subset 擴大支援宣告。 |
+| **C：進階 SV／UVM／SVA 邊界** | P1/P2；R03/R06/R08/R09 | 先處理實際目標 profile 阻擋的 call-only specialization／clocking／bind/checker，其他按 corpus evidence 排序。pinned API 不足先做最小 capability spike/ADR，再決定 helper 或明確 unsupported；不猜 API、不換 backend、不增加 stub 讓測試過。所有 runtime 欄位仍 not_computed/NOT_RUN。 |
+| **D：重新 qualification 與受限 pilot** | P0 release gate；R10/R12＋全部已承諾 subset | 在 exact source＋lock 上完成 real probes、unit/contract、integration、fault-injection、acceptance、critical mutations、coverage、必要 benchmark，由 `scripts/qualify.py` 計算狀態；required cases 不可 SKIP。保留原 §22.2 門檻。用有授權且可重現的 RTL/UVM profile 做 read-only pilot；無可靠 golden 的大專案只報 gaps，不報全面正確率。未有 EDA 不妨礙限定 static subset，但不得宣稱 EDA/project qualification。 |
+| **E：可選外部 inventory 守界** | P2；R11 | 只維護 import/query 與 protected preparation 的純處理、安全和 provenance tests。若日後提出新的差異比較，先定義 artifact 身分／缺漏／不可信來源規則再另行批准；目前不新增 native Verilator runner，不模擬，也不參與 slang completeness 判定。 |
+
+每個 issue 的完成證據至少包含：requirement/Test IDs、完整 source SHA 或 dirty source hash、lock hash、host/platform、profile/std/CU/defines/tops、命令、PASS/FAIL/BLOCKED/SKIP/NOT_RUN 計數、golden review 理由、diagnostics／unsupported inventory、可重現 artifact 路徑。新 extractor 修改必須更新其 identity，不能沿用舊 build cache 或舊 qualification。遇資源上限不以縮小 corpus 的結果冒充原規模 benchmark。
+
+**建議第一批 issues，依序：**
+
+1. `HDL-R10`：安全 CI 前置條件＋mandatory/no-skip gates（不直接 dispatch 現有 real job）。
+2. `HDL-R01/R12`：coverage matrix／空結果契約與過時宣告修正。
+3. `HDL-R08`：既有最新 UVM integration 的真實驗收，先關閉已知未驗證事項。
+4. `HDL-R04/R05`：Verilog `.v/.vh` corpus＋port/internal-symbol 關係。
+5. `HDL-R02`：dimension／return-type／scope-prefix references；完成後再擴大 generic／進階語法。
+
+### 30.7 可宣布「足夠」的停止條件
+
+不以「所有 SystemVerilog 都支援」作不可能核對的完成宣告。對一個明確的**靜態使用情境＋profile 集合**，只有在下列條件成立後，才可宣布該 subset 足夠：
+
+- 使用者需要的語法／查詢都有測試與已知缺口分類；G1 的負向結論風險可由機器讀取，未搜尋範圍不被隱藏。
+- 該 subset 的正／負 golden 與 API tests 在當前 SHA／lock 的真實受限 worker 通過；required integration／acceptance 無 SKIP，三後端降級明列而非冒稱 READY。
+- manifest/context、original source spans、snapshot freshness、query completeness、candidate approval/CAS/recovery 的既有安全不變。
+- `scripts/qualify.py` 產生可追溯結果；G0 waiver／ADR-012／license 等 owner 決策仍由 owner 處理，代理不得代簽或改成 PASS。
+- EDA compile／simulation／formal／RTL coverage 與軟體 QA 分開；本計畫不要求執行 simulation，也不把 absence of EDA evidence 藏起來。
+
+**本次收斂結果：維持 developer preview／UNQUALIFIED 的保守定位，先補證據與 reference coverage，再補高頻 Verilog／SystemVerilog 語意；不是移除 slang、加入模擬器或擴寫成 full-language signoff 工具。**
+

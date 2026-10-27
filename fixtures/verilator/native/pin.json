@@ -1,0 +1,7 @@
+{
+  "version": "5.052",
+  "repository": "https://github.com/verilator/verilator.git",
+  "commit": "ea338be98e1e838d3518809ce8899f85a009963c",
+  "tree": "21357af5972974181919bf9e3ba06ccf455fa6f1",
+  "git_archive_tar_sha256": "8bbdd703b0edce79a1c4d9bd83838975ed9d65b27e58b8c308a2963fb6ecd8c3"
+}

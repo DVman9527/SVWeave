@@ -50,7 +50,7 @@ from svweave.application.queries import (
 )
 from svweave.application.semantic_common import build_envelope
 from svweave.domain.cursor import MAX_RESPONSE_BYTES, check_limit
-from svweave.domain.envelope import Envelope, ErrorInfo, Outcome
+from svweave.domain.envelope import Envelope, ErrorInfo, Outcome, Pagination
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.states import Completeness, Freshness
 from svweave.editing.plan import mask_comments_strings
@@ -219,6 +219,7 @@ def rename_preview(
                     },
                 ),
                 freshness=s.fresh(),
+                reference_query="rename_preview",
             )
         decl = rows[0]
         ids = [str(t["declaration_id"]) for t in twins] if twins else [str(decl["declaration_id"])]
@@ -704,5 +705,9 @@ def rename_preview(
             warnings=wmsgs,
             extra_limits=[*_gap_limits(s), RENAME_NOTE],
             freshness=fresh,
+            pagination=Pagination(
+                limit=lim, truncated=bool(cut) or scan_truncated or data_out["diffs_truncated"]
+            ),
+            reference_query="rename_preview",
         )
 
