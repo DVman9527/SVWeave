@@ -170,7 +170,8 @@ def test_diff_impact_parity_with_a_real_git_change(built: Built) -> None:
     try:  # the `built` fixture is shared: leave the workspace as it was found
         code, c = cli_env(root, "query", "diff-impact", "--build", built.build_id, "--depth", "2")
         m, _ = call(make_gateway(built.opts), "svw_diff_impact", {"build_id": built.build_id, "depth": 2})
-        assert code == 0 and normalize(c) == normalize(m)
+        assert code == 0, json.dumps(c.get("error"), sort_keys=True)[:2000]
+        assert normalize(c) == normalize(m)
         assert [d["qualified_name"] for d in m["data"]["affected_definitions"]] == ["demo_lane"]
         assert m["data"]["files"][0]["aligned"] is True and m["freshness"] == "STALE"
     finally:
