@@ -8,6 +8,6 @@ test_HDL_VLT_valid_source_must_not_hide_compiler_failure (tests.unit.test_verila
 test_HDL_VLT_workflow_evidence_subdirectory_is_only_write_exemption (tests.unit.test_verilator_native_harness.NativeVerilatorGuards.test_HDL_VLT_workflow_evidence_subdirectory_is_only_write_exemption) ... ok
 
 ----------------------------------------------------------------------
-Ran 8 tests in 0.021s
+Ran 8 tests in 0.018s
 
 OK

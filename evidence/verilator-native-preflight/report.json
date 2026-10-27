@@ -43,12 +43,13 @@
     "tests": 8,
     "native_evidence": false,
     "dependencies": "available host Python; not frozen repository dev environment",
-    "log_sha256": "cbaaadd9f02592246dfb63004f8278958c0e13cccdfd4ac47f27a9cf0271cda3"
+    "log_sha256": "dd310ac2df50cdef525c05d4e0658b75c27b16b082a79ee3eae6410ecfc643c2",
+    "post_publication_rerun_base": "f457ec5001f248e838e2c8b84145e96b99e05c82"
   },
   "prepared_source_sha256": {
     "scripts/bootstrap_verilator.py": "62dfe5e1339d16ddfa792ff3b938aa6ac52571e7009e20289f798c4102105a5f",
     "scripts/verify_verilator_native.py": "9023656ff0bd1c7a4260c99616e5b451b81a1dc11e8241b5f1fc8c7585799c08",
-    "tests/unit/test_verilator_native_harness.py": "3322558f9fde9bf534d6d67b56076a334bc1775b5d5d7526f528eff560e8d499",
+    "tests/unit/test_verilator_native_harness.py": "d70cefdb8bec5bf0c5a094d935d330bd0778780c7f67030ecc91f9d1f1877f38",
     "fixtures/verilator/native/README.md": "16817ed098c1f0c6910f93bdd2453c025ae5195f12d07fddb4d4b4872068def0",
     "fixtures/verilator/native/native_class.sv": "15182bf6658ca29c5a9704f623e4df874362a3558331ec0042e32784a8b64b07",
     "fixtures/verilator/native/native_defs.vh": "bc5a9afc8523ff802c2e969354bc34cce2e480d5bdb99bccea138c35509fb076",

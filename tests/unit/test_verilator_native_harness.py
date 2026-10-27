@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 from scripts import bootstrap_verilator as bootstrap
 from scripts import verify_verilator_native as native
+
 from svweave.security.sandbox import HostCapability, SandboxRunner
 
 
