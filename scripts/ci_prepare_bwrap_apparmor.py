@@ -12,11 +12,12 @@ import os
 import re
 import shlex
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 # Reviewed upstream v4.0.1 (Ubuntu Noble's ABI4 profile); comments/spacing may differ.
 # https://gitlab.com/apparmor/apparmor/-/blob/v4.0.1/profiles/apparmor/profiles/extras/bwrap-userns-restrict
@@ -68,18 +69,70 @@ def validate_policy(text: str) -> None:
             "Official package profile differs from reviewed ABI4 policy; stop for review")
 
 
+def official_ubuntu_uri(uri: ParseResult, *, mirror_base: bool = False) -> bool:
+    # ParseResult is used by both package and mirror validation. No credentials or alternate ports.
+    host = uri.hostname or ""
+    return (
+        uri.scheme in {"http", "https"}
+        and uri.netloc == host
+        and not uri.params and not uri.query and not uri.fragment
+        and "%" not in uri.path and ".." not in uri.path.split("/")
+        and (host in {"archive.ubuntu.com", "security.ubuntu.com", "ports.ubuntu.com"}
+             or host.endswith(".archive.ubuntu.com"))
+        and (uri.path in {"/ubuntu/", "/ubuntu-ports/"} if mirror_base
+             else uri.path.startswith(("/ubuntu/pool/", "/ubuntu-ports/pool/")))
+    )
+
+
+def validate_mirror_entries(content: str) -> None:
+    entries = 0
+    for line in content.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        fields = line.split("\t")
+        require(len(fields) in {1, 2} and (
+            len(fields) == 1 or re.fullmatch(r"priority:[1-9][0-9]*", fields[1]) is not None
+        ), "Unsupported Ubuntu mirror-list metadata")
+        require(official_ubuntu_uri(urlparse(fields[0]), mirror_base=True),
+                "Mirror list contains a nonofficial or malformed Ubuntu origin")
+        entries += 1
+    require(1 <= entries <= 32, "Expected a bounded nonempty Ubuntu mirror list")
+
+
+def validate_runner_mirror_file() -> None:
+    # The only authorized file transport. Check every ancestor without following symlinks.
+    for name in ("/etc", "/etc/apt", "/etc/apt/apt-mirrors.txt"):
+        path = Path(name)
+        metadata = path.lstat()
+        expected_type = stat.S_ISREG if name.endswith(".txt") else stat.S_ISDIR
+        require(expected_type(metadata.st_mode) and metadata.st_uid == 0
+                and not metadata.st_mode & 0o022,
+                "Runner mirror path must be root-owned, non-writable by others, and not a symlink")
+        if name.endswith(".txt"):
+            require(metadata.st_size <= 4096, "Runner mirror list exceeds inspection bound")
+    with Path("/etc/apt/apt-mirrors.txt").open() as stream:
+        content = stream.read(4097)
+    require(len(content) <= 4096, "Runner mirror list changed beyond inspection bound")
+    validate_mirror_entries(content)
+
+
 def validate_download_uri(output: str) -> None:
     lines = [line for line in output.splitlines() if line.startswith("'")]
     require(len(lines) == 1, "Expected exactly one authenticated Ubuntu package URI")
     uri = urlparse(shlex.split(lines[0])[0])
-    host = uri.hostname or ""
+    if uri.scheme == "mirror+file":
+        require(not uri.netloc and not uri.params and not uri.query and not uri.fragment
+                and re.fullmatch(
+                    r"/etc/apt/apt-mirrors\.txt/pool/main/a/apparmor/"
+                    r"apparmor-profiles_[A-Za-z0-9.+~:-]+_all\.deb", uri.path
+                ) is not None,
+                "Unsupported mirror-file reference or package path")
+        validate_runner_mirror_file()
+        return
     # No userinfo, query, fragment, or raw APT output in failure diagnostics.
-    origin = json.dumps({"scheme": uri.scheme, "host": host, "path": uri.path[:500]})
-    require(uri.scheme in {"http", "https"} and (
-        host in {"archive.ubuntu.com", "security.ubuntu.com", "ports.ubuntu.com"}
-        or host.endswith(".archive.ubuntu.com")
-    ) and uri.path.startswith(("/ubuntu/pool/", "/ubuntu-ports/pool/")),
-        f"Package download is not from the official Ubuntu archive: {origin}")
+    origin = json.dumps({"scheme": uri.scheme, "host": uri.hostname or "", "path": uri.path[:500]})
+    require(official_ubuntu_uri(uri),
+            f"Package download is not from the official Ubuntu archive: {origin}")
 
 
 def describe_runner_mirror_list() -> None:
@@ -163,9 +216,10 @@ def main() -> None:
         run("dpkg-deb", "--extract", str(package), str(extracted))
         source = extracted / "usr/share/apparmor/extra-profiles" / POLICY_NAME
         require(source.is_file() and not source.is_symlink(), "Official bwrap profile absent")
+        require(source.stat().st_size <= 16384, "Official profile exceeds review bound")
         policy = source.read_text()
+        print(f"Official profile sha256={hashlib.sha256(policy.encode()).hexdigest()}\n{policy}", flush=True)
         validate_policy(policy)
-        print(policy, flush=True)
         # Check again immediately before the only policy writes; never overwrite a destination.
         check_conflicts(policy_dir, run("sudo", "-n", "cat", "/sys/kernel/security/apparmor/profiles"))
         target = policy_dir / POLICY_NAME
