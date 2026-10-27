@@ -221,7 +221,7 @@ class McpClient:
         self.token = uuid.uuid4().hex
         self.init: InitInfo | None = None
         self.tools: dict[str, ToolInfo] = {}
-        self.violation: dict[str, Any] | None = None
+        self._violation: dict[str, Any] | None = None
         self._session: ClientSession | None = None
         self._owner: asyncio.Task[None] | None = None
         self._stop: asyncio.Event | None = None
@@ -231,6 +231,23 @@ class McpClient:
         self._stopped = False
         self._pid: int | None = None
         self.transport_stats = TransportStats()
+
+    @property
+    def violation(self) -> dict[str, Any] | None:
+        # The transport records overflow before terminating the process, then delivers the
+        # exception asynchronously. Expose its reason even while that delivery is pending.
+        overflow = self.transport_stats.overflow
+        if self._violation is None and overflow is not None:
+            return {
+                "kind": "message_too_large",
+                "limit_bytes": overflow.limit_bytes,
+                "received_bytes_at_least": overflow.received_bytes,
+            }
+        return self._violation
+
+    @violation.setter
+    def violation(self, value: dict[str, Any] | None) -> None:
+        self._violation = value
 
     # ------------------------------------------------------------------ errors
     def _err(self, code: ErrorCode, message: str, reason: str, **extra: Any) -> SvwError:
@@ -271,7 +288,7 @@ class McpClient:
 
     # ------------------------------------------------------------------ message handler
     async def _on_message(self, message: object) -> None:
-        if isinstance(message, MessageTooLarge) and self.violation is None:
+        if isinstance(message, MessageTooLarge) and self._violation is None:
             self.violation = {
                 "kind": "message_too_large",
                 "limit_bytes": message.limit_bytes,

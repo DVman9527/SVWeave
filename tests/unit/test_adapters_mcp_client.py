@@ -503,3 +503,34 @@ def test_sec_a_spontaneous_flood_is_reported_and_reaped_by_the_adapter(tmp_path:
             assert stopped == [True], cls.__name__
     finally:
         s.stop()
+
+
+def test_sec_transport_overflow_is_visible_before_async_message_delivery(tmp_path: Path) -> None:
+    import anyio
+
+    from svweave.adapters.bounded_stdio import MessageTooLarge
+    from svweave.adapters.mcp_client import McpClient
+
+    client = McpClient(launch(tmp_path))
+    overflow = MessageTooLarge(1024, 2048)
+    # Deterministically reproduce the interval after detection/process termination but before
+    # the transport's zero-capacity stream delivers the exception to the message handler.
+    client.transport_stats.overflow = overflow
+    expected = {"kind": "message_too_large", "limit_bytes": 1024,
+                "received_bytes_at_least": 2048}
+    assert not client.alive
+    assert client.violation == expected
+    error = client._violation_error()
+    assert error.code is ErrorCode.BACKEND_UNAVAILABLE
+    assert error.details["reason"] == "message_too_large"
+    assert error.details["protocol_error"] == expected
+
+    async def deliver() -> None:
+        with anyio.CancelScope() as scope:
+            client._inflight.add(scope)
+            await client._on_message(overflow)
+            assert scope.cancel_called  # fallback must not suppress in-flight cancellation
+            client._inflight.remove(scope)
+
+    anyio.run(deliver)
+    assert client.violation == expected

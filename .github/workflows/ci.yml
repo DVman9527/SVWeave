@@ -48,13 +48,24 @@ jobs:
           uv venv --python 3.12 .venv
           uv pip install --python .venv/bin/python -e '.[dev]'
       - name: Pinned wheels (pyslang, MCP SDK) and tool archives, SHA-256 verified against the lock
-        run: .venv/bin/python scripts/bootstrap_locked.py --skip-serena
+        run: .venv/bin/python scripts/bootstrap_locked.py
       - name: Ruff
         run: .venv/bin/ruff check src tests
       - name: Mypy (strict)
         run: .venv/bin/mypy
       - name: Schemas in sync with the models
         run: .venv/bin/svweave schema emit --check
+      - name: Install and verify the mandatory worker sandbox
+        run: |
+          sudo apt-get update && sudo apt-get install -y bubblewrap
+          .venv/bin/python - <<'PY'
+          from svweave.security.sandbox import probe_host
+
+          capability = probe_host(refresh=True)
+          if not capability.available:
+              raise SystemExit(f"Mandatory worker sandbox unavailable: {capability.reason}")
+          print(f"Mandatory worker sandbox ready: {capability.version}")
+          PY
       - name: Unit tests
         run: .venv/bin/python -m pytest tests/unit -q --no-cov
       - name: Contract tests
