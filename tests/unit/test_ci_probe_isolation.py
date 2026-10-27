@@ -17,6 +17,7 @@ import tempfile
 import types
 import unittest
 from dataclasses import replace
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -367,6 +368,23 @@ class ProbeEvidenceTests(unittest.TestCase):
         with patch.object(subprocess, "run", return_value=result) as transport:
             report = collect_nested_preflight(self.root / "python", self.root, transport)
         self.assertTrue(report["ready"])
+
+    def test_HDL_CI_04_nested_preflight_records_exact_utc_transport_interval(self):
+        import _cleanroom_preflight as preflight
+        start = datetime(2026, 10, 27, 10, 30, 0, 123456, tzinfo=UTC)
+        finish = datetime(2026, 10, 27, 10, 30, 1, 654321, tzinfo=UTC)
+        result = subprocess.CompletedProcess([], 1, '{"capability":{"available":false}}', "")
+        with (
+            patch.object(preflight, "datetime") as clock,
+            patch.object(subprocess, "run", return_value=result) as transport,
+        ):
+            clock.now.side_effect = [start, finish]
+            report = preflight.collect_nested_preflight(self.root / "python", self.root, transport)
+        self.assertEqual(report["started_at_utc"], "2026-10-27 10:30:00.123456 UTC")
+        self.assertEqual(report["finished_at_utc"], "2026-10-27 10:30:01.654321 UTC")
+        self.assertEqual(clock.now.call_args_list, [unittest.mock.call(UTC), unittest.mock.call(UTC)])
+        self.assertEqual(transport.call_count, 1)
+        self.assertFalse(report["ready"])
 
     def test_HDL_CI_04_nested_preflight_malformed_output_is_not_ready(self):
         from _cleanroom_preflight import collect_nested_preflight

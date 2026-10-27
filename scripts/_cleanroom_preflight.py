@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from subprocess import CompletedProcess
 from typing import Any
@@ -52,8 +53,13 @@ def collect_nested_preflight(
     room: Path,
     run_netless: Callable[[list[str], Path, float], CompletedProcess[str]],
 ) -> dict[str, Any]:
+    started_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S.%f UTC")
     result = run_netless([str(python), "-I", "-c", PREFLIGHT_CODE], room, 60)
-    report: dict[str, Any] = {"returncode": result.returncode, "stderr": result.stderr[-4000:]}
+    finished_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S.%f UTC")
+    report: dict[str, Any] = {
+        "returncode": result.returncode, "stderr": result.stderr[-4000:],
+        "started_at_utc": started_at, "finished_at_utc": finished_at,
+    }
     try:
         payload = json.loads(result.stdout)
         if not isinstance(payload, dict):

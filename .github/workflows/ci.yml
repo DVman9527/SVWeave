@@ -168,7 +168,35 @@ jobs:
       - name: DEP-01 nested sandbox diagnostic (required; not qualification)
         if: ${{ inputs.cleanroom_only }}
         run: |
-          .venv/bin/python -m pytest tests/integration/test_dep01_cleanroom.py -q --no-cov --junitxml=.svweave/ci/junit_dep01_cleanroom.xml
+          probe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
+          if .venv/bin/python -m pytest tests/integration/test_dep01_cleanroom.py -q --no-cov --junitxml=.svweave/ci/junit_dep01_cleanroom.xml; then
+            :
+          else
+            probe_status=$?
+            probe_finished_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')
+            # Prefer the nested preflight interval; reject missing, malformed or stale evidence.
+            # A missing interval uses the failed test's bounds, never an extra namespace attempt.
+            if probe_window=$(.venv/bin/python - "$probe_started_at" "$probe_finished_at" <<'PY_WINDOW'
+          import json
+          import sys
+          from datetime import datetime
+          from pathlib import Path
+          fmt = "%Y-%m-%d %H:%M:%S.%f UTC"
+          report = json.loads(Path(".svweave/ci/dep01/nested-sandbox-preflight.json").read_text())
+          start, end = (datetime.strptime(report[key], fmt) for key in ("started_at_utc", "finished_at_utc"))
+          lower, upper = (datetime.strptime(value, fmt) for value in sys.argv[1:])
+          if not lower <= start <= end <= upper:
+              raise SystemExit("Preflight interval is outside the failed test; using test bounds")
+          print(start.strftime(fmt) + "\t" + end.strftime(fmt))
+          PY_WINDOW
+            ); then
+              IFS=$'\t' read -r probe_started_at probe_finished_at <<< "$probe_window"
+            fi
+            # Read-only and bounded; diagnostic failure must not replace the original test failure.
+            mkdir -p .svweave/ci/dep01 && timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" "$probe_finished_at" > .svweave/ci/dep01/nested-sandbox-kernel.log 2>&1 || true
+            head -c 262144 .svweave/ci/dep01/nested-sandbox-kernel.log || true
+            exit "$probe_status"
+          fi
       - name: Backend contract probe
         if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/probe_backends.py --out .svweave/ci/capability_report.json

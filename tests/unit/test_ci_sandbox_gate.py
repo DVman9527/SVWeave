@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shlex
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -74,7 +75,10 @@ class SandboxGateTests(unittest.TestCase):
         command = steps[diagnostic]["run"]
         self.assertIn("tests/integration/test_dep01_cleanroom.py", command)
         self.assertIn("--junitxml=.svweave/ci/junit_dep01_cleanroom.xml", command)
-        self.assertNotIn("||", command)
+        self.assertIn('probe_status=$?', command)
+        self.assertIn('exit "$probe_status"', command)
+        self.assertIn('"$probe_started_at" "$probe_finished_at"', command)
+        self.assertIn("nested-sandbox-kernel.log", command)
         self.assertNotIn("continue-on-error", steps[diagnostic])
         identity = steps[names.index("Record exact validation identity")]["run"]
         self.assertIn("cleanroom nested-isolation diagnostic only; not qualification", identity)
@@ -170,6 +174,85 @@ class SandboxGateTests(unittest.TestCase):
     def test_SEC_05_failed_setup_preserves_status(self) -> None:
         self._assert_probe_status_survives_diagnostics(0, 0, 9)
 
+    def _assert_cleanroom_status_survives_diagnostics(
+        self, probe_status: int, diagnostic_status: int, report_mode: str = "valid",
+    ) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        command = next(step["run"] for step in workflow["jobs"]["real-backends"]["steps"]
+                       if step.get("name") == "DEP-01 nested sandbox diagnostic (required; not qualification)")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".venv/bin").mkdir(parents=True)
+            (root / "scripts").mkdir()
+            # Execute the real workflow shell/interval parser; replace pytest and diagnostics only.
+            # No backend, bwrap, host audit log or privileged command is executed.
+            python = root / ".venv/bin/python"
+            python.write_text(f"""#!{sys.executable}
+import json, os, sys
+from datetime import UTC, datetime
+from pathlib import Path
+if sys.argv[1:3] == ['-m', 'pytest']:
+    stamp = datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S.%f UTC')
+    start = '2000-01-01 00:00:00.000000 UTC' if {report_mode!r} == 'stale' else stamp
+    report = {{'started_at_utc': start, 'finished_at_utc': start}}
+    if {report_mode!r} == 'delimiters':
+        report = {{key: value.replace(' ', '\\t\\n', 1) for key, value in report.items()}}
+    if {report_mode!r} != 'missing':
+        path = Path('.svweave/ci/dep01/nested-sandbox-preflight.json')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('not-json' if {report_mode!r} == 'malformed' else json.dumps(report))
+        Path('expected-bounds').write_text(start + '\\n' + start + '\\n')
+    sys.exit({probe_status})
+os.execv(sys.executable, [sys.executable, *sys.argv[1:]])
+""")
+            python.chmod(0o700)
+            (root / "scripts/ci_sandbox_diagnostics.sh").write_text(
+                '#!/bin/bash\nprintf "%s\\n%s\\n" "$1" "$2" > diagnostics-called\n'
+                f'echo "bounded audit evidence"\nexit {diagnostic_status}\n'
+            )
+            result = subprocess.run(
+                ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", command],
+                cwd=root, capture_output=True, text=True, check=False, timeout=10,
+            )
+            self.assertEqual(result.returncode, probe_status, result.stderr)
+            called = root / "diagnostics-called"
+            self.assertEqual(called.exists(), probe_status != 0)
+            if called.exists():
+                bounds = called.read_text()
+                self.assertEqual(len(bounds.splitlines()), 2)
+                if report_mode in ("valid", "delimiters"):
+                    self.assertEqual(bounds, (root / "expected-bounds").read_text())
+                else:
+                    self.assertNotIn("2000-01-01", bounds)
+                    for value in bounds.splitlines():
+                        self.assertRegex(value, r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC")
+                log = root / ".svweave/ci/dep01/nested-sandbox-kernel.log"
+                self.assertIn("bounded audit evidence", log.read_text())
+
+    def test_SEC_05_cleanroom_success_does_not_collect_failure_diagnostics(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(0, 1)
+
+    def test_SEC_05_cleanroom_failure_with_successful_diagnostics_stays_failed(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 0)
+
+    def test_SEC_05_cleanroom_failure_with_failed_diagnostics_stays_failed(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 1)
+
+    def test_SEC_05_cleanroom_failure_with_timed_out_diagnostics_stays_failed(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 124)
+
+    def test_SEC_05_cleanroom_missing_interval_uses_failed_test_window(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 0, "missing")
+
+    def test_SEC_05_cleanroom_malformed_interval_uses_failed_test_window(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 0, "malformed")
+
+    def test_SEC_05_cleanroom_stale_interval_uses_failed_test_window(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 0, "stale")
+
+    def test_SEC_05_cleanroom_interval_delimiters_cannot_change_shell_arguments(self) -> None:
+        self._assert_cleanroom_status_survives_diagnostics(7, 0, "delimiters")
+
     def test_SEC_05_diagnostics_shell_syntax(self) -> None:
         result = subprocess.run(
             ["bash", "-n", str(ROOT / "scripts/ci_sandbox_diagnostics.sh")],
@@ -182,6 +265,7 @@ class SandboxGateTests(unittest.TestCase):
     def test_SEC_05_kernel_audit_read_is_supported_and_bounded(self) -> None:
         script = (ROOT / "scripts/ci_sandbox_diagnostics.sh").read_text()
         self.assertIn("date -u '+%Y-%m-%d %H:%M:%S.%6N UTC'", script)
+        self.assertIn("probe_finished_at=${2:-", script)
         argv = shlex.split(script[script.index("sudo -n journalctl"):].replace("\\\n", " "))
         self.assertEqual(argv[:4], ["sudo", "-n", "journalctl", "-k"])
         self.assertNotIn("--kernel", argv)
