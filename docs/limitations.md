@@ -301,9 +301,12 @@ not a product runtime compiler backend or an extension of slang's resolved-refer
 simulation, resolves UVM runtime behavior, or changes edit eligibility. The JSON format is
 pinned to 5.052. A separate explicit `scripts/verify_verilator_native.py` validation harness
 uses mandatory sandboxing for real static lint/JSON checks; it does not run during product
-queries/imports or change slang authority. Actual native validation remains **NOT_RUN** pending
-authorized CI dispatch/evidence; the local sandbox probe is **BLOCKED** by `NETLINK_ROUTE`
-permissions. No native PASS or additional UVM reference coverage is claimed. See
+queries/imports or change slang authority. Initial native run 40471175289 actually executed under CI isolation; its aggregate result is
+**FAIL**, because the legacy fixture exposed producer columns after macro expansion that do
+not address original source tokens. Those locations remain UNVERIFIED, never edit bindings.
+The revised harness and new macro-free case await a fresh native run; replay is not native PASS.
+The local sandbox remains **BLOCKED** by `NETLINK_ROUTE` permissions. No full native PASS or
+additional UVM reference coverage is claimed. See
 [static supplement scope and evidence](verilator_static_supplement.md).
 
 ## Slurm is not yet a supported execution backend

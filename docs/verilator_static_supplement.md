@@ -112,8 +112,8 @@ environments and does not modify the frozen mandatory backend lock.
 ```
 
 The `.v/.vh` 1364-2005 hierarchy/macro/parameter fixture, 1800-2017 typedef/class fixture,
-missing-module negative and syntax negative are specified in
-`fixtures/verilator/native/README.md` (HDL-VLT-01–04). Real JSON source-token and
+missing-module negative, syntax negative and macro-free cell counterpart are specified in
+`fixtures/verilator/native/README.md` (HDL-VLT-01–05). Real JSON source-token and
 artifact-local pointer checks are deliberately fixture-specific, not an upgrade of general
 imported locations to trusted edit locations. No claim is made about erased source references,
 all SystemVerilog classes, assertions, UVM, design correctness, or runtime behavior.
@@ -129,6 +129,23 @@ Local preparation evidence is in `evidence/verilator-native-preflight/`: the dot
 bwrap probe is **BLOCKED** by `NETLINK_ROUTE` permissions and native execution was not attempted
 there. Only a subsequently retained CI `report.json` with passing native cases establishes a
 native result; the presence of this harness or its unit-test success does not.
+
+### Observed native macro-location limitation
+
+The first actual run, [40471175289](https://github.com/DVman9527/SVWeave/actions/runs/40471175289)
+at `d709bb92f22768c95db0f534e93dd90f43670354`, successfully built Verilator and
+accepted both valid fixtures in lint and JSON modes. The SV import/query and both
+expected-invalid cases passed. The Verilog case failed the original harness's
+over-broad source-token assumption: its `u_leaf` location was line 4 columns 28–34,
+which selects `IVE_WI` in original source but `u_leaf` after the known macro expansion.
+Top-port columns have the same problem. Native producer locations after macro expansion
+are therefore explicitly **UNVERIFIED for original source tokens**, not trusted edits.
+
+The raw locations and failed report are preserved, not rewritten. The revised test checks
+the exact macro-column discrepancy as negative provenance evidence, retains exact-token
+checks on unaffected locations, and adds a separate macro-free cell positive fixture.
+Replaying the retained actual JSON tests this correction without running a compiler;
+only a subsequent native run establishes the revised harness's end-to-end result.
 
 ## Explicit protected-source preparation (static only)
 

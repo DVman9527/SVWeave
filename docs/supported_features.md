@@ -296,7 +296,9 @@ index. Official regression goldens exercise class/member/method/type and selecte
 module and port node inventory. This is `EXTERNAL_DECLARED`, `PARTIAL`, unbound to any build;
 it does not establish resolved references or close unvisited-body/runtime UVM gaps.
 The separate `scripts/verify_verilator_native.py` static lint/JSON verification harness is
-explicit opt-in test infrastructure, not a product runtime backend. Actual native verification
-is `NOT_RUN` pending an authorized CI dispatch/result; the local mandatory sandbox probe is
-BLOCKED (`NETLINK_ROUTE` permissions). Harness preparation or pure tests are not native PASS.
+explicit opt-in test infrastructure, not a product runtime backend. Initial native run 40471175289 executed pinned Verilator inside the mandatory CI sandbox,
+but its aggregate result is FAIL: the legacy fixture exposed macro-expanded columns that do
+not address original source tokens. The revised oracle and new macro-free case await a fresh
+native run. Local execution remains BLOCKED (`NETLINK_ROUTE` permissions); replay tests do not
+retroactively change the failed run to PASS. See `evidence/verilator-native-run40471175289/`.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).

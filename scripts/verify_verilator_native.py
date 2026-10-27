@@ -40,6 +40,7 @@ CASES = (
     {"id": "HDL-VLT-02", "source": "native_class.sv", "top": "native_class_top", "language": "1800-2017", "expect": "accept"},
     {"id": "HDL-VLT-03", "source": "native_missing.sv", "top": "native_missing_top", "language": "1800-2017", "expect": "reject", "diagnostic": "missing_unit"},
     {"id": "HDL-VLT-04", "source": "native_syntax.sv", "top": "native_syntax_top", "language": "1800-2017", "expect": "reject", "diagnostic": "syntax error"},
+    {"id": "HDL-VLT-05", "source": "native_plain.v", "top": "native_plain_top", "language": "1364-2005", "expect": "accept"},
 )
 
 
@@ -111,7 +112,7 @@ def verify_exit(result: dict, case: dict) -> None:
               f"Missing specific compiler diagnostic: {diagnostic[-3000:]}")
 
 
-def verify_inventory(inventory: dict, case: dict, source: Path) -> dict:
+def verify_inventory(inventory: dict, case: dict, source: Path, *, source_label: str | None = None) -> dict:
     check(inventory["trust_class"] == "EXTERNAL_DECLARED", "Native run must not promote importer trust")
     check(inventory["completeness"] == "PARTIAL", "Native run must not promote completeness")
     check(inventory["runtime_resolution"] == "not_computed", "No runtime resolution allowed")
@@ -119,28 +120,59 @@ def verify_inventory(inventory: dict, case: dict, source: Path) -> dict:
     items = inventory["items"]
     lines = source.read_text().splitlines()
 
-    def select(kind: str, name: str, *, token: str | None = None, line: int | None = None) -> dict:
+    def find(kind: str, name: str, line: int | None) -> dict:
         found = [i for i in items if i["node_type"] == kind and i["verilog_name"] == name]
         if line is not None:
             found = [i for i in found if i["source_span"]["start_line"] == line]
         check(len(found) == 1, f"Expected exactly one {kind} {name} at line {line}: {len(found)}")
         item = found[0]
         # Explicit mapping to this known fixture, never open a producer-provided path.
-        check(item["source_file"] in {source.name, str(source)}, "Unexpected producer source label")
+        labels = {source_label} if source_label is not None else {source.name, str(source)}
+        check(item["source_file"] in labels, "Unexpected producer source label")
         span = item["source_span"]
         check(span["start_line"] == span["end_line"], "Expected a single-line fixture location")
         check(1 <= span["start_line"] <= len(lines), "Location outside fixture")
         text = lines[span["start_line"] - 1]
         check(1 <= span["start_column"] < span["end_column"] <= len(text) + 1, "Column outside fixture")
-        check(text[span["start_column"] - 1:span["end_column"] - 1] == (token or name), "Source token mismatch")
         check("resolved_target" not in item, "No invented resolved target")
+        return item
+
+    def select(kind: str, name: str, *, token: str | None = None, line: int | None = None) -> dict:
+        item = find(kind, name, line)
+        span = item["source_span"]
+        text = lines[span["start_line"] - 1]
+        actual = text[span["start_column"] - 1:span["end_column"] - 1]
+        check(actual == (token or name), f"Source token mismatch for {kind} {name}: {actual!r}")
+        return item
+
+    location_findings = []
+
+    def macro_column(kind: str, name: str, line: int, start: int, end: int, original: str) -> dict:
+        # Fixture-only negative oracle, observed in actual run 40471175289. This is NOT
+        # a macro source mapper and never rewrites the imported producer location.
+        item = find(kind, name, line)
+        expected_span = {"start_line": line, "end_line": line, "start_column": start, "end_column": end}
+        check(item["source_span"] == expected_span, f"Changed producer macro columns for {name}")
+        text = lines[line - 1]
+        check(text.count("`NATIVE_WIDTH") == 1, "Expected exactly this fixture's single macro")
+        check(text[start - 1:end - 1] == original != name, "Macro location must not select the original identifier")
+        expanded = text.replace("`NATIVE_WIDTH", "4")
+        check(expanded[start - 1:end - 1] == name, "Producer column must match the known fixture expansion")
+        location_findings.append({
+            "node_type": kind, "name": name, "producer_span": item["source_span"],
+            "original_source_slice": original, "known_expansion_slice": name,
+            "source_binding": "UNVERIFIED", "interpretation": "macro_expanded_column_not_original_token",
+        })
         return item
 
     assertions = []
     select("MODULE", case["top"])
     if case["id"] == "HDL-VLT-01":
         leaf = select("MODULE", "native_leaf", line=7)
-        cell = select("CELL", "u_leaf", line=4)
+        check("`define NATIVE_WIDTH 4" in (source.parent / "native_defs.vh").read_text().splitlines(), "Unexpected fixture macro value")
+        cell = macro_column("CELL", "u_leaf", 4, 28, 34, "IVE_WI")
+        macro_column("VAR", "d", 2, 51, 52, "_")
+        macro_column("VAR", "q", 3, 41, 42, "_")
         check(cell["attributes"]["modp"] == leaf["node_id"], "Cell pointer must name this artifact's specialized leaf")
         data = select("VAR", "d", line=7)
         check(data["parent_node_id"] == leaf["node_id"], "Input belongs to specialized leaf")
@@ -148,7 +180,14 @@ def verify_inventory(inventory: dict, case: dict, source: Path) -> dict:
         check(dtype["attributes"].get("range") == "3:0", "Expected macro/parameter-specialized 4-bit input")
         check("WIDTH" not in json.dumps(dtype), "Folded type must not invent a WIDTH source reference")
         select("VAR", "WIDTH", line=7)
-        assertions += ["1364-2005 .v/.vh preprocessing and parameter specialization", "module/cell/input source tokens", "artifact-local cell pointer", "folded range is 3:0; no reconstructed WIDTH reference"]
+        assertions += ["1364-2005 .v/.vh preprocessing and parameter specialization", "macro-free module/parameter/leaf-input original source tokens", "macro-shifted cell/top-port locations explicitly NOT original source tokens", "artifact-local cell pointer", "folded range is 3:0; no reconstructed WIDTH reference"]
+    elif case["id"] == "HDL-VLT-05":
+        leaf = select("MODULE", "native_plain_leaf", line=4)
+        cell = select("CELL", "u_plain", line=2)
+        data = select("VAR", "d", line=4)
+        check(cell["attributes"]["modp"] == leaf["node_id"], "Macro-free cell pointer mismatch")
+        check(data["parent_node_id"] == leaf["node_id"], "Macro-free leaf input containment mismatch")
+        assertions += ["1364-2005 macro-free cell/module/input exact original source tokens", "artifact-local cell pointer"]
     else:
         cls = select("CLASS", "Packet", token="class", line=2)
         member = select("VAR", "payload", line=3)
@@ -157,7 +196,8 @@ def verify_inventory(inventory: dict, case: dict, source: Path) -> dict:
         check(member["parent_node_id"] == cls["node_id"], "Member containment mismatch")
         check(method["parent_node_id"] == cls["node_id"], "Method containment mismatch")
         assertions += ["1800-2017 typedef/class/member/function inventory", "class keyword/member/function source tokens", "class containment (not runtime dispatch)"]
-    return {"assertions": assertions, "item_count": len(items),
+    return {"assertions": assertions, "item_count": len(items), "source_location_findings": location_findings,
+            "source_binding": "UNVERIFIED", "location_limitations": ["Producer columns following macro expansion may not address original source tokens; no edit-location binding is established."],
             "methodcall_count": sum(i["node_type"] == "METHODCALL" for i in items)}
 
 

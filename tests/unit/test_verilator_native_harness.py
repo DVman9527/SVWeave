@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import io
 import json
 import os
@@ -19,6 +20,55 @@ from svweave.security.sandbox import HostCapability, SandboxRunner
 
 
 class NativeVerilatorGuards(unittest.TestCase):
+    def recorded_macro_inventory(self) -> tuple[dict, dict]:
+        recorded = native.FIXTURES / "recorded/run40471175289"
+        provenance = json.loads((recorded / "provenance.json").read_text())
+        tree, meta = recorded / "design.tree.json", recorded / "design.tree.meta.json"
+        self.assertEqual(native.digest(tree), provenance["tree_sha256"])
+        self.assertEqual(native.digest(meta), provenance["meta_sha256"])
+        for name, expected in provenance["source_sha256"].items():
+            self.assertEqual(native.digest(native.FIXTURES / name), expected)
+        return native.parse_tree(tree.read_bytes(), meta.read_bytes(), "5.052"), provenance
+
+    def test_HDL_VLT_real_output_macro_columns_remain_unverified(self) -> None:
+        inventory, provenance = self.recorded_macro_inventory()
+        before = copy.deepcopy(inventory)
+        result = native.verify_inventory(inventory, native.CASES[0], native.FIXTURES / "native_legacy.v",
+                                         source_label=provenance["source_label"])
+        self.assertEqual(inventory, before)  # no correction or promotion of raw producer locations
+        self.assertEqual(result["source_binding"], "UNVERIFIED")
+        findings = result["source_location_findings"]
+        self.assertEqual([(f["name"], f["original_source_slice"]) for f in findings],
+                         [("u_leaf", "IVE_WI"), ("d", "_"), ("q", "_")])
+        self.assertTrue(all(f["source_binding"] == "UNVERIFIED" for f in findings))
+
+    def test_HDL_VLT_real_output_changed_macro_columns_fail_closed(self) -> None:
+        for name, line, start, end in (("u_leaf", 4, 40, 46), ("d", 2, 52, 53)):
+            inventory, provenance = self.recorded_macro_inventory()
+            item = next(i for i in inventory["items"]
+                        if i["name"] == name and i["source_span"]["start_line"] == line)
+            item["source_span"]["start_column"] = start
+            item["source_span"]["end_column"] = end
+            # Even a span selecting the original u_leaf token cannot silently replace
+            # the frozen producer-column expectation for this actual native fixture.
+            with self.assertRaisesRegex(AssertionError, "Changed producer macro columns"):
+                native.verify_inventory(inventory, native.CASES[0], native.FIXTURES / "native_legacy.v",
+                                        source_label=provenance["source_label"])
+
+    def test_HDL_VLT_recorded_real_artifacts_import_query_remains_external(self) -> None:
+        self.recorded_macro_inventory()  # checks unchanged artifact/source hashes first
+        recorded = native.FIXTURES / "recorded/run40471175289"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            out = root / "case"
+            out.mkdir()
+            tree, meta = out / "tree.json", out / "meta.json"
+            tree.write_bytes((recorded / "design.tree.json").read_bytes())
+            meta.write_bytes((recorded / "design.tree.meta.json").read_bytes())
+            result = native.roundtrip(root, native.CASES[0], tree, meta)
+            self.assertEqual(result["source_binding"], "UNVERIFIED")
+            self.assertFalse(result["authoritative_database_created"])
+
     def test_HDL_VLT_commands_are_static_and_explicit_language(self) -> None:
         for case in native.CASES:
             for mode in ("lint", "json"):

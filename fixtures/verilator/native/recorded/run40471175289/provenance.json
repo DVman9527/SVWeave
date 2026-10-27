@@ -1,0 +1,25 @@
+{
+  "schema_version": "svw-recorded-native-fixture-1",
+  "run_id": "40471175289",
+  "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40471175289",
+  "source_commit": "d709bb92f22768c95db0f534e93dd90f43670354",
+  "tool_version": "Verilator 5.052 2026-09-05 rev vUNKNOWN-built20261027-ea338be",
+  "binary_sha256": "1cae037c649b5bb8fd9ba7db5b30c19b5ef31cb696535ef158d4e350b9646a62",
+  "tool_source": {
+    "commit": "ea338be98e1e838d3518809ce8899f85a009963c",
+    "tree": "21357af5972974181919bf9e3ba06ccf455fa6f1",
+    "git_archive_tar_sha256": "8bbdd703b0edce79a1c4d9bd83838975ed9d65b27e58b8c308a2963fb6ecd8c3"
+  },
+  "source_label": "/home/runner/work/SVWeave/SVWeave/evidence/verilator-native/sources/native_legacy.v",
+  "source_sha256": {
+    "native_legacy.v": "bcd9cc55e188c93e3af27fc813796fe4e214872d612600b24ecb35a9eb15f5d8",
+    "native_defs.vh": "bc5a9afc8523ff802c2e969354bc34cce2e480d5bdb99bccea138c35509fb076"
+  },
+  "tree_sha256": "c151404beb7aa086992aa9e958982e9bf76abf52dbbba809da1b5e19cfd44cdb",
+  "meta_sha256": "f1118181ab48efbc767eebe329b1f2b9e92706eaadcfa585c5367c434514b210",
+  "recorded_run_status": "FAIL",
+  "native_lint": "ACCEPTED",
+  "native_json": "ACCEPTED",
+  "original_case_error": "AssertionError: Source token mismatch",
+  "replay_scope": "Pure importer/harness regression using unchanged actual native outputs; not a new native run."
+}

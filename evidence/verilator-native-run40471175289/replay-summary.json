@@ -1,0 +1,16 @@
+{
+  "recorded_native_run": "40471175289",
+  "native_run_status": "FAIL",
+  "local_replay_status": "PASS",
+  "local_replay_tests": 11,
+  "new_native_execution": false,
+  "new_case_HDL_VLT_05": "NOT_RUN",
+  "sha256": {
+    "evidence/verilator-native-run40471175289/native-report.json": "66bb08953624fdbc6aed2210ff2ace56ee87054c797254762e7082d63018b6e0",
+    "evidence/verilator-native-run40471175289/native-junit.xml": "81964e478c4c99154f77bf29def660201243b0a83ef2ff7dbaf9cd5d67ca4c1e",
+    "evidence/verilator-native-run40471175289/bootstrap-report.json": "b866c6bfbae6eb26e008e003314846dadeea9a8ffded1af81d4a87809b3b0d64",
+    "evidence/verilator-native-run40471175289/replay-guards.log": "dd1806fde4293ab0e88e1fdbf52d88803462d2e33f83be97575faf002e3350d6",
+    "scripts/verify_verilator_native.py": "00d069809d265aa7bf87ac0cd062f9117f2ca4f90909bd8a83022348f7e50d78",
+    "tests/unit/test_verilator_native_harness.py": "0dbf199f2cb45ad41fe63a4b940c69d6d7bd96341b96b69f610e702a5b61e923"
+  }
+}
