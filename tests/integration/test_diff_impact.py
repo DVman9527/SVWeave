@@ -11,7 +11,8 @@ import pytest
 from tests.integration.demo_support import demo_ws
 from tests.integration.test_cli_semantic import run
 
-pytestmark = pytest.mark.integration
+# Exercise real Git and repository policy, not unrelated runner/user filters (e.g. Git LFS).
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("isolated_git")]
 
 LANE = "fixtures/demo/rtl/demo_lane.sv"
 

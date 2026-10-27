@@ -6,7 +6,6 @@ test name)."""
 from __future__ import annotations
 
 import json
-import os
 import time
 from pathlib import Path
 from typing import Any
@@ -28,7 +27,9 @@ from tests.integration.helpers import (
     dbq,
     decl_by_qn,
     decl_rows,
+    native_check,
     opts,
+    raw_dto,
     ref_rows,
     uvm_ws,
 )
@@ -490,7 +491,9 @@ def test_M6_failed_and_aborted_jobs_still_leave_all_thirteen_artifacts(tmp_path:
 
 
 # ============================================================================== surviving mutants
-def test_ignored_severity_diagnostics_are_excluded_from_counts_and_outcome(tmp_path: Path) -> None:
+def test_ignored_severity_diagnostics_are_excluded_from_counts_and_outcome(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     sv = """
 module top;
   logic [3:0] w;
@@ -504,28 +507,13 @@ module top;
   end
 endmodule
 """
-    from svweave.adapters.slang.worker import build_and_extract
-
     root = tmp_path / "raw"
     root.mkdir()
     (root / "t.sv").write_text(sv)
-    import pyslang
-    from pyslang import driver as drv
-
-    d = drv.Driver()
-    d.addStandardArgs()
-    os.chdir(root)
-    d.parseCommandLine("slang t.sv --top top", drv.CommandLineOptions())
-    d.processOptions()
-    d.parseAllSources()
-    comp = d.createCompilation()
-    ignored = [
-        x
-        for x in comp.getAllDiagnostics()
-        if d.diagEngine.getSeverity(x.code, x.location) == pyslang.DiagnosticSeverity.Ignored
-    ]
-    assert len(ignored) >= 3  # the premise: slang hands us default-off diagnostics
-    r = build_and_extract(WorkerRequest(snapshot_root=str(root), args=["--top", "top", "t.sv"]))
+    monkeypatch.setenv("SVW_TEST_NATIVE_SECRET", "must-not-reach-native-check")
+    premise = native_check("ignored_diagnostics", root)
+    assert premise["ignored"] >= 3  # independent real premise: slang hands us default-off diagnostics
+    r = raw_dto(WorkerRequest(snapshot_root=str(root), args=["--top", "top", "t.sv"]))
     assert r["diagnostics"] == []
     w = mk(tmp_path / "w", {"t.sv": sv}, "top")
     env = build(w)

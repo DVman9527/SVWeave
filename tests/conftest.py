@@ -19,6 +19,19 @@ pytest_plugins = ["tests.required_backends"]
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
 
+def pytest_configure() -> None:
+    """An inherited worker opt-out must never silently weaken real qualification tests.
+
+    Deliberate degraded-feature controls use explicit arguments inside mandatory outer isolation;
+    this only rejects the host environment fallback, before any test or backend fixture runs.
+    """
+    if os.environ.get("SVWEAVE_ALLOW_DEGRADED_WORKER") == "1":
+        raise pytest.UsageError(
+            "SVWEAVE_ALLOW_DEGRADED_WORKER=1 is forbidden in the test runner; "
+            "native tests require mandatory sandboxing"
+        )
+
+
 def profile(**over: Any) -> dict[str, Any]:
     p: dict[str, Any] = {
         "cwd": ".",

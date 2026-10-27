@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/spikes"))
 sys.path.insert(0, str(ROOT / "src"))
 import _sandbox as boundary  # noqa: E402
+
 from svweave.domain.errors import SvwError  # noqa: E402
 from svweave.security.sandbox import (  # noqa: E402
     HostCapability,
@@ -76,17 +77,21 @@ class ProbeBoundaryTests(unittest.TestCase):
         self.assertIn("-i", result.argv)
 
     def test_HDL_CI_04_missing_sandbox_never_starts_a_process(self):
-        with patch.object(boundary, "SandboxRunner", return_value=self.runner(False)), \
-                patch.object(boundary.subprocess, "Popen") as start:
-            with self.assertRaises(SvwError):
-                boundary.run(self.spec, [str(self.tool)])
+        with (
+            patch.object(boundary, 'SandboxRunner', return_value=self.runner(False)),
+            patch.object(boundary.subprocess, 'Popen') as start,
+            self.assertRaises(SvwError),
+        ):
+            boundary.run(self.spec, [str(self.tool)])
         start.assert_not_called()
 
     def test_HDL_CI_04_degraded_environment_flag_cannot_enable_fallback(self):
-        with patch.dict(os.environ, {"SVWEAVE_ALLOW_DEGRADED_WORKER": "1"}), \
-                patch.object(boundary, "SandboxRunner", return_value=self.runner(False)):
-            with self.assertRaises(SvwError):
-                boundary.wrap(self.spec, [str(self.tool)])
+        with (
+            patch.dict(os.environ, {'SVWEAVE_ALLOW_DEGRADED_WORKER': '1'}),
+            patch.object(boundary, 'SandboxRunner', return_value=self.runner(False)),
+            self.assertRaises(SvwError),
+        ):
+            boundary.wrap(self.spec, [str(self.tool)])
 
     def test_HDL_CI_04_network_enabled_spec_is_rejected(self):
         with self.assertRaises(SvwError):
@@ -114,9 +119,11 @@ class ProbeBoundaryTests(unittest.TestCase):
 
     def test_HDL_CI_04_broad_runtime_fallback_is_rejected(self):
         venv = self.root / "venv"
-        with patch.object(boundary, "python_binds", return_value=[venv]):
-            with self.assertRaises(SvwError):
-                boundary.probe_spec(python_venvs=(venv,))
+        with (
+            patch.object(boundary, 'python_binds', return_value=[venv]),
+            self.assertRaises(SvwError),
+        ):
+            boundary.probe_spec(python_venvs=(venv,))
 
     def test_HDL_CI_04_runtime_symlink_topology_is_narrow_and_complete(self):
         runtime = self.root / "runtime"
@@ -157,14 +164,18 @@ class ProbeBoundaryTests(unittest.TestCase):
         return patch.object(boundary, "wrap", return_value=WrappedCommand(argv, IsolationMode.BWRAP))
 
     def test_HDL_CI_04_failed_metadata_is_not_accepted(self):
-        with patch.object(boundary, "run", return_value=subprocess.CompletedProcess([], 1, "fake version", "")):
-            with self.assertRaises(SvwError):
-                boundary.checked_text(self.spec, [str(self.tool)])
+        with (
+            patch.object(boundary, 'run', return_value=subprocess.CompletedProcess([], 1, 'fake version', '')),
+            self.assertRaises(SvwError),
+        ):
+            boundary.checked_text(self.spec, [str(self.tool)])
 
     def test_HDL_CI_04_empty_metadata_is_not_accepted(self):
-        with patch.object(boundary, "run", return_value=subprocess.CompletedProcess([], 0, "", "")):
-            with self.assertRaises(SvwError):
-                boundary.checked_text(self.spec, [str(self.tool)])
+        with (
+            patch.object(boundary, 'run', return_value=subprocess.CompletedProcess([], 0, '', '')),
+            self.assertRaises(SvwError),
+        ):
+            boundary.checked_text(self.spec, [str(self.tool)])
 
     def test_HDL_CI_04_subprocess_environment_has_no_inherited_secret(self):
         code = "import json,os;print(json.dumps(dict(os.environ)))"
@@ -177,24 +188,30 @@ class ProbeBoundaryTests(unittest.TestCase):
         self.assertEqual(env["PATH"], "/usr/bin:/bin")
 
     def test_HDL_CI_04_stdout_overflow_fails_not_truncates(self):
-        with self.fake_wrap([sys.executable, "-I", "-c", "print('x'*10000)"]):
-            with self.assertRaises(SvwError) as error:
-                boundary.run(self.spec, ["unit-only"], max_stdout_bytes=128)
+        with (
+            self.fake_wrap([sys.executable, '-I', '-c', "print('x'*10000)"]),
+            self.assertRaises(SvwError) as error,
+        ):
+            boundary.run(self.spec, ["unit-only"], max_stdout_bytes=128)
         self.assertEqual(error.exception.code.value, "OUTPUT_LIMIT")
 
     def test_HDL_CI_04_stderr_overflow_fails_not_truncates(self):
-        with self.fake_wrap([sys.executable, "-I", "-c", "import sys;print('x'*10000,file=sys.stderr)"]):
-            with self.assertRaises(SvwError):
-                boundary.run(self.spec, ["unit-only"], max_stderr_bytes=128)
+        with (
+            self.fake_wrap([sys.executable, '-I', '-c', "import sys;print('x'*10000,file=sys.stderr)"]),
+            self.assertRaises(SvwError),
+        ):
+            boundary.run(self.spec, ["unit-only"], max_stderr_bytes=128)
 
     def test_HDL_CI_04_timeout_reaps_descendant_process_group(self):
         pidfile = self.root / "child.pid"
         code = ("import subprocess,sys,time;from pathlib import Path;"
                 "p=subprocess.Popen([sys.executable,'-I','-c','import time;time.sleep(60)']);"
                 "Path(sys.argv[1]).write_text(str(p.pid));time.sleep(60)")
-        with self.fake_wrap([sys.executable, "-I", "-c", code, str(pidfile)]):
-            with self.assertRaises(subprocess.TimeoutExpired):
-                boundary.run(self.spec, ["unit-only"], timeout=0.5)
+        with (
+            self.fake_wrap([sys.executable, '-I', '-c', code, str(pidfile)]),
+            self.assertRaises(subprocess.TimeoutExpired),
+        ):
+            boundary.run(self.spec, ["unit-only"], timeout=0.5)
         self.assertTrue(pidfile.exists())
         status = Path(f"/proc/{pidfile.read_text()}/stat")
         self.assertTrue(not status.exists() or status.read_text().rsplit(")", 1)[1].split()[0] == "Z")
@@ -256,9 +273,11 @@ class ProbeEvidenceTests(unittest.TestCase):
             if "--all-deps" in argv:
                 Path(argv[argv.index("--all-deps") + 1]).write_bytes(b"x" * (1024 * 1024 + 1))
             return result
-        with patch.object(self.probe, "run", side_effect=oversized):
-            with self.assertRaisesRegex(ValueError, "exceeds"):
-                self.probe.probe_slang_cli()
+        with (
+            patch.object(self.probe, 'run', side_effect=oversized),
+            self.assertRaisesRegex(ValueError, 'exceeds'),
+        ):
+            self.probe.probe_slang_cli()
 
     def test_HDL_CI_04_cli_dependency_symlink_is_rejected(self):
         def symlinked(spec, argv, **kwargs):
@@ -268,9 +287,11 @@ class ProbeEvidenceTests(unittest.TestCase):
                 path.unlink()
                 path.symlink_to(ROOT / "README.md")
             return result
-        with patch.object(self.probe, "run", side_effect=symlinked):
-            with self.assertRaises(SvwError):
-                self.probe.probe_slang_cli()
+        with (
+            patch.object(self.probe, 'run', side_effect=symlinked),
+            self.assertRaises(SvwError),
+        ):
+            self.probe.probe_slang_cli()
 
     def test_HDL_CI_04_pyslang_sandbox_denial_is_unavailable(self):
         with patch.object(self.probe, "checked_text", side_effect=RuntimeError("isolation denied")):
@@ -280,10 +301,13 @@ class ProbeEvidenceTests(unittest.TestCase):
 
     def test_HDL_CI_04_cbm_original_state_is_rejected_before_host_mutation(self):
         cbm = load_script("probe_cbm_unit", "scripts/spikes/cbm_spike.py")
-        with patch.object(Path, "mkdir") as mkdir, patch.object(Path, "chmod") as chmod, \
-                patch.object(boundary, "run") as run:
-            with self.assertRaises(SvwError):
-                cbm.configure_state(self.root / "toolchain/slang/slang", boundary.BASE_ENV, ROOT / "fixtures")
+        with (
+            patch.object(Path, 'mkdir') as mkdir,
+            patch.object(Path, 'chmod') as chmod,
+            patch.object(boundary, 'run') as run,
+            self.assertRaises(SvwError),
+        ):
+            cbm.configure_state(self.root / "toolchain/slang/slang", boundary.BASE_ENV, ROOT / "fixtures")
         mkdir.assert_not_called()
         chmod.assert_not_called()
         run.assert_not_called()
@@ -300,10 +324,57 @@ class ProbeEvidenceTests(unittest.TestCase):
 
     def test_HDL_CI_04_cbm_failed_safe_setting_stops_before_server_launch(self):
         cbm = load_script("probe_cbm_unit", "scripts/spikes/cbm_spike.py")
-        with patch.object(boundary, "run", return_value=subprocess.CompletedProcess([], 1, "", "denied")) as run:
-            with self.assertRaisesRegex(RuntimeError, "safe config"):
-                cbm.configure_state(self.root / "toolchain/slang/slang", boundary.BASE_ENV, self.root / "cbm-state")
+        with (
+            patch.object(boundary, 'run', return_value=subprocess.CompletedProcess([], 1, '', 'denied')) as run,
+            self.assertRaisesRegex(RuntimeError, 'safe config'),
+        ):
+            cbm.configure_state(self.root / "toolchain/slang/slang", boundary.BASE_ENV, self.root / "cbm-state")
         self.assertEqual(run.call_count, 1)
+
+    def test_HDL_CI_04_sandbox_denial_reason_is_preserved_in_evidence(self):
+        from svweave.domain.errors import ErrorCode
+        error = SvwError(ErrorCode.BACKEND_UNAVAILABLE, "mandatory isolation unavailable",
+                         {"isolation": "UNAVAILABLE", "reason": "nested user namespace denied"})
+        with patch.object(self.probe, "checked_text", side_effect=error):
+            result = self.probe.probe_pyslang()
+        self.assertEqual(result["status"], "UNAVAILABLE")
+        self.assertEqual(result["error_details"]["reason"], "nested user namespace denied")
+
+    def test_HDL_CI_04_grouped_sandbox_denial_reason_is_preserved(self):
+        from svweave.domain.errors import ErrorCode
+        error = SvwError(ErrorCode.BACKEND_UNAVAILABLE, "mandatory isolation unavailable",
+                         {"reason": "native host refusal"})
+        result = self.probe.failure_record(ExceptionGroup("transport", [error]))
+        self.assertEqual(result["causes"][0]["error_details"]["reason"], "native host refusal")
+
+    def test_HDL_CI_04_nested_preflight_preserves_denial_and_fails_closed(self):
+        from _cleanroom_preflight import collect_nested_preflight
+        observation = {"capability": {"available": False, "reason": "nested namespace denied"}}
+        result = subprocess.CompletedProcess([], 1, json.dumps(observation), "")
+        with patch.object(subprocess, "run", return_value=result) as transport:
+            report = collect_nested_preflight(self.root / "python", self.root, transport)
+        self.assertFalse(report["ready"])
+        self.assertEqual(report["observation"]["capability"]["reason"], "nested namespace denied")
+        argv, cwd, timeout = transport.call_args.args
+        self.assertEqual(argv[1:3], ["-I", "-c"])
+        self.assertIn("probe_host(refresh=True)", argv[3])
+        self.assertEqual((cwd, timeout), (self.root, 60))
+
+    def test_HDL_CI_04_nested_preflight_requires_real_success_fields(self):
+        from _cleanroom_preflight import collect_nested_preflight
+        observation = {"capability": {"available": True, "reason": None}}
+        result = subprocess.CompletedProcess([], 0, json.dumps(observation), "")
+        with patch.object(subprocess, "run", return_value=result) as transport:
+            report = collect_nested_preflight(self.root / "python", self.root, transport)
+        self.assertTrue(report["ready"])
+
+    def test_HDL_CI_04_nested_preflight_malformed_output_is_not_ready(self):
+        from _cleanroom_preflight import collect_nested_preflight
+        result = subprocess.CompletedProcess([], 0, "not-json", "")
+        with patch.object(subprocess, "run", return_value=result) as transport:
+            report = collect_nested_preflight(self.root / "python", self.root, transport)
+        self.assertFalse(report["ready"])
+        self.assertIn("parse_error", report)
 
     def test_HDL_CI_04_qualification_scripts_have_no_raw_subprocess_launches(self):
         for name in ("scripts/probe_backends.py", "scripts/spikes/pyslang_spike.py",

@@ -2,16 +2,77 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import shutil
+import sys
 from pathlib import Path
 from typing import Any
 
+from scripts.spikes import _sandbox as boundary
+
+from svweave.adapters.slang.protocol import WorkerRequest
+from svweave.adapters.slang.runner import run_worker
 from svweave.application.options import WorkspaceOptions
 from svweave.domain.envelope import Envelope
+from svweave.security.sandbox import IsolationMode
 from tests.conftest import FIXTURES, Ws, profile
 
 LANG = FIXTURES / "language"
 UVM_SRC = Path(__file__).resolve().parents[2] / ".toolchain" / "uvm-core" / "src"
+
+
+def raw_dto(req: WorkerRequest) -> dict[str, Any]:
+    """The real, unchanged worker DTO, never in-process or through degraded isolation."""
+    out = run_worker(req, timeout_s=180, memory_mib=4096, allow_degraded=False)
+    assert out.isolation == IsolationMode.BWRAP.value, (out.message, out.stderr_tail)
+    assert out.ok and out.exit_code == 0, (out.kind, out.message, out.stderr_tail)
+    result = json.loads(out.stdout)
+    assert isinstance(result, dict)
+    return result
+
+
+def native_check(
+    name: str,
+    source: Path,
+    *,
+    tools: tuple[Path, ...] = (),
+    writable: tuple[Path, ...] = (),
+    args: tuple[str, ...] = (),
+) -> dict[str, Any]:
+    """Run an independent native test premise inside the mandatory probe boundary.
+
+    The child verifies namespace separation, a read-only source and a clean environment before
+    loading any native backend. No source tree or tool input is writable in the outer sandbox.
+    """
+    script = Path(__file__).with_name("native_checks.py")
+    code = Path(__file__).resolve().parents[2] / "src"
+    assert os.environ.get("SVW_TEST_NATIVE_SECRET"), "caller must plant a synthetic environment sentinel"
+
+    def source_hashes() -> dict[str, str]:
+        return {str(path.relative_to(source)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in source.rglob("*") if path.is_file()}
+
+    original = source_hashes()
+    spec = boundary.probe_spec(
+        sources=(source, script, code), tools=tools, writable=writable, cwd=source,
+        python_venvs=(Path(sys.prefix),),
+    )
+    try:
+        result = boundary.run(
+            spec,
+            [sys.executable, "-I", str(script), name, str(source),
+             os.readlink("/proc/self/ns/net"), os.readlink("/proc/self/ns/pid"), *args],
+            timeout=300,
+        )
+    finally:
+        assert source_hashes() == original, "native check changed its read-only source input"
+    assert result.returncode == 0, (result.stdout, result.stderr)
+    data = json.loads(result.stdout)
+    assert data["safety"] == {"network_private": True, "pid_private": True,
+                              "source_readonly": True, "secret_absent": True}
+    return data["result"]
 
 
 def lang_ws(tmp_path: Path, topic: str, top: str | list[str], **prof: Any) -> Ws:

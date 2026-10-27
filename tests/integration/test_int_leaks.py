@@ -13,15 +13,13 @@ import pytest
 from svweave.adapters.codebase_memory import CbmAdapter
 from svweave.adapters.mcp_client import TOKEN_ENV, McpClient, McpLaunch
 from svweave.adapters.serena import SerenaAdapter
-from svweave.application.search import svw_search
-from svweave.domain.states import EvidenceKind
 from svweave.orchestration.registry import CBM, BackendRegistry
 from svweave.orchestration.toolchain import Toolchain
-from svweave.security.sandbox import HostCapability, SandboxRunner
+from svweave.security.sandbox import SandboxRunner
 from tests.integration.conftest import SID_A, copy_fixture_dirs, skip_or_fail
+from tests.integration.helpers import native_check
 
 pytestmark = pytest.mark.integration
-KEY = b"k" * 32
 
 
 #: Per-client SVWEAVE_BACKEND_TOKENs of every McpClient THIS test process created. Only processes whose
@@ -90,26 +88,30 @@ def test_no_cbm_process_outlives_its_adapter_in_bwrap_mode(
 
 
 def test_f4_degraded_mode_runs_for_real_marks_results_degraded_and_leaves_nothing_behind(
-    toolchain: Toolchain, snapshots_root: Path, tmp_path: Path
+    toolchain: Toolchain, snapshots_root: Path, tmp_path: Path,
+    sandbox: SandboxRunner, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     if not toolchain.cbm_binary.is_file():
         skip_or_fail("cbm binary not installed")
     assert not backend_procs()
-    forced = SandboxRunner(allow_degraded=True, capability=HostCapability(False, None, None, "forced for test"))
-    reg = BackendRegistry(toolchain, tmp_path / "backends", snapshots_root, sandbox=forced)
-    try:
-        env = svw_search(snapshot_id=SID_A, snapshot_root=snapshots_root / SID_A, query="demo_lane",
-                         registry=reg, cursor_key=KEY)
-        assert env.data["backend_used"] == "codebase-memory-mcp"
-        assert env.data["degraded"] is True and "WITHOUT process isolation" in env.data["degraded_reason"]
-        assert env.provenance.evidence_kind is EvidenceKind.SOURCE_CANDIDATE
-        assert any(i["file"] == "demo/rtl/demo_lane.sv" for i in env.data["items"])
-        ad = reg.cbm(snapshots_root / SID_A)
-        assert ad.alive and ad.pid, "degraded (env -i) launch must still be tracked as alive"
-        assert ad.isolation.value == "degraded_no_isolation" and ad.warnings
-    finally:
-        reg.shutdown()
-    assert wait_gone() == [], "degraded-mode cbm / daemon survived registry.shutdown()"
+    state = tmp_path / "outer-state"
+    state.mkdir()
+    source = snapshots_root / SID_A
+    original = (source / "demo/rtl/demo_lane.sv").read_bytes()
+    monkeypatch.setenv("SVW_TEST_NATIVE_SECRET", "must-not-reach-degraded-backend")
+    result = native_check(
+        "degraded_cbm", source,
+        tools=(toolchain.cbm_binary.parent, toolchain.root / "toolchain.lock.json",
+               toolchain.root / "capability_report.json"),
+        writable=(state,), args=(str(toolchain.root), str(state)),
+    )
+    assert result["backend_used"] == "codebase-memory-mcp" and result["degraded"] is True
+    assert result["isolation"] == "degraded_no_isolation"
+    assert result["processes_after_shutdown"] == [] and result["runtime_removed"] is True
+    assert result["tokens"]
+    _OWN_TOKENS.update(result["tokens"])
+    assert wait_gone() == [], "degraded backend survived the mandatory outer boundary"
+    assert (source / "demo/rtl/demo_lane.sv").read_bytes() == original
 
 
 def test_registry_probe_leaves_no_process_behind(toolchain: Toolchain, sandbox: SandboxRunner, tmp_path: Path) -> None:

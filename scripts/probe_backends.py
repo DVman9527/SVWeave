@@ -22,6 +22,7 @@ import importlib.metadata
 import tempfile
 import sys
 import time
+from dataclasses import asdict
 from pathlib import Path
 
 import anyio
@@ -50,6 +51,7 @@ from _mcp_common import (  # noqa: E402
 
 from _sandbox import checked_text, probe_spec, python_spec, run, serena_spec  # noqa: E402
 from svweave.security import safeio  # noqa: E402
+from svweave.security.sandbox import probe_host  # noqa: E402
 
 PROBE = REPO / ".svweave/probe"
 CBM_REQUIRED = ["index_repository", "index_status", "search_graph", "get_graph_schema", "get_code_snippet"]
@@ -70,6 +72,17 @@ def classify(checks: list[dict], alive: bool) -> str:
 
 def chk(name: str, ok: bool, detail, required: bool = True) -> dict:
     return {"check": name, "pass": bool(ok), "required_for_ready": required, "detail": detail}
+
+
+def failure_record(error: BaseException) -> dict:
+    """Retain the actual isolation denial reason, not only SvwError's summary string."""
+    record = {"error": f"{type(error).__name__}: {error}"}
+    details = getattr(error, "details", None)
+    if isinstance(details, dict):
+        record["error_details"] = details
+    if isinstance(error, BaseExceptionGroup):
+        record["causes"] = [failure_record(child) for child in error.exceptions[:8]]
+    return record
 
 
 # ---------------------------------------------------------------- pyslang
@@ -113,7 +126,7 @@ def probe_pyslang() -> dict:
         rep["status"] = classify(checks, alive=all(v.get("returncode") == 0 for v in b.values()))
     except Exception as e:
         rep["status"] = "UNAVAILABLE"
-        rep["error"] = f"{type(e).__name__}: {e}"
+        rep.update(failure_record(e))
     rep["probe_wall_s"] = round(time.monotonic() - t0, 3)
     return rep
 
@@ -216,7 +229,7 @@ def probe_cbm() -> dict:
     try:
         rep = anyio.run(_probe_cbm)
     except BaseException as e:
-        rep = {"backend": "codebase-memory-mcp", "status": "UNAVAILABLE", "error": f"{type(e).__name__}: {e!r}"}
+        rep = {"backend": "codebase-memory-mcp", "status": "UNAVAILABLE", **failure_record(e)}
     rep["probe_wall_s"] = round(time.monotonic() - t0, 3)
     return rep
 
@@ -295,7 +308,7 @@ def probe_serena() -> dict:
     try:
         rep = anyio.run(_probe_serena)
     except BaseException as e:
-        rep = {"backend": "serena", "status": "UNAVAILABLE", "error": f"{type(e).__name__}: {e!r}"}
+        rep = {"backend": "serena", "status": "UNAVAILABLE", **failure_record(e)}
     rep["probe_wall_s"] = round(time.monotonic() - t0, 3)
     return rep
 
@@ -314,6 +327,7 @@ def main() -> int:
                     "qualification_state": "UNQUALIFIED",
                     "mcp_client_sdk": importlib.metadata.version("mcp"),
                     "isolation": "mandatory_bwrap", "probe_artifacts": str(PROBE),
+                    "sandbox_host_capability": asdict(probe_host()),
                     "backends": {}}
     lock = REPO / "toolchain.lock.json"
     if lock.exists():
@@ -324,7 +338,7 @@ def main() -> int:
         try:
             report["backends"][name] = fns[name]()  # sequential: one heavy process at a time
         except Exception as e:
-            report["backends"][name] = {"status": "UNAVAILABLE", "error": f"{type(e).__name__}: {e}"}
+            report["backends"][name] = {"status": "UNAVAILABLE", **failure_record(e)}
     report["summary"] = {k: v.get("status") for k, v in report["backends"].items()}
     report["required_backend_errors"] = required_backend_errors(report["summary"])
     report["limitations"] = [

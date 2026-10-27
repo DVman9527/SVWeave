@@ -29,6 +29,8 @@ from svweave.adapters.codebase_memory import CbmAdapter
 from svweave.adapters.codebase_memory.adapter import BACKEND as CBM_BACKEND
 from svweave.adapters.serena import SerenaAdapter
 from svweave.adapters.serena.adapter import BACKEND as SERENA_BACKEND
+from svweave.adapters.slang.protocol import WorkerRequest
+from svweave.adapters.slang.runner import worker_sandbox_spec
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.states import BackendAvailability
 from svweave.orchestration.capability import CapabilityComparison
@@ -285,22 +287,30 @@ class BackendRegistry:
             h.error_code = ErrorCode.BACKEND_UNAVAILABLE.value
             return self._finish_probe(h)
         result: dict[str, Any] = {}
+        exit_code: int | None = None
         try:
             with tempfile.TemporaryDirectory(prefix="svwps-") as tmp:
                 src = Path(tmp) / "probe.sv"
                 src.write_text(PYSLANG_PROBE_SV, encoding="utf-8")
-                p = subprocess.run(
+                # A health check imports the native parser and compiles HDL too. Reuse the
+                # worker's immutable fixture/runtime mounts, but never inherit a degraded
+                # registry opt-in: missing isolation cannot qualify a native health probe.
+                mandatory = SandboxRunner(allow_degraded=False, capability=self.sandbox.capability)
+                spec = worker_sandbox_spec(WorkerRequest(snapshot_root=tmp, args=[]))
+                p = mandatory.run_once(
+                    spec,
                     [sys.executable, "-I", "-c", PYSLANG_PROBE_SCRIPT, str(src)],
-                    capture_output=True, text=True, timeout=120, check=False,
+                    timeout=120,
                 )
+                exit_code = p.returncode
             result = json.loads(p.stdout.strip().splitlines()[-1]) if p.stdout.strip() else {}
-            if p.returncode != 0 and not result:
+            if p.returncode != 0:
                 h.reasons.append("pyslang compile probe crashed: " + self.redactor.text(p.stderr[-200:]))
-        except (OSError, subprocess.SubprocessError, ValueError) as e:
+        except (OSError, subprocess.SubprocessError, ValueError, SvwError) as e:
             h.reasons.append(f"pyslang compile probe failed: {type(e).__name__}")
         imported = str(result.get("version", ""))
         h.details = {"locked": want, "imported": imported, "compile": result}
-        if not result:
+        if exit_code != 0 or not result:
             h.status = BackendAvailability.UNAVAILABLE
             h.error_code = ErrorCode.BACKEND_UNAVAILABLE.value
             h.reasons.append("pyslang cannot import or compile")

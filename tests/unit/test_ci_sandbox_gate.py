@@ -47,7 +47,9 @@ class SandboxGateTests(unittest.TestCase):
         self.assertNotIn("continue-on-error", job)
         for step in steps[host:probe + 1]:
             self.assertNotIn("continue-on-error", step)
-            self.assertNotIn("if", step)  # default success-only chaining, never always() on probes
+        self.assertNotIn("if", steps[host])
+        self.assertNotIn("if", steps[boundary])
+        self.assertEqual(steps[probe]["if"], "${{ !inputs.cleanroom_only }}")
         self.assertEqual(job["env"]["SVWEAVE_REQUIRE_BACKENDS"], "1")
         self.assertIn("not full qualification", job["name"])
         self.assertIn("Record exact validation identity", names)
@@ -55,6 +57,42 @@ class SandboxGateTests(unittest.TestCase):
         self.assertNotIn("scripts/probe_backends.py", native)
         self.assertIn("SVWEAVE_REQUIRE_BACKENDS", native)
         self.assertIn("--junitxml=", native)
+
+    def test_HDL_CI_01_cleanroom_diagnostic_is_opt_in_and_fail_closed(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        # PyYAML's YAML 1.1 loader interprets the unquoted workflow key `on` as True.
+        events = workflow.get("on", workflow.get(True))
+        option = events["workflow_dispatch"]["inputs"]["cleanroom_only"]
+        self.assertEqual(option["type"], "boolean")
+        self.assertIs(option["default"], False)
+        steps = workflow["jobs"]["real-backends"]["steps"]
+        names = [step.get("name") for step in steps]
+        boundary = names.index("Required native probe isolation regressions (fail closed)")
+        diagnostic = names.index("DEP-01 nested sandbox diagnostic (required; not qualification)")
+        self.assertLess(boundary, diagnostic)
+        self.assertEqual(steps[diagnostic]["if"], "${{ inputs.cleanroom_only }}")
+        command = steps[diagnostic]["run"]
+        self.assertIn("tests/integration/test_dep01_cleanroom.py", command)
+        self.assertIn("--junitxml=.svweave/ci/junit_dep01_cleanroom.xml", command)
+        self.assertNotIn("||", command)
+        self.assertNotIn("continue-on-error", steps[diagnostic])
+        identity = steps[names.index("Record exact validation identity")]["run"]
+        self.assertIn("cleanroom nested-isolation diagnostic only; not qualification", identity)
+
+    def test_HDL_CI_01_full_backend_mode_is_unchanged_unless_diagnostic_selected(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["real-backends"]["steps"]
+        full_only = {
+            "Backend contract probe", "Integration, fault injection and acceptance (skips are failures)",
+            "Critical mutation suite (plan 20.5)",
+            "Small-scale benchmark (smoke only; not the plan 22.3 reference run)",
+        }
+        found = [step for step in steps if step.get("name") in full_only]
+        self.assertEqual(len(found), len(full_only))
+        for step in found:
+            self.assertEqual(step["if"], "${{ !inputs.cleanroom_only }}")
+            self.assertNotIn("continue-on-error", step)
+        self.assertNotIn("cleanroom_only", str(workflow["jobs"]["native-verilator"]))
 
     def test_HDL_CI_01_hidden_junit_and_identity_artifacts_are_explicitly_retained(self) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())

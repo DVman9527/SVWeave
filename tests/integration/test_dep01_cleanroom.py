@@ -21,6 +21,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,9 @@ pytestmark = pytest.mark.integration
 
 REPO = Path(__file__).resolve().parents[2]
 EVIDENCE = REPO / "evidence" / "dep01" / "cleanroom.json"
+sys.path.insert(0, str(REPO / "scripts"))
+from _cleanroom_preflight import collect_nested_preflight  # noqa: E402
+
 NETLESS = ["bwrap", "--unshare-net", "--die-with-parent", "--bind", "/", "/", "--dev", "/dev",
            "--proc", "/proc", "--"]
 
@@ -118,6 +122,15 @@ def _cleanroom(tmp_path: Path) -> None:
                       room, 300)
     assert ver.returncode == 0, scrub(ver.stdout[-2000:], room)
 
+    # Keep the offline outer namespace AND the mandatory inner SandboxRunner. Record the
+    # actual nested denial before the temporary clean room is removed; do not bypass it.
+    preflight = collect_nested_preflight(py, room, run_netless)
+    preflight["outer_argv"] = NETLESS
+    diagnostic = REPO / ".svweave/ci/dep01/nested-sandbox-preflight.json"
+    diagnostic.parent.mkdir(parents=True, exist_ok=True)
+    diagnostic.write_text(scrub(json.dumps(preflight, indent=2), room) + "\n")
+    assert preflight["ready"], scrub(json.dumps(preflight), room)
+
     prb = run_netless([str(py), "scripts/probe_backends.py", "--out", str(room / "capability_report.json")],
                       room, 2400)
     assert (room / "capability_report.json").is_file(), scrub(prb.stdout[-2000:] + prb.stderr[-2000:], room)
@@ -147,6 +160,7 @@ def _cleanroom(tmp_path: Path) -> None:
         "installed": {"binaries_sha256_equal_lock": ["slang", "codebase_memory_mcp", "verible"],
                       "gateway_venv": vers, "serena_agent": breport["components"]["serena"]},
         "verify_only_rc": ver.returncode,
+        "nested_sandbox_preflight": preflight,
         "probe": {"summary": summary, "limitations": rep["limitations"],
                   "schema_digest": {b: rep["backends"][b]["schema_digest"] for b in ("cbm", "serena")},
                   "matches_committed_capability_report": True},

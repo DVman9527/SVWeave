@@ -218,6 +218,7 @@ def test_OPI_F6_F8_owner_through_generate_blocks_and_no_false_descendant_warning
 
 
 # ----------------------------------------------------------------------------- diff impact
+@pytest.mark.usefixtures("isolated_git")
 def test_OPI_F4_git_filters_are_never_run_and_F10_the_diff_stays_in_the_project(tmp_path: Path) -> None:
     mono = tmp_path / "mono"
     w = Ws(mono / "proj")
@@ -242,6 +243,7 @@ def test_OPI_F4_git_filters_are_never_run_and_F10_the_diff_stays_in_the_project(
     _git(mono, "config", "filter.evil.clean", f"sh -c 'touch {marker}; cat'")
     code, env = run(w.root, "query", "diff-impact", "--build", b["build_id"])
     assert env["error"]["code"] == "POLICY_DENIED" and env["error"]["details"]["reason"] == "git_filters_configured"
+    assert env["error"]["details"]["filters"] == ["filter.evil.clean"]
     assert not marker.exists()  # the repository's program was not run
 
 

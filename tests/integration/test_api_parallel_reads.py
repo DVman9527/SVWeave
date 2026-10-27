@@ -11,10 +11,11 @@ Comparison rule: an envelope is compared whole (``model_dump`` JSON) after remov
 else is excluded: ``build_id``, ``snapshot_id``, ``freshness``, ``analysis_coverage``, ``data``,
 ``pagination`` (including the signed ``next_cursor``, which is a deterministic function of build,
 query and offset) and ``warnings`` must all be bit-identical to the sequential baseline.
-For the during-rebuild test ``freshness`` is the one field allowed to move, and only along the
+For the during-rebuild test ``freshness`` is allowed to move, and only along the
 honest path STALE (source touched before the rebuild, so never CURRENT) -> HISTORICAL
-(superseded by the new build), and never backwards per reader; the gateway's own "freshness is ..."
-warning is dropped with it.
+(superseded by the new build), and never backwards per reader. Its exact warning and the
+``reference_coverage.blockers`` freshness entry must agree with that state before those three
+coupled values are canonicalized. All other coverage fields, blockers and warnings stay compared.
 
 Plan mapping: the plan has no dedicated concurrency test id. These tests are an EXTENSION of
 API-01..05 (plan section 20 API table) and SVW-023 (MCP gateway / job manager); they keep the
@@ -115,21 +116,44 @@ def peak_overlap(iv: list[tuple[float, float]]) -> int:
     return peak
 
 
-def norm(env: Env, *, drop: tuple[str, ...] = (), freshness_moves: bool = False) -> str:
-    """Canonical form for equality: everything but ``request_id`` (and ``drop``).
+def norm(env: Env, *, freshness_moves: bool = False) -> str:
+    """Compare the whole envelope except ``request_id`` without mutating the response.
 
-    ``freshness_moves`` additionally drops ``freshness`` and the gateway's own "freshness is ..."
-    warning (svw_search words it "the workspace changed since this snapshot"), which legitimately
-    appears once the workspace changed under an older build/snapshot."""
-    e = {k: v for k, v in env.items() if k != "request_id" and k not in drop}
+    During a rebuild, first validate the exact freshness warning and reference-coverage blocker
+    against the top-level state, then remove only those known dynamic values for comparison.
+    Missing, duplicate or contradictory warnings/blockers fail instead of being hidden.
+    """
+    e = {k: v for k, v in env.items() if k != "request_id"}
     if freshness_moves:
-        e.pop("freshness", None)
-        e["warnings"] = [
-            w
-            for w in e.get("warnings", [])
-            if not w.startswith("freshness is ")
-            and "workspace changed since this snapshot" not in w
+        fresh = e.pop("freshness")
+        build_bound = e["build_id"] is not None
+        assert fresh in ({"CURRENT", "STALE", "HISTORICAL"} if build_bound else {"CURRENT", "STALE"})
+        expected_warnings = []
+        if fresh != "CURRENT":
+            expected_warnings = [
+                f"freshness is {fresh}: the workspace changed since this build's snapshot; "
+                "results describe the snapshot, not the current files"
+                if build_bound else
+                "the workspace changed since this snapshot; results describe the snapshot"
+            ]
+        freshness_warnings = [
+            w for w in e["warnings"]
+            if w.startswith(("freshness is ", "the workspace changed since this snapshot"))
         ]
+        assert freshness_warnings == expected_warnings, (fresh, freshness_warnings)
+        e["warnings"] = [w for w in e["warnings"] if w not in expected_warnings]
+        if build_bound:
+            coverage = e["analysis_coverage"]
+            refs = coverage["reference_coverage"]
+            assert refs is not None, "build-bound reads must carry reference coverage"
+            expected_blockers = [] if fresh == "CURRENT" else [f"freshness_{fresh.lower()}"]
+            freshness_blockers = [b for b in refs["blockers"] if b.startswith("freshness_")]
+            assert freshness_blockers == expected_blockers, (fresh, freshness_blockers)
+            # Copy the nested dictionaries: the original response retains all its warnings and
+            # blockers, and no other coverage information is omitted from the equality check.
+            e["analysis_coverage"] = coverage | {"reference_coverage": refs | {
+                "blockers": [b for b in refs["blockers"] if b not in expected_blockers],
+            }}
     return json.dumps(e, sort_keys=True, separators=(",", ":"))
 
 

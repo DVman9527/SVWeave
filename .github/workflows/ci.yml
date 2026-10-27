@@ -20,6 +20,10 @@ on:
         description: "Run isolated pinned backend validation (not full qualification or release)"
         type: boolean
         default: false
+      cleanroom_only:
+        description: "With real_backends: only DEP-01 nested-isolation diagnostic; not qualification"
+        type: boolean
+        default: false
       native_verilator:
         description: "Run pinned native Verilator static lint/JSON and importer regressions (no simulation)"
         type: boolean
@@ -89,7 +93,7 @@ jobs:
       # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
 
   real-backends:
-    name: isolated pinned backend validation (not full qualification)
+    name: ${{ inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic (not qualification)' || 'isolated pinned backend validation (not full qualification)' }}
     if: github.event_name == 'workflow_dispatch' && inputs.real_backends
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -124,7 +128,8 @@ jobs:
               "workflow_sha256": hashlib.sha256(Path(".github/workflows/ci.yml").read_bytes()).hexdigest(),
               "platform": platform.platform(),
               "python": sys.version,
-              "scope": "isolated backend validation only; not full qualification, release or EDA simulation",
+              "scope": "${{ inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic only; not qualification' || 'isolated backend validation only; not full qualification, release or EDA simulation' }}",
+              "cleanroom_diagnostic_only": "${{ inputs.cleanroom_only }}",
           }
           (out / "identity.json").write_text(json.dumps(identity, indent=2) + "\n")
           PY_IDENTITY
@@ -160,14 +165,22 @@ jobs:
       - name: Required native probe isolation regressions (fail closed)
         run: |
           .venv/bin/python -m pytest tests/unit/test_ci_probe_isolation.py tests/integration/test_int_probe_isolation.py -q --no-cov --junitxml=.svweave/ci/junit_probe_isolation.xml
+      - name: DEP-01 nested sandbox diagnostic (required; not qualification)
+        if: ${{ inputs.cleanroom_only }}
+        run: |
+          .venv/bin/python -m pytest tests/integration/test_dep01_cleanroom.py -q --no-cov --junitxml=.svweave/ci/junit_dep01_cleanroom.xml
       - name: Backend contract probe
+        if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/probe_backends.py --out .svweave/ci/capability_report.json
       - name: Integration, fault injection and acceptance (skips are failures)
+        if: ${{ !inputs.cleanroom_only }}
         run: |
           .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov --junitxml=.svweave/ci/junit_required.xml
       - name: Critical mutation suite (plan 20.5)
+        if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/mutation_suite.py
       - name: Small-scale benchmark (smoke only; not the plan 22.3 reference run)
+        if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30
       - name: Upload validation evidence (not a full qualification)
         if: always()

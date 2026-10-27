@@ -159,17 +159,26 @@ def test_a2_outside_absolute_include_cannot_be_read_by_the_sandboxed_worker(tmp_
     assert not any(SECRET in json.dumps(d) for d in doc["diagnostics"])
 
 
-def test_a2_control_the_same_probe_reads_the_file_without_the_sandbox(tmp_path: Path) -> None:
-    """Negative control: proves the probe above can see the file when no sandbox is in place."""
-    from svweave.security.sandbox import HostCapability, SandboxRunner
+def test_a2_control_the_same_probe_reads_the_file_without_the_sandbox(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Real inner degraded control, contained by mandatory outer isolation.
 
-    no_bwrap = SandboxRunner(allow_degraded=True,
-                             capability=HostCapability(False, None, None, "forced for the control"))
-    out = run_worker(_leak_world(tmp_path), timeout_s=60, memory_mib=4096, sandbox=no_bwrap)
-    assert out.kind == "ok", out.stderr_tail
-    assert out.isolation == "degraded_no_isolation" and out.isolation_warnings
-    assert out.resource_usage["isolation"] == "degraded_no_isolation"
-    assert SECRET in out.stdout.decode()  # the outside file WAS read
+    The outer boundary exposes only the synthetic outside fixture, read-only. This still proves
+    the worker's own sandbox is what blocks the include, without giving a native parser host access.
+    """
+    from tests.integration.helpers import native_check
+
+    request = _leak_world(tmp_path)
+    outside = tmp_path / "outside" / "secret.svh"
+    original = outside.read_bytes()
+    monkeypatch.setenv("SVW_TEST_NATIVE_SECRET", "must-not-reach-degraded-control")
+    out = native_check("degraded_slang", Path(request.snapshot_root), tools=(tmp_path / "outside",))
+    assert out["kind"] == "ok"
+    assert out["isolation"] == "degraded_no_isolation" and out["isolation_warnings"]
+    assert out["resource_usage"]["isolation"] == "degraded_no_isolation"
+    assert SECRET in out["stdout"]  # the synthetic outside file WAS read
+    assert outside.read_bytes() == original
 
 
 def test_a2_without_bwrap_the_worker_fails_closed_unless_degraded_is_explicit(
