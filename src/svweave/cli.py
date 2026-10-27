@@ -134,6 +134,12 @@ def _query_flags(f: Callable[..., Any]) -> Callable[..., Any]:
     "outside the repository).",
 )
 @click.option("--local", "local_path", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--execution-provider", type=click.Choice(["local", "srun"]), default=None)
+@click.option("--execution-profile", default=None, help="Operator-approved execution site profile.")
+@click.option(
+    "--allocation-mode", type=click.Choice(["existing_allocation", "new_allocation"]), default=None
+)
+@click.option("--allocation-id", default=None, help="Explicit borrowed Slurm allocation ID.")
 @click.option("--request-id", default=None)
 @click.option("--compact", is_flag=True, help="Single-line JSON output.")
 @click.pass_context
@@ -145,14 +151,29 @@ def cli(
     local_path: Path | None,
     request_id: str | None,
     compact: bool,
+    execution_provider: str | None,
+    execution_profile: str | None,
+    allocation_mode: str | None,
+    allocation_id: str | None,
 ) -> None:
     """SVWeave: build-aware SystemVerilog analysis gateway (M1: config, manifest, snapshot)."""
     root = root.resolve()
+    overrides = {
+        k: v
+        for k, v in {
+            "provider": execution_provider,
+            "site_profile": execution_profile,
+            "allocation_mode": allocation_mode,
+            "allocation_id": allocation_id,
+        }.items()
+        if v is not None
+    }
     opts = WorkspaceOptions(
         root=root,
         manifest_path=manifest_path.resolve() if manifest_path else None,
         policy_path=policy_path.resolve() if policy_path else None,
         local_path=local_path.resolve() if local_path else None,
+        execution_overrides=overrides or None,
     )
     ctx.obj = _State(opts, request_id, compact)
 
@@ -174,6 +195,40 @@ def init_cmd(st: _State) -> None:
 def doctor_cmd(st: _State, probe: bool) -> None:
     """Config, policy, backend and client-boundary checks (backends NOT probed unless --probe)."""
     st.emit(st.run(lambda rid: run_doctor(st.opts, rid, probe=probe)))
+
+
+@cli.command("execution-preflight")
+@pass_state
+def execution_preflight(st: _State) -> None:
+    """Offline configuration/authorization check; never starts or queries Slurm."""
+
+    def check(rid: str) -> Envelope:
+        ctx = st.opts.load()
+        if ctx.execution.provider == "srun":
+            ctx.execution.require_srun_authorized()
+        return Envelope(
+            request_id=rid,
+            workspace_id=ctx.workspace_id,
+            outcome=Outcome.OK,
+            data={
+                "provider": ctx.execution.provider,
+                "execution_fingerprint": ctx.execution.fingerprint,
+                "submitted": False,
+                "remote_probe": "NOT_RUN",
+            },
+        )
+
+    st.emit(st.run(check))
+
+
+@cli.command("execution-recovery")
+@click.option("--limit", type=click.IntRange(1, 1000), default=200, show_default=True)
+@pass_state
+def execution_recovery(st: _State, limit: int) -> None:
+    """Read local attempt recovery evidence; never queries/cancels Slurm or clears pins."""
+    from svweave.application.execution_recovery import inspect_execution
+
+    st.emit(st.run(lambda rid: inspect_execution(st.opts, rid, limit=limit)))
 
 
 @cli.group("manifest")
@@ -294,7 +349,11 @@ def graph_grp() -> None:
     "--name", default=None, help="File name stem under .svweave/exports/ (default graph-<build>)."
 )
 @click.option(
-    "--max-instances", type=int, default=5000, show_default=True, help="Draw at most N instances, shallowest first."
+    "--max-instances",
+    type=int,
+    default=5000,
+    show_default=True,
+    help="Draw at most N instances, shallowest first.",
 )
 @click.option(
     "--max-fanout",
@@ -492,7 +551,9 @@ def query_references(
 @click.option("--file", "file", default=None, help="Logical file path (with --byte).")
 @click.option("--byte", type=int, default=None, help="Zero-based byte offset (with --file).")
 @click.option("--instance", default=None, help="Instance id or path.")
-@click.option("--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels.")
+@click.option(
+    "--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels."
+)
 @click.option("--limit", type=int, default=None, help="Items per list (default 50, max 500).")
 @pass_state
 @_query_flags
@@ -529,10 +590,16 @@ def query_impact(
 
 @query_grp.command("diff-impact")
 @_build_opt
-@click.option("--base", default="HEAD", show_default=True, help="Git revision the build was made from.")
-@click.option("--head", default=None, help="Git revision of the change (default: the working tree).")
+@click.option(
+    "--base", default="HEAD", show_default=True, help="Git revision the build was made from."
+)
+@click.option(
+    "--head", default=None, help="Git revision of the change (default: the working tree)."
+)
 @click.option("--repo", default=None, help="Git repository directory (default: the project root).")
-@click.option("--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels.")
+@click.option(
+    "--depth", type=int, default=3, show_default=True, help="Dependent/dependency levels."
+)
 @click.option("--limit", type=int, default=None, help="Items per list (default 50, max 500).")
 @pass_state
 @_diff_flags

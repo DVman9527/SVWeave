@@ -1,5 +1,6 @@
 # SVWeave
 
+**Slurm 狀態：** 已加入明確選用的設定與離線安全基礎；遠端執行仍為 **BLOCKED / UNQUALIFIED**，尚未支援。預設仍是 local。請見 [Slurm 實作狀態與驗收閘門](docs/srun.md)。
 [English](README.md) | 繁體中文 | [简体中文](README.zh-CN.md)
 
 > 本文件為 `README.md` 的繁體中文（台灣用語）翻譯；若與英文版有出入，一律以英文版 `README.md` 為準。
@@ -59,6 +60,38 @@
 *用戶端只與一個閘道溝通。閘道掌管政策、工作、來源追溯與錯誤對應，並透過轉接器驅動三個後端。每個後端都在關閉網路的 `bwrap` 沙箱中執行，且沒有原始碼的可寫掛載（甚至完全沒有掛載）；pyslang worker 同樣處於沙箱內。後端讀取不可變的快照，或把內容寫入 `.svweave/` 之下的候選副本。受信任目錄（政策、核准 HMAC 金鑰、游標金鑰）位於儲存庫之外。使用者的原始碼工作區只能透過唯一一條路徑存取：編輯協調器經核准的 compare-and-set 寫入（TB4）。虛線為信任邊界 TB1 至 TB4。*
 
 ## 狀態
+
+### 目前新增功能與限制（2026-10-27）
+
+- **UVM 靜態呼叫 metadata：** 既有 references 查詢透過 `context.uvm` 呈現已辨識、已解析的 config-db／factory／registry 呼叫及原樣參數對應。證據為 `static_call_site`，`runtime_resolution=not_computed`；不代表 config-db 命中、factory 選擇、phase 執行或 runtime topology，也不擴大 generic body 的走訪範圍。見[支援特性](docs/supported_features.md#uvm-static-call-metadata-uvm-02--uvm-03)。
+- **選用的 Verilator 5.052 inventory：** 匯入既有 JSON，與 slang 索引分開查閱；不啟動 Verilator。結果維持 `EXTERNAL_DECLARED`、`PARTIAL`，未綁定 snapshot／build，不授權編輯，也不證明 HDL 成功。
+- **Protected-source preparation：** 明確選取單一檔案，產生衍生檔與 gap 報告，保留明文 bytes、CR/LF 與位移，不修改原檔。這是詞法留白，不是解密、編譯器或猜造 blackbox；加密區的 definitions／interfaces／ports 仍為 `UNKNOWN`。不自動替換 manifest，也不自動將報告綁入匯入 JSON；下游工具必須保留原始 include 搜尋環境。
+
+```bash
+svweave supplement verilator --tree artifacts/design.tree.json --meta artifacts/design.tree.meta.json --tool-version 5.052
+svweave supplement show --supplement SUPPLEMENT_ID --name Packet --node-type CLASS --allow-partial
+svweave supplement prepare-source --source rtl/vendor_ip.sv --allow-partial
+```
+
+匯入 exit 0 只代表儲存完成；`--allow-partial` 只接受部分 inventory／preparation，不代表編譯成功。詳見 [inventory 與 preparation 契約](docs/verilator_static_supplement.md)。單元測試不構成 native-tool／UVM 端到端資格認定。
+
+### Slurm：僅離線基礎
+
+預設仍為 local。已具備型別化 opt-in 設定、安全閘門、immutable staging、ledger／pin 保護與有上限的 transport／bootstrap 元件，但**實際派送仍被硬性阻擋**。明確選用 srun 不會 fallback local；srun 編輯與 candidate validation 均拒絕。live launcher／query／reconcile adapter、計算節點資格認定及 P1 遠端 codebase-memory／Serena 仍未完成或未實作。
+
+```bash
+svweave execution-preflight
+svweave --execution-provider local execution-preflight
+svweave execution-recovery --limit 200
+```
+
+全域選項為 `--execution-provider`、`--execution-profile`、`--allocation-mode`、`--allocation-id`；只能選取受信任的站點 profile，不能授權。Preflight 完全離線。Recovery 是有上限、唯讀的本機檢視，不查詢／取消 job、不修復證據或清除 pin；缺失／損壞證據保持 blocked，本機 PID 結束不等於遠端已清理。
+離線 Slurm 22.05.9 accounting decoder 是 **API，不是 CLI 或 live adapter**；只接受 SVWeave 自有的有上限欄位封套，非原生 sacct JSON。結果僅供診斷，維持 `EXTERNAL_DECLARED`、cleanup `UNKNOWN`、worker success `NOT_ESTABLISHED`，即使是 `COMPLETED/0:0` 也一樣。
+
+Slurm 22.05.9 與 MUNGE 0.5.18 已安裝於儲存庫外，但 MUNGE Unix stream socket 建立在 bind 前遭拒；沒有可運作叢集，未執行 scheduler job 或遠端驗收。已記錄的 **464 passed、4 deselected** 聚焦離線回歸（含 98 個 decoder 測試）不是完整後端測試或 Slurm 資格認定。EDA／simulation／formal／coverage 維持 `NOT_RUN`。
+見[狀態與閘門](docs/srun.md)、[accounting 契約](docs/srun_accounting.md)、[程式碼審查](docs/srun_code_review.md)、[離線證據](evidence/srun/accounting-verification.json)與 [runtime 阻擋證據](evidence/srun/runtime-smoke.json)。下列完整測試與資格認定數字是歷史紀錄，不是上述新增功能的驗證。
+
+### 歷史驗證紀錄
 
 **開發者預覽版 v0.1.0-dev。UNQUALIFIED**，除非資格認定報告（`.svweave/qualification/report.json`，由 `scripts/qualify.py` 產生，證據位於 `evidence/` 之下）顯示 `ACCEPTED_STATIC_PREVIEW`。工具的「靜態預覽」狀態絕不代表模擬、形式驗證或 EDA 結果：除非你自行匯入證據，否則 `eda_compile`、`simulation` 與 `formal` 皆為 `NOT_RUN`，而匯入的證據是 `EXTERNAL_DECLARED`，SVWeave 永遠不會加以驗證。在依賴任何結果之前，請先閱讀 `docs/limitations.md`。
 

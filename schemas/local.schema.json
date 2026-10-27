@@ -1,5 +1,56 @@
 {
   "$defs": {
+    "ExecutionSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "allocation_id": {
+          "anyOf": [
+            {
+              "pattern": "^[1-9][0-9]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allocation Id"
+        },
+        "allocation_mode": {
+          "default": "existing_allocation",
+          "enum": [
+            "existing_allocation",
+            "new_allocation"
+          ],
+          "title": "Allocation Mode",
+          "type": "string"
+        },
+        "provider": {
+          "default": "local",
+          "enum": [
+            "local",
+            "srun"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "site_profile": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Site Profile"
+        }
+      },
+      "title": "ExecutionSelection",
+      "type": "object"
+    },
     "RootMapping": {
       "additionalProperties": false,
       "properties": {
@@ -25,6 +76,9 @@
   "additionalProperties": false,
   "description": "svweave.local.yaml: host-specific external root mappings.",
   "properties": {
+    "execution": {
+      "$ref": "#/$defs/ExecutionSelection"
+    },
     "root_mappings": {
       "items": {
         "$ref": "#/$defs/RootMapping"

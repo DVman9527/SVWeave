@@ -1,0 +1,118 @@
+{
+  "schema_version": "1",
+  "recorded_at": "2026-10-27T04:59:48.471616+00:00",
+  "base_commit": "797cb9447de3dcc6e1c7983cb4f906f11d6a5d6c",
+  "qualification": "UNQUALIFIED",
+  "scope": "Three README updates and final focused checks of intended offline implementation; no live scheduler operations or qualification",
+  "requirement_mapping": {
+    "DOC-01": "Three language READMEs align with implemented commands and explicit limitations",
+    "SRUN-22": "Offline preflight/recovery and accounting scope documented",
+    "plan_26.3": "Reviewed staging scope excludes runtime, installations, keys and private source"
+  },
+  "preservation": {
+    "prior_record": "accounting-verification.json",
+    "changed_paths_since_record": [
+      "README.md",
+      "README.zh-CN.md",
+      "README.zh-TW.md"
+    ],
+    "other_reviewed_file_hashes": "UNCHANGED"
+  },
+  "checks": {
+    "focused_regression": {
+      "status": "PASS",
+      "passed": 464,
+      "deselected": 4,
+      "command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/python -m pytest -o addopts='' -q tests/unit/test_slurm_accounting.py tests/unit/test_srun_config.py tests/unit/test_srun_session.py tests/unit/test_srun_audit_regressions.py tests/unit/test_execution_reconciliation.py tests/unit/test_execution_recovery_inspection.py tests/unit/test_srun_recovery_cli.py tests/unit/test_srun_integration_guards.py tests/unit/test_srun_staging.py tests/unit/test_execution_provider.py tests/unit/test_gateway_jobs.py tests/unit/test_storage.py tests/unit/test_domain.py tests/unit/test_config.py tests/unit/test_manifest.py tests/unit/test_snapshot.py tests/unit/test_slang_args.py tests/unit/test_slang_ingest.py tests/unit/test_edit_machine.py tests/unit/test_adapters_orchestration.py tests/unit/test_gateway_cli.py -k 'not test_exit_codes_per_command and not doctor'",
+      "evidence": "readme-regression.log"
+    },
+    "static_supplement_unit": {
+      "status": "PASS",
+      "command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/python -m pytest -o addopts='' -q tests/unit/test_uvm_call_metadata.py tests/unit/test_verilator_importer.py tests/unit/test_protected_source.py",
+      "evidence": "readme-static-supplement.log",
+      "passed": 103
+    },
+    "lint": {
+      "status": "PASS",
+      "evidence": "readme-lint.log"
+    },
+    "types": {
+      "status": "PASS",
+      "source_files": 131,
+      "evidence": "readme-types.log"
+    },
+    "schemas": {
+      "status": "PASS",
+      "evidence": "readme-schema.json"
+    },
+    "docs": {
+      "status": "PASS",
+      "passed": 2,
+      "evidence": "readme-docs.log"
+    },
+    "diff_check": "PASS",
+    "full_backend_suite": "NOT_RUN",
+    "real_slurm_integration_acceptance": "NOT_RUN",
+    "eda_compile": "NOT_RUN",
+    "simulation": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "coverage": "NOT_RUN"
+  },
+  "file_hashes_excluding_evidence": {
+    "README.md": "6bff5302462c89e6874af45fd3bbb89a333c9788d35e2d703b5a36af948d0b94",
+    "README.zh-CN.md": "f2fafbd017cd8a9086d79b3c67be0eea1955a4436b5a0e81e9950181797b8d0b",
+    "README.zh-TW.md": "49e86be4d3555db84c6468e843001eeaefcb81af2c6f9bec93683e5f0ecb6f3f",
+    "docs/adr/ADR-015-slurm-execution-boundary.md": "36be0ea7c4fecbd28754357c3d4be60db2b6b8e6421924ae62d8482da548d7b0",
+    "docs/limitations.md": "d7563685ac558386ea701ad004efa0977ce4444db63ec56c33810a9a904b45eb",
+    "docs/operations.md": "618a908a58b3d54b57e55f7a8f45ecdfff8641ce42ce505743cccb666b25c4db",
+    "docs/security.md": "d522540157d4b49a4fa3fd3ff94d4259328a68a7e602e4bc6160d8254e9fc3fa",
+    "docs/srun.md": "06ee603a07f8be30cb76c69ea0042be5b0f616b57e9be70baf4cb29b95bd08b6",
+    "docs/srun_accounting.md": "abca66b5efe3a4e5ac3c97791564b828024ce7a1945381ddc0ca924f8f76287f",
+    "docs/srun_code_review.md": "9397a1c648e85a29bf7d010524b759358d33493f9a68d4173c80b364bd84c967",
+    "schemas/local.schema.json": "34f27235076b361565fbc2ff3fac7b60edff070fcef792edf118ebdee2cdd427",
+    "schemas/policy.schema.json": "482545ac8e68facc685b156f1508d1c787d4c60fe89ba82421001d300684fa16",
+    "scripts/mutation_suite.py": "8a75c153726635565269ed3db661e9e19322c6a26d77b92ecb82541445c4f318",
+    "src/svweave/adapters/slang/args.py": "5fb30bf301f13d0352ba184c41d57d7352535628ee97342f009fed8894b070e7",
+    "src/svweave/application/build.py": "5443bd99b73679b1d3fd736d89ef51e6d45b108f1dbb5ea95186f26de5c313d7",
+    "src/svweave/application/edit.py": "5f97ab3ba5152f573db996184c28b8f23cf32c13e0e98027a3953c155f74ccb6",
+    "src/svweave/application/execution_recovery.py": "f6e0d6aebfc4f0221f1d0217473530c31986bc9f1c895532e78a8f9fadecf2f0",
+    "src/svweave/application/jobs.py": "f3e3d5580f1dbcc479b6183c8215b274900df24bf29abdc8c8774c376e63d075",
+    "src/svweave/application/options.py": "5c942b4be7ddf07bbde9eaae8976f2b8d19872cad8eaf847fb7869d0caf9cca3",
+    "src/svweave/application/session.py": "232b0d1f51a820633f8a46e063d35c3543fda91ffe71408d351d27bce84f2232",
+    "src/svweave/cli.py": "0dffeaab70268e0c18721e08ecf973affbae418c78208b8fd9047c90ab53603d",
+    "src/svweave/config/context.py": "0e0cbc93bc824a89cde9d4ca670281a5ea314933de3177fb13a873cb6bf34cd5",
+    "src/svweave/config/execution.py": "8c57596b6b4537a3f69dee29e31646b52a85241d510e58e0f2d144c44afdd1a4",
+    "src/svweave/config/models.py": "4b716385a956f1b23bad3da4e1296373f5b2cb8c9748bd9a2244adfccaa7ec40",
+    "src/svweave/domain/ids.py": "28a20d3319cec07db1adae9af032cd3a50c803e042bf23022e89b2b39d968c53",
+    "src/svweave/editing/plan.py": "467a46d5967447a523eea9ce6b030fa95e1a4d0f39631a937a884b1001059312",
+    "src/svweave/execution/__init__.py": "7bcc83079524ab8057a020a21283bb90869e0c0d232a850f0dd4f81d7cfa5025",
+    "src/svweave/execution/accounting.py": "eefd2a42e042bfb09ee4fc0f4598bb6604b3498e61b0f037059d68baec4287f3",
+    "src/svweave/execution/control.py": "8e3ac661772f42e86b4a08b0c4ead1bd097e937178b196a379c1627555b07a5d",
+    "src/svweave/execution/deadlines.py": "c77bfbec6889990b8b1d3a1bfcfaa2a2842c672196ce10580da2fe779e14dbea",
+    "src/svweave/execution/ledger.py": "07d4eb891d570429bc92d281da104088ad286264b25671af9d9d8df925d785d0",
+    "src/svweave/execution/local.py": "af3b0cd6c4b9324d76e0d956fa17fe6a1dfad6f73e31d1842e10db12c27f4f4b",
+    "src/svweave/execution/models.py": "f42d7ac26af6320eb690d5cb3a662520932b72a840adee5cac95e7f23a2e4b23",
+    "src/svweave/execution/ownership.py": "c37d2fe3ba44569367207d7669625944bec52ed105c5df6ad1cc3ddfcfee9405",
+    "src/svweave/execution/recovery.py": "d3207c0a6e33b37698763808a38e7ac901e6e8325aaa30e158b11d2954c834eb",
+    "src/svweave/execution/remote_bootstrap.py": "0dc40b303ee1d923a153b341a127dc0fe2becf97e8709f3b5c6158233df4fa8c",
+    "src/svweave/execution/slurm.py": "b4fa2c0746f8558a1c64d78bb2b49bc8a426dc8dc37eed217c63e7d217c2564d",
+    "src/svweave/execution/staging.py": "7e12aa784251718a2cffa759461a6f05b6854400829455c2f1d56800f3546ee9",
+    "src/svweave/execution/supervisor.py": "4d10fa64904a4f679a03f2782671232a665049c7c3c12b0b405dca5f3a413f58",
+    "src/svweave/execution/transport.py": "d7aabc69d9aa0ab1d1d0a82f0d7804263a8cef506cb8a00ef0f0d6dc003ca2d3",
+    "src/svweave/orchestration/registry.py": "71e83846e989cbeeea769a7f12f7254688eb50a6d3973a033015bc93e3b753bd",
+    "src/svweave/storage/db.py": "027d0ecd43cf8e7de0adcd52159b6383935784612d1873291d46c2c7952f1594",
+    "src/svweave/storage/migrations.py": "926eccf72663a4e4e3548b1102eb803244793b33a868c5000e6303be1176cbc9",
+    "support_srun.md": "0e57b68195cb16b7b47c48651e0f539a73ce247a3f7bbf247810677f97331d29",
+    "tests/unit/test_execution_provider.py": "95f7ca9e8e1e2a5e0260a3bfeeb2688fef150b3726498c2f97d53fd9981047d2",
+    "tests/unit/test_execution_reconciliation.py": "a853e7739f558149dc049fd9696476a3f140e18a6c9f7aa01c58221b2c7c2084",
+    "tests/unit/test_execution_recovery_inspection.py": "ac68f528fd93df0966e71cb23f2d105e98d06d5bb09b57829c8b4d0e32075e5c",
+    "tests/unit/test_slurm_accounting.py": "5030717bb55b4f068d6ceb4f356bbdc5ee397f4231748013926d95bb34a50c55",
+    "tests/unit/test_srun_audit_regressions.py": "bd7cfe92d5f6a251bb565b6b9f91c04fbe885aae8432feeb3bd61723f3058854",
+    "tests/unit/test_srun_config.py": "6b0cf23b1784d0fb15bcfd14b50a2d243d7d1e7a47442926550b03fc9179874d",
+    "tests/unit/test_srun_integration_guards.py": "fb2553e06a2d0000fe100a5780e395dc543b9cf688c11c57a7fe2e873d160f98",
+    "tests/unit/test_srun_recovery_cli.py": "a1ac89df5465555e2ad99af6c7c375d6013877f52c4908c18b685651ec435603",
+    "tests/unit/test_srun_session.py": "07d1f808668bbe9ff864b8071f907e2845386e2073aeca3ca8d67b792c9c1e8c",
+    "tests/unit/test_srun_staging.py": "8e98cf5c04967e72f4534b23fa7fe5ba637c2837e5406e7b66e80917cf8a1191"
+  },
+  "publication": "Prepared for authorized local commit; no push attempted. Existing ancestor workflow change requires Workflows permission."
+}

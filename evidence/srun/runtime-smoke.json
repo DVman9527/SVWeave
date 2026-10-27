@@ -1,0 +1,105 @@
+{
+  "schema_version": "1",
+  "recorded_at": "2026-10-27T03:34:18.020650+00:00",
+  "commit": "797cb9447de3dcc6e1c7983cb4f906f11d6a5d6c",
+  "qualification": "UNQUALIFIED",
+  "scope": "Redacted record of existing installation and separately approved single-node runtime attempts; documentation-only update, no retry or feature execution.",
+  "toolchain_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "installation": {
+    "status": "PASS",
+    "slurm_version": "22.05.9",
+    "munge_version": "0.5.18",
+    "source": "Official release archives; local prefix, not a system service install",
+    "slurm_source_sha256": "0b732f293ca7ba226c21a58981dee37d668afdedad2fb2a485e8b3eff585d0d2",
+    "munge_source_sha256": "39c3ec6ef5604bfa206e8aa10fc05d5119040f6de4a554bc0fb98ca1aed838dc",
+    "source_checks": "Slurm archive SHA256 checked against official checksum; MUNGE archive SHA512 checked against official release asset.",
+    "client_checks": {
+      "status": "PASS",
+      "commands_redacted": [
+        "SLURM_CONF=<offline-config> <local-prefix>/bin/srun --version",
+        "SLURM_CONF=<offline-config> <local-prefix>/bin/srun --help"
+      ],
+      "version_output": "slurm 22.05.9",
+      "operational_cluster": false
+    }
+  },
+  "runtime": {
+    "status": "FAIL",
+    "availability": "BLOCKED",
+    "command_redacted": "<approved-supervisor> starts <local-prefix>/sbin/munged --foreground with dedicated runtime paths; secret arguments omitted",
+    "attempts": [
+      {
+        "attempt": 1,
+        "status": "FAIL",
+        "phase": "MUNGE socket path validation",
+        "reason": "Socket directory lacked execute permissions required by MUNGE."
+      },
+      {
+        "attempt": 2,
+        "status": "FAIL",
+        "approval_scope": "Dedicated socket directory mode 0711 explicitly approved",
+        "phase": "MUNGE Unix stream socket creation, before bind",
+        "reason": "socket(PF_UNIX, SOCK_STREAM, 0): Operation not permitted",
+        "log_excerpt": "munged: Error: Failed to create socket: Operation not permitted"
+      }
+    ],
+    "slurm_daemons_started": false,
+    "scheduler_jobs_submitted": false
+  },
+  "not_run": {
+    "munge_authentication_round_trip": "NOT_RUN",
+    "scheduler_smoke": "NOT_RUN",
+    "svweave_slurm_integration_acceptance": "NOT_RUN",
+    "remote_sandbox_toolchain": "NOT_RUN",
+    "eda_compile": "NOT_RUN",
+    "simulation": "NOT_RUN",
+    "formal": "NOT_RUN",
+    "coverage": "NOT_RUN"
+  },
+  "cleanup": {
+    "status": "PASS",
+    "scope": "Approved attempt supervisor-owned resources only; not a cluster-wide assertion",
+    "remaining_owned_pids": [],
+    "remaining_owned_listeners": [],
+    "socket_exists": false
+  },
+  "evidence_sources": {
+    "installation": "INSTALL-PROVENANCE.txt, installed-binary-sha256.txt and srun-help.txt (local install records)",
+    "runtime": "supervisor-attempt2.log and munged-foreground.log (local smoke records)",
+    "raw_logs_copied": false,
+    "redaction": "No private key contents or paths, host/address identifiers, full environment or signed URLs copied."
+  },
+  "offline_regression": {
+    "status": "PASS",
+    "passed": 295,
+    "evidence": "verification.json and unit-regression.log",
+    "historical": true,
+    "rerun_for_this_update": false,
+    "qualifies_cluster": false
+  },
+  "requirement_mapping": {
+    "SRUN-02": "Installed client checked offline; authentication/scheduler operational path blocked before submission.",
+    "SRUN-04/SRUN-05": "Compute-node isolation and toolchain tests NOT_RUN.",
+    "SRUN-08/SRUN-09/SRUN-14": "Scheduler cancellation, borrowed-step isolation and local/remote equivalence NOT_RUN.",
+    "SRUN-22": "Documentation and machine-evidence consistency checked separately."
+  },
+  "next_prerequisites": [
+    "Explicitly authorized environment permitting MUNGE Unix sockets and required Slurm daemons, with approved site/network/resource scope; current saved environment catalog has no eligible target.",
+    "Implement and qualify the site launcher/query/reconcile adapter without relaxing the closed launch gate.",
+    "Run authorized real compute-node isolation, toolchain, ownership, cancellation, cleanup and semantic-equivalence acceptance tests."
+  ],
+  "prohibited_workarounds": "No socket retry, alternate-tool/environment bypass, authentication disablement or isolation weakening authorized by this record.",
+  "publication": "No commit or push.",
+  "documentation_checks": {
+    "status": "PASS",
+    "commands": [
+      "git diff --check",
+      "PYTHONPATH=src <existing-test-python> -m pytest -o addopts='' -q tests/unit/test_gateway_cli.py -k DOC_01"
+    ],
+    "doc_tests_passed": 2,
+    "doc_tests_deselected": 6,
+    "implementation_preservation": "All src/tests/schemas/scripts hashes in prior verification.json unchanged.",
+    "json_parse": "PASS",
+    "redaction_check": "PASS"
+  }
+}

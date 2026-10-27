@@ -10,6 +10,8 @@ from typing import Annotated, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from svweave.config.execution import ExecutionPolicy, ExecutionSelection
+
 NonEmptyStr = Annotated[str, StringConstraints(min_length=1)]
 _NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _ID = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")
@@ -153,7 +155,9 @@ class LanguageOptions(_Strict):
     ``--compat <vendor>`` (slang's vendor-leniency bundle; only ``vcs`` is accepted). Recorded in
     config_id and in the build's semantic_deviations. Nothing else can be passed through to slang."""
 
-    timescale: Annotated[str, StringConstraints(pattern=rf"^{_TIME_UNIT}/{_TIME_UNIT}$")] | None = None
+    timescale: Annotated[str, StringConstraints(pattern=rf"^{_TIME_UNIT}/{_TIME_UNIT}$")] | None = (
+        None
+    )
     std: Literal["1364-2005", "1800-2017", "1800-2023", "latest"] | None = None
     compat: Literal["vcs"] | None = None
 
@@ -320,6 +324,7 @@ class LocalConfig(_Strict):
 
     schema_version: Literal["1.0"]
     root_mappings: list[RootMapping] = Field(default_factory=list)
+    execution: ExecutionSelection = Field(default_factory=ExecutionSelection)
 
     @model_validator(mode="after")
     def _v(self) -> LocalConfig:
@@ -341,6 +346,7 @@ class Policy(_Strict):
     #: Accept approvals made through the non-qualified test-token path (never a human at a TTY).
     #: Only a human editing the trusted policy.json can set it; default off.
     allow_test_approvals: bool = False
+    execution: ExecutionPolicy = Field(default_factory=ExecutionPolicy)
 
     @model_validator(mode="after")
     def _v(self) -> Policy:

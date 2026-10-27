@@ -1,0 +1,29 @@
+{
+  "scope": "unit-only throwaway copy, no backend process or Slurm",
+  "results": [
+    {
+      "id": "M23",
+      "baseline_rc": 0,
+      "mutant_rc": 1,
+      "status": "KILLED",
+      "baseline_output": ".                                                                        [100%]\n",
+      "mutant_output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n___________ test_SRUN_P0_edit_guard_precedes_baseline_and_candidate ____________\n\nws = <tests.conftest.Ws object at 0x7fcd7e0efaa0>\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fcd7e0ef710>\n\n    def test_SRUN_P0_edit_guard_precedes_baseline_and_candidate(ws: Ws, monkeypatch: pytest.MonkeyPatch) -> None:\n        ws.policy(editing_enabled=True)\n        ws.config({\"p\": profile()}, editing={\"enabled\": True})\n        opts = remote(ws)\n        ctx = opts.load()\n        assert ctx.effective.editing_enabled\n        def forbidden(*args: Any, **kw: Any) -> None:\n            pytest.fail(\"srun edit must not start baseline or candidate\")\n        monkeypatch.setattr(edit, \"run_build\", forbidden)\n        monkeypatch.setattr(edit, \"run_build_on_record\", forbidden)\n>       with pytest.raises(SvwError, match=\"not qualified\"):\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       Failed: DID NOT RAISE SvwError\n\ntests/unit/test_srun_integration_guards.py:65: Failed\n=========================== short test summary info ============================\nFAILED tests/unit/test_srun_integration_guards.py::test_SRUN_P0_edit_guard_precedes_baseline_and_candidate\n"
+    },
+    {
+      "id": "M24",
+      "baseline_rc": 0,
+      "mutant_rc": 1,
+      "status": "KILLED",
+      "baseline_output": ".                                                                        [100%]\n",
+      "mutant_output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n____________________ test_SRUN_09_exact_borrowed_step_only _____________________\n\n    def test_SRUN_09_exact_borrowed_step_only() -> None:\n        owner = own()\n        observation = SchedulerObservation(ownership=owner, state=\"RUNNING\", terminal=False, observed_at_monotonic=10.0)\n        assert cancellation_target(owner, observation, now=11.0) == \"12.3\"\n        for altered in (own(job_id=\"13\"), own(step_id=\"4\"), own(uid=os.getuid() + 1), own(nonce=\"different\"), own(submitted_at=\"later\")):\n>           with pytest.raises(SvwError):\n                 ^^^^^^^^^^^^^^^^^^^^^^^\nE           Failed: DID NOT RAISE SvwError\n\ntests/unit/test_execution_provider.py:38: Failed\n=========================== short test summary info ============================\nFAILED tests/unit/test_execution_provider.py::test_SRUN_09_exact_borrowed_step_only\n"
+    },
+    {
+      "id": "M25",
+      "baseline_rc": 0,
+      "mutant_rc": 1,
+      "status": "KILLED",
+      "baseline_output": ".                                                                        [100%]\n",
+      "mutant_output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n___________ test_SRUN_17_unknown_cleanup_pins_snapshots_and_orphans ____________\n\nws = <tests.conftest.Ws object at 0x7fea48cc5160>\n\n    def test_SRUN_17_unknown_cleanup_pins_snapshots_and_orphans(ws: Ws) -> None:\n        ctx = ws.ctx()\n        rec = capture_snapshot(ctx, resolve_profile(ctx, \"p\"))\n        root = ctx.state_dir / \"execution\"\n        root.mkdir(mode=0o700)\n        ExecutionLedger(root).save(record(rec.snapshot_id))\n        with Database(ctx.state_dir / \"svweave.db\") as db:\n            db.upsert_workspace(ctx.workspace_id, {}, \"a\" * 64)\n            db.record_snapshot(rec)\n            db.start_job(\"remote-job\", \"b\" * 64, rec.snapshot_id)\n            db.conn.execute(\"UPDATE jobs SET owner_pid=2147483647 WHERE job_id='remote-job'\")\n            plan = plan_gc(db, snapshots_dir(ctx), keep_last=0)\n            assert not plan.delete\n            assert JobManager(WorkspaceOptions(root=ws.root)).sweep_orphans(ctx, db) == 0\n            assert db.job(\"remote-job\")[\"lifecycle\"] == \"RUNNING\"\n            # Even a FAILED local DB row cannot release remote inputs with UNKNOWN cleanup.\n            db.finish_job(\"remote-job\", JobLifecycle.FAILED, error=\"gateway lost remote state\")\n            plan = plan_gc(db, snapshots_dir(ctx), keep_last=0)\n>           assert not plan.delete\nE           AssertionError: assert not ['43500acf881b70aa664e59b68ce2d2673b553e141c5c01ea252f34e870edee7a']\nE            +  where ['43500acf881b70aa664e59b68ce2d2673b553e141c5c01ea252f34e870edee7a'] = GcPlan(keep={}, delete=['43500acf881b70aa664e59b68ce2d2673b553e141c5c01ea252f34e870edee7a'], orphan_dirs=[], temp_dirs=[], skipped_reason=None, deleted=[], dry_run=True).delete\n\ntests/unit/test_srun_integration_guards.py:98: AssertionError\n=========================== short test summary info ============================\nFAILED tests/unit/test_srun_integration_guards.py::test_SRUN_17_unknown_cleanup_pins_snapshots_and_orphans\n"
+    }
+  ]
+}

@@ -286,3 +286,7 @@ not an executed backend or an extension of slang's resolved-reference coverage. 
 simulation, resolves UVM runtime behavior, or changes edit eligibility. The JSON format is
 pinned to 5.052; no native integration or additional UVM coverage is claimed. See
 [static supplement scope and evidence](verilator_static_supplement.md).
+
+## Slurm is not yet a supported execution backend
+
+Offline configuration, routing and safety primitives do not constitute remote support. Compute-node sandbox/toolchain checks, site-integrated launch/supervision, ownership discovery, cancellation races, real pyslang equivalence and P1 graph/Serena lifecycle are still pending qualification/implementation. No Slurm integration, speedup, simulation or formal result is claimed. See [Slurm status](srun.md).

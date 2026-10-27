@@ -19,6 +19,8 @@ from svweave.domain.states import (
     Completeness,
     JobLifecycle,
 )
+from svweave.execution.ledger import pinned_snapshots
+from svweave.execution.models import AttemptRecord
 from svweave.snapshot.models import SnapshotRecord
 from svweave.storage.lock import WorkspaceBusy, init_lock, workspace_lock
 from svweave.storage.migrations import migrate
@@ -79,6 +81,30 @@ class Database:
                 "VALUES (?,?,?,?) ON CONFLICT(workspace_id) DO UPDATE SET "
                 "root_mapping=excluded.root_mapping, policy_hash=excluded.policy_hash",
                 (workspace_id, json.dumps(root_mapping, sort_keys=True), policy_hash, _now()),
+            )
+
+    def add_execution_attempt_ref(self, record: AttemptRecord) -> None:
+        """Durably anchor an attempt BEFORE submission; no deletion/unpin API.
+
+        Call under the workspace build lock. The independent immutable reference
+        means loss of the file ledger cannot turn an uncertain submission into a
+        clean workspace. Repeating the same identity is idempotent, never replace.
+        """
+        identity = (record.attempt_id, record.job_id, record.snapshot_id,
+                    record.execution_fingerprint)
+        with self.transaction() as conn:
+            previous = conn.execute(
+                "SELECT attempt_id, job_id, snapshot_id, execution_fingerprint "
+                "FROM execution_attempt_refs WHERE attempt_id=?", (record.attempt_id,),
+            ).fetchone()
+            if previous is not None:
+                if tuple(previous) != identity:
+                    raise SvwError(ErrorCode.RECOVERY_REQUIRED, "execution attempt reference identity changed")
+                return
+            conn.execute(
+                "INSERT INTO execution_attempt_refs "
+                "(attempt_id,job_id,snapshot_id,execution_fingerprint,created_at) VALUES (?,?,?,?,?)",
+                (*identity, _now()),
             )
 
     def add_retention_ref(self, snapshot_id: str, ref: str) -> None:
@@ -339,6 +365,10 @@ def plan_gc(db: Database, snapshots_dir: Path, keep_last: int = KEEP_LAST_SUCCES
     def keep(sid: str, why: str) -> None:
         plan.keep.setdefault(sid, []).append(why)
 
+    remote_pins = pinned_snapshots(snapshots_dir.parent, c)
+    for sid in present if remote_pins is None else remote_pins:
+        keep(sid, "execution_cleanup_unconfirmed")
+
     for sid in present[:keep_last]:
         keep(sid, "recent_successful")
     active = ",".join(f"'{s.value}'" for s in ACTIVE_JOB_STATES)
@@ -391,6 +421,9 @@ def plan_gc(db: Database, snapshots_dir: Path, keep_last: int = KEEP_LAST_SUCCES
                 plan.temp_dirs.append(p.name)
             elif p.is_dir() and p.name not in known:
                 plan.orphan_dirs.append(p.name)
+    if remote_pins is None or remote_pins:
+        # Unknown remote work may still reference staging/temp directories.
+        plan.temp_dirs = []
     return plan
 
 

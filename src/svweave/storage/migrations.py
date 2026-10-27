@@ -190,6 +190,18 @@ CREATE TABLE published_pointer (
     (2, MIGRATION_V2),
     (3, MIGRATION_V3),
     (4, MIGRATION_V4),
+    (5, """
+CREATE TABLE execution_attempt_refs (
+    attempt_id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    snapshot_id TEXT NOT NULL,
+    execution_fingerprint TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE TRIGGER execution_attempt_refs_no_replace BEFORE INSERT ON execution_attempt_refs WHEN EXISTS (SELECT 1 FROM execution_attempt_refs WHERE attempt_id=NEW.attempt_id) BEGIN SELECT RAISE(ABORT, 'execution attempt references cannot be replaced'); END;
+CREATE TRIGGER execution_attempt_refs_no_update BEFORE UPDATE ON execution_attempt_refs BEGIN SELECT RAISE(ABORT, 'execution attempt references are immutable'); END;
+CREATE TRIGGER execution_attempt_refs_no_delete BEFORE DELETE ON execution_attempt_refs BEGIN SELECT RAISE(ABORT, 'execution attempt references must be retained'); END;
+"""),
 ]
 
 LATEST_VERSION = MIGRATIONS[-1][0]

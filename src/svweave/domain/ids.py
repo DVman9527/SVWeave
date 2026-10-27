@@ -58,6 +58,8 @@ def compute_build_id(
     config_id: str,
     toolchain_id: str,
     semantic_schema_version: str = SEMANTIC_SCHEMA_VERSION,
+    *,
+    execution_fingerprint: str | None = None,
 ) -> str:
     for name, value in (
         ("snapshot_id", snapshot_id),
@@ -72,8 +74,13 @@ def compute_build_id(
             )
     if not semantic_schema_version or ":" in semantic_schema_version:
         raise SvwError(ErrorCode.INVALID_CONFIG, "invalid semantic_schema_version")
-    # ':' cannot occur in any validated component, so the join is unambiguous.
-    return sha256_hex(":".join((snapshot_id, config_id, toolchain_id, semantic_schema_version)))
+    # Preserve every existing local identity; remote namespaces cannot reuse legacy builds.
+    components: tuple[str, ...] = (snapshot_id, config_id, toolchain_id, semantic_schema_version)
+    if execution_fingerprint is not None:
+        if not is_sha256_hex(execution_fingerprint):
+            raise SvwError(ErrorCode.INVALID_CONFIG, "invalid execution_fingerprint")
+        components += ("execution-v1", execution_fingerprint)
+    return sha256_hex(":".join(components))
 
 
 def explain_build_change(old: dict[str, str], new: dict[str, str]) -> list[str]:

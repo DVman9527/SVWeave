@@ -23,7 +23,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from svweave.adapters.slang.runner import WorkerHandle
-from svweave.application.build import DB_FILENAME, run_build
+from svweave.application.build import DB_FILENAME, require_execution_fingerprint, run_build
 from svweave.application.events import EventLog, read_events
 from svweave.application.evidence import record_static_for
 from svweave.application.options import WorkspaceOptions
@@ -32,6 +32,8 @@ from svweave.domain.envelope import Envelope, ErrorInfo, Outcome, error_envelope
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.ids import new_job_id
 from svweave.domain.states import ACTIVE_JOB_STATES, JobLifecycle
+from svweave.execution.ledger import ensure_reconciled, job_requires_reconciliation
+from svweave.execution.slurm import ensure_available
 from svweave.storage.db import Database
 from svweave.storage.lock import WorkspaceBusy, build_lock
 
@@ -76,7 +78,7 @@ class JobManager:
         self._thread: threading.Thread | None = None
         self._active_id: str | None = None
         self._active_profile: str | None = None
-        self._active_args: tuple[bool, str | None] | None = None
+        self._active_args: tuple[bool, str | None, str] | None = None
         self._handle: WorkerHandle | None = None
         self._owned: set[str] = set()
 
@@ -97,6 +99,10 @@ class JobManager:
             ACTIVE,
         ).fetchall()
         for r in rows:
+            if job_requires_reconciliation(ctx.state_dir, r["job_id"]):
+                # A dead local PID cannot prove a remote step stopped. Leave lifecycle active
+                # and pins intact until an operator can reconcile exact scheduler ownership.
+                continue
             if r["job_id"] in self._owned or r["owner_pid"] == os.getpid():
                 continue
             if not _pid_alive(r["owner_pid"]):
@@ -119,10 +125,13 @@ class JobManager:
     ) -> dict[str, Any]:
         ctx = self.opts.load()
         name, _ = ctx.profile(profile)  # INVALID_CONFIG now, not inside the thread
+        if ctx.execution.provider == "srun":
+            ensure_available(ctx.execution)
+        build_args = (reuse, expected_snapshot_id, ctx.execution.fingerprint)
         with self._lock, self._db(ctx) as db:
             self.sweep_orphans(ctx, db)
             if self._thread is not None and self._thread.is_alive() and self._active_id:
-                if self._active_profile == name and self._active_args == (reuse, expected_snapshot_id):
+                if self._active_profile == name and self._active_args == build_args:
                     return {**self._row(db, self._active_id), "already_running": True}
                 if self._active_profile == name:
                     # same profile, different request: joining would silently drop this caller's
@@ -130,7 +139,7 @@ class JobManager:
                     raise SvwError(
                         ErrorCode.RESOURCE_LIMIT,
                         "a build of this profile is running with different arguments "
-                        "(reuse / expected_snapshot_id); retry when it has finished",
+                        "(reuse / expected_snapshot_id / execution); retry when it has finished",
                         {"active_job_id": self._active_id, "active_profile": self._active_profile,
                          "reason": "different_build_arguments"},
                     )
@@ -139,6 +148,7 @@ class JobManager:
                     "another build job is active; only one build runs at a time",
                     {"active_job_id": self._active_id, "active_profile": self._active_profile},
                 )
+            ensure_reconciled(ctx.state_dir, db.conn)
             try:  # a CLI build (or another process) may hold the workspace build lock
                 with build_lock(ctx.state_dir):
                     pass
@@ -155,7 +165,10 @@ class JobManager:
                     f"({','.join('?' * len(ACTIVE))})",
                     ACTIVE,
                 ).fetchall():
-                    if r["job_id"] not in self._owned and _pid_alive(r["owner_pid"]):
+                    if r["job_id"] not in self._owned and (
+                        _pid_alive(r["owner_pid"])
+                        or job_requires_reconciliation(ctx.state_dir, r["job_id"])
+                    ):
                         raise SvwError(
                             ErrorCode.RESOURCE_LIMIT,
                             "a build job of another gateway process is active",
@@ -178,11 +191,12 @@ class JobManager:
                 )
             handle = WorkerHandle()
             self._handle, self._active_id, self._active_profile = handle, job_id, name
-            self._active_args = (reuse, expected_snapshot_id)
+            self._active_args = build_args
             self._owned.add(job_id)
             t = threading.Thread(
                 target=self._run,
-                args=(job_id, name, request_id, reuse, expected_snapshot_id, handle),
+                args=(job_id, name, request_id, reuse, expected_snapshot_id, handle,
+                      ctx.execution.fingerprint),
                 name=f"svw-job-{job_id[:8]}",
                 daemon=True,
             )
@@ -200,13 +214,16 @@ class JobManager:
         reuse: bool,
         expected: str | None,
         handle: WorkerHandle,
+        expected_execution_fingerprint: str,
     ) -> None:
         t0 = time.monotonic()
         env: Envelope | None = None
         build_id: str | None = None
         try:
             ctx = self.opts.load()
+            require_execution_fingerprint(ctx, expected_execution_fingerprint)
             with self._db(ctx) as db:
+                ensure_reconciled(ctx.state_dir, db.conn)
                 if handle.cancelled:
                     db.finish_job(job_id, JobLifecycle.CANCELLED, error="cancelled before start")
                     self._emit(
@@ -222,6 +239,7 @@ class JobManager:
                 test_fault=self._test_fault,
                 job_id=job_id,
                 expected_snapshot_id=expected,
+                expected_execution_fingerprint=expected_execution_fingerprint,
             )
             build_id = env.build_id
             if expected is not None and env.snapshot_id != expected:  # belt and braces
@@ -354,6 +372,9 @@ class JobManager:
         with self._db(ctx) as db:
             self.sweep_orphans(ctx, db)
             data = self._row(db, job_id)
+            if job_requires_reconciliation(ctx.state_dir, job_id):
+                data["execution"] = {"cleanup_confirmed": False, "phase": "CLEANUP_UNCONFIRMED",
+                                     "recovery_required": True}
             r = db.job(job_id)
             assert r is not None
             run_events = read_events(ctx.state_dir / "runs" / job_id / "events.jsonl", 200)

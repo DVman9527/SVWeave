@@ -80,7 +80,18 @@ def denied(reason: str, message: str, **details: Any) -> SvwError:
     return SvwError(ErrorCode.POLICY_DENIED, message, {"reason": reason, **details})
 
 
+def require_local_editing(ctx: WorkspaceContext) -> None:
+    """P0 remote execution is read-only; never fall back for candidate validation."""
+    if ctx.execution.provider != "local":
+        raise denied(
+            "srun_editing_not_supported",
+            "editing and candidate validation are not qualified with srun execution",
+            submitted=False,
+        )
+
+
 def require_editing_enabled(ctx: WorkspaceContext) -> None:
+    require_local_editing(ctx)
     if not ctx.effective.editing_enabled:
         raise denied(
             "editing_disabled",

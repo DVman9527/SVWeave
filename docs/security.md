@@ -186,3 +186,7 @@ EDA licence environments or company source. Real-backend jobs run only on manual
 
 Report security problems privately to the repository owner (contact: TBD by owner). Include the
 version, `toolchain.lock.json` hash and a redacted `svweave doctor` output.
+
+## Slurm control-plane exception is not approved
+
+The new typed scheduler policy field grants nothing by default. Runtime scheduler networking requires separate owner approval; backend network isolation remains mandatory. Current site contracts remain unqualified and no live launch is enabled. Repository local configuration cannot approve a site, and srun editing/candidate validation is denied. See [ADR-015](adr/ADR-015-slurm-execution-boundary.md) and [Slurm boundaries](srun.md).

@@ -75,6 +75,7 @@ from svweave.editing.plan import (
     path_allowed,
     recheck_edit_policy,
     require_editing_enabled,
+    require_local_editing,
     resolve_edits,
     slang_scope_escape,
 )
@@ -573,6 +574,7 @@ def _run_profile_validation(
     failures: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Baseline + candidate static build of one profile; appends failures; returns the facts."""
+    require_local_editing(ctx)
     out: dict[str, Any] = {"profile": profile}
     base_env = run_build(opts, profile, request_id)
     if base_env.build_id is None or base_env.error and base_env.outcome in (Outcome.ERROR, Outcome.BLOCKED):

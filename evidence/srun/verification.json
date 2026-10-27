@@ -1,0 +1,162 @@
+{
+  "schema_version": "1",
+  "qualification": "UNQUALIFIED",
+  "created_at": "2026-10-27T02:39:50.761853+00:00",
+  "commit": "797cb9447de3dcc6e1c7983cb4f906f11d6a5d6c",
+  "dirty_tree_digest": "ee48fc216513e12ab9d54e4176cd7066b362d20e9a706f0847e00fac9452e1e1",
+  "dirty_tree_scope": "changed tracked and untracked implementation/docs/tests, excludes evidence to avoid self-reference",
+  "file_hashes": {
+    "README.md": "4edb70ddee48607feb368ba99da1fe24c560fb0f961ecbd459c0a98c92408c44",
+    "README.zh-CN.md": "6e0d1b375be968754e272993e0f60cd1c972c35aede8e9369291930d0a840c78",
+    "README.zh-TW.md": "33f872ef75c7e683a609649ea6bf96653dfb61e9566b01ad6d746b447967bb0a",
+    "docs/adr/ADR-015-slurm-execution-boundary.md": "36be0ea7c4fecbd28754357c3d4be60db2b6b8e6421924ae62d8482da548d7b0",
+    "docs/limitations.md": "d7563685ac558386ea701ad004efa0977ce4444db63ec56c33810a9a904b45eb",
+    "docs/operations.md": "0e1aa151302c6d6a88ca1a5bcc095c59e9e8fa3a4268eb76cfb733159cd3d0de",
+    "docs/security.md": "d522540157d4b49a4fa3fd3ff94d4259328a68a7e602e4bc6160d8254e9fc3fa",
+    "docs/srun.md": "1f1f3ffca4fce06242eb2c21f751e2b54025330217edb946e665e3ac40f2a85c",
+    "schemas/local.schema.json": "34f27235076b361565fbc2ff3fac7b60edff070fcef792edf118ebdee2cdd427",
+    "schemas/policy.schema.json": "482545ac8e68facc685b156f1508d1c787d4c60fe89ba82421001d300684fa16",
+    "scripts/mutation_suite.py": "e5a7cec215b2f73f1e222b339c179605739ce48a730dd95f2c883614a157a9b0",
+    "src/svweave/adapters/slang/args.py": "5fb30bf301f13d0352ba184c41d57d7352535628ee97342f009fed8894b070e7",
+    "src/svweave/application/build.py": "2a7ad8de04230b45b5cdb7981bebfb3c0acc1789c508066e37819dcb191a72b9",
+    "src/svweave/application/edit.py": "5f97ab3ba5152f573db996184c28b8f23cf32c13e0e98027a3953c155f74ccb6",
+    "src/svweave/application/jobs.py": "be02ca97b33bf2d9daaae07eb84693e10d40c64a1fde8af56507c9046ba02346",
+    "src/svweave/application/options.py": "5c942b4be7ddf07bbde9eaae8976f2b8d19872cad8eaf847fb7869d0caf9cca3",
+    "src/svweave/cli.py": "f946a7894cc5935c6ae54ce0b3ddfac48df691177d5b1a13a23649c32ca89fdc",
+    "src/svweave/config/context.py": "0e0cbc93bc824a89cde9d4ca670281a5ea314933de3177fb13a873cb6bf34cd5",
+    "src/svweave/config/execution.py": "43413932f4e2e7f01a25fa6480be094e214f9045ba726b2a92afced619f7c16f",
+    "src/svweave/config/models.py": "4b716385a956f1b23bad3da4e1296373f5b2cb8c9748bd9a2244adfccaa7ec40",
+    "src/svweave/domain/ids.py": "28a20d3319cec07db1adae9af032cd3a50c803e042bf23022e89b2b39d968c53",
+    "src/svweave/editing/plan.py": "467a46d5967447a523eea9ce6b030fa95e1a4d0f39631a937a884b1001059312",
+    "src/svweave/execution/__init__.py": "7bcc83079524ab8057a020a21283bb90869e0c0d232a850f0dd4f81d7cfa5025",
+    "src/svweave/execution/control.py": "8e3ac661772f42e86b4a08b0c4ead1bd097e937178b196a379c1627555b07a5d",
+    "src/svweave/execution/deadlines.py": "c77bfbec6889990b8b1d3a1bfcfaa2a2842c672196ce10580da2fe779e14dbea",
+    "src/svweave/execution/ledger.py": "2842db5215ace1016986c68dd5d96ffff583890e37f90d4f0a7a7b6ee40bef56",
+    "src/svweave/execution/local.py": "af3b0cd6c4b9324d76e0d956fa17fe6a1dfad6f73e31d1842e10db12c27f4f4b",
+    "src/svweave/execution/models.py": "f42d7ac26af6320eb690d5cb3a662520932b72a840adee5cac95e7f23a2e4b23",
+    "src/svweave/execution/ownership.py": "a5f877351598b8e63b176a2105c767c5f9a98c1c86517f9ac0e5a05d185ea05f",
+    "src/svweave/execution/remote_bootstrap.py": "0dc40b303ee1d923a153b341a127dc0fe2becf97e8709f3b5c6158233df4fa8c",
+    "src/svweave/execution/slurm.py": "b4fa2c0746f8558a1c64d78bb2b49bc8a426dc8dc37eed217c63e7d217c2564d",
+    "src/svweave/execution/staging.py": "7e12aa784251718a2cffa759461a6f05b6854400829455c2f1d56800f3546ee9",
+    "src/svweave/execution/supervisor.py": "6e69ecbe810e826f8768dc51e0f4051d08e26d2230eb122f8fa767a6cd43e808",
+    "src/svweave/execution/transport.py": "d7aabc69d9aa0ab1d1d0a82f0d7804263a8cef506cb8a00ef0f0d6dc003ca2d3",
+    "src/svweave/orchestration/registry.py": "71e83846e989cbeeea769a7f12f7254688eb50a6d3973a033015bc93e3b753bd",
+    "src/svweave/storage/db.py": "75d38bb8aeb4b34d6fc0834a214b005220579e5d1897268396648a7db3831c63",
+    "support_srun.md": "e3b1dadbba55c88e9cb2f4bca254fda4761c4f4cc6a38244d4d7d5d285966466",
+    "tests/unit/test_execution_provider.py": "95f7ca9e8e1e2a5e0260a3bfeeb2688fef150b3726498c2f97d53fd9981047d2",
+    "tests/unit/test_srun_config.py": "d7372ff49845c380f80cf3ecbffc62c064289fc35bbcec090046b8168db89540",
+    "tests/unit/test_srun_integration_guards.py": "fb2553e06a2d0000fe100a5780e395dc543b9cf688c11c57a7fe2e873d160f98",
+    "tests/unit/test_srun_staging.py": "8e98cf5c04967e72f4534b23fa7fe5ba637c2837e5406e7b66e80917cf8a1191"
+  },
+  "toolchain_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "target_slurm_version": "22.05.9",
+  "srun_installed": true,
+  "scheduler_jobs_submitted": false,
+  "host_scope": "Local source-installed client; approved single-node runtime attempt blocked at MUNGE Unix socket creation; no operational cluster.",
+  "runtime": "/workspace/shared/uvm-ab/venv/bin/python, PYTHONPATH=src",
+  "checks": {
+    "unit_regression": {
+      "status": "PASS",
+      "passed": 295,
+      "deselected": 4,
+      "evidence": "unit-regression.log",
+      "scope": "focused pure/offline regression, not full suite"
+    },
+    "new_srun_tests": {
+      "status": "PASS",
+      "passed": 82,
+      "files": [
+        "test_srun_config.py",
+        "test_execution_provider.py",
+        "test_srun_integration_guards.py",
+        "test_srun_staging.py"
+      ],
+      "independent_review_run": true
+    },
+    "ruff": {
+      "status": "PASS",
+      "command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/ruff check .",
+      "evidence": "lint.log"
+    },
+    "mypy": {
+      "status": "PASS",
+      "command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/mypy",
+      "evidence": "types.log"
+    },
+    "schema": {
+      "status": "PASS",
+      "command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/python -m svweave.cli schema emit --check",
+      "evidence": "schema-check.json"
+    },
+    "docs": {
+      "status": "PASS",
+      "passed": 2,
+      "evidence": "docs-check.log"
+    },
+    "mutations": {
+      "status": "PASS",
+      "killed": [
+        "M23",
+        "M24",
+        "M25"
+      ],
+      "scope": "pure throwaway-copy focused harness; not complete standard mutation suite",
+      "evidence": "mutations.json",
+      "reproduce": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/python evidence/srun/mutation-runner.txt"
+    },
+    "git_diff_check": {
+      "status": "PASS",
+      "command": "git diff --check"
+    },
+    "known_environment_failure": {
+      "status": "FAIL",
+      "test": "tests/unit/test_gateway_cli.py::test_exit_codes_per_command",
+      "reason": "doctor returns BACKEND_UNAVAILABLE: cbm_binary missing; no backend launched",
+      "note": "excluded from final focused pure run; no claim of full regression pass"
+    },
+    "slurm_integration_acceptance": {
+      "status": "BLOCKED",
+      "reason": "Client installed; approved runtime attempt failed before MUNGE readiness due to Unix socket creation denial. No Slurm daemon/job started; site adapter, deployment and qualification remain unavailable."
+    },
+    "remote_sandbox_toolchain": {
+      "status": "NOT_RUN",
+      "reason": "no compute-node access; local NETLINK_ROUTE denial not bypassed or retried"
+    },
+    "p1_remote_mcp": {
+      "status": "NOT_RUN",
+      "implementation": "NOT_IMPLEMENTED"
+    },
+    "full_qualification": {
+      "status": "NOT_RUN",
+      "reason": "real backend and Slurm gates unavailable; no fabricated PASS"
+    },
+    "eda_compile": {
+      "status": "NOT_RUN"
+    },
+    "simulation": {
+      "status": "NOT_RUN"
+    },
+    "formal": {
+      "status": "NOT_RUN"
+    },
+    "coverage": {
+      "status": "NOT_RUN"
+    }
+  },
+  "unit_command": "PYTHONPATH=src /workspace/shared/uvm-ab/venv/bin/python -m pytest -o addopts='' -q tests/unit/test_srun_config.py tests/unit/test_srun_integration_guards.py tests/unit/test_srun_staging.py tests/unit/test_execution_provider.py tests/unit/test_gateway_jobs.py tests/unit/test_storage.py tests/unit/test_domain.py tests/unit/test_config.py tests/unit/test_manifest.py tests/unit/test_snapshot.py tests/unit/test_slang_args.py tests/unit/test_slang_ingest.py tests/unit/test_edit_machine.py tests/unit/test_adapters_orchestration.py tests/unit/test_gateway_cli.py -k 'not test_exit_codes_per_command and not doctor'",
+  "source_verification": [
+    "https://raw.githubusercontent.com/SchedMD/slurm/slurm-22-05-9-1/doc/man/man1/srun.1",
+    "https://raw.githubusercontent.com/SchedMD/slurm/slurm-22-05-9-1/doc/man/man1/scancel.1",
+    "https://raw.githubusercontent.com/SchedMD/slurm/slurm-22-05-9-1/src/srun/libsrun/allocate.c"
+  ],
+  "remaining": [
+    "Implement qualified site launcher/query/reconcile adapter with independently corroborated exact step identity and safe pending ID discovery (new allocation remains unsupported).",
+    "Approve explicit scheduler control-plane exception and authorized allocation/resource budget; never widen backend network access.",
+    "Supply trusted shared staging/control/runtime deployment, complete runtime inventory and compute namespace support; execute authorized P0B safety/equivalence/cancel tests.",
+    "P1 graph/Serena remote provider and helper lifecycle implementation/real qualification remain outstanding."
+  ],
+  "publication": "No commit or push; existing local commit preserved.",
+  "environment_updated_at": "2026-10-27T03:34:18.020089+00:00",
+  "historical_snapshot_note": "created_at, dirty_tree_digest, file_hashes and test results describe the original offline run; only environment status/link updated after installation and approved smoke failure. Tests were not rerun.",
+  "runtime_evidence": "runtime-smoke.json"
+}

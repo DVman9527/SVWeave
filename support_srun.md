@@ -1,8 +1,10 @@
 # SVWeave srun 執行支援完整規劃
 
-> 狀態：設計提案，尚未實作、尚未執行 Slurm 驗收。文件日期：2026-10-27。
-> 本文假設使用者所指 `srun` 是 **Slurm Workload Manager 的 srun**；若是站內同名 wrapper，必須先確認其契約再實作。
-> 本次只新增本文件，不修改功能、不提交或推送 Git、不送出 Slurm 工作。
+> 狀態：設計規劃；已加入部分離線設定、provider 邊界與安全基礎，但遠端執行仍為 **BLOCKED / UNQUALIFIED**，尚未完成整體實作或 Slurm 驗收。文件日期：2026-10-27。
+> 當前實作與待完成項目請見 [Slurm 狀態矩陣](docs/srun.md)。下文保留原始規劃與當時檢查紀錄，不將規劃中的測試視為已通過。
+> 最新環境結果：已由官方來源安裝 Slurm **22.05.9**／MUNGE **0.5.18**；指定離線 config 的 client version/help 檢查通過，但**沒有可運作叢集**。已核准的單節點測試於 MUNGE 啟動失敗：首次為 socket 路徑權限；經明確核准專用 0711 socket 目錄後，第二次 Unix stream socket 建立遭 `Operation not permitted`（尚未 bind）。MUNGE runtime 為 **FAIL / BLOCKED**，Slurm daemon／job 未啟動，scheduler 測試為 **NOT_RUN**；清理後 owned PIDs／listeners 為空且 socket 不存在。既有 **295 個離線測試通過**不是叢集驗收。詳見 [redacted runtime evidence](evidence/srun/runtime-smoke.json) 與 [狀態矩陣](docs/srun.md)。
+> 使用者已確認目標版本為 **Slurm 22.05.9**。是否另經站內同名 wrapper 尚待確認；wrapper 的契約不得自行推定。
+> 原始規劃階段只新增本文件，未修改功能。後續已加入離線實作與測試（見狀態文件）；尚未提交或推送 Git，亦未送出 Slurm 工作。
 
 ## 1 結論與範圍
 
@@ -334,7 +336,7 @@ ownership ledger 至少含 SVWeave job／attempt、cluster、UID、Slurm job／s
 
 ## 15 待站點與使用者確認
 
-1. `srun` 是否為原生 Slurm，或公司 wrapper？精確版本與支援範圍為何？
+1. 版本已確認為 **Slurm 22.05.9**；`srun` 是否另經公司 wrapper，以及站點實際支援範圍仍待確認。
 2. 只需要 pyslang worker，還是最終也需要 graph／Serena？gateway 是否允許留在提交主機？
 3. 常用模式是在已取得 allocation 內啟動，還是允許本工具取得新 allocation？允許哪些 account／partition／qos、資源與計費上限？
 4. 哪些提交主機可連 controller／compute stdio？是否核准 §3.2 最小控制平面網路例外？
@@ -367,6 +369,6 @@ ownership ledger 至少含 SVWeave job／attempt、cluster、UID、Slurm job／s
 
 特別注意：查閱版本的 srun 文件含 beta `--async`，其 `--parsable` 依賴 async；**本提案不採用它們，也不把它們當所有 Slurm 版本的既有能力**。同步 stdin/stdout worker 不應因取得 ID 而改成 detached async 模式。[Slurm srun](https://slurm.schedmd.com/srun.html)
 
-### 本次實際完成與未執行事項
+### 原始規劃階段的實際完成與未執行事項
 
-本次只閱讀程式碼、工作樹狀態、規範及官方文件，撰寫此規劃並做文件／變更範圍檢查。沒有執行 Slurm 工作、native backend、simulation 或 feature tests；所有 srun integration／acceptance 狀態為 **NOT_RUN**。文件完成不等於功能完成，現有未提交變更與其 qualification 狀態不因本文件改變。
+原始規劃階段只閱讀程式碼、工作樹狀態、規範及官方文件，撰寫此規劃並做文件／變更範圍檢查。後續離線實作進度與逐項測試對照請見 [docs/srun.md](docs/srun.md)；下述未執行事項保留原始階段的歷史範圍。沒有執行 Slurm 工作、native backend、simulation 或 feature tests；所有 srun integration／acceptance 狀態為 **NOT_RUN**。文件完成不等於功能完成，現有未提交變更與其 qualification 狀態不因本文件改變。

@@ -1,4 +1,251 @@
 {
+  "$defs": {
+    "ExecutionDeadlines": {
+      "additionalProperties": false,
+      "properties": {
+        "cancel_grace_seconds": {
+          "default": 10,
+          "maximum": 600,
+          "minimum": 1,
+          "title": "Cancel Grace Seconds",
+          "type": "integer"
+        },
+        "overall_seconds": {
+          "default": 300,
+          "maximum": 1209600,
+          "minimum": 1,
+          "title": "Overall Seconds",
+          "type": "integer"
+        },
+        "queue_seconds": {
+          "default": 120,
+          "maximum": 604800,
+          "minimum": 1,
+          "title": "Queue Seconds",
+          "type": "integer"
+        },
+        "startup_seconds": {
+          "default": 30,
+          "maximum": 3600,
+          "minimum": 1,
+          "title": "Startup Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "ExecutionDeadlines",
+      "type": "object"
+    },
+    "ExecutionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "scheduler_network_approved": {
+          "default": false,
+          "title": "Scheduler Network Approved",
+          "type": "boolean"
+        },
+        "site_profiles": {
+          "patternProperties": {
+            "^[A-Za-z0-9_][A-Za-z0-9_.-]*$": {
+              "$ref": "#/$defs/SlurmSiteProfile"
+            }
+          },
+          "title": "Site Profiles",
+          "type": "object"
+        }
+      },
+      "title": "ExecutionPolicy",
+      "type": "object"
+    },
+    "ExecutionResources": {
+      "additionalProperties": false,
+      "properties": {
+        "cpus_per_task": {
+          "default": 1,
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Cpus Per Task",
+          "type": "integer"
+        },
+        "memory_mib": {
+          "default": 8192,
+          "maximum": 1048576,
+          "minimum": 64,
+          "title": "Memory Mib",
+          "type": "integer"
+        },
+        "nodes": {
+          "const": 1,
+          "default": 1,
+          "title": "Nodes",
+          "type": "integer"
+        },
+        "tasks": {
+          "const": 1,
+          "default": 1,
+          "title": "Tasks",
+          "type": "integer"
+        },
+        "walltime_seconds": {
+          "default": 120,
+          "maximum": 604800,
+          "minimum": 1,
+          "title": "Walltime Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "ExecutionResources",
+      "type": "object"
+    },
+    "SlurmSiteProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account"
+        },
+        "bootstrap_path": {
+          "title": "Bootstrap Path",
+          "type": "string"
+        },
+        "cluster": {
+          "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+          "title": "Cluster",
+          "type": "string"
+        },
+        "constraint": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Constraint"
+        },
+        "deadlines": {
+          "$ref": "#/$defs/ExecutionDeadlines"
+        },
+        "executable_hashes": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Executable Hashes",
+          "type": "object"
+        },
+        "partition": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Partition"
+        },
+        "python_path": {
+          "title": "Python Path",
+          "type": "string"
+        },
+        "qos": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qos"
+        },
+        "qualification_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qualification Digest"
+        },
+        "reservation": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reservation"
+        },
+        "resources": {
+          "$ref": "#/$defs/ExecutionResources"
+        },
+        "scancel_path": {
+          "title": "Scancel Path",
+          "type": "string"
+        },
+        "scheduler_query_contract": {
+          "const": "unqualified",
+          "default": "unqualified",
+          "title": "Scheduler Query Contract",
+          "type": "string"
+        },
+        "scontrol_path": {
+          "title": "Scontrol Path",
+          "type": "string"
+        },
+        "shared_root": {
+          "title": "Shared Root",
+          "type": "string"
+        },
+        "slurm_version": {
+          "const": "22.05.9",
+          "default": "22.05.9",
+          "title": "Slurm Version",
+          "type": "string"
+        },
+        "srun_path": {
+          "title": "Srun Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cluster",
+        "srun_path",
+        "scancel_path",
+        "scontrol_path",
+        "python_path",
+        "bootstrap_path",
+        "shared_root"
+      ],
+      "title": "SlurmSiteProfile",
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "description": "policy.json: trusted, created by the CLI; a repository profile can only tighten it.",
   "properties": {
@@ -24,6 +271,9 @@
       "default": false,
       "title": "Editing Enabled",
       "type": "boolean"
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionPolicy"
     },
     "network_enabled": {
       "default": false,

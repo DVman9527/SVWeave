@@ -17,7 +17,7 @@ from svweave.application.events import EventLog
 from svweave.application.jobs import JobManager
 from svweave.application.keys import cursor_key
 from svweave.application.options import WorkspaceOptions
-from svweave.domain.errors import SvwError
+from svweave.domain.errors import ErrorCode, SvwError
 from svweave.orchestration.registry import BackendRegistry
 from svweave.security import safeio
 from svweave.security.redaction import Redactor
@@ -41,6 +41,7 @@ class Session:
         self._registry_factory = registry_factory
         self._registry: BackendRegistry | None = None
         self._registry_error: SvwError | None = None
+        self._registry_execution_fingerprint: str | None = None
         self._lock = threading.Lock()
         self.jobs = jobs or JobManager(opts, events=events)
         #: Probe results gathered by this session (in memory only; see services.status).
@@ -51,16 +52,42 @@ class Session:
     def registry(self) -> BackendRegistry | None:
         """The backend registry, or None when the toolchain is unavailable (text fallback)."""
         with self._lock:
-            if self._registry is not None or self._registry_error is not None:
-                return self._registry
+            # A long-lived MCP session must not reuse a local backend after its effective
+            # execution selection changes. Revalidate even when a registry/error is cached,
+            # and apply the same provider guard to injected factories as production ones.
             try:
+                ctx = self.opts.load()
+                fingerprint = ctx.execution.fingerprint
+                if fingerprint != self._registry_execution_fingerprint:
+                    self._discard_registry()
+                    self._registry_error = None
+                    self._registry_execution_fingerprint = fingerprint
+                if ctx.execution.provider != "local":
+                    raise SvwError(
+                        ErrorCode.BACKEND_UNAVAILABLE,
+                        "remote graph/Serena MCP execution is not qualified (P1)",
+                        {"reason": "srun_mcp_not_supported", "submitted": False},
+                    )
+                if self._registry is not None or self._registry_error is not None:
+                    return self._registry
                 if self._registry_factory is not None:
                     self._registry = self._registry_factory()
                 else:
-                    self._registry = BackendRegistry.for_workspace(self.opts.load())
+                    self._registry = BackendRegistry.for_workspace(ctx)
             except SvwError as e:
+                self._discard_registry()
                 self._registry_error = e
+                # Retry configuration validation on the next access even if a malformed
+                # config is repaired without changing its eventual execution fingerprint.
+                if e.code != ErrorCode.BACKEND_UNAVAILABLE:
+                    self._registry_execution_fingerprint = None
             return self._registry
+
+    def _discard_registry(self) -> None:
+        """Invalidate before teardown; caller holds the session lock."""
+        reg, self._registry = self._registry, None
+        if reg is not None:
+            reg.shutdown()
 
     @property
     def registry_created(self) -> bool:
@@ -130,9 +157,7 @@ def load_probe(trusted_dir: Path) -> dict[str, Any] | None:
             "reasons": [red.text(str(x))[:300] for x in (h.get("reasons") or [])][:20],
             "limitations": [red.text(str(x))[:300] for x in (h.get("limitations") or [])][:20],
             "version": red.text(str(h.get("version") or ""))[:64] or None,
-            "features": {
-                str(k): bool(v) for k, v in (h.get("features") or {}).items()
-            }
+            "features": {str(k): bool(v) for k, v in (h.get("features") or {}).items()}
             if isinstance(h.get("features"), dict)
             else {},
         }

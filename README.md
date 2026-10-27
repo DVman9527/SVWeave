@@ -1,5 +1,6 @@
 # SVWeave
 
+**Slurm status:** opt-in configuration and offline safety foundations are available; remote execution remains **BLOCKED / UNQUALIFIED**, not supported yet. Local remains the default. See [Slurm execution status and gates](docs/srun.md).
 English | [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
 **SVWeave is a SystemVerilog-first, local code-intelligence layer for AI clients and engineers.**
@@ -72,6 +73,65 @@ source workspace is reached through exactly one path: the edit coordinator's app
 compare-and-set write (TB4). Dashed lines are trust boundaries TB1 to TB4.*
 
 ## Status
+
+### Current additions and their limits (2026-10-27)
+
+- **UVM static call metadata:** the existing references query exposes `context.uvm` for
+  recognized, resolved config-db/factory/registry calls, including written argument associations.
+  This is `static_call_site` evidence with `runtime_resolution=not_computed`, not config-db hits,
+  factory choices, phase execution or runtime topology; it does not expand generic-body traversal.
+  See [supported features](docs/supported_features.md#uvm-static-call-metadata-uvm-02--uvm-03).
+- **Optional Verilator 5.052 inventory:** import existing JSON artifacts, then inspect them
+  separately from slang. No Verilator executable runs; results remain `EXTERNAL_DECLARED`,
+  `PARTIAL` and unbound to a snapshot/build. They do not authorize edits or establish HDL success.
+- **Protected-source preparation:** explicitly prepare one source into a derived file and gap
+  report, preserving plaintext bytes and CR/LF offsets without changing the original. This is
+  lexical blanking, not decryption, a compiler or invented blackboxes; encrypted definitions,
+  interfaces and ports remain `UNKNOWN`. It neither replaces the manifest nor automatically binds
+  the report to imported JSON. Preserve the original include context for downstream tools.
+
+```bash
+svweave supplement verilator --tree artifacts/design.tree.json --meta artifacts/design.tree.meta.json --tool-version 5.052
+svweave supplement show --supplement SUPPLEMENT_ID --name Packet --node-type CLASS --allow-partial
+svweave supplement prepare-source --source rtl/vendor_ip.sv --allow-partial
+```
+
+Import exit 0 means storage completed; `--allow-partial` accepts a partial inventory/preparation,
+not successful compilation. See [inventory and preparation contracts](docs/verilator_static_supplement.md).
+Native-tool/UVM end-to-end qualification is not established by their unit tests.
+
+### Slurm: offline foundation only
+
+Local execution remains the default. Typed opt-in configuration, safety guards, immutable staging,
+ledger/pin protection and bounded transport/bootstrap primitives exist, but **live dispatch is
+hard-blocked**. Explicit srun selection never falls back to local; srun editing/candidate validation
+is denied. The live launcher/query/reconcile adapter, compute-node qualification and P1 remote
+codebase-memory/Serena remain incomplete or not implemented.
+
+```bash
+svweave execution-preflight
+svweave --execution-provider local execution-preflight
+svweave execution-recovery --limit 200
+```
+
+Global selection options are `--execution-provider`, `--execution-profile`, `--allocation-mode`
+and `--allocation-id`; they select, never authorize, a trusted site profile. Preflight is offline.
+Recovery is bounded, read-only local inspection: it does not query/cancel jobs, repair evidence or
+clear pins. Missing/corrupt evidence stays blocked; a dead local PID is not remote-cleanup proof.
+The offline Slurm 22.05.9 accounting decoder is an **API, not a CLI or live adapter**; it accepts
+SVWeave's bounded field envelope, not native sacct JSON. Output is diagnostic-only
+`EXTERNAL_DECLARED`, cleanup `UNKNOWN`, worker success `NOT_ESTABLISHED`—even for `COMPLETED/0:0`.
+
+Slurm 22.05.9 and MUNGE 0.5.18 were installed outside the repository, but MUNGE Unix stream socket
+creation was denied before bind. No operational cluster, scheduler job or remote acceptance ran.
+The recorded **464 passed, 4 deselected** focused offline regressions (including 98 decoder tests)
+are not a full backend suite or Slurm qualification. EDA/simulation/formal/coverage remain `NOT_RUN`.
+See [status and gates](docs/srun.md), [accounting contract](docs/srun_accounting.md),
+[code review](docs/srun_code_review.md), [offline evidence](evidence/srun/accounting-verification.json)
+and [runtime blocker](evidence/srun/runtime-smoke.json). The full-suite and qualification figures
+below are historical, not verification of these additions.
+
+### Historical verification snapshots
 
 **Developer preview v0.1.0-dev. UNQUALIFIED** unless the qualification report
 (`.svweave/qualification/report.json`, produced by `scripts/qualify.py`, evidence under

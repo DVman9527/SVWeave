@@ -12,6 +12,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from svweave.config.execution import ExecutionSelection, resolve_execution
 from svweave.config.loader import load_local_config, load_manifest
 from svweave.config.models import LocalConfig, Manifest, Policy
 from svweave.config.paths import PathPolicy, glob_match, is_within, lexical_join
@@ -75,6 +76,7 @@ class WorkspaceContext:
         local: LocalConfig | None,
         policy: Policy,
         manifest_dir: Path | None = None,
+        execution: ExecutionSelection | None = None,
     ) -> None:
         self.project_root = Path(os.path.realpath(project_root))
         self.manifest_dir = Path(os.path.realpath(manifest_dir or project_root))
@@ -82,6 +84,9 @@ class WorkspaceContext:
         self.manifest = manifest
         self.local = local
         self.policy = policy
+        self.execution = resolve_execution(
+            execution or (local.execution if local else ExecutionSelection()), policy.execution
+        )
         self.path_policy = PathPolicy(policy_roots(policy, self.project_root))
         # project.root is repo-controlled: it may not lift the workspace out of the directory
         # holding svweave.yaml unless the trusted policy lists that exact root.
@@ -135,6 +140,7 @@ class WorkspaceContext:
         manifest_path: Path | None = None,
         local_path: Path | None = None,
         policy_path: Path | None = None,
+        execution: ExecutionSelection | None = None,
     ) -> WorkspaceContext:
         mpath = manifest_path or (workdir / MANIFEST_FILENAME)
         manifest = load_manifest(mpath)
@@ -142,7 +148,7 @@ class WorkspaceContext:
         lpath = local_path or (mpath.parent / LOCAL_FILENAME)
         local = load_local_config(lpath) if lpath.exists() else None
         _, policy = load_trusted_policy(mpath, manifest, policy_path)
-        return cls(project_root, manifest, local, policy, mpath.parent)
+        return cls(project_root, manifest, local, policy, mpath.parent, execution)
 
     @property
     def workspace_id(self) -> str:
@@ -287,5 +293,7 @@ class WorkspaceContext:
     def logical_of(self, lexical: Path) -> str:
         root = self._governing_root(lexical)
         if root is None:
-            raise PathPolicy.deny(str(lexical), "not inside any declared source root", SOURCE_ROOT_HINT)
+            raise PathPolicy.deny(
+                str(lexical), "not inside any declared source root", SOURCE_ROOT_HINT
+            )
         return self._logical(lexical, root)

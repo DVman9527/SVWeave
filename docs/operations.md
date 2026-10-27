@@ -109,3 +109,17 @@ SVWeave's guarantees cover operations through its gateway only (plan 23.2).
 BLOCKED or missing input, 4 backend/resource/timeout, 5 stale/conflict, 6 policy/approval refusal.
 Semantic `query` commands additionally exit 5 for a STALE/HISTORICAL build and 3 for a PARTIAL one
 unless `--allow-stale` / `--allow-partial` is given; the JSON result carries the state either way.
+
+## Slurm execution boundary
+
+Use the offline `svweave execution-preflight` to inspect the selection/authorization boundary without starting or querying Slurm. Live srun remains BLOCKED; local remains default. Never clear an unknown attempt ledger or cancel a whole borrowed allocation to recover a step. See [Slurm status and operator gates](srun.md).
+
+
+### Read-only Slurm recovery inspection
+
+Use `svweave execution-recovery --limit 200` to inspect bounded local attempt records and
+immutable database references without network access, submission, cancellation, database
+mutation or unpinning. It remains available for an unqualified srun selection. Missing/corrupt
+records or an unsafe WAL-backed database view fail closed with `RECOVERY_REQUIRED`. An empty
+or truncated listing does not prove absence of remote jobs; recorded IDs/cleanup are not fresh
+scheduler evidence or cancellation authority. See [recovery boundaries](srun.md#read-only-recovery-inspection).

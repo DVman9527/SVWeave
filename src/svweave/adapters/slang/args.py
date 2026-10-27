@@ -40,7 +40,17 @@ def _tops_and_params(nm: NormalizedManifest) -> list[str]:
     return args
 
 
-def build_invocation(nm: NormalizedManifest, files_root: Path, group_dir: Path) -> Invocation:
+def build_invocation(
+    nm: NormalizedManifest, files_root: Path, group_dir: Path, *,
+    published_group_dir: Path | None = None,
+) -> Invocation:
+    """Render paths at their final shared location while optionally writing temporary metadata.
+
+    ``published_group_dir`` changes only the declared path, never input resolution; the
+    caller must atomically publish those exact bytes at that location before execution.
+    """
+    if published_group_dir is not None and not published_group_dir.is_absolute():
+        raise ValueError("published group directory must be absolute")
     if nm.cu_mode != "explicit_groups":
         return Invocation(args=to_slang_args(nm, files_root))
 
@@ -68,7 +78,8 @@ def build_invocation(nm: NormalizedManifest, files_root: Path, group_dir: Path) 
         text = " ".join(shlex.quote(x) for x in lines) + "\n"
         path = group_dir / f"{u.id}.f"
         path.write_text(text, encoding="utf-8")
-        inv.group_files.append(GroupFile(path=str(path), sha256=sha256_hex(text)))
-        inv.args += ["-C", str(path)]
+        published = (published_group_dir or group_dir) / path.name
+        inv.group_files.append(GroupFile(path=str(published), sha256=sha256_hex(text)))
+        inv.args += ["-C", str(published)]
         inv.ledger.append({"file": path.name, "text": text})
     return inv

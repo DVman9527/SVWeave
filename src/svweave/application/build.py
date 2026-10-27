@@ -22,7 +22,7 @@ from svweave.adapters.slang.args import build_invocation
 from svweave.adapters.slang.deps import check_dependencies
 from svweave.adapters.slang.ingest import Ingested, ingest
 from svweave.adapters.slang.protocol import ExtractResult, WorkerRequest
-from svweave.adapters.slang.runner import WorkerHandle, WorkerOutcome, run_worker
+from svweave.adapters.slang.runner import WorkerHandle, WorkerOutcome
 from svweave.application.options import WorkspaceOptions
 from svweave.application.semantic_common import BASIS, freshness_of, require_build
 from svweave.application.toolchain import compute_toolchain
@@ -38,6 +38,11 @@ from svweave.domain.states import (
     Freshness,
     JobLifecycle,
 )
+from svweave.editing.plan import require_local_editing
+from svweave.execution.ledger import ensure_reconciled
+from svweave.execution.local import run_worker
+from svweave.execution.slurm import ensure_available
+from svweave.execution.slurm import run_worker as run_slurm_worker
 from svweave.manifest.models import NormalizedManifest
 from svweave.manifest.resolver import resolve_profile, write_manifest
 from svweave.snapshot.capture import capture_snapshot, snapshots_dir
@@ -140,6 +145,16 @@ def _rel(ctx: WorkspaceContext, p: Path) -> str:
         return str(p)
 
 
+def require_execution_fingerprint(ctx: WorkspaceContext, expected: str | None) -> None:
+    """A queued request must never silently migrate to a different execution context."""
+    if expected is not None and ctx.execution.fingerprint != expected:
+        raise SvwError(
+            ErrorCode.POLICY_DENIED,
+            "execution context changed after the build request; submit a new request",
+            {"reason": "execution_context_changed", "submitted": False},
+        )
+
+
 # ---------------------------------------------------------------------------- entry point
 def run_build(
     opts: WorkspaceOptions,
@@ -152,12 +167,18 @@ def run_build(
     test_fault: str | None = None,
     job_id: str | None = None,
     expected_snapshot_id: str | None = None,
+    expected_execution_fingerprint: str | None = None,
 ) -> Envelope:
     """Build (or reuse) the semantic result of a profile. At most ONE build runs per workspace
     (exclusive non-blocking build lock, shared by the CLI and the MCP job manager). With
     ``expected_snapshot_id`` the build stops with STALE_SNAPSHOT when the captured snapshot differs.
     ``test_fault`` is a TEST-ONLY hook that is never read from configuration."""
     ctx = opts.load()
+    require_execution_fingerprint(ctx, expected_execution_fingerprint)
+    request_execution = ctx.execution.fingerprint
+    ensure_reconciled(ctx.state_dir)
+    if ctx.execution.provider == "srun":
+        ensure_available(ctx.execution)
     try:
         with build_lock(ctx.state_dir):
             return _run_build_locked(
@@ -170,6 +191,7 @@ def run_build(
                 test_fault,
                 job_id,
                 expected_snapshot_id,
+                request_execution,
             )
     except WorkspaceBusy as e:
         raise SvwError(
@@ -189,8 +211,13 @@ def _run_build_locked(
     test_fault: str | None,
     job_id: str | None,
     expected_snapshot_id: str | None,
+    expected_execution_fingerprint: str,
 ) -> Envelope:
     ctx = opts.load()
+    require_execution_fingerprint(ctx, expected_execution_fingerprint)
+    ensure_reconciled(ctx.state_dir)
+    if ctx.execution.provider == "srun":
+        ensure_available(ctx.execution)
     name, _ = ctx.profile(profile)
     nm = resolve_profile(ctx, name)
     write_manifest(ctx, nm)
@@ -239,6 +266,8 @@ def run_build_on_record(
     candidate build from moving the published pointer). The record's snapshot directory must exist
     under ``.svweave/snapshots``; the manifest is resolved against the current workspace."""
     ctx = opts.load()
+    require_local_editing(ctx)
+    ensure_reconciled(ctx.state_dir)
     try:
         with build_lock(ctx.state_dir):  # one build at a time, like run_build
             name, _ = ctx.profile(profile)
@@ -275,8 +304,13 @@ def _build_snapshot(
     pre_job_id: str | None = None,
     publish: bool = True,
 ) -> Envelope:
+    if ctx.execution.provider == "srun":
+        ensure_available(ctx.execution)  # before any cache lookup, including direct internal calls
     tc_id, tc_parts, lock_path = compute_toolchain(ctx.project_root)
-    build_id = compute_build_id(rec.snapshot_id, nm.config_id, tc_id)
+    build_id = compute_build_id(
+        rec.snapshot_id, nm.config_id, tc_id,
+        execution_fingerprint=(ctx.execution.fingerprint if ctx.execution.provider != "local" else None),
+    )
     existing = db.conn.execute("SELECT * FROM builds WHERE build_id=?", (build_id,)).fetchone()
     if existing is not None and reuse and existing["completeness"] == Completeness.COMPLETE.value:
         if publish:
@@ -401,12 +435,21 @@ def _run_job(
         },
     )
     run.event("worker", "start")
-    outcome = run_worker(
+    worker = run_worker if ctx.execution.provider == "local" else run_slurm_worker
+    execution_args: dict[str, Any] = {}
+    if ctx.execution.provider == "srun":
+        execution_args = {
+            "execution": ctx.execution, "policy": ctx.policy.execution,
+            "run_dir": run.dir, "job_id": job_id, "snapshot_id": rec.snapshot_id,
+            "toolchain_id": tc_id,
+        }
+    outcome = worker(
         req,
         timeout_s=float(analysis.max_build_seconds),
         memory_mib=analysis.max_worker_memory_mib,
         handle=handle,
         test_fault=test_fault,
+        **execution_args,
     )
     run.event(
         "worker",

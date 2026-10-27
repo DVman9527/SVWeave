@@ -1,0 +1,22 @@
+import importlib.util,json,os,pathlib,shutil,subprocess,sys,tempfile
+root=pathlib.Path.cwd()
+spec=importlib.util.spec_from_file_location('mut',root/'scripts/mutation_suite.py')
+m=importlib.util.module_from_spec(spec);sys.modules['mut']=m;spec.loader.exec_module(m)
+results=[]
+with tempfile.TemporaryDirectory(prefix='svweave-srun-mutation-') as td:
+    dest=pathlib.Path(td)
+    for d in ('src','tests','fixtures'):
+        shutil.copytree(root/d,dest/d,ignore=shutil.ignore_patterns('__pycache__'))
+    shutil.copy(root/'pyproject.toml',dest/'pyproject.toml')
+    env={**os.environ,'PYTHONPATH':str(dest/'src')}
+    for item in m.MUTATIONS:
+        if item.mid not in ('M23','M24','M25','M26'):continue
+        args=[sys.executable,'-m','pytest','--no-cov','-q',*item.tests]
+        baseline=subprocess.run(args,cwd=dest,env=env,capture_output=True,text=True,timeout=60)
+        m.apply_patches(item,dest)
+        result=subprocess.run(args,cwd=dest,env=env,capture_output=True,text=True,timeout=60)
+        row={'id':item.mid,'baseline_rc':baseline.returncode,'mutant_rc':result.returncode,'status':'KILLED' if baseline.returncode==0 and result.returncode==1 and 'FAILED' in result.stdout else 'ERROR','baseline_output':baseline.stdout+baseline.stderr,'mutant_output':result.stdout+result.stderr}
+        results.append(row);m.restore(item,dest)
+        print(row['id'],row['status'],flush=True)
+(root/'evidence/srun/review-mutations.json').write_text(json.dumps({'scope':'unit-only throwaway copy, no backend process or Slurm','results':results},indent=2)+'\n')
+assert all(r['status']=='KILLED' for r in results)

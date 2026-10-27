@@ -116,6 +116,12 @@ class BackendRegistry:
     ) -> BackendRegistry:
         """Registry for a loaded ``WorkspaceContext``: the workspace's ORIGINAL source roots are
         wired in as ``protected_paths`` so no backend bind can ever make them writable."""
+        if ws.execution.provider != "local":
+            raise SvwError(
+                ErrorCode.BACKEND_UNAVAILABLE,
+                "remote graph/Serena MCP execution is not qualified (P1)",
+                {"reason": "srun_mcp_not_supported", "submitted": False},
+            )
         protected = tuple(Path(r.abs) for r in ws.roots if r.abs is not None)
         return cls(
             toolchain or Toolchain.discover(),

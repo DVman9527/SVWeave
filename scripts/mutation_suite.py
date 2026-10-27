@@ -331,6 +331,41 @@ MUTATIONS: list[Mutation] = [
                "                if False:  # " + MARK + ":M22\n")],
         ["tests/unit/test_edit_slang_symbol.py::test_n2_state_changing_directive_inside_a_macro_body_is_refused"],
     ),
+    m(
+        "M23", "remove the P0 remote editing provider guard",
+        "support_srun SRUN-23/P0 editing",
+        [Patch("src/svweave/editing/plan.py",
+               '    if ctx.execution.provider != "local":\n',
+               '    if False:  # ' + MARK + ':M23\n')],
+        ["tests/unit/test_srun_integration_guards.py::test_SRUN_P0_edit_guard_precedes_baseline_and_candidate"],
+    ),
+
+    m(
+        "M24", "ignore exact scheduler ownership on cancellation",
+        "support_srun SRUN-09/11/23",
+        [Patch("src/svweave/execution/ownership.py",
+               " or expected != observed.ownership):\n",
+               "):  # " + MARK + ":M24\n")],
+        ["tests/unit/test_execution_provider.py::test_SRUN_09_exact_borrowed_step_only"],
+    ),
+    m(
+        "M25", "drop unknown remote cleanup snapshot pins",
+        "support_srun SRUN-17/23",
+        [Patch("src/svweave/storage/db.py",
+               "    remote_pins = pinned_snapshots(snapshots_dir.parent, c)\n",
+               "    remote_pins: set[str] | None = set()  # " + MARK + ":M25\n")],
+        ["tests/unit/test_srun_integration_guards.py::test_SRUN_17_unknown_cleanup_pins_snapshots_and_orphans"],
+    ),
+
+    m(
+        "M26", "ignore unresolved remote workspace submission barrier",
+        "support_srun SRUN-10/17/23",
+        [Patch("src/svweave/execution/ledger.py",
+               "    if workspace_requires_reconciliation(state_dir, conn):\n",
+               "    if False:  # " + MARK + ":M26\n")],
+        ["tests/unit/test_srun_audit_regressions.py::test_SRUN_10_failed_remote_attempt_blocks_direct_and_async_new_work"],
+    ),
+
 ]
 
 
