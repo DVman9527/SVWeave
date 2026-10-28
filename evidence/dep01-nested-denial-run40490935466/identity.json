@@ -1,0 +1,13 @@
+{
+  "source_identity": {
+    "git_head": "4a7a360b455a4dc4db5cffa2b711beb1baf5e266",
+    "src_tree_sha256": "2492cfb9ac867014452871e11bea13bf5f21ee52fb1024b30f91ea60d8979660"
+  },
+  "git_status": "",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "f4d58db1dbea5de23ce64d8392822a7558328c3e1da004cfa417eab93ea6d914",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+  "scope": "cleanroom nested-isolation diagnostic only; not qualification",
+  "cleanroom_diagnostic_only": "true"
+}

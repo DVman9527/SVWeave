@@ -1970,3 +1970,27 @@ Release decision: ACCEPTED_STATIC_PREVIEW | BLOCKED
 
 本機 `NETLINK_ROUTE` sandbox restriction 仍在；上述 PASS 來自已授權 hosted CI，不代表本機已能安全執行。本次 progress／evidence 重建只讀取既有產物，未重新安裝、啟動 backend、dispatch CI、commit／push。後續變更須另列 source identity、fresh checks 與適用授權；不得降低隔離、忽略錯誤或修改原始 evidence counts 取得綠燈。**Simulation、formal、RTL coverage、native Verilator UVM acceptance 均維持 NOT_RUN；無 owner waiver／license signoff。**
 
+### 30.9 進度追加：DEP-01 nested sandbox denial 與待決契約（2026-10-27 10:50 UTC 後）
+
+**目前 full qualification 仍為 BLOCKED／UNQUALIFIED；已定位 DEP-01 的真實隔離拒絕，未選擇或實作安全契約變更。** 本段追加，不改寫 30.8 或其他歷史結果；[原始 evidence、identity、JUnit、kernel log 與 manifest](evidence/dep01-nested-denial-run40490935466/README.md) 保留各 run/source 邊界。
+
+| exact run／source | 結果與界線 |
+|---|---|
+| [40485644533](https://github.com/DVman9527/SVWeave/actions/runs/40485644533)／`2d26630ab278c22079c0750832cacfcb8d5f00db` | 34 boundary checks PASS，backend probe 執行成功（slang READY，graph／Serena DEGRADED）；broad suite **235 nodes、229 PASS、6 FAIL、0 error/skip**。失敗為 API-PAR-02、DEP-01、DIF-I01/02/03、OPI-F4/F10。其後發現其他 legacy direct-native／degraded test paths 及 registry health direct compile，不能由 boundary PASS 宣稱 whole-suite 已隔離。 |
+| 後續 fixes | containment／contract 修正已 review，**195 local pure PASS**；不是完整更新版 integration／fault-injection／acceptance 已通過，不能改寫上述 6 FAIL。 |
+| [40490935466](https://github.com/DVman9527/SVWeave/actions/runs/40490935466)／`4a7a360b455a4dc4db5cffa2b711beb1baf5e266` | Fast SUCCESS；HDL-CI-04/05 **40 PASS**（36 pure＋4 native，0 failure/error/skip）；DEP-01 focused diagnostic **1 FAIL**（0 error/skip）。`cleanroom_only` 明確不執行 full probe／broad suites／mutation／benchmark，這些是 **NOT_RUN，不是 PASS**；artifact 內 2026-10-13 mutation 是歷史夾帶檔案。 |
+
+DEP-01 preflight 精確區間 **2026-10-27 10:46:27.646820–10:46:27.717638 UTC**；其中 **10:46:27.708 UTC** 的 kernel audit 記錄 `comm=bwrap`、`profile=unpriv_bwrap`、`capability=21/sys_admin` **DENIED**。Preflight `returncode=1`、`ready=false`、child label `bwrap//&unpriv_bwrap (enforce)`；官方 profile 刻意對 child 使用 `audit deny capability`。此證據支持目前 outer network-isolated controller 內無法再建立 mandatory inner sandbox 的診斷，不支持關閉 AppArmor、授予 capability、使用 degraded fallback 或默認移除 outer isolation。
+
+使用者於 **10:50:39 UTC** 被要求選擇：**(1)** 保留原 controller＋backend 隔離保證，將 DEP-01 記為 BLOCKED 並完成其餘已授權回歸；或 **(2)** 明確批准較窄的 trusted host controller 契約，仍保留 offline install/verify 與每個 backend 隔離，但移除 controller 的 outer network-isolation 保證。**目前沒有選項被選定；本次只保留證據與更新文件，未實作 (2)，不把先前 validation 授權或沉默視為批准。**
+
+`305e8c3` 的 native Verilator 5＋slang semantic/UVM 21 PASS 仍是 30.8 的限定歷史證據，不可移植到本次 failed diagnostic 或完整更新版 suite。原 macro columns UNVERIFIED、外部 inventory 非權威 references、simulation/formal/RTL coverage NOT_RUN、owner waiver／license signoff 未完成等界線均不變；本次未 commit／push／Library write。
+
+### 30.10 決策追加：採方案 1，保留 DEP-01 隔離保證並繼續其餘回歸（2026-10-28）
+
+使用者於 **2026-10-28** 明確回覆 **「1.」及「做1.」**，選定 30.9 的**方案 1**。30.9 的「待決」是 2026-10-27 當時狀態，現由本段決策取代：**保留原 controller＋backend 隔離保證，DEP-01 維持 BLOCKED，繼續其餘已授權回歸。** 未選擇方案 2；不得因此移除 controller 的 outer network namespace、授予 capability、放寬 AppArmor 或使用 degraded fallback。
+
+後續採**明確限縮範圍的 remaining-regressions CI**，另列 DEP-01 blocked ledger，不能隱藏排除項、把既有 FAIL 改為 PASS／SKIP，或將 selected-subset PASS 當完整 qualification。該 CI 路徑正在準備，**新的執行結果／exact-source evidence 尚待執行與核對**；本段不是新 run 成功證據。既有 235 cases／229 PASS／6 FAIL、focused DEP-01 FAIL、40 boundary PASS 及 `305e8c3` 的 5＋21 PASS 均維持其原 run／source 範圍。
+
+**Full qualification 仍為 BLOCKED／UNQUALIFIED**；DEP-01 原契約、strict JUnit equality、mandatory backend isolation、owner waiver／license signoff 與 EDA 狀態分離等要求不變。本次僅更新文件／決策註記並重新核對保留 evidence，未執行 backend、改 policy/topology、commit／push 或 Library write。
+

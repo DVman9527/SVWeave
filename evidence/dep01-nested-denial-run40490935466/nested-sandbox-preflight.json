@@ -1,0 +1,66 @@
+{
+  "returncode": 1,
+  "stderr": "",
+  "started_at_utc": "2026-10-27 10:46:27.646820 UTC",
+  "finished_at_utc": "2026-10-27 10:46:27.717638 UTC",
+  "observation": {
+    "capability": {
+      "available": false,
+      "bwrap_path": "/usr/bin/bwrap",
+      "version": "bubblewrap 0.9.0",
+      "reason": "bwrap: No permissions to create new namespace, likely because the kernel does not allow non-privileged user namespaces. See <https://deb.li/bubblewrap> or <file:///usr/share/doc/bubblewrap/README.Debian.gz>."
+    },
+    "namespaces": {
+      "user": "user:[4026532387]",
+      "pid": "pid:[4026531836]",
+      "net": "net:[4026532329]",
+      "mnt": "mnt:[4026532327]"
+    },
+    "uid_map": "1001          0          1",
+    "gid_map": "1001          0          1",
+    "process_label": "bwrap//&unpriv_bwrap (enforce)",
+    "mounts": [
+      {
+        "mountpoint": "/",
+        "options": "rw,nosuid,nodev,relatime",
+        "optional_fields": [
+          "master:1"
+        ],
+        "filesystem": "ext4",
+        "source": "/dev/root"
+      },
+      {
+        "mountpoint": "/proc",
+        "options": "rw,nosuid,nodev,noexec,relatime",
+        "optional_fields": [
+          "master:5"
+        ],
+        "filesystem": "proc",
+        "source": "proc"
+      },
+      {
+        "mountpoint": "/proc",
+        "options": "rw,nosuid,nodev,noexec,relatime",
+        "optional_fields": [
+          "master:5"
+        ],
+        "filesystem": "proc",
+        "source": "proc"
+      }
+    ]
+  },
+  "ready": false,
+  "outer_argv": [
+    "bwrap",
+    "--unshare-net",
+    "--die-with-parent",
+    "--bind",
+    "/",
+    "/",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--"
+  ]
+}

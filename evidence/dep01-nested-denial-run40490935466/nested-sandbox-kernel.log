@@ -1,0 +1,81 @@
+Sandbox failure diagnostics: 2026-10-27 10:46:27.646820 UTC through 2026-10-27 10:46:27.717638 UTC
+
+--- Kernel release ---
+Linux 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64
+
+
+--- OS release ---
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+
+
+--- Namespace/AppArmor sysctls (read only) ---
+kernel.unprivileged_userns_clone = 1
+user.max_user_namespaces = 63838
+kernel.apparmor_restrict_unprivileged_userns = 1
+kernel.apparmor_restrict_unprivileged_unconfined = 0
+sysctl: cannot stat /proc/sys/kernel/apparmor_restrict_unprivileged_unconfined_restricted: No such file or directory
+
+
+--- AppArmor enabled ---
+Y
+
+
+--- Diagnostic shell security status (same job as probe) ---
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	000001ffffffffff
+CapAmb:	0000000000000000
+NoNewPrivs:	0
+Seccomp:	0
+Seccomp_filters:	0
+
+
+--- Diagnostic shell AppArmor label ---
+unconfined
+
+
+--- bwrap resolved executable ---
+/usr/bin/bwrap
+
+
+--- bwrap executable metadata ---
+/usr/bin/bwrap -rwxr-xr-x 755 root:root
+
+
+--- bwrap version (not a namespace probe) ---
+bubblewrap 0.9.0
+
+
+--- bubblewrap package ---
+bubblewrap 0.9.0-1ubuntu0.3 install ok installed
+
+
+--- bwrap package owner ---
+bubblewrap: /usr/bin/bwrap
+
+
+--- Loaded bwrap AppArmor profiles ---
+unpriv_bwrap (enforce)
+bwrap (enforce)
+
+
+--- Packaged bwrap AppArmor policy (not necessarily loaded) ---
+cat: /etc/apparmor.d/bwrap: No such file or directory
+
+
+--- Kernel audit/security entries during the mandatory probe (last 100 matches) ---
+2026-10-27T10:46:27+00:00 runnervmtai0g kernel: audit: type=1400 audit(1793097987.708:129): apparmor="DENIED" operation="capable" class="cap" profile="unpriv_bwrap" pid=3265 comm="bwrap" capability=21  capname="sys_admin"
+

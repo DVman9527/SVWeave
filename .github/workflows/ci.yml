@@ -24,6 +24,10 @@ on:
         description: "With real_backends: only DEP-01 nested-isolation diagnostic; not qualification"
         type: boolean
         default: false
+      remaining_regressions:
+        description: "With real_backends: remaining regressions; only DEP-01 excluded and BLOCKED, never qualification"
+        type: boolean
+        default: false
       native_verilator:
         description: "Run pinned native Verilator static lint/JSON and importer regressions (no simulation)"
         type: boolean
@@ -93,13 +97,19 @@ jobs:
       # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
 
   real-backends:
-    name: ${{ inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic (not qualification)' || 'isolated pinned backend validation (not full qualification)' }}
-    if: github.event_name == 'workflow_dispatch' && inputs.real_backends
+    name: ${{ inputs.remaining_regressions && 'remaining regressions (DEP-01 BLOCKED; not qualification)' || inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic (not qualification)' || 'isolated pinned backend validation (not full qualification)' }}
+    if: github.event_name == 'workflow_dispatch' && (inputs.real_backends || inputs.remaining_regressions)
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
       SVWEAVE_REQUIRE_BACKENDS: "1"
     steps:
+      - name: Validate bounded regression mode
+        run: |
+          if [[ '${{ inputs.remaining_regressions }}' == 'true' ]] && { [[ '${{ inputs.real_backends }}' != 'true' ]] || [[ '${{ inputs.cleanroom_only }}' == 'true' ]]; }; then
+            echo 'remaining_regressions requires real_backends=true and cleanroom_only=false' >&2
+            exit 2
+          fi
       # TODO(pin): actions/checkout -> full commit SHA
       - uses: actions/checkout@v4
         with:
@@ -128,11 +138,43 @@ jobs:
               "workflow_sha256": hashlib.sha256(Path(".github/workflows/ci.yml").read_bytes()).hexdigest(),
               "platform": platform.platform(),
               "python": sys.version,
-              "scope": "${{ inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic only; not qualification' || 'isolated backend validation only; not full qualification, release or EDA simulation' }}",
+              "scope": "${{ inputs.remaining_regressions && 'remaining regressions only; DEP-01 BLOCKED; not qualification' || inputs.cleanroom_only && 'cleanroom nested-isolation diagnostic only; not qualification' || 'isolated backend validation only; not full qualification, release or EDA simulation' }}",
               "cleanroom_diagnostic_only": "${{ inputs.cleanroom_only }}",
+              "remaining_regressions_only": "${{ inputs.remaining_regressions }}",
           }
           (out / "identity.json").write_text(json.dumps(identity, indent=2) + "\n")
           PY_IDENTITY
+      - name: Record required DEP-01 BLOCKED ledger (not a qualification report)
+        if: ${{ inputs.remaining_regressions }}
+        run: |
+          python - <<'PY_SCOPE'
+          import json
+          from pathlib import Path
+          out = Path(".svweave/ci")
+          identity = json.loads((out / "identity.json").read_text())
+          ledger = {
+              "schema_version": 1,
+              "scope": "remaining_regressions",
+              "identity": identity,
+              "full_qualification_status": "BLOCKED",
+              "qualify_py_executed": False,
+              "release_qualified": False,
+              "collection": {"status": "NOT_RUN"},
+              "excluded_tests": [{
+                  "requirement": "DEP-01",
+                  "nodeid": "tests/integration/test_dep01_cleanroom.py::test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends",
+                  "status": "BLOCKED",
+                  "reason": "Retained outer offline controller cannot launch mandatory inner bwrap: enforced unpriv_bwrap denies CAP_SYS_ADMIN; no isolation guarantee or policy change authorized.",
+                  "observed_run_id": 40490935466,
+                  "observed_source_sha": "4a7a360b455a4dc4db5cffa2b711beb1baf5e266",
+                  "evidence": "evidence/dep01-nested-denial-run40490935466/nested-sandbox-kernel.log",
+                  "acceptance_unchanged": True,
+                  "waived": False,
+              }],
+          }
+          (out / "remaining-regressions-scope.json").write_text(json.dumps(ledger, indent=2) + "\n")
+          print("DEP-01 remains BLOCKED; remaining regression results cannot qualify a release.")
+          PY_SCOPE
       - name: Install package and the pinned toolchain (network only here, hashes verified)
         run: |
           python -m pip install --upgrade pip==24.3.1 uv==0.5.11
@@ -201,9 +243,13 @@ jobs:
         if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/probe_backends.py --out .svweave/ci/capability_report.json
       - name: Integration, fault injection and acceptance (skips are failures)
-        if: ${{ !inputs.cleanroom_only }}
+        if: ${{ !inputs.cleanroom_only && !inputs.remaining_regressions }}
         run: |
           .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov --junitxml=.svweave/ci/junit_required.xml
+      - name: Remaining integration, fault injection and acceptance (DEP-01 BLOCKED; skips are failures)
+        if: ${{ inputs.remaining_regressions }}
+        run: |
+          .venv/bin/python -m pytest tests/integration tests/fault_injection tests/acceptance -q --no-cov -p tests.remaining_regressions --deselect=tests/integration/test_dep01_cleanroom.py::test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends --junitxml=.svweave/ci/junit_remaining.xml
       - name: Critical mutation suite (plan 20.5)
         if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/mutation_suite.py

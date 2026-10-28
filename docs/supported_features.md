@@ -319,9 +319,13 @@ the new macro-free positive and exact discrepancy check do not change that limit
 Local execution remains BLOCKED (`NETLINK_ROUTE` permissions). The native result neither
 merges references into slang nor completes HDL-R02/R04 or full qualification. The retained
 supplement JUnit reports 195 parent tests plus 75 pytest subtest outcomes (270 aggregate),
-not 270 named testcases. Subsequent unpublished accounting/probe-isolation changes were
-reconstructed and freshly checked: 133 local pure checks passed; 10 pytest-dependent checks
-remain `BLOCKED_ENV` and four native boundary cases remain `NOT_RUN`. Authorized parent-owned
-publication/dispatch follows final review. The old run does not validate these newer changes;
-full qualification remains blocked.
+not 270 named testcases. Subsequent
+[run 40490935466](../evidence/dep01-nested-denial-run40490935466/README.md) at `4a7a360`
+passed 40 isolation checks (36 pure + 4 native), but DEP-01 failed on an audited nested-sandbox
+denial. The latest broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`; a full updated
+rerun has not passed. On **2026-10-28 the user selected option 1**: preserve the original
+controller-plus-backend isolation guarantee, retain DEP-01 as **BLOCKED**, and continue other
+regressions with an explicit blocked ledger. No narrower controller contract or topology
+relaxation was selected; new scoped-run evidence is pending. None of these runs expands
+HDL/reference coverage or completes full qualification.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).

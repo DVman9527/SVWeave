@@ -1,0 +1,146 @@
+{
+  "schema_version": "svw-multi-source-evidence-manifest-1",
+  "sources": [
+    {
+      "role": "current",
+      "run_id": 40490935466,
+      "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40490935466",
+      "source_commit": "4a7a360b455a4dc4db5cffa2b711beb1baf5e266",
+      "artifact_name": "svweave-evidence",
+      "members": [
+        {
+          "artifact_path": ".svweave/ci/dep01/nested-sandbox-kernel.log",
+          "sha256": "91091b993bc71c76c33d3adf1d20483cc6afc97d0e529560ff10c666223c1974",
+          "bytes": 2107,
+          "copied": true,
+          "retained_path": "nested-sandbox-kernel.log"
+        },
+        {
+          "artifact_path": ".svweave/ci/dep01/nested-sandbox-preflight.json",
+          "sha256": "aba1d3bfb97a221e0f13ab1f0d9dc1cd60f9e683777d9d1fdc36db202ba118ad",
+          "bytes": 1692,
+          "copied": true,
+          "retained_path": "nested-sandbox-preflight.json"
+        },
+        {
+          "artifact_path": ".svweave/ci/identity.json",
+          "sha256": "a0968203b2094ed26eb8e91954f5c9432f2be10820b18981c5900ea227a88323",
+          "bytes": 619,
+          "copied": true,
+          "retained_path": "identity.json"
+        },
+        {
+          "artifact_path": ".svweave/ci/junit_dep01_cleanroom.xml",
+          "sha256": "1cf0facb1a0d85552bb90cf6f2d124e04e99a44c1d6e8e91e35f38d017ffc0b1",
+          "bytes": 8927,
+          "copied": true,
+          "retained_path": "junit-dep01-cleanroom.xml"
+        },
+        {
+          "artifact_path": ".svweave/ci/junit_probe_isolation.xml",
+          "sha256": "f68cfad5621cb909d834ee83d298eb871ac67c3e4b7263412eda2c82fb5abae5",
+          "bytes": 6418,
+          "copied": true,
+          "retained_path": "junit-probe-isolation.xml"
+        },
+        {
+          "artifact_path": "evidence/mutation/2026-10-13.json",
+          "sha256": "3a175cf4485e7162263648338b0005b5883d599d7892ef73d1ead4452bf19a08",
+          "bytes": 18250,
+          "copied": false,
+          "retained_path": null
+        }
+      ]
+    },
+    {
+      "role": "historical",
+      "run_id": 40485644533,
+      "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40485644533",
+      "source_commit": "2d26630ab278c22079c0750832cacfcb8d5f00db",
+      "artifact_name": "svweave-evidence",
+      "members": [
+        {
+          "artifact_path": ".svweave/ci/capability_report.json",
+          "sha256": "9034d3bf040255588a67eb30f929be75453defdbe4c950e7777f324ad992cc3d",
+          "bytes": 68805,
+          "copied": true,
+          "retained_path": "historical-run40485644533/capability-report.json"
+        },
+        {
+          "artifact_path": ".svweave/ci/identity.json",
+          "sha256": "c73d54e8a906ebffcc190b9589e0f66122840f418e6f3adfbd7db693ffd98b40",
+          "bytes": 602,
+          "copied": true,
+          "retained_path": "historical-run40485644533/identity.json"
+        },
+        {
+          "artifact_path": ".svweave/ci/junit_probe_isolation.xml",
+          "sha256": "dfe3be3a931b5b7c8ab8f18aa871a30f48792c5ad89b168b7927f8d48b03b7d7",
+          "bytes": 5452,
+          "copied": true,
+          "retained_path": "historical-run40485644533/junit-probe-isolation.xml"
+        },
+        {
+          "artifact_path": ".svweave/ci/junit_required.xml",
+          "sha256": "ec41a916a2d17207f528ed474c40a2ce9aff7c4f09b35a1f03c12b16804509b3",
+          "bytes": 64310,
+          "copied": true,
+          "retained_path": "historical-run40485644533/junit-required.xml"
+        },
+        {
+          "artifact_path": ".svweave/probe/run-39vqpvvf/cbm_stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0,
+          "copied": false,
+          "retained_path": null
+        },
+        {
+          "artifact_path": ".svweave/probe/run-39vqpvvf/pyslang_result.json",
+          "sha256": "63873bf1173ec657f77023cf7c2d7d5eae354a0747659185bc6b5a61447ad08a",
+          "bytes": 123595,
+          "copied": false,
+          "retained_path": null
+        },
+        {
+          "artifact_path": ".svweave/probe/run-39vqpvvf/serena_stderr.log",
+          "sha256": "5d1e12c11f5c567a6fb589d1d18b21dd0450c921e21b538bf08b99cebca98029",
+          "bytes": 22044,
+          "copied": false,
+          "retained_path": null
+        },
+        {
+          "artifact_path": ".svweave/probe/run-39vqpvvf/slang_cli-2751hkel/dependencies.txt",
+          "sha256": "e526be6a5fbeb151d95598a8f765a0f6d82f7bab3a03fa767d9d5f41d4792970",
+          "bytes": 165,
+          "copied": false,
+          "retained_path": null
+        },
+        {
+          "artifact_path": ".svweave/probe/run-39vqpvvf/slang_cli-2751hkel/design.ast.json",
+          "sha256": "8bb6e989cc6a9b8b08d3e7b509edbbd6f850b65db2a444397b88c2ecea52857e",
+          "bytes": 112708,
+          "copied": false,
+          "retained_path": null
+        },
+        {
+          "artifact_path": "evidence/mutation/2026-10-13.json",
+          "sha256": "3a175cf4485e7162263648338b0005b5883d599d7892ef73d1ead4452bf19a08",
+          "bytes": 18250,
+          "copied": false,
+          "retained_path": null
+        }
+      ]
+    }
+  ],
+  "local_evidence": [
+    {
+      "source_path": "/tmp/svweave-diagnostic-pure.xml",
+      "retained_path": "local-diagnostic-pure.xml",
+      "sha256": "249eae85963787bd8e1a1ed92566d363e86624568b9a58f57d225f578bed9b67",
+      "bytes": 30448,
+      "source_commit": null,
+      "note": "Local pure regression JUnit for intermediate fixes, 195 cases. No exact source identity is embedded; not remote/native/full-suite verification and not attributed to the current source SHA."
+    }
+  ],
+  "retention_note": "Raw retained files are byte-identical copies. Nonretained members remain explicitly copied=false. The dated mutation artifact is historical carryover, not evidence that mutation tests ran in the diagnostic-only job. No policy or topology change is authorized by this evidence."
+}

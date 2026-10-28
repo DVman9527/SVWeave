@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shlex
 import subprocess
@@ -83,7 +84,7 @@ class SandboxGateTests(unittest.TestCase):
         identity = steps[names.index("Record exact validation identity")]["run"]
         self.assertIn("cleanroom nested-isolation diagnostic only; not qualification", identity)
 
-    def test_HDL_CI_01_full_backend_mode_is_unchanged_unless_diagnostic_selected(self) -> None:
+    def test_HDL_CI_01_full_backend_mode_is_unchanged_unless_partial_mode_selected(self) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         steps = workflow["jobs"]["real-backends"]["steps"]
         full_only = {
@@ -94,9 +95,210 @@ class SandboxGateTests(unittest.TestCase):
         found = [step for step in steps if step.get("name") in full_only]
         self.assertEqual(len(found), len(full_only))
         for step in found:
-            self.assertEqual(step["if"], "${{ !inputs.cleanroom_only }}")
+            expected = ("${{ !inputs.cleanroom_only && !inputs.remaining_regressions }}"
+                        if step["name"].startswith("Integration,") else "${{ !inputs.cleanroom_only }}")
+            self.assertEqual(step["if"], expected)
             self.assertNotIn("continue-on-error", step)
         self.assertNotIn("cleanroom_only", str(workflow["jobs"]["native-verilator"]))
+        self.assertNotIn("remaining_regressions", str(workflow["jobs"]["native-verilator"]))
+
+    def test_HDL_CI_01_remaining_regressions_is_explicit_and_defaults_off(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        events = workflow.get("on", workflow.get(True))
+        option = events["workflow_dispatch"]["inputs"]["remaining_regressions"]
+        self.assertEqual(option["type"], "boolean")
+        self.assertIs(option["default"], False)
+        job = workflow["jobs"]["real-backends"]
+        self.assertIn("DEP-01 BLOCKED; not qualification", job["name"])
+        self.assertIn("inputs.real_backends || inputs.remaining_regressions", job["if"])
+        self.assertEqual(job["env"]["SVWEAVE_REQUIRE_BACKENDS"], "1")
+        names = [step.get("name") for step in job["steps"]]
+        self.assertEqual(names[0], "Validate bounded regression mode")
+        ledger = names.index("Record required DEP-01 BLOCKED ledger (not a qualification report)")
+        setup = names.index("Install package and the pinned toolchain (network only here, hashes verified)")
+        boundary = names.index("Required native probe isolation regressions (fail closed)")
+        remaining = names.index(
+            "Remaining integration, fault injection and acceptance (DEP-01 BLOCKED; skips are failures)")
+        self.assertLess(ledger, setup)
+        self.assertLess(boundary, remaining)
+        for step in job["steps"][:remaining + 1]:
+            self.assertNotIn("continue-on-error", step)
+
+    def test_HDL_CI_01_remaining_regressions_excludes_only_exact_blocked_node(self) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["real-backends"]["steps"]
+        full = next(step for step in steps if step.get("name", "").startswith("Integration,"))
+        remaining = next(step for step in steps if step.get("name", "").startswith("Remaining integration,"))
+        self.assertEqual(remaining["if"], "${{ inputs.remaining_regressions }}")
+        node = ("tests/integration/test_dep01_cleanroom.py::"
+                "test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends")
+        argv = shlex.split(remaining["run"])
+        exclusion = f"--deselect={node}"
+        self.assertEqual(argv.count(exclusion), 1)
+        argv.remove(exclusion)
+        plugin = argv.index("-p")
+        self.assertEqual(argv[plugin:plugin + 2], ["-p", "tests.remaining_regressions"])
+        del argv[plugin:plugin + 2]
+        argv = [arg.replace("junit_remaining.xml", "junit_required.xml") for arg in argv]
+        self.assertEqual(argv, shlex.split(full["run"]))
+        self.assertNotIn("--deselect", full["run"])
+
+    def _assert_remaining_mode_validation(self, real: bool, remaining: bool, diagnostic: bool, expected: int) -> None:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        command = workflow["jobs"]["real-backends"]["steps"][0]["run"]
+        for key, value in (("real_backends", real), ("remaining_regressions", remaining),
+                           ("cleanroom_only", diagnostic)):
+            command = command.replace("${{ inputs." + key + " }}", str(value).lower())
+        result = subprocess.run(["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", command],
+                                capture_output=True, text=True, check=False, timeout=10)
+        self.assertEqual(result.returncode, expected, result.stderr)
+
+    def test_HDL_CI_01_remaining_mode_accepts_explicit_selection(self) -> None:
+        self._assert_remaining_mode_validation(True, True, False, 0)
+
+    def test_HDL_CI_01_remaining_mode_rejects_missing_real_backend_authorization(self) -> None:
+        self._assert_remaining_mode_validation(False, True, False, 2)
+
+    def test_HDL_CI_01_remaining_mode_rejects_cleanroom_conflict(self) -> None:
+        self._assert_remaining_mode_validation(True, True, True, 2)
+
+    def test_HDL_CI_01_remaining_mode_preserves_default_full_selection(self) -> None:
+        self._assert_remaining_mode_validation(True, False, False, 0)
+
+    def test_HDL_CI_01_remaining_mode_preserves_explicit_cleanroom_selection(self) -> None:
+        self._assert_remaining_mode_validation(True, False, True, 0)
+
+    def _run_remaining_ledger(self, identity: dict | None) -> tuple[subprocess.CompletedProcess[str], dict | None]:
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        step = next(step for step in workflow["jobs"]["real-backends"]["steps"]
+                    if step.get("name") == "Record required DEP-01 BLOCKED ledger (not a qualification report)")
+        self.assertEqual(step["if"], "${{ inputs.remaining_regressions }}")
+        code = step["run"].split("<<'PY_SCOPE'\n", 1)[1].rsplit("PY_SCOPE", 1)[0]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            out = root / ".svweave/ci"
+            out.mkdir(parents=True)
+            if identity is not None:
+                (out / "identity.json").write_text(json.dumps(identity))
+            result = subprocess.run([sys.executable, "-I", "-c", code], cwd=root,
+                                    capture_output=True, text=True, check=False, timeout=10)
+            ledger = out / "remaining-regressions-scope.json"
+            return result, json.loads(ledger.read_text()) if ledger.exists() else None
+
+    def test_HDL_CI_01_remaining_ledger_retains_blocked_identity_without_qualification(self) -> None:
+        identity = {"source_identity": {"git_head": "f" * 40, "src_tree_sha256": "e" * 64},
+                    "lock_sha256": "d" * 64, "remaining_regressions_only": "true"}
+        result, ledger = self._run_remaining_ledger(identity)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIsNotNone(ledger)
+        self.assertEqual(ledger["identity"], identity)
+        self.assertEqual(ledger["full_qualification_status"], "BLOCKED")
+        self.assertIs(ledger["qualify_py_executed"], False)
+        self.assertIs(ledger["release_qualified"], False)
+        self.assertEqual(ledger["collection"], {"status": "NOT_RUN"})
+        self.assertEqual(len(ledger["excluded_tests"]), 1)
+        blocked = ledger["excluded_tests"][0]
+        self.assertEqual(blocked["requirement"], "DEP-01")
+        self.assertEqual(blocked["status"], "BLOCKED")
+        self.assertIs(blocked["acceptance_unchanged"], True)
+        self.assertIs(blocked["waived"], False)
+        self.assertEqual(blocked["observed_run_id"], 40490935466)
+        self.assertEqual(blocked["observed_source_sha"], "4a7a360b455a4dc4db5cffa2b711beb1baf5e266")
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        remaining = next(step for step in workflow["jobs"]["real-backends"]["steps"]
+                         if step.get("name", "").startswith("Remaining integration,"))
+        self.assertIn("--deselect=" + blocked["nodeid"], shlex.split(remaining["run"]))
+
+    def test_HDL_CI_01_remaining_ledger_missing_identity_fails_before_regressions(self) -> None:
+        result, ledger = self._run_remaining_ledger(None)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIsNone(ledger)
+
+    def _assert_remaining_collection(self, mode: str) -> None:
+        from tests.remaining_regressions import BLOCKED_NODE, SUITES
+        identity = {"source_identity": {"git_head": "f" * 40, "src_tree_sha256": "e" * 64},
+                    "lock_sha256": "d" * 64, "workflow_sha256": "c" * 64,
+                    "remaining_regressions_only": "true"}
+        if mode == "empty_identity":
+            identity["source_identity"]["git_head"] = ""
+        _, ledger = self._run_remaining_ledger(identity)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "pytest.ini").write_text("[pytest]\n")
+            for suite in SUITES:
+                (root / suite).mkdir(parents=True)
+            blocked_name = BLOCKED_NODE.split("::")[1]
+            if mode == "missing":
+                blocked_name = "test_renamed_dep01"
+            (root / "tests/integration/test_dep01_cleanroom.py").write_text(
+                f"def {blocked_name}():\n    raise AssertionError('blocked test must never run')\n"
+                + (f"def {blocked_name}_extra():\n    assert True\n" if mode == "prefix" else ""))
+            body = ("import pytest\nfrom pathlib import Path\n"
+                    "def test_remaining():\n    Path('executed').touch()\n")
+            body += "    pytest.skip('required case missing')\n" if mode == "skip" else "    assert True\n"
+            (root / "tests/integration/test_remaining.py").write_text(body)
+            out = root / ".svweave/ci"
+            out.mkdir(parents=True)
+            if mode == "waived":
+                ledger["excluded_tests"][0]["waived"] = True
+            (out / "remaining-regressions-scope.json").write_text(json.dumps(ledger))
+            if mode == "stale_identity":
+                identity["lock_sha256"] = "b" * 64
+            if mode != "missing_identity":
+                (out / "identity.json").write_text(json.dumps(identity))
+            args = [sys.executable, "-m", "pytest", *SUITES, "-q", "-c", "pytest.ini",
+                    "-p", "tests.remaining_regressions", "-p", "tests.required_backends",
+                    "--deselect=" + BLOCKED_NODE]
+            if mode == "extra_exclusion":
+                args.append("--deselect=tests/integration/test_remaining.py::test_remaining")
+            env = {**os.environ, "PYTHONPATH": str(ROOT), "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+                   "SVWEAVE_REQUIRE_BACKENDS": "0" if mode == "nonrequired" else "1"}
+            env.pop("PYTEST_ADDOPTS", None)
+            result = subprocess.run(args, cwd=root, env=env, capture_output=True, text=True,
+                                    check=False, timeout=30)
+            self.assertEqual(result.returncode, 0 if mode == "valid" else 1 if mode == "skip" else 4,
+                             result.stdout + result.stderr)
+            updated = json.loads((out / "remaining-regressions-scope.json").read_text())
+            self.assertEqual(updated["full_qualification_status"], "BLOCKED")
+            self.assertIs(updated["release_qualified"], False)
+            self.assertEqual((root / "executed").exists(), mode in ("valid", "skip"))
+            if mode in ("valid", "skip"):
+                self.assertEqual(updated["collection"], {
+                    "status": "VALIDATED", "collected_count": 2, "selected_count": 1,
+                    "blocked_count": 1, "blocked_nodeids": [BLOCKED_NODE],
+                })
+            if mode in ("missing", "prefix"):
+                self.assertEqual(updated["collection"]["status"], "FAIL")
+
+    def test_HDL_CI_01_remaining_collection_records_exactly_one_blocked_node(self) -> None:
+        self._assert_remaining_collection("valid")
+
+    def test_HDL_CI_01_remaining_collection_missing_blocked_node_fails_before_execution(self) -> None:
+        self._assert_remaining_collection("missing")
+
+    def test_HDL_CI_01_remaining_collection_extra_exclusion_fails_before_execution(self) -> None:
+        self._assert_remaining_collection("extra_exclusion")
+
+    def test_HDL_CI_01_remaining_collection_prefix_collision_fails_before_execution(self) -> None:
+        self._assert_remaining_collection("prefix")
+
+    def test_HDL_CI_01_remaining_collection_cannot_disable_required_backend_mode(self) -> None:
+        self._assert_remaining_collection("nonrequired")
+
+    def test_HDL_CI_01_remaining_collection_cannot_waive_blocked_requirement(self) -> None:
+        self._assert_remaining_collection("waived")
+
+    def test_HDL_CI_01_remaining_collection_rejects_stale_ledger_identity(self) -> None:
+        self._assert_remaining_collection("stale_identity")
+
+    def test_HDL_CI_01_remaining_collection_requires_current_identity_file(self) -> None:
+        self._assert_remaining_collection("missing_identity")
+
+    def test_HDL_CI_01_remaining_collection_requires_nonempty_identity_fields(self) -> None:
+        self._assert_remaining_collection("empty_identity")
+
+    def test_HDL_CI_01_remaining_collection_selected_skip_still_fails(self) -> None:
+        self._assert_remaining_collection("skip")
 
     def test_HDL_CI_01_hidden_junit_and_identity_artifacts_are_explicitly_retained(self) -> None:
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())

@@ -1,0 +1,12 @@
+{
+  "source_identity": {
+    "git_head": "2d26630ab278c22079c0750832cacfcb8d5f00db",
+    "src_tree_sha256": "c07c3d126c46ee83d1c00f2f254ef497b780bbdd33b4402b283d37bbaabc72d7"
+  },
+  "git_status": "",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "5d0f2c56ae3e203825b9d7c1b1e6fd1bab41206605c3a9854fa7946cf2cc5796",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+  "scope": "isolated backend validation only; not full qualification, release or EDA simulation"
+}

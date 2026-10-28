@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.667" timestamp="2026-10-27T10:46:21.382000+00:00" hostname="runnervmtai0g"><testcase classname="tests.integration.test_dep01_cleanroom" name="test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends" time="6.574"><failure message="AssertionError: {&quot;returncode&quot;: 1, &quot;stderr&quot;: &quot;&quot;, &quot;started_at_utc&quot;: &quot;2026-10-27 10:46:27.646820 UTC&quot;, &quot;finished_at_utc&quot;: &quot;2026-10-27 10:46:27.717638 UTC&quot;, &quot;observation&quot;: {&quot;capability&quot;: {&quot;available&quot;: false, &quot;bwrap_path&quot;: &quot;/usr/bin/bwrap&quot;, &quot;version&quot;: &quot;bubblewrap 0.9.0&quot;, &quot;reason&quot;: &quot;bwrap: No permissions to create new namespace, likely because the kernel does not allow non-privileged user namespaces. See &lt;https://deb.li/bubblewrap&gt; or &lt;file:///usr/share/doc/bubblewrap/README.Debian.gz&gt;.&quot;}, &quot;namespaces&quot;: {&quot;user&quot;: &quot;user:[4026532387]&quot;, &quot;pid&quot;: &quot;pid:[4026531836]&quot;, &quot;net&quot;: &quot;net:[4026532329]&quot;, &quot;mnt&quot;: &quot;mnt:[4026532327]&quot;}, &quot;uid_map&quot;: &quot;1001          0          1&quot;, &quot;gid_map&quot;: &quot;1001          0          1&quot;, &quot;process_label&quot;: &quot;bwrap//&amp;unpriv_bwrap (enforce)&quot;, &quot;mounts&quot;: [{&quot;mountpoint&quot;: &quot;/&quot;, &quot;options&quot;: &quot;rw,nosuid,nodev,relatime&quot;, &quot;optional_fields&quot;: [&quot;master:1&quot;], &quot;filesystem&quot;: &quot;ext4&quot;, &quot;source&quot;: &quot;/dev/root&quot;}, {&quot;mountpoint&quot;: &quot;/proc&quot;, &quot;options&quot;: &quot;rw,nosuid,nodev,noexec,relatime&quot;, &quot;optional_fields&quot;: [&quot;master:5&quot;], &quot;filesystem&quot;: &quot;proc&quot;, &quot;source&quot;: &quot;proc&quot;}, {&quot;mountpoint&quot;: &quot;/proc&quot;, &quot;options&quot;: &quot;rw,nosuid,nodev,noexec,relatime&quot;, &quot;optional_fields&quot;: [&quot;master:5&quot;], &quot;filesystem&quot;: &quot;proc&quot;, &quot;source&quot;: &quot;proc&quot;}]}, &quot;ready&quot;: false, &quot;outer_argv&quot;: [&quot;bwrap&quot;, &quot;--unshare-net&quot;, &quot;--die-with-parent&quot;, &quot;--bind&quot;, &quot;/&quot;, &quot;/&quot;, &quot;--dev&quot;, &quot;/dev&quot;, &quot;--proc&quot;, &quot;/proc&quot;, &quot;--&quot;]}&#10;assert False">def test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends() -&gt; None:
+        # a SHORT path: cbm's daemon socket lives under the room and AF_UNIX paths are limited to ~108 bytes
+        base = Path(tempfile.mkdtemp(prefix="dep01-", dir="/tmp"))
+        try:
+&gt;           _cleanroom(base)
+
+tests/integration/test_dep01_cleanroom.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tmp_path = PosixPath('/tmp/dep01-52mtp4ly')
+
+    def _cleanroom(tmp_path: Path) -&gt; None:
+        if shutil.which("bwrap") is None:
+            skip_or_fail("bwrap not installed (needed to disable the network)")
+        art = REPO / ".toolchain" / "downloads"
+        serena_src = REPO / ".toolchain" / "serena-src"
+        uv_cache = REPO / ".toolchain" / "state" / "uv-cache"
+        # the pinned uv tarball (lock section `uv`) and the Serena build backends come from the artifact dir
+        uv_tgz = art / ("uv-" + json.loads((REPO / "toolchain.lock.json").read_text())["uv"]["source_url"].rsplit("/", 1)[1])
+        for need in (art / "wheelhouse", art / "serena-build-wheelhouse", serena_src / ".git", uv_cache, uv_tgz):
+            if not need.exists():
+                skip_or_fail(f"cached artifact missing: {need.relative_to(REPO)} "
+                             "(run scripts/bootstrap_locked.py --fetch-only)")
+        probe = run_netless(["python3", "-c", "import socket,sys\n"
+                             "try:\n socket.create_connection(('1.1.1.1',443),timeout=3);print('CONNECTED')\n"
+                             "except OSError as e:\n print('BLOCKED errno=%s' % e.errno)"], tmp_path, 60)
+        assert probe.returncode == 0 and probe.stdout.strip().startswith("BLOCKED"), probe.stdout + probe.stderr
+    
+        room = tmp_path / "cleanroom"
+        room.mkdir()
+        assert list(room.iterdir()) == []  # EMPTY
+        # src/: the probes speak MCP through svweave's bounded stdio transport, so the fresh venv must
+        # import svweave; bootstrap links it offline exactly as on a real offline host
+        for rel in ("scripts", "fixtures", "src"):
+            shutil.copytree(REPO / rel, room / rel, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        shutil.copy(REPO / "toolchain.lock.json", room / "toolchain.lock.json")
+        cache_copy = tmp_path / "uv-cache"
+        shutil.copytree(uv_cache, cache_copy, symlinks=True)
+    
+        boot = run_netless(
+            ["python3", "scripts/bootstrap_locked.py", "--offline", "--create-venv",
+             "--artifact-dir", str(art), "--serena-source", str(serena_src),
+             "--uv-cache-dir", str(cache_copy), "--report", str(room / "boot.json")],
+            room, 1800)
+        assert boot.returncode == 0, scrub(boot.stdout[-3000:] + boot.stderr[-3000:], room)
+        breport: dict[str, Any] = json.loads((room / "boot.json").read_text())
+        assert breport["ok"] is True and breport["offline"] is True and breport["errors"] == []
+        assert breport["components"]["uv"]["source"] == "pinned" and breport["components"]["uv"]["verified"] is True
+        assert breport["components"]["svweave"] == {"installed": "linked-src"}
+        # nothing was installed outside the room and the locked bytes are what is installed
+        lock = json.loads((REPO / "toolchain.lock.json").read_text())
+        comps = lock["components"]
+        tc = room / ".toolchain"
+        for name, key in (("slang", "slang/slang"), ("cbm", "cbm/codebase-memory-mcp"),
+                          ("verible", "verible/bin/verible-verilog-ls")):
+            want = comps[{"cbm": "codebase_memory_mcp"}.get(name, name)]["binary_sha256"]
+            assert sha256(tc / key) == want, name
+        py = room / ".venv" / "bin" / "python"
+        assert py.is_file()
+        vers = {d: subprocess.run([str(py), "-I", "-c", f"import importlib.metadata as m;print(m.version('{d}'))"],
+                                  capture_output=True, text=True).stdout.strip() for d in ("pyslang", "mcp")}
+        assert vers == {"pyslang": comps["pyslang"]["version"], "mcp": comps["mcp_sdk"]["version"]}
+    
+        ver = run_netless(["python3", "scripts/bootstrap_locked.py", "--verify-only", "--artifact-dir", str(art)],
+                          room, 300)
+        assert ver.returncode == 0, scrub(ver.stdout[-2000:], room)
+    
+        # Keep the offline outer namespace AND the mandatory inner SandboxRunner. Record the
+        # actual nested denial before the temporary clean room is removed; do not bypass it.
+        preflight = collect_nested_preflight(py, room, run_netless)
+        preflight["outer_argv"] = NETLESS
+        diagnostic = REPO / ".svweave/ci/dep01/nested-sandbox-preflight.json"
+        diagnostic.parent.mkdir(parents=True, exist_ok=True)
+        diagnostic.write_text(scrub(json.dumps(preflight, indent=2), room) + "\n")
+&gt;       assert preflight["ready"], scrub(json.dumps(preflight), room)
+E       AssertionError: {"returncode": 1, "stderr": "", "started_at_utc": "2026-10-27 10:46:27.646820 UTC", "finished_at_utc": "2026-10-27 10:46:27.717638 UTC", "observation": {"capability": {"available": false, "bwrap_path": "/usr/bin/bwrap", "version": "bubblewrap 0.9.0", "reason": "bwrap: No permissions to create new namespace, likely because the kernel does not allow non-privileged user namespaces. See &lt;https://deb.li/bubblewrap&gt; or &lt;file:///usr/share/doc/bubblewrap/README.Debian.gz&gt;."}, "namespaces": {"user": "user:[4026532387]", "pid": "pid:[4026531836]", "net": "net:[4026532329]", "mnt": "mnt:[4026532327]"}, "uid_map": "1001          0          1", "gid_map": "1001          0          1", "process_label": "bwrap//&amp;unpriv_bwrap (enforce)", "mounts": [{"mountpoint": "/", "options": "rw,nosuid,nodev,relatime", "optional_fields": ["master:1"], "filesystem": "ext4", "source": "/dev/root"}, {"mountpoint": "/proc", "options": "rw,nosuid,nodev,noexec,relatime", "optional_fields": ["master:5"], "filesystem": "proc", "source": "proc"}, {"mountpoint": "/proc", "options": "rw,nosuid,nodev,noexec,relatime", "optional_fields": ["master:5"], "filesystem": "proc", "source": "proc"}]}, "ready": false, "outer_argv": ["bwrap", "--unshare-net", "--die-with-parent", "--bind", "/", "/", "--dev", "/dev", "--proc", "/proc", "--"]}
+E       assert False
+
+tests/integration/test_dep01_cleanroom.py:132: AssertionError</failure></testcase></testsuite></testsuites>

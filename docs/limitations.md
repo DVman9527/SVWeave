@@ -232,20 +232,38 @@ evidence). Measured gaps on the fixtures:
   not a statement about other hosts or real projects, and no token-saving claim is made (plan 22.4
   has not been executed).
 * SVWeave's own license is not decided (plan 3.2): **TBD by owner**.
-* Latest bounded evidence: [run 40474142649](../evidence/verilator-native-run40474142649/README.md)
+* Earlier bounded evidence: [run 40474142649](../evidence/verilator-native-run40474142649/README.md)
   at `305e8c30747ba2eeb1b53a66eaa29e8255d8e245` passed five native Verilator static
   checks and 21 real slang semantic/UVM tests, each with zero failures/errors/skips. The
   separate supplement/gate suite has 195 parent testcase nodes plus 75 pytest 9.1.1 subtest
   outcomes (270 producer-reported aggregate), not 270 independently named tests. At that
   source, the strict qualification parser rejects the count mismatch; raw XML is preserved.
   This is not a current full three-backend qualification or a waiver/license signoff.
-  Subsequent unpublished accounting/probe-isolation changes were reconstructed and freshly
-  checked: **133 local pure checks PASS** (103 accounting + 30 isolation), with **10 pytest-
-  dependent checks BLOCKED_ENV**, not 143 PASS. Strict JUnit equality remains; no missing
-  subtests are inferred as PASS. The proposed gate is mandatory host sandbox → required
-  native boundary tests → successful backend probe, not an unconditional bypass. Four HDL-CI-05
-  native cases remain `NOT_RUN`; authorized parent-owned publication/dispatch follows final
-  review. Full qualification remains **BLOCKED / UNQUALIFIED**.
+* Current DEP-01 limitation: [run 40490935466 evidence](../evidence/dep01-nested-denial-run40490935466/README.md)
+  at `4a7a360b455a4dc4db5cffa2b711beb1baf5e266` has fast CI success and **40 passing
+  probe-isolation checks** (36 pure + 4 native), but the focused cleanroom test is **1 FAIL**,
+  zero errors/skips. Nested preflight at **10:46:27.646820–10:46:27.717638 UTC** recorded
+  `ready=false`; the bounded audit event at **10:46:27.708 UTC** denied `bwrap` capability
+  **21 / sys_admin** under `unpriv_bwrap`. The official profile deliberately restricts child
+  capabilities. This blocks the required inner sandbox inside the outer network-isolated
+  controller; it is not permission to relax AppArmor or remove isolation.
+* The latest broad-suite evidence remains [run 40485644533](https://github.com/DVman9527/SVWeave/actions/runs/40485644533)
+  at `2d26630ab278c22079c0750832cacfcb8d5f00db`: **235 cases, 229 PASS, 6 FAIL, 0 errors/skips**.
+  Its 34 boundary checks and backend contract probe succeeded, but review subsequently found
+  other direct-native/degraded test paths. Do not call the whole broad suite isolated merely
+  because boundary tests passed. Later containment/contract fixes were reviewed and **195
+  local pure checks passed**; the updated full integration rerun has not passed. In the latest
+  diagnostic-only run, full probes/broad suites/mutation/benchmark are excluded by explicit
+  conditions—**NOT_RUN**, not PASS. A dated mutation file in its artifact is historical carryover.
+* **User decision, 2026-10-28: option 1 selected** (`1.` / `做1.`). Preserve the original
+  controller-plus-backend isolation guarantee, keep DEP-01 **BLOCKED**, and continue the other
+  authorized regressions. The narrower trusted-host-controller option was **not selected**:
+  no removal of the controller's outer network namespace, capability grant, AppArmor relaxation
+  or degraded fallback is authorized by this choice. A separately scoped remaining-regressions
+  CI path is being prepared with an explicit DEP-01 blocked ledger; its execution/results are
+  still pending. Even a passing selected subset cannot complete qualification while DEP-01
+  and the other release/owner requirements remain open. Full qualification stays **BLOCKED /
+  UNQUALIFIED**; strict JUnit equality, failure visibility and separate EDA statuses are unchanged.
 
 ## 8. Graph export (ADR-014)
 

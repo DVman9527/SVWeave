@@ -150,13 +150,18 @@ Those are **not native Verilator UVM tests**. The gate/supplement suite separate
 zero failures/errors/skips. Raw counts are not normalized: at this source, the strict
 qualification parser rejects that aggregate-versus-node difference.
 
-Subsequent unpublished accounting/isolation changes were reconstructed after workspace
-recovery and freshly checked: **133 local pure checks PASS** (103 accounting + 30 isolation);
-**10 pytest-dependent checks BLOCKED_ENV**, not 143 PASS. Accounting uses independently named
-cases, not relaxed JUnit equality or inferred passing subtests. The proposed workflow gates
-backend probes behind mandatory host sandbox and required native boundary tests. Four HDL-CI-05
-native cases remain **NOT_RUN**; authorized parent-owned publication/dispatch follows final
-review. These newer changes are not verified by the older exact-source run.
+Subsequent accounting uses independently named cases, not relaxed JUnit equality or inferred
+passing subtests. [Run 40490935466](../evidence/dep01-nested-denial-run40490935466/README.md)
+at `4a7a360` passed 40 isolation checks (36 pure + 4 native), but its DEP-01 diagnostic failed
+on a time-correlated AppArmor denial of nested `bwrap` capability 21 / `sys_admin`.
+That diagnostic-only run did not execute the full backend probe, broad suites, mutation or
+benchmark. The latest broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`; later
+reviewed fixes and 195 local pure PASS are not a passing full updated rerun. On **2026-10-28
+the user selected option 1**: preserve the original controller-plus-backend isolation guarantee,
+keep DEP-01 **BLOCKED**, and continue the other regressions with an explicit blocked ledger.
+No narrower controller contract or policy/topology relaxation was selected. The separately
+scoped run is being prepared; no new execution result is claimed here. These newer results
+are not verified by the older Verilator run and do not change its bounded import/query claim.
 
 This native PASS does not prove all original source spans, reconstruct erased references,
 populate slang's authoritative index, extend UVM generic-body traversal, or change edit
