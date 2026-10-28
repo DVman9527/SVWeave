@@ -47,6 +47,7 @@ import shutil
 import subprocess
 import sys
 import time
+import tomllib
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
@@ -409,6 +410,37 @@ def latest_benchmark_evidence() -> tuple[str | None, dict[str, Any] | None]:
     return str(loaded[0][0].relative_to(REPO)), loaded[0][1]
 
 
+# Owner confirmed MIT on 2026-10-28 (plan 30.14). Keep the existing canonical text
+# and copyright notice; changing the license grant requires a separate owner decision.
+MIT_LICENSE_SHA256 = "7246ac07a69d6959c68ffe77d814f89083d958732343d030594c9ddaf9e7cdc5"
+
+
+def project_license_errors(repo: Path) -> list[str]:
+    """First-party license consistency only; never a third-party legal sign-off."""
+    errors: list[str] = []
+    try:
+        if hashlib.sha256((repo / "LICENSE").read_bytes()).hexdigest() != MIT_LICENSE_SHA256:
+            errors.append("LICENSE differs from the owner-confirmed MIT text/copyright")
+    except OSError:
+        errors.append("MIT LICENSE is missing or unreadable")
+    try:
+        project = tomllib.loads((repo / "pyproject.toml").read_text())["project"]
+        if not isinstance(project, dict):
+            raise ValueError("project metadata must be a table")
+        if project.get("license") != "MIT" or project.get("license-files") != ["LICENSE"]:
+            errors.append("package metadata must declare MIT and include LICENSE")
+    except (OSError, ValueError, KeyError, TypeError):
+        errors.append("package license metadata is missing or malformed")
+    for filename in ("README.md", "README.zh-TW.md", "README.zh-CN.md"):
+        try:
+            text = (repo / filename).read_text()
+            if not re.search(r"\[MIT[^\]]*\]\(LICENSE\)", text) or "TBD by owner" in text:
+                errors.append(f"{filename} must link MIT LICENSE without stale owner-TBD status")
+        except OSError:
+            errors.append(f"{filename} is missing or unreadable")
+    return errors
+
+
 def step_docs(out: Path) -> dict[str, Any]:
     checks: dict[str, Any] = {}
     checks["schema_emit_check"] = sh([SVW, "schema", "emit", "--check"], out / "logs" / "schema.log")
@@ -422,12 +454,9 @@ def step_docs(out: Path) -> dict[str, Any]:
                 "docs/install.md", "docs/operations.md", "docs/architecture.md",
                 "docs/manifest.md", "docs/mcp_contract.md", "docs/supported_features.md",
                 "docs/editing.md", "docs/qualification_report_template.md",
-                "THIRD_PARTY_NOTICES.md", "license_manifest.json", "toolchain.lock.json"]
+                "THIRD_PARTY_NOTICES.md", "license_manifest.json", "toolchain.lock.json", "LICENSE"]
     checks["required_files_missing"] = [f for f in required if not (REPO / f).is_file()]
-    readme = (REPO / "README.md").read_text() if (REPO / "README.md").is_file() else ""
-    checks["readme_claims_mit_for_svweave"] = bool(re.search(r"(?i)svweave[^\n]{0,40}\bMIT\b.{0,10}licen", readme)) \
-        and "TBD by owner" not in readme
-    checks["readme_mentions_license_tbd"] = "TBD by owner" in readme
+    checks["project_license_errors"] = project_license_errors(REPO)
     return checks
 
 
@@ -577,8 +606,7 @@ def compute_gates(R: dict[str, Any]) -> dict[str, Any]:
             why += [f"docs command/sample tests: {message}" for message in suite_result_errors(dt_)]
             if docs["required_files_missing"]:
                 why.append("missing docs: " + ", ".join(docs["required_files_missing"]))
-            if docs["readme_claims_mit_for_svweave"]:
-                why.append("README claims an MIT license for SVWeave itself")
+            why += docs.get("project_license_errors", ["first-party license consistency not checked"])
         bpath, bj = R.get("benchmark_ref")
         if bj is None:
             why.append("no reference-scale (scale 1.0) benchmark JSON")

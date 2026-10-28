@@ -1563,8 +1563,8 @@ rules. The ones that matter most:
 
 ## License
 
-* **SVWeave's own license: TBD by owner** (plan 3.2). Until the owner decides, no license is
-  granted by this repository.
+* **SVWeave's own code is licensed under the [MIT License](LICENSE).** Copyright (c) 2026 DVman9527.
+  Third-party components retain their own licenses and notices; this does not relicense them.
 * Third-party components are downloaded by the installer and not redistributed here. Pinned Serena
   v1.7.0 is MIT; slang and pyslang are MIT; Verible is Apache-2.0; codebase-memory-mcp is MIT with
   vendored components; the MCP Python SDK is MIT; Accellera UVM is Apache-2.0. These are

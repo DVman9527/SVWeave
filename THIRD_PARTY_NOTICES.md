@@ -8,7 +8,9 @@ at the pinned versions are stored under `evidence/m0/licenses/`; their SHA-256 v
 `license_manifest.json`.
 
 This file is an engineering inventory, not a legal review (plan §3.2). Legal review status:
-**NOT_DONE**. SVWeave's own license has not been chosen by the owner.
+**NOT_DONE**. SVWeave's own code is licensed under the [MIT License](LICENSE), as confirmed
+by the owner on 2026-10-28. Third-party components retain their own licenses and notices;
+this first-party decision does not complete the third-party legal review.
 
 | Component | Pinned version | License | License text |
 |---|---|---|---|

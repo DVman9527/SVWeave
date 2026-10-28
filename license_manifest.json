@@ -3,7 +3,7 @@
   "generated_at": "2026-10-13",
   "qualification_state": "UNQUALIFIED",
   "legal_review_status": "NOT_DONE",
-  "note": "Engineering inventory, not a legal conclusion (plan §3.2). Process-level adapters do not by themselves discharge license obligations. SVWeave's own license is not yet decided by the owner.",
+  "note": "Engineering inventory, not a legal conclusion (plan §3.2). Process-level adapters do not by themselves discharge license obligations. SVWeave's own code is MIT-licensed (LICENSE), confirmed by the owner on 2026-10-28. This first-party decision does not relicense third-party components or complete their legal review.",
   "components": [
     {
       "component": "slang (CLI binary)",

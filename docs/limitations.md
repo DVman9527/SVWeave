@@ -231,7 +231,8 @@ evidence). Measured gaps on the fixtures:
 * Performance numbers exist only for the corpus and host recorded in `evidence/bench/`. They are
   not a statement about other hosts or real projects, and no token-saving claim is made (plan 22.4
   has not been executed).
-* SVWeave's own license is not decided (plan 3.2): **TBD by owner**.
+* SVWeave's own code is licensed under the [MIT License](../LICENSE), confirmed by the owner on
+  2026-10-28 (plan 30.14). This does not close third-party legal review or release sign-off.
 * Earlier bounded evidence: [run 40474142649](../evidence/verilator-native-run40474142649/README.md)
   at `305e8c30747ba2eeb1b53a66eaa29e8255d8e245` passed five native Verilator static
   checks and 21 real slang semantic/UVM tests, each with zero failures/errors/skips. The

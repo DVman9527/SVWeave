@@ -241,5 +241,6 @@ def test_readme_exists_and_every_documented_command_resolves() -> None:
     assert not missing, missing
     text = readme.read_text()
     assert "SystemVerilog-first" in text and "UNQUALIFIED" in text
-    assert "TBD by owner" in text, "SVWeave's own license must not be claimed (plan 3.2)"
+    assert "[MIT License](LICENSE)" in text and "TBD by owner" not in text
+    assert (REPO / "LICENSE").read_text().startswith("MIT License\n")
     assert os.path.isfile(REPO / "docs" / "limitations.md")

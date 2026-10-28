@@ -265,4 +265,6 @@ formal are `NOT_RUN`); no incremental build; Linux only. Benchmark findings are 
 
 ### License
 
-SVWeave's own license: TBD by owner. No license is granted by this repository yet.
+SVWeave's own code is licensed under the [MIT License](LICENSE), confirmed by the owner on
+2026-10-28. The existing Copyright (c) 2026 DVman9527 notice is retained. Third-party licenses
+and the outstanding third-party legal review are unchanged.

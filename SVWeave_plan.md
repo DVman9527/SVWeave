@@ -2047,3 +2047,11 @@ Native Verilator 本次**未重跑**；`305e8c3` 的 native 5＋slang semantic/U
 Native identity 在安裝前 clean；稍後 `source_dirty` 只記錄生成的 `?? evidence/verilator-native-bootstrap/`，不隱去也不冒稱全程 clean。Macro-expanded locations 仍 **UNVERIFIED**、不可作 edit binding；external inventory 仍 `EXTERNAL_DECLARED/PARTIAL`、snapshot/build-unbound，沒有合併進 slang 權威 references。Graph／Serena 仍 **DEGRADED**，已知 UVM class/task extraction limitations 保留。
 
 使用者另於 **2026-10-28 03:37:02 UTC** 要求「驗證完成後一併更新 三語言 README」；English／繁中／简中 README 現同步上述結果、exact SHA、R2 較窄契約與剩餘限制。**Full qualification 仍 BLOCKED／UNQUALIFIED**：本 run 未執行新的 `qualify.py` 完整 release 評估；strict parser 核對不是執行 release gates。Owner G0 waiver／ADR-012／license sign-off、reference-scale performance 仍未完成；simulation／formal／RTL coverage、native Verilator UVM、protected-source end-to-end acceptance 仍 **NOT_RUN**。本次文件／evidence 更新不執行新的 backend 或自行 commit／push。
+
+### 30.14 Owner 決策追加：SVWeave 自有程式碼採 MIT（2026-10-28）
+
+使用者檢視 README 的自有授權待決說明後，於 **2026-10-28 04:35:16 UTC** 明確指示 **「改為MIT授權」**。此決策完成 §3.2 中 **SVWeave 自有程式碼的發佈授權選擇**，取代該項歷史 TBD 狀態；自有程式碼採用 [MIT License](LICENSE)。儲存庫既有 `LICENSE` 已為完整 MIT 條款，保留其內容及 **Copyright (c) 2026 DVman9527**，不重寫既有版權人。
+
+同步三語 README、套件 metadata、現行 limitations、CHANGELOG、第三方 notices 的自有授權敘述，以及 `license_manifest.json` 的自有授權 note。驗收改為核對 MIT 文件與套件／README 一致，不能繼續把 owner 已批准的 MIT 宣告視為未授權；也不得因第一方授權選擇而移除其他 qualification gates。
+
+**邊界不變：**第三方元件仍各自依原授權與 notices 使用；`license_manifest.json` 的 components／license hashes／`legal_review_status=NOT_DONE` 及 owner legal-review sign-off 原樣保留。不是整套 dependency 重新授權、第三方法務審查完成或 release sign-off；historical evidence 不改寫，full qualification 仍 **UNQUALIFIED**。

@@ -1047,5 +1047,5 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 ## 许可证
 
-* **SVWeave 自身的许可证：TBD by owner**（计划 3.2）。在负责人做出决定之前，本仓库不授予任何许可。
+* **SVWeave 自有代码采用 [MIT 许可证](LICENSE)。** Copyright (c) 2026 DVman9527。第三方组件仍适用各自的许可证和声明，不因本项目采用 MIT 而重新授权。
 * 第三方组件由安装程序下载，不在此处再分发。锁定的 Serena v1.7.0 为 MIT；slang 和 pyslang 为 MIT；Verible 为 Apache-2.0；codebase-memory-mcp 为 MIT 并附带内置的第三方组件；MCP Python SDK 为 MIT；Accellera UVM 为 Apache-2.0。这些是工程层面的清单，不是法律审查（`THIRD_PARTY_NOTICES.md`、`license_manifest.json`；法律审查状态为 `NOT_DONE`）。将 Serena 升级到 v1.7.0 之后的版本会改变其许可证，并需要重新审查（ADR-010）。

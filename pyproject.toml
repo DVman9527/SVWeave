@@ -7,6 +7,8 @@ name = "svweave"
 version = "0.1.0"
 description = "Build-aware SystemVerilog/UVM analysis and controlled-edit gateway"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "pydantic==2.14.1",
     "pyyaml==6.0.3",
