@@ -110,3 +110,40 @@ else:
         time.sleep(.05)
     assert _live_token_processes(token) == []
     assert original.read_text() == "module fixture; endmodule\n"
+
+
+def test_DEP_01_R2_controller_timeout_reaps_native_detached_descendant(
+    tmp_path: Path, sandbox: SandboxRunner,
+) -> None:
+    """A host-controller timeout must also reap bwrap's separate-session descendants."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from _cleanroom_controller import probe_argv, run_controller
+
+    room, source, state = tmp_path / "room", tmp_path / "source", tmp_path / "state"
+    for directory in (room / ".venv/bin", room / "scripts", source, state):
+        directory.mkdir(parents=True)
+    (room / ".venv/bin/python").symlink_to(sys.executable)
+    original = source / "fixture.sv"
+    original.write_text("module fixture; endmodule\n")
+    ready = state / "ready"
+    token = "svw-r2-controller-child-" + uuid.uuid4().hex
+    child = "from pathlib import Path;import sys,time;Path(sys.argv[1]).write_text('ready');time.sleep(60)"
+    worker = ("import subprocess,sys,time\n"
+              f"subprocess.Popen([sys.executable,'-I','-c',{child!r},sys.argv[1],sys.argv[2]],"
+              "start_new_session=True)\ntime.sleep(60)\n")
+    # Trusted stdlib-only test controller; its actual worker uses the unchanged native boundary.
+    (room / "scripts/probe_backends.py").write_text(
+        f"import sys\nsys.path.insert(0,{str(ROOT / 'scripts/spikes')!r})\n"
+        "from pathlib import Path\nimport _sandbox as boundary\n"
+        f"spec=boundary.python_spec(sources=(Path({str(source)!r}),),"
+        f"writable=(Path({str(state)!r}),),cwd=Path({str(source)!r}))\n"
+        f"boundary.run(spec,[str(Path(sys.executable).resolve()),'-I','-c',{worker!r},"
+        f"{str(ready)!r},{token!r}],timeout=60)\n")
+    with pytest.raises(subprocess.TimeoutExpired):
+        run_controller(probe_argv(room), room, 3)
+    assert ready.read_text() == "ready", "the native detached child must have started"
+    deadline = time.monotonic() + 5
+    while _live_token_processes(token) and time.monotonic() < deadline:
+        time.sleep(.05)
+    assert _live_token_processes(token) == []
+    assert original.read_text() == "module fixture; endmodule\n"
