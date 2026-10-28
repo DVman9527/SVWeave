@@ -1319,9 +1319,11 @@ locked `uv.lock`. `--verify-only` compares the installed state with the lock wit
 offline machine, prepare the cache with `scripts/bootstrap_locked.py --fetch-only`, copy the
 repository and `.toolchain/`, then run
 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv` and finish with
-`--verify-only`. The clean-room offline run is tested by
-`tests/integration/test_dep01_cleanroom.py` (network-isolated on the build host, not on a separate
-air-gapped machine). `scripts/gateway_lock_refresh.py` is a maintainer tool that regenerates the
+`--verify-only`. The revised cleanroom contract `DEP-01-R2-host-controller` uses network-isolated
+offline install/verify and individually isolated backends, but a trusted host controller without
+an outer network-isolation guarantee. Its new native acceptance is **NOT_RUN**; it is not an
+end-to-end offline or physically air-gapped claim. See [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md).
+`scripts/gateway_lock_refresh.py` is a maintainer tool that regenerates the
 gateway wheelhouse section of the lock. Procedure: `docs/install.md`.
 
 **Sandbox.** Every backend, the pyslang worker included, starts through a `bwrap` argument array:

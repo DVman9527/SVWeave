@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "scope": "remaining_regressions",
+  "identity": {
+    "source_identity": {
+      "git_head": "4b6454417ca1f92fae5063116f9458cbfbca443d",
+      "src_tree_sha256": "2492cfb9ac867014452871e11bea13bf5f21ee52fb1024b30f91ea60d8979660"
+    },
+    "git_status": "",
+    "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+    "workflow_sha256": "950bdfab9c63bc7563c8de0795db79285017ac5372d570605d278b61df1dfc36",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "scope": "remaining regressions only; DEP-01 BLOCKED; not qualification",
+    "cleanroom_diagnostic_only": "false",
+    "remaining_regressions_only": "true"
+  },
+  "full_qualification_status": "BLOCKED",
+  "qualify_py_executed": false,
+  "release_qualified": false,
+  "collection": {
+    "status": "VALIDATED",
+    "collected_count": 235,
+    "selected_count": 234,
+    "blocked_count": 1,
+    "blocked_nodeids": [
+      "tests/integration/test_dep01_cleanroom.py::test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends"
+    ]
+  },
+  "excluded_tests": [
+    {
+      "requirement": "DEP-01",
+      "nodeid": "tests/integration/test_dep01_cleanroom.py::test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends",
+      "status": "BLOCKED",
+      "reason": "Retained outer offline controller cannot launch mandatory inner bwrap: enforced unpriv_bwrap denies CAP_SYS_ADMIN; no isolation guarantee or policy change authorized.",
+      "observed_run_id": 40490935466,
+      "observed_source_sha": "4a7a360b455a4dc4db5cffa2b711beb1baf5e266",
+      "evidence": "evidence/dep01-nested-denial-run40490935466/nested-sandbox-kernel.log",
+      "acceptance_unchanged": true,
+      "waived": false
+    }
+  ]
+}

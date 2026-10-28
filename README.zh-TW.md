@@ -904,7 +904,7 @@ root_mappings:
 | MCP Python SDK | 2.3.0 |
 | Accellera UVM（`uvm-core`） | 2020.3.1 |
 
-**Bootstrap。** 線上執行一次：`scripts/bootstrap_locked.py` 會下載每個構件，使用前先驗證其 SHA-256，以防路徑穿越（path-traversal）的方式解壓縮，並依鎖定的 `uv.lock` 建立 Serena venv。`--verify-only` 在不使用網路的情況下比對已安裝狀態與 lock。對於離線機器，請以 `scripts/bootstrap_locked.py --fetch-only` 準備快取，複製儲存庫與 `.toolchain/`，然後執行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最後以 `--verify-only` 收尾。全新環境（clean-room）的離線執行由 `tests/integration/test_dep01_cleanroom.py` 測試（在建置主機上隔離網路，而非在另一部實體隔離（air-gapped）的機器上）。`scripts/gateway_lock_refresh.py` 是維護者工具，用來重新產生 lock 中閘道 wheelhouse 的部分。程序：`docs/install.md`。
+**Bootstrap。** 線上執行一次：`scripts/bootstrap_locked.py` 會下載每個構件，使用前先驗證其 SHA-256，以防路徑穿越（path-traversal）的方式解壓縮，並依鎖定的 `uv.lock` 建立 Serena venv。`--verify-only` 在不使用網路的情況下比對已安裝狀態與 lock。對於離線機器，請以 `scripts/bootstrap_locked.py --fetch-only` 準備快取，複製儲存庫與 `.toolchain/`，然後執行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最後以 `--verify-only` 收尾。修訂 cleanroom 契約 `DEP-01-R2-host-controller` 保留 offline install/verify 的網路隔離與每個 backend 的個別隔離，但 trusted controller 在 host 執行，**不保證 controller 外層網路隔離**；新 native 驗收仍為 **NOT_RUN**，不是 end-to-end offline 或實體 air-gap 宣告。見 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是維護者工具，用來重新產生 lock 中閘道 wheelhouse 的部分。程序：`docs/install.md`。
 
 **沙箱。** 每個後端（包含 pyslang worker）都透過 `bwrap` 引數陣列啟動：系統與工具鏈為唯讀，只有其候選副本（適用時）與它自己的狀態目錄可讀寫，`--unshare-net`，擁有隨閘道結束而消失的獨立 PID 命名空間，且沒有真實的 `$HOME`。原始碼不會以可寫方式掛載，或根本不掛載。`bwrap` 不施加 CPU、記憶體或 pid 數量限制，也沒有 seccomp 過濾器；記憶體僅對 HDL worker 做限制（`RLIMIT_AS`）。若無法使用非特權使用者命名空間，後端會失敗即拒絕（fail closed），或僅在明確標示的降級模式下執行（ADR-011）。
 

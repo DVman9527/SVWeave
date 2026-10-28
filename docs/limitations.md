@@ -239,7 +239,22 @@ evidence). Measured gaps on the fixtures:
   outcomes (270 producer-reported aggregate), not 270 independently named tests. At that
   source, the strict qualification parser rejects the count mismatch; raw XML is preserved.
   This is not a current full three-backend qualification or a waiver/license signoff.
-* Current DEP-01 limitation: [run 40490935466 evidence](../evidence/dep01-nested-denial-run40490935466/README.md)
+* Latest selected-scope evidence: [run 40617140613](../evidence/remaining-regressions-run40617140613/README.md)
+  at `4b6454417ca1f92fae5063116f9458cbfbca443d` passed fast CI and **234 selected regressions**
+  (203 integration + 19 fault-injection + 12 acceptance), with zero failures/errors/skips.
+  The identity-bound ledger validates **235 collected = 234 selected + 1 DEP-01 BLOCKED**;
+  DEP-01 is unwaived and its original acceptance is unchanged. A separate **40-case boundary
+  suite PASS** includes four native cases also present in the 234, so do not add these as
+  independent test totals. Backend probe results remain slang READY / graph and Serena DEGRADED.
+  Fresh **26/26 mutations were killed**, with no survivors/errors. `qualify.py` was not run;
+  the ledger explicitly retains `full_qualification_status=BLOCKED` and `release_qualified=false`.
+* The same run's PERF-01 result is only a **0.05-scale smoke measurement: 4,844 lines / 25 files**,
+  on four logical CPUs / 15.61 GiB RAM with warm page cache. It records `reference_host_met=false`
+  and `reference_corpus=false`; graph search is **SKIPPED** (`--no-graph`). Passing measured
+  targets does not establish plan 22.3 reference-scale or graph performance. The October 13
+  mutation report also present in the artifact is historical carryover, not part of this run's
+  26 mutations. Native Verilator was not rerun; simulation/formal/RTL coverage remain NOT_RUN.
+* Original DEP-01 limitation: [run 40490935466 evidence](../evidence/dep01-nested-denial-run40490935466/README.md)
   at `4a7a360b455a4dc4db5cffa2b711beb1baf5e266` has fast CI success and **40 passing
   probe-isolation checks** (36 pure + 4 native), but the focused cleanroom test is **1 FAIL**,
   zero errors/skips. Nested preflight at **10:46:27.646820–10:46:27.717638 UTC** recorded
@@ -247,23 +262,25 @@ evidence). Measured gaps on the fixtures:
   **21 / sys_admin** under `unpriv_bwrap`. The official profile deliberately restricts child
   capabilities. This blocks the required inner sandbox inside the outer network-isolated
   controller; it is not permission to relax AppArmor or remove isolation.
-* The latest broad-suite evidence remains [run 40485644533](https://github.com/DVman9527/SVWeave/actions/runs/40485644533)
+* Historical broad-suite evidence remains [run 40485644533](https://github.com/DVman9527/SVWeave/actions/runs/40485644533)
   at `2d26630ab278c22079c0750832cacfcb8d5f00db`: **235 cases, 229 PASS, 6 FAIL, 0 errors/skips**.
   Its 34 boundary checks and backend contract probe succeeded, but review subsequently found
   other direct-native/degraded test paths. Do not call the whole broad suite isolated merely
   because boundary tests passed. Later containment/contract fixes were reviewed and **195
-  local pure checks passed**; the updated full integration rerun has not passed. In the latest
-  diagnostic-only run, full probes/broad suites/mutation/benchmark are excluded by explicit
+  local pure checks passed**. The five non-DEP failures now pass in the 234 selected regressions
+  above, but DEP-01 remains blocked; this does not rewrite the historical six failures or pass
+  the entire original suite. In the earlier diagnostic-only run, full probes/broad suites/mutation/benchmark were excluded by explicit
   conditions—**NOT_RUN**, not PASS. A dated mutation file in its artifact is historical carryover.
-* **User decision, 2026-10-28: option 1 selected** (`1.` / `做1.`). Preserve the original
-  controller-plus-backend isolation guarantee, keep DEP-01 **BLOCKED**, and continue the other
-  authorized regressions. The narrower trusted-host-controller option was **not selected**:
-  no removal of the controller's outer network namespace, capability grant, AppArmor relaxation
-  or degraded fallback is authorized by this choice. A separately scoped remaining-regressions
-  CI path is being prepared with an explicit DEP-01 blocked ledger; its execution/results are
-  still pending. Even a passing selected subset cannot complete qualification while DEP-01
-  and the other release/owner requirements remain open. Full qualification stays **BLOCKED /
-  UNQUALIFIED**; strict JUnit equality, failure visibility and separate EDA statuses are unchanged.
+* **Latest user decision, 2026-10-28 03:17:21 UTC: option 2 explicitly selected**, superseding
+  option 1 for future acceptance. [DEP-01-R2-host-controller / ADR-016](adr/ADR-016-dep01-trusted-host-controller.md)
+  retains network-isolated offline install/verify and every backend's mandatory read-only,
+  no-network, no-inherited-secret sandbox; only the trusted controller runs on the host without
+  an outer network-isolation guarantee. This is a narrower contract, not equivalent to the old
+  end-to-end network-isolated cleanroom. Controller downloads/source uploads, AppArmor/sysctl/
+  capability changes, degraded backend fallback and broader product/Slurm exceptions remain
+  unauthorized. **Revised DEP-01 acceptance is NOT_RUN pending new exact-source CI**; original
+  DEP-01 FAIL/BLOCKED and option-1 selected-scope evidence stay unchanged. Full qualification
+  remains **BLOCKED / UNQUALIFIED**; strict JUnit equality and separate EDA statuses are unchanged.
 
 ## 8. Graph export (ADR-014)
 

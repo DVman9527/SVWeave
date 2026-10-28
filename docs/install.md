@@ -117,11 +117,22 @@ internet access can be provisioned from a prepared `.toolchain/` directory:
    * `--serena-source` is cloned with `git clone --no-local file://...`, so the path must be visible
      to the process; the error for a bad path names it.
 
-Status of this procedure: DEP-01 is exercised by `tests/integration/test_dep01_cleanroom.py`, which
-bootstraps into an empty directory with `--offline` under `bwrap --unshare-net` (no network
-namespace) and then probes all three backends from the fresh install. Evidence:
-`evidence/dep01/cleanroom.json`. That is a network-isolated clean-room run on the build host, not a
-run on a separate physical air-gapped machine.
+Current cleanroom acceptance is **`DEP-01-R2-host-controller`**, explicitly authorized on
+**2026-10-28 03:17:21 UTC**; see [ADR-016](adr/ADR-016-dep01-trusted-host-controller.md).
+`tests/integration/test_dep01_cleanroom.py` retains network-isolated offline installation into
+an empty directory and network-isolated verification. Its reviewed probe controller runs on
+the host, **without an outer network-isolation guarantee**; every native backend/helper still
+requires read-only source/tool inputs, no network and no inherited secrets in mandatory bwrap.
+The controller must not download dependencies or upload source. This is a narrower contract,
+not an end-to-end offline or physically air-gapped cleanroom claim.
+
+**Revised acceptance is NOT_RUN pending new exact-source CI.** New revision evidence belongs
+under `.svweave/ci/dep01-r2/`, including the contract, bootstrap, controller preflight and
+capability reports. Original `evidence/dep01/cleanroom.json` is historical, not R2 evidence;
+the later [nested-denial run](../evidence/dep01-nested-denial-run40490935466/README.md) remains
+FAIL/BLOCKED under its original contract. No AppArmor/sysctl/capability relaxation or backend
+fallback is allowed. The old option-1 `remaining_regressions=true` selector is R1-only, not a
+way to skip the revised node or claim its acceptance.
 
 Running DEP-01 needs two things on the host (otherwise it skips, or fails under
 `SVWEAVE_REQUIRE_BACKENDS=1`):
@@ -150,9 +161,10 @@ transport). Those were run by hand end to end (fetch-only, then `--offline` unde
 linking is also unit-tested in `tests/unit/test_bootstrap_locked.py`.
 
 DEP-01 runs the pinned uv from the artifact dir (no `--uv`) and builds Serena from the pinned build
-wheels; `evidence/dep01/cleanroom.json` was refreshed with this lock on 2026-10-20 (in a scratch copy
+wheels. Historically, `evidence/dep01/cleanroom.json` was refreshed with this lock on 2026-10-20 (in a scratch copy
 whose `.toolchain/` came from the `vendor/` procedure). The `vendor/` procedure itself was also run end
-to end under `bwrap --unshare-net` (see `CHANGELOG.md`).
+to end under `bwrap --unshare-net` (see `CHANGELOG.md`). Those dated results do not validate the
+R2 host-controller contract.
 
 The PyPI wheels are also committed in `vendor/` (see `vendor/README.md`) for hosts that reach GitHub but not PyPI,
 together with the pinned uv tarball and a standalone CPython; the other GitHub-hosted components are

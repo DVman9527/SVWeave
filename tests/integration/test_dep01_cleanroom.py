@@ -1,13 +1,14 @@
-"""DEP-01 (plan 20.2): clean Linux environment + all pinned artifacts provided, NO network ->
-three backends start and probe successfully, no temporary download, versions/hashes match the lock.
+"""DEP-01-R2-host-controller: offline install/verification + individually isolated backends.
 
 The clean room is an EMPTY temp directory that receives only the repository's scripts, fixtures,
 svweave source tree (``src/``) and lock (no .toolchain, no .venv). ``scripts/bootstrap_locked.py
 --offline`` installs from the locally cached artifacts (archives, the hash-locked gateway wheelhouse,
 a local Serena checkout, a copy of the uv cache) and links ``src/`` into the fresh venv while running
-under ``bwrap --unshare-net``; then ``scripts/probe_backends.py`` of the FRESH install probes pyslang,
-cbm and Serena, also without network (the MCP probes use svweave's bounded stdio transport). Evidence (no host paths) is
-compared with / written to ``evidence/dep01/cleanroom.json`` (``SVWEAVE_WRITE_EVIDENCE=1``).
+under ``bwrap --unshare-net``. The FRESH install's trusted probe controller runs on the HOST:
+its own network access is NOT isolated. All source-analyzing backend children still require
+the existing read-only, no-network SandboxRunner. This explicitly narrower R2 acceptance does
+not turn the original nested-controller DEP-01 FAIL/BLOCKED evidence into PASS. Fresh evidence
+is always retained under ``.svweave/ci/dep01-r2/``; optional committed evidence uses a new path.
 
 Host prerequisites (docs/install.md, "Running DEP-01"): the cached artifacts under ``.toolchain/``
 (``downloads/`` -- after a ``vendor/`` install, ``ln -s ../vendor/downloads .toolchain/downloads`` --
@@ -23,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,9 +35,17 @@ from tests.integration.conftest import skip_or_fail
 pytestmark = pytest.mark.integration
 
 REPO = Path(__file__).resolve().parents[2]
-EVIDENCE = REPO / "evidence" / "dep01" / "cleanroom.json"
+EVIDENCE = REPO / "evidence" / "dep01-r2" / "cleanroom.json"
 sys.path.insert(0, str(REPO / "scripts"))
-from _cleanroom_preflight import collect_nested_preflight  # noqa: E402
+from _bench_common import source_identity  # noqa: E402
+from _cleanroom_controller import (  # noqa: E402
+    CONTRACT_REVISION,
+    probe_argv,
+    run_controller,
+    validate_contract_identity,
+    validate_probe_evidence,
+)
+from _cleanroom_preflight import collect_sandbox_preflight  # noqa: E402
 
 NETLESS = ["bwrap", "--unshare-net", "--die-with-parent", "--bind", "/", "/", "--dev", "/dev",
            "--proc", "/proc", "--"]
@@ -57,16 +67,64 @@ def run_netless(args: list[str], cwd: Path, timeout: float) -> subprocess.Comple
                           timeout=timeout)
 
 
-def test_DEP_01_offline_bootstrap_into_empty_dir_then_probe_all_three_backends() -> None:
+def source_digest(root: Path) -> str:
+    hashes = {p.relative_to(root).as_posix(): sha256(p) for p in sorted(root.rglob("*"))
+              if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"}
+    return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
+
+
+def record_result(name: str, result: subprocess.CompletedProcess[str], artifacts: Path, room: Path) -> None:
+    for stream in ("stdout", "stderr"):
+        (artifacts / f"{name}.{stream}.log").write_text(scrub(getattr(result, stream), room))
+    (artifacts / f"{name}.execution.json").write_text(json.dumps({"returncode": result.returncode}))
+
+
+def test_DEP_01_R2_offline_install_then_host_controlled_isolated_backend_probes() -> None:
     # a SHORT path: cbm's daemon socket lives under the room and AF_UNIX paths are limited to ~108 bytes
     base = Path(tempfile.mkdtemp(prefix="dep01-", dir="/tmp"))
+    out = REPO / ".svweave/ci/dep01-r2"
+    out.mkdir(parents=True, exist_ok=True)
+    artifacts = Path(tempfile.mkdtemp(prefix="run-", dir=out))
+    before = source_digest(REPO / "fixtures")
+    after = None
+    contract: dict[str, Any] = {
+        "revision": CONTRACT_REVISION, "status": "RUNNING",
+        "original_contract_status": "BLOCKED", "original_contract_reclassified": False,
+        "controller_network_isolated": False,
+        "offline_install_verification_network_isolated": True,
+        "backend_isolation": "mandatory_bwrap", "release_qualified": False,
+        "ci_identity_verified": False,
+        "source_identity": source_identity(), "lock_sha256": sha256(REPO / "toolchain.lock.json"),
+        "workflow_sha256": sha256(REPO / ".github/workflows/ci.yml"),
+        "artifacts": artifacts.relative_to(REPO).as_posix(),
+        "started_at_utc": datetime.now(UTC).isoformat(),
+    }
     try:
-        _cleanroom(base)
+        identity = REPO / ".svweave/ci/identity.json"
+        if identity.exists():
+            validate_contract_identity(contract, json.loads(identity.read_text()))
+            contract["ci_identity_verified"] = True
+        elif os.environ.get("GITHUB_ACTIONS") == "true":
+            raise ValueError("R2 CI validation requires current identity.json")
+        _cleanroom(base, artifacts)
+        after = source_digest(REPO / "fixtures")
+        assert after == before, "original fixture source changed"
+        contract["status"] = "PASS"
+    except BaseException as error:
+        contract.update(status="FAIL", error=f"{type(error).__name__}: {scrub(str(error), base)}")
+        raise
     finally:
+        contract["source_manifest_sha256"] = {
+            "before": before, "after": after if after is not None else source_digest(REPO / "fixtures"),
+        }
+        contract["finished_at_utc"] = datetime.now(UTC).isoformat()
+        text = json.dumps(contract, indent=2) + "\n"
+        (artifacts / "contract.json").write_text(text)
+        (out / "contract.json").write_text(text)  # current-run pointer; raw evidence stays in its fresh leaf
         shutil.rmtree(base, ignore_errors=True)
 
 
-def _cleanroom(tmp_path: Path) -> None:
+def _cleanroom(tmp_path: Path, artifacts: Path) -> None:
     if shutil.which("bwrap") is None:
         skip_or_fail("bwrap not installed (needed to disable the network)")
     art = REPO / ".toolchain" / "downloads"
@@ -81,6 +139,7 @@ def _cleanroom(tmp_path: Path) -> None:
     probe = run_netless(["python3", "-c", "import socket,sys\n"
                          "try:\n socket.create_connection(('1.1.1.1',443),timeout=3);print('CONNECTED')\n"
                          "except OSError as e:\n print('BLOCKED errno=%s' % e.errno)"], tmp_path, 60)
+    record_result("offline-network-check", probe, artifacts, tmp_path)
     assert probe.returncode == 0 and probe.stdout.strip().startswith("BLOCKED"), probe.stdout + probe.stderr
 
     room = tmp_path / "cleanroom"
@@ -91,6 +150,7 @@ def _cleanroom(tmp_path: Path) -> None:
     for rel in ("scripts", "fixtures", "src"):
         shutil.copytree(REPO / rel, room / rel, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copy(REPO / "toolchain.lock.json", room / "toolchain.lock.json")
+    before = source_digest(room / "fixtures")
     cache_copy = tmp_path / "uv-cache"
     shutil.copytree(uv_cache, cache_copy, symlinks=True)
 
@@ -99,6 +159,9 @@ def _cleanroom(tmp_path: Path) -> None:
          "--artifact-dir", str(art), "--serena-source", str(serena_src),
          "--uv-cache-dir", str(cache_copy), "--report", str(room / "boot.json")],
         room, 1800)
+    record_result("bootstrap", boot, artifacts, room)
+    if (room / "boot.json").is_file():
+        (artifacts / "bootstrap.json").write_text(scrub((room / "boot.json").read_text(), room))
     assert boot.returncode == 0, scrub(boot.stdout[-3000:] + boot.stderr[-3000:], room)
     breport: dict[str, Any] = json.loads((room / "boot.json").read_text())
     assert breport["ok"] is True and breport["offline"] is True and breport["errors"] == []
@@ -114,27 +177,38 @@ def _cleanroom(tmp_path: Path) -> None:
         assert sha256(tc / key) == want, name
     py = room / ".venv" / "bin" / "python"
     assert py.is_file()
-    vers = {d: subprocess.run([str(py), "-I", "-c", f"import importlib.metadata as m;print(m.version('{d}'))"],
-                              capture_output=True, text=True).stdout.strip() for d in ("pyslang", "mcp")}
+    vers = {}
+    for distribution in ("pyslang", "mcp"):
+        result = run_netless(
+            [str(py), "-I", "-c", f"import importlib.metadata as m;print(m.version('{distribution}'))"], room, 60)
+        record_result(f"installed-{distribution}", result, artifacts, room)
+        assert result.returncode == 0, scrub(result.stderr, room)
+        vers[distribution] = result.stdout.strip()
     assert vers == {"pyslang": comps["pyslang"]["version"], "mcp": comps["mcp_sdk"]["version"]}
 
     ver = run_netless(["python3", "scripts/bootstrap_locked.py", "--verify-only", "--artifact-dir", str(art)],
                       room, 300)
+    record_result("verify-only", ver, artifacts, room)
     assert ver.returncode == 0, scrub(ver.stdout[-2000:], room)
 
-    # Keep the offline outer namespace AND the mandatory inner SandboxRunner. Record the
-    # actual nested denial before the temporary clean room is removed; do not bypass it.
-    preflight = collect_nested_preflight(py, room, run_netless)
-    preflight["outer_argv"] = NETLESS
-    diagnostic = REPO / ".svweave/ci/dep01/nested-sandbox-preflight.json"
-    diagnostic.parent.mkdir(parents=True, exist_ok=True)
+    # R2 explicitly moves only trusted orchestration to the host. Native backend launches
+    # remain mandatory SandboxRunner calls; do not retry the known-denied original nesting.
+    preflight = collect_sandbox_preflight(py, room, run_controller)
+    preflight.update(contract_revision=CONTRACT_REVISION, controller_network_isolated=False)
+    diagnostic = artifacts / "controller-sandbox-preflight.json"
     diagnostic.write_text(scrub(json.dumps(preflight, indent=2), room) + "\n")
+    (artifacts.parent / diagnostic.name).write_text(diagnostic.read_text())
     assert preflight["ready"], scrub(json.dumps(preflight), room)
 
-    prb = run_netless([str(py), "scripts/probe_backends.py", "--out", str(room / "capability_report.json")],
-                      room, 2400)
+    assert not (room / "capability_report.json").exists(), "fresh probe output required"
+    prb = run_controller(probe_argv(room), room, 2400)
+    record_result("probe-controller", prb, artifacts, room)
     assert (room / "capability_report.json").is_file(), scrub(prb.stdout[-2000:] + prb.stderr[-2000:], room)
+    (artifacts / "capability-report.json").write_text(scrub((room / "capability_report.json").read_text(), room))
+    assert prb.returncode == 0, scrub(prb.stdout[-2000:] + prb.stderr[-2000:], room)
     rep: dict[str, Any] = json.loads((room / "capability_report.json").read_text())
+    validate_probe_evidence(rep, prb.returncode)
+    assert source_digest(room / "fixtures") == before, "fresh installed fixture source changed"
     ref: dict[str, Any] = json.loads((REPO / "capability_report.json").read_text())
     summary = rep["summary"]
     assert set(summary) == {"pyslang", "slang_cli", "cbm", "serena"}
@@ -148,9 +222,10 @@ def _cleanroom(tmp_path: Path) -> None:
     assert str(room) not in text, "probe wrote a clean-room host path"
 
     ev = {
-        "test": "DEP-01 offline clean-room bootstrap + three-backend probe",
-        "network": "disabled: bwrap --unshare-net around bootstrap, verify and probe "
-                   "(1.1.1.1:443 connect probe: BLOCKED)",
+        "test": CONTRACT_REVISION,
+        "controller_network_isolated": False,
+        "network": "offline bootstrap/installed verification: NETLESS; trusted probe controller: host; "
+                   "every native backend: mandatory no-network SandboxRunner",
         "lock_sha256": sha256(REPO / "toolchain.lock.json"),
         "bootstrap": {"command": "scripts/bootstrap_locked.py --offline --create-venv --artifact-dir "
                                  "${REPO}/.toolchain/downloads --serena-source ${REPO}/.toolchain/serena-src "
@@ -160,18 +235,14 @@ def _cleanroom(tmp_path: Path) -> None:
         "installed": {"binaries_sha256_equal_lock": ["slang", "codebase_memory_mcp", "verible"],
                       "gateway_venv": vers, "serena_agent": breport["components"]["serena"]},
         "verify_only_rc": ver.returncode,
-        "nested_sandbox_preflight": preflight,
+        "controller_sandbox_preflight": preflight,
         "probe": {"summary": summary, "limitations": rep["limitations"],
                   "schema_digest": {b: rep["backends"][b]["schema_digest"] for b in ("cbm", "serena")},
                   "matches_committed_capability_report": True},
     }
     out = json.loads(scrub(json.dumps(ev), room))
     assert "/home/" not in json.dumps(out)
+    (artifacts / "cleanroom-r2.json").write_text(json.dumps(out, indent=2) + "\n")
     if os.environ.get("SVWEAVE_WRITE_EVIDENCE") == "1":
         EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
         EVIDENCE.write_text(json.dumps(out, indent=2) + "\n")
-    else:
-        assert EVIDENCE.is_file(), "evidence/dep01/cleanroom.json missing (SVWEAVE_WRITE_EVIDENCE=1)"
-        old = json.loads(EVIDENCE.read_text())
-        assert old["probe"]["summary"] == out["probe"]["summary"]
-        # old["lock_sha256"] is informational: refresh the evidence (SVWEAVE_WRITE_EVIDENCE=1) after a lock change

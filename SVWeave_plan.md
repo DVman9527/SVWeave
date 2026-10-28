@@ -1994,3 +1994,37 @@ DEP-01 preflight 精確區間 **2026-10-27 10:46:27.646820–10:46:27.717638 UTC
 
 **Full qualification 仍為 BLOCKED／UNQUALIFIED**；DEP-01 原契約、strict JUnit equality、mandatory backend isolation、owner waiver／license signoff 與 EDA 狀態分離等要求不變。本次僅更新文件／決策註記並重新核對保留 evidence，未執行 backend、改 policy/topology、commit／push 或 Library write。
 
+### 30.11 執行追加：方案 1 的 remaining-regressions PASS，DEP-01 仍 BLOCKED（2026-10-28）
+
+[Run 40617140613](https://github.com/DVman9527/SVWeave/actions/runs/40617140613) 在 exact source **`4b6454417ca1f92fae5063116f9458cbfbca443d`** 完成 SUCCESS（fast＋remaining-regressions jobs）。[新保留證據](evidence/remaining-regressions-run40617140613/README.md) 含 identity、scope ledger、原始 JUnit、backend report、fresh mutation／smoke benchmark、run metadata／job-log excerpt 與 member hashes；lock 仍為 `ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9`。本段更新 30.10 的待執行狀態，不改寫先前 FAIL 或 DEP-01 原驗收。
+
+| 範圍 | 本次結果與不可跨越的界線 |
+|---|---|
+| Selected integration／fault-injection／acceptance | **234 PASS、0 failure/error/skip**＝203 integration＋19 fault-injection＋12 acceptance。Ledger 與 CI identity 相同，collection **235＝234 selected＋1 DEP-01 BLOCKED**；只有原 DEP-01 node 被排除，`acceptance_unchanged=true`、`waived=false`。這不是 235 PASS，也不是把 DEP-01 轉成 pytest SKIP。 |
+| HDL-CI-04/05＋backend probe | **40 boundary cases PASS**（36 pure＋4 native）；4 native 亦在 234 suite，不能相加成 274 個獨立測試。Mandatory bwrap backend probe 完成、required errors 為空；pyslang／slang CLI READY，graph／Serena **DEGRADED**，已知限制不變。 |
+| Critical mutations M01–M26 | **26/26 KILLED、0 survivor/error**，26 baseline commands 均 rc=0。Fresh job log 記錄 01:56:11–02:03:27 UTC 真實執行及寫入 2026-10-28 report；JSON 本身未含 commit 欄位，以 run／artifact／job log 連結 source，不冒稱獨立自證。Artifact 的 2026-10-13 mutation 是歷史夾帶，未計入本次。 |
+| PERF-01 smoke | **scale 0.05、4,844 lines／25 files**；5 個 fresh-state builds 成功、hot categories 各 30 samples；僅 measured smoke targets PASS。4 logical CPUs／15.61 GiB RAM、warm page cache；`reference_host_met=false`、`reference_corpus=false`，graph search **SKIPPED**（`--no-graph`）。不是 §22.3 100k-line／500-file 或 graph performance qualification。 |
+
+先前非 DEP 的 5 個失敗案例（API-PAR-02、DIF-I01/02/03、OPI-F4/F10）在新 selected suite 已 PASS；舊 `2d26630` 的 229 PASS／6 FAIL 及 `4a7a360` 的 DEP-01 focused FAIL 仍原樣保留。**DEP-01 維持 BLOCKED、原 controller＋backend 隔離契約不變、沒有 waiver／policy relaxation。** Ledger 明列 `full_qualification_status=BLOCKED`、`qualify_py_executed=false`、`release_qualified=false`；selected PASS 不是完整 qualification。
+
+Native Verilator 本次**未重跑**；`305e8c3` 的 native 5＋slang semantic/UVM 21 仍是其 exact-source 歷史 subset。新 suite 有 real slang 回歸，但不是 native Verilator UVM。Macro locations UNVERIFIED、外部 inventory 非權威 references、simulation／formal／RTL coverage NOT_RUN、owner waiver／license 與 reference-scale performance 未完成等界線不變。本次 evidence／docs 更新未另行執行 backend、dispatch CI、commit／push 或 Library write。
+
+### 30.12 驗收契約修訂：DEP-01-R2-host-controller，方案 2（2026-10-28 03:17:21 UTC）
+
+使用者在已明示「offline 安裝／核對仍隔離、各 backend 仍唯讀／無網路，只有 trusted controller 改在 host 執行、不再保證其全程斷網」後，於 **2026-10-28 03:17:21 UTC** 明確指示：**「改採先前方案 2 然後調整規則」**。此授權將**未來 DEP-01 驗收**修訂為 **`DEP-01-R2-host-controller`**（[ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)），取代 30.10 的方案 1 決策；不改寫 30.9–30.11 或既有 artifact，不批准 release／owner waiver／license signoff，也不變更 commit/push、其他 confirmation 或 scheduler 授權規則。
+
+**修訂後驗收狀態：NOT_RUN，待新 exact-source CI。原 DEP-01 的 historical FAIL／BLOCKED 維持不變。** §20.2 DEP-01 的 pinned offline artifacts、無臨時下載、versions/hashes 對齊及真實三後端 probe 目標保留；只縮減該測試 controller 的外層隔離保證，不放寬一般 runtime／source／secret 安全規則。
+
+| 階段 | 新契約必須保留 | 不再宣告／未獲授權事項 |
+|---|---|---|
+| Cleanroom offline install／verify | 空目錄、pinned local artifacts、`--offline` 安裝及 `--verify-only` 仍在 network-disabled isolation 內；缺 cache／hash mismatch／隔離不可用 fail closed。 | 不因 controller 在 host 而允許臨時下載、online dependency resolution 或偷換 backend。 |
+| Trusted orchestration controller | 僅受信任、已 review 的控制腳本在 host 執行，以明確環境排除 inherited secrets，負責檢查、報告並呼叫既有 mandatory backend launcher。 | **controller 無 outer network-isolation 保證**；不是 end-to-end offline／air-gapped。不得藉此下載、上傳 source、執行 arbitrary repository hooks 或在 host 直接解析 HDL。 |
+| 每個 backend／native helper | 原 source／tool/runtime inputs 唯讀；mandatory bwrap 無網路、無 inherited secrets；只有 dedicated state 可寫，保留 process／output bounds 與清理。 | 不准 raw host backend、degraded fallback、自訂 wrapper、任意 mount／環境放寬。 |
+| Host／產品 runtime 政策 | AppArmor、sysctl、capabilities、immutable source/CAS/approval 與一般 runtime no-network 不變；Slurm 授權完全獨立。 | 不是通用 controller 例外、不是關閉 AppArmor 或授予 `sys_admin`，也不是 scheduler network／release 授權。 |
+
+新 integration node 為 `tests/integration/test_dep01_cleanroom.py::test_DEP_01_R2_offline_install_then_host_controlled_isolated_backend_probes`。新 evidence 另存 `.svweave/ci/dep01-r2/`（contract、controller preflight、bootstrap、capability report 與相應 JUnit），帶 exact source/lock/workflow identity；contract 明列 `revision=DEP-01-R2-host-controller`、`original_contract_status=BLOCKED`、`controller_network_isolated=false`、`offline_install_verification_network_isolated=true`、`backend_isolation=mandatory_bwrap`。這些宣告不是 execution PASS，必須由新真實執行證據核對；不得使用舊 cleanroom summary 代替。
+
+維持 required missing/skip/failure gates 及 strict JUnit equality；負測須涵蓋缺 sandbox、raw/degraded launch、secret inheritance、original source 可寫、缺漏／malformed／stale revision evidence。既有 HDL-CI-04/05 為 regression anchor，不替代 R2 integration。舊 `remaining_regressions=true` 屬 R1-only，R2 下須提前拒絕，不能藉舊 deselection 靜默排除新 node 或宣稱其驗收通過。
+
+本次只修訂上述窄範圍契約／project rules；新測試結果仍 **NOT_RUN**。即使日後 R2 PASS，也只證明較窄的新契約，不能補成原 outer-controller 隔離保證或完整 qualification。**Full qualification 仍 BLOCKED／UNQUALIFIED**；simulation／formal／RTL coverage、reference-scale performance 與 owner／license gates 仍分列。原 234 selected PASS、40 boundary PASS、26/26 mutation 及縮小規模 benchmark 均維持各自 run/source 的歷史解讀。
+

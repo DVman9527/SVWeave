@@ -90,6 +90,25 @@ JUnit result, rerun the failed test, waive DEP-01 or make a selected-subset PASS
 PASS. Full qualification remains **BLOCKED / UNQUALIFIED**. Simulation/formal/RTL coverage and
 owner waiver/license signoff remain separate and unestablished.
 
+### Follow-on result: option 1 remaining regressions, 2026-10-28
+
+[Run 40617140613 at `4b6454417ca1f92fae5063116f9458cbfbca443d`](../remaining-regressions-run40617140613/README.md)
+subsequently passed 234 selected regressions with zero failures/errors/skips. Its identity-bound
+ledger accounts for 235 collected as 234 selected + the exact DEP-01 **BLOCKED**, unwaived,
+acceptance-unchanged exclusion. This resolves the preparation/pending-run state above, not the
+DEP-01 denial or the original acceptance requirement. Raw failure evidence in this directory
+remains unchanged; full qualification remains BLOCKED / UNQUALIFIED.
+
+### Later acceptance revision: option 2, 2026-10-28 03:17:21 UTC
+
+The user subsequently instructed **「改採先前方案 2 然後調整規則」**, explicitly authorizing
+[DEP-01-R2-host-controller](../../docs/adr/ADR-016-dep01-trusted-host-controller.md) for future
+acceptance. Offline install/verify and every backend remain isolated; only the trusted host
+controller loses its outer network-isolation guarantee. No AppArmor/sysctl/capability or backend
+fallback change is authorized. **Revised acceptance is NOT_RUN pending new exact-source CI**.
+This changes the later acceptance contract, not this directory's original raw FAIL/BLOCKED,
+audit evidence, option-1 history or hashes; it does not turn either historical run into R2 PASS.
+
 ## Retention
 
 [artifact-manifest.json](artifact-manifest.json) records original member paths, source run/SHA,

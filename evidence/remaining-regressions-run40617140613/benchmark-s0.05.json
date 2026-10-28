@@ -1,0 +1,570 @@
+{
+  "benchmark": "PERF-01",
+  "started_utc": "2026-10-28T02:03:27+00:00",
+  "host": {
+    "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+    "logical_cpus": 4,
+    "ram_total_gib": 15.61,
+    "ram_available_gib_at_start": 14.57,
+    "swap_total_gib": 3.0,
+    "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "kernel": "6.17.0-1022-azure",
+    "python": "3.12.15",
+    "filesystem": {
+      "mount": "/",
+      "device": "/dev/root",
+      "fstype": "ext4"
+    },
+    "page_cache": "warm (not dropped: no privilege)",
+    "loadavg_at_start": [
+      0.9892578125,
+      0.97265625,
+      0.658203125
+    ]
+  },
+  "toolchain_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "source_identity": {
+    "git_head": "4b6454417ca1f92fae5063116f9458cbfbca443d",
+    "src_tree_sha256": "2492cfb9ac867014452871e11bea13bf5f21ee52fb1024b30f91ea60d8979660"
+  },
+  "svweave_version": "0.1.0",
+  "corpus": {
+    "scale": 0.05,
+    "seed": 1,
+    "files": 25,
+    "lines": 4844,
+    "bytes": 110390,
+    "content_sha256": "1e3830fa84e679ee0dddb407687683b8c3da919660b6a658ed75efa9b8dc4bae",
+    "packages": 2,
+    "interfaces": 2,
+    "modules": 20
+  },
+  "corpus_dir": "(local path omitted)",
+  "uvm_in_loc": false,
+  "targets_plan_22_3": {
+    "cold_build_s": 120.0,
+    "worker_peak_gib": 8.0,
+    "hot_query_p95_s": 1.0,
+    "hot_search_p95_s": 2.0
+  },
+  "reference_host_met": false,
+  "tool_startup": {
+    "command": "svweave --help",
+    "median_s": 0.6351099959999829,
+    "max_s": 0.6434904929999448,
+    "raw_s": [
+      0.6351,
+      0.6418,
+      0.6435,
+      0.6016,
+      0.6053
+    ]
+  },
+  "cold_build": {
+    "runs": [
+      {
+        "run": 1,
+        "exit": 0,
+        "total_wall_s": 1.4071209979999821,
+        "tree_rss_peak_kib_sampled": 144692,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 2531,
+          "references": 3599,
+          "instances": 28,
+          "port_bindings": 87,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 0.326,
+          "peak_rss_kib": 67536,
+          "user_cpu_s": 0.26,
+          "sys_cpu_s": 0.016,
+          "rusage_source": "worker",
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0,
+          "isolation": "bwrap",
+          "isolation_warnings": []
+        },
+        "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+        "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839"
+      },
+      {
+        "run": 2,
+        "exit": 0,
+        "total_wall_s": 1.4399591690000761,
+        "tree_rss_peak_kib_sampled": 144508,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 2531,
+          "references": 3599,
+          "instances": 28,
+          "port_bindings": 87,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 0.327,
+          "peak_rss_kib": 67688,
+          "user_cpu_s": 0.254,
+          "sys_cpu_s": 0.026,
+          "rusage_source": "worker",
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0,
+          "isolation": "bwrap",
+          "isolation_warnings": []
+        },
+        "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+        "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839"
+      },
+      {
+        "run": 3,
+        "exit": 0,
+        "total_wall_s": 1.3864514269999972,
+        "tree_rss_peak_kib_sampled": 145316,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 2531,
+          "references": 3599,
+          "instances": 28,
+          "port_bindings": 87,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 0.326,
+          "peak_rss_kib": 67540,
+          "user_cpu_s": 0.244,
+          "sys_cpu_s": 0.032,
+          "rusage_source": "worker",
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0,
+          "isolation": "bwrap",
+          "isolation_warnings": []
+        },
+        "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+        "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839"
+      },
+      {
+        "run": 4,
+        "exit": 0,
+        "total_wall_s": 1.3579187799999772,
+        "tree_rss_peak_kib_sampled": 144372,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 2531,
+          "references": 3599,
+          "instances": 28,
+          "port_bindings": 87,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 0.316,
+          "peak_rss_kib": 67580,
+          "user_cpu_s": 0.242,
+          "sys_cpu_s": 0.03,
+          "rusage_source": "worker",
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0,
+          "isolation": "bwrap",
+          "isolation_warnings": []
+        },
+        "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+        "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839"
+      },
+      {
+        "run": 5,
+        "exit": 0,
+        "total_wall_s": 1.3976369179999892,
+        "tree_rss_peak_kib_sampled": 146512,
+        "outcome": "OK",
+        "completeness": "COMPLETE",
+        "reused": false,
+        "counts": {
+          "declarations": 2531,
+          "references": 3599,
+          "instances": 28,
+          "port_bindings": 87,
+          "assertions": 0,
+          "diagnostics": 0,
+          "errors": 0,
+          "warnings": 0,
+          "specializations": 0,
+          "unresolved": 0,
+          "dynamic_unresolved": 0
+        },
+        "worker": {
+          "wall_s": 0.326,
+          "peak_rss_kib": 67776,
+          "user_cpu_s": 0.251,
+          "sys_cpu_s": 0.029,
+          "rusage_source": "worker",
+          "memory_limit_mib": 8192,
+          "timeout_s": 600.0,
+          "isolation": "bwrap",
+          "isolation_warnings": []
+        },
+        "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+        "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839"
+      }
+    ],
+    "ok_runs": 5,
+    "total_wall_s": {
+      "median": 1.3976369179999892,
+      "max": 1.4399591690000761,
+      "min": 1.3579187799999772
+    },
+    "worker_wall_s": {
+      "median": 0.326,
+      "max": 0.327
+    },
+    "worker_peak_rss_kib": {
+      "median": 67580,
+      "max": 67776
+    },
+    "process_tree_rss_peak_kib_sampled": {
+      "median": 144692,
+      "max": 146512
+    },
+    "definition": "total_wall_s = whole `svweave build` process (tool startup included, separately measured below); worker_wall_s = slang worker only",
+    "fresh_state_each_run": true
+  },
+  "hot_queries": {
+    "build_id": "624a9a7ddc486e8f98115d12af7803995d870ef0334d127a4d1925084d3e40fa",
+    "limit": 100,
+    "symbol": {
+      "n": 30,
+      "p50_s": 0.004146693999985018,
+      "p95_s": 0.00422587389998057,
+      "max_s": 0.00425494000000981,
+      "min_s": 0.004122743000039009,
+      "raw_s": [
+        0.004255,
+        0.004228,
+        0.004188,
+        0.00418,
+        0.004197,
+        0.004223,
+        0.004159,
+        0.004141,
+        0.004129,
+        0.004124,
+        0.004129,
+        0.00413,
+        0.004131,
+        0.004153,
+        0.004177,
+        0.004133,
+        0.00414,
+        0.004147,
+        0.004148,
+        0.00416,
+        0.004194,
+        0.004149,
+        0.004162,
+        0.00414,
+        0.00413,
+        0.004123,
+        0.00413,
+        0.004146,
+        0.004125,
+        0.004127
+      ],
+      "query_set": {
+        "names": [
+          "pkg_000::agent_a",
+          "pkg_000::agent_b",
+          "pkg_000::base_agent",
+          "pkg_001::agent_a",
+          "pkg_001::agent_b",
+          "pkg_001::base_agent",
+          "ifc_000.mix_0",
+          "ifc_000.mix_1",
+          "ifc_000.mix_10",
+          "ifc_000.mix_11",
+          "ifc_000.mix_12",
+          "ifc_000.mix_13",
+          "ifc_000.mix_14",
+          "ifc_000.mix_15",
+          "ifc_000.mix_16",
+          "ifc_000.mix_17",
+          "ifc_000.mix_18",
+          "ifc_000.mix_19"
+        ]
+      },
+      "limit": 100
+    },
+    "hierarchy": {
+      "n": 30,
+      "p50_s": 0.004022904999999355,
+      "p95_s": 0.004353063599995721,
+      "max_s": 0.004473285000017313,
+      "min_s": 0.003776056999981847,
+      "raw_s": [
+        0.00381,
+        0.004058,
+        0.004297,
+        0.003786,
+        0.00402,
+        0.004265,
+        0.003922,
+        0.004086,
+        0.004387,
+        0.003841,
+        0.004072,
+        0.004312,
+        0.003861,
+        0.004067,
+        0.004286,
+        0.003787,
+        0.004025,
+        0.00426,
+        0.003849,
+        0.004021,
+        0.004283,
+        0.003776,
+        0.004018,
+        0.004248,
+        0.003834,
+        0.003984,
+        0.004473,
+        0.003816,
+        0.004012,
+        0.004254
+      ],
+      "query_set": {
+        "top": "bench_top",
+        "depth": "2..4",
+        "limit": 100
+      },
+      "limit": 100
+    },
+    "references": {
+      "n": 30,
+      "p50_s": 0.006818153499978052,
+      "p95_s": 0.007480520050029327,
+      "max_s": 0.007496894000041721,
+      "min_s": 0.006765955999981088,
+      "raw_s": [
+        0.007413,
+        0.007405,
+        0.006828,
+        0.006805,
+        0.006766,
+        0.006803,
+        0.00679,
+        0.006768,
+        0.007434,
+        0.007465,
+        0.00704,
+        0.006876,
+        0.006788,
+        0.006874,
+        0.006809,
+        0.006806,
+        0.007493,
+        0.007497,
+        0.006803,
+        0.006787,
+        0.006784,
+        0.006909,
+        0.006808,
+        0.00678,
+        0.007437,
+        0.007424,
+        0.006794,
+        0.006924,
+        0.006867,
+        0.006804
+      ],
+      "query_set": {
+        "symbols_by_reference_count_desc": [
+          99,
+          99,
+          43,
+          43,
+          43,
+          43,
+          43,
+          43
+        ],
+        "limit": 100
+      },
+      "limit": 100
+    },
+    "definition": "in-process application services (what the MCP server calls), SQLite warm, 3 warm-up calls not counted"
+  },
+  "hot_search": {
+    "snapshot_id": "26caaf1038710ce21a8a3478bdeef7808ec79e3b12d72973ddf39ec225454839",
+    "text": {
+      "n": 30,
+      "p50_s": 0.0018512340000143013,
+      "p95_s": 0.0019841456000108336,
+      "max_s": 0.002007998000067346,
+      "min_s": 0.0017789669999501712,
+      "raw_s": [
+        0.001812,
+        0.001836,
+        0.00198,
+        0.001887,
+        0.001936,
+        0.001912,
+        0.001855,
+        0.001817,
+        0.001803,
+        0.001807,
+        0.00183,
+        0.001859,
+        0.002008,
+        0.001904,
+        0.001921,
+        0.001906,
+        0.001847,
+        0.001815,
+        0.001809,
+        0.001788,
+        0.001823,
+        0.001858,
+        0.001988,
+        0.001902,
+        0.001917,
+        0.001884,
+        0.001847,
+        0.001815,
+        0.001799,
+        0.001779
+      ],
+      "query_type": "literal text (text_fallback)",
+      "graph_state": "not used",
+      "backend_used": "text_fallback",
+      "queries": [
+        "mod_0007",
+        "agent_a",
+        "fn_3",
+        "pkg_001",
+        "stage",
+        "g_stage",
+        "base_agent",
+        "bench_top",
+        "ifc_002",
+        "w_ge_nothing_matches_this"
+      ],
+      "limit": 100
+    },
+    "graph": {
+      "status": "SKIPPED",
+      "reason": "--no-graph given"
+    }
+  },
+  "disk_usage": {
+    "bytes": {
+      "backends": 0,
+      "bundles": 0,
+      "candidates": 0,
+      "journal": 0,
+      "manifests": 19489,
+      "recovery": 0,
+      "runs": 64147,
+      "snapshots": 125909,
+      "semantic_db(svweave.db*)": 7421952,
+      "logs(events.jsonl,*.log; subset of runs)": 1220,
+      "other": 0
+    },
+    "total_state_bytes": 7631497,
+    "source_corpus_bytes": 112193,
+    "note": "candidates/journal are empty here (no edit); graph state lives in backends/"
+  },
+  "compare_plan_22_3": {
+    "rows": [
+      {
+        "target": "cold semantic build (median of runs)",
+        "budget": "<= 120.0 s",
+        "measured": 1.3976,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "cold semantic build (max of runs)",
+        "budget": "<= 120.0 s",
+        "measured": 1.44,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "HDL worker peak RSS (max)",
+        "budget": "<= 8.0 GiB",
+        "measured": 0.0646,
+        "unit": "GiB",
+        "status": "PASS"
+      },
+      {
+        "target": "hot symbol query p95",
+        "budget": "<= 1.0 s",
+        "measured": 0.0042,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot hierarchy query p95",
+        "budget": "<= 1.0 s",
+        "measured": 0.0044,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot references query p95",
+        "budget": "<= 1.0 s",
+        "measured": 0.0075,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot repository search p95 (text fallback)",
+        "budget": "<= 2.0 s",
+        "measured": 0.002,
+        "unit": "s",
+        "status": "PASS"
+      },
+      {
+        "target": "hot repository search p95 (graph)",
+        "status": "SKIPPED",
+        "reason": "--no-graph given"
+      }
+    ],
+    "all_measured_targets_pass": true,
+    "reference_corpus": false,
+    "caveat": "NOT the plan 22.3 reference corpus (reduced scale): these PASS/FAIL values say nothing about the 100,000-line / 500-file target."
+  },
+  "leaked_backend_processes_after_run": [],
+  "finished_utc": "2026-10-28T02:03:38+00:00"
+}

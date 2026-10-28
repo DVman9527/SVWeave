@@ -322,10 +322,21 @@ supplement JUnit reports 195 parent tests plus 75 pytest subtest outcomes (270 a
 not 270 named testcases. Subsequent
 [run 40490935466](../evidence/dep01-nested-denial-run40490935466/README.md) at `4a7a360`
 passed 40 isolation checks (36 pure + 4 native), but DEP-01 failed on an audited nested-sandbox
-denial. The latest broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`; a full updated
-rerun has not passed. On **2026-10-28 the user selected option 1**: preserve the original
+denial. The historical broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`.
+Earlier on **2026-10-28 the user selected option 1**: preserve the original
 controller-plus-backend isolation guarantee, retain DEP-01 as **BLOCKED**, and continue other
-regressions with an explicit blocked ledger. No narrower controller contract or topology
-relaxation was selected; new scoped-run evidence is pending. None of these runs expands
-HDL/reference coverage or completes full qualification.
+regressions with an explicit blocked ledger. Under that decision, no narrower controller
+contract was selected. [Run 40617140613](../evidence/remaining-regressions-run40617140613/README.md)
+at `4b6454417ca1f92fae5063116f9458cbfbca443d` now passes **234 selected regressions**, zero
+failures/errors/skips; its ledger accounts for 235 collected as 234 selected + 1 DEP-01 BLOCKED,
+unwaived. Separate boundary checks pass 40 cases (four overlap the selected suite), and fresh
+mutations kill 26/26. The benchmark is only 0.05-scale smoke, with graph search SKIPPED and
+reference host/corpus unmet. Native Verilator was not rerun. These results do not expand
+HDL/reference coverage or complete full qualification.
+
+At **2026-10-28 03:17:21 UTC**, the user explicitly changed future acceptance to
+[DEP-01-R2-host-controller](adr/ADR-016-dep01-trusted-host-controller.md): offline install/verify
+and every backend remain isolated, but the trusted host controller has no outer network-isolation
+guarantee. No backend/policy relaxation follows. Revised acceptance is **NOT_RUN** pending new
+CI; the original DEP-01 FAIL/BLOCKED and the option-1 run are not converted to R2 success.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).

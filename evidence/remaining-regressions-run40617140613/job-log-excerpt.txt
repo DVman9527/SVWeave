@@ -1,0 +1,91 @@
+2026-10-28T01:48:57.0109119Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +4b6454417ca1f92fae5063116f9458cbfbca443d:refs/remotes/origin/main
+2026-10-28T01:48:59.4071231Z  * [new ref]         4b6454417ca1f92fae5063116f9458cbfbca443d -> origin/main
+2026-10-28T01:48:59.7534443Z 4b6454417ca1f92fae5063116f9458cbfbca443d
+2026-10-28T01:56:11.1179836Z ##[group]Run .venv/bin/python scripts/mutation_suite.py
+2026-10-28T01:56:11.1180084Z [36;1m.venv/bin/python scripts/mutation_suite.py[0m
+2026-10-28T01:56:11.1229927Z shell: /usr/bin/bash -e {0}
+2026-10-28T01:56:11.1230056Z env:
+2026-10-28T01:56:11.1230180Z   SVWEAVE_REQUIRE_BACKENDS: 1
+2026-10-28T01:56:11.1230354Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T01:56:11.1230576Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T01:56:11.1230949Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T01:56:11.1231145Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T01:56:11.1231343Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T01:56:11.1231538Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T01:56:11.1231706Z ##[endgroup]
+2026-10-28T02:03:27.5122361Z [mut] svweave imported (python -I) from: /home/runner/work/SVWeave/SVWeave/.svweave/mutation/repo/src/svweave/__init__.py
+2026-10-28T02:03:27.5122996Z [mut] baseline for M01: rc=0 ['...........                                                              [100%]']
+2026-10-28T02:03:27.5123472Z [mut] M01 KILLED: remove the header hash from the snapshot inventory (headers hash to a constant)
+2026-10-28T02:03:27.5124285Z [mut] baseline for M02: rc=0 ['....                                                                     [100%]']
+2026-10-28T02:03:27.5124750Z [mut] M02 KILLED: ignore include-directory order (slang -I dirs are sorted alphabetically)
+2026-10-28T02:03:27.5125204Z [mut] baseline for M03: rc=0 ['................                                                         [100%]']
+2026-10-28T02:03:27.5125631Z [mut] M03 KILLED: merge methods by bare name (function/task qualified_name = bare name)
+2026-10-28T02:03:27.5126076Z [mut] baseline for M04: rc=0 ['....................                                                     [100%]']
+2026-10-28T02:03:27.5126530Z [mut] M04 KILLED: PARTIAL becomes COMPLETE (ingest completeness verdict always COMPLETE)
+2026-10-28T02:03:27.5126980Z [mut] baseline for M05: rc=0 ['...................................................................      [100%]']
+2026-10-28T02:03:27.5127453Z [mut] M05 KILLED: cancel the expected-hash compare-and-set (exact range and commit precondition)
+2026-10-28T02:03:27.5127917Z [mut] baseline for M06: rc=0 ['..............................................................           [100%]']
+2026-10-28T02:03:27.5128294Z [mut] M06 KILLED: accept a fake approval (HMAC signature check disabled)
+2026-10-28T02:03:27.5128657Z [mut] baseline for M07: rc=0 ['.............                                                            [100%]']
+2026-10-28T02:03:27.5129191Z [mut] M07 KILLED: snapshot/candidate separation lost (candidate files are hardlinks of the snapshot, so a candidate write mutates the snapshot)
+2026-10-28T02:03:27.5129736Z [mut] baseline for M11: rc=0 ['..........................                                               [100%]']
+2026-10-28T02:03:27.5130205Z [mut] M11 KILLED: sandbox write-surface check removed (a backend may get a writable bind of the protected original)
+2026-10-28T02:03:27.5130673Z [mut] baseline for M08: rc=0 ['....................................                                     [100%]']
+2026-10-28T02:03:27.5131290Z [mut] M08 KILLED: blind rollback after a crash (conflicting files are classified as applied, recovery CAS removed)
+2026-10-28T02:03:27.5131747Z [mut] baseline for M09: rc=0 ['.............................                                            [100%]']
+2026-10-28T02:03:27.5132184Z [mut] M09 KILLED: ignore unsupported options (unknown flag is logged and dropped, build not blocked)
+2026-10-28T02:03:27.5132621Z [mut] baseline for M10: rc=0 ['......................................................................   [100%]']
+2026-10-28T02:03:27.5133036Z [mut] M10 KILLED: treat a static build as simulation PASS (absent evidence reported as PASS)
+2026-10-28T02:03:27.5133666Z [mut] baseline for M12: rc=0 ['........                                                                 [100%]']
+2026-10-28T02:03:27.5134078Z [mut] M12 KILLED: roll-forward skips recovery gates (policy / approval / candidate rechecks)
+2026-10-28T02:03:27.5134490Z [mut] baseline for M13: rc=0 ['....................................                                     [100%]']
+2026-10-28T02:03:27.5134891Z [mut] M13 KILLED: commit and roll-forward skip the current edit-policy recheck (A4)
+2026-10-28T02:03:27.5135271Z [mut] baseline for M14: rc=0 ['..                                                                       [100%]']
+2026-10-28T02:03:27.5135685Z [mut] M14 KILLED: slang_symbol resolution ignores the build/snapshot identity and COMPLETE check
+2026-10-28T02:03:27.5136096Z [mut] baseline for M15: rc=0 ['..                                                                       [100%]']
+2026-10-28T02:03:27.5136509Z [mut] M15 KILLED: slang_symbol picks the first of several matching names (ambiguity refusal removed)
+2026-10-28T02:03:27.5136935Z [mut] baseline for M16: rc=0 ['..............                                                           [100%]']
+2026-10-28T02:03:27.5137362Z [mut] M16 KILLED: slang_symbol replacement shape check removed (class / comment / qualifier escapes)
+2026-10-28T02:03:27.5137793Z [mut] baseline for M17: rc=0 ['..                                                                       [100%]']
+2026-10-28T02:03:27.5138340Z [mut] M17 KILLED: slang_symbol scope-escape check after the candidate build removed
+2026-10-28T02:03:27.5138760Z [mut] baseline for M18: rc=0 ['..                                                                       [100%]']
+2026-10-28T02:03:27.5139210Z [mut] M18 KILLED: slang_symbol base-span shape check removed (extern / prototype / odd span)
+2026-10-28T02:03:27.5139655Z [mut] baseline for M19: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5140077Z [mut] M19 KILLED: slang_symbol accepts a symbol_id that is not a task or function
+2026-10-28T02:03:27.5140497Z [mut] baseline for M20: rc=0 ['...............                                                          [100%]']
+2026-10-28T02:03:27.5141105Z [mut] M20 KILLED: slang_symbol replacement may contain preprocessor directives / pasting / any macro
+2026-10-28T02:03:27.5141571Z [mut] baseline for M21: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5142031Z [mut] M21 KILLED: slang_symbol candidate target span is not required to equal the replacement
+2026-10-28T02:03:27.5142485Z [mut] baseline for M22: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5142976Z [mut] M22 KILLED: slang_symbol macro-body walk ignores state-changing directives (include / undef / define)
+2026-10-28T02:03:27.5143429Z [mut] baseline for M23: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5143764Z [mut] M23 KILLED: remove the P0 remote editing provider guard
+2026-10-28T02:03:27.5144108Z [mut] baseline for M24: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5144475Z [mut] M24 KILLED: ignore exact scheduler ownership on cancellation
+2026-10-28T02:03:27.5144853Z [mut] baseline for M25: rc=0 ['.                                                                        [100%]']
+2026-10-28T02:03:27.5145223Z [mut] M25 KILLED: drop unknown remote cleanup snapshot pins
+2026-10-28T02:03:27.5145588Z [mut] baseline for M26: rc=0 ['......                                                                   [100%]']
+2026-10-28T02:03:27.5145989Z [mut] M26 KILLED: ignore unresolved remote workspace submission barrier
+2026-10-28T02:03:27.5146472Z [mut] killed 26/26; survived=[] errors=[]; wrote /home/runner/work/SVWeave/SVWeave/evidence/mutation/2026-10-28.json
+2026-10-28T02:03:27.5230645Z ##[group]Run .venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30
+2026-10-28T02:03:27.5231201Z [36;1m.venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30[0m
+2026-10-28T02:03:27.5282209Z shell: /usr/bin/bash -e {0}
+2026-10-28T02:03:27.5282339Z env:
+2026-10-28T02:03:27.5282449Z   SVWEAVE_REQUIRE_BACKENDS: 1
+2026-10-28T02:03:27.5282617Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T02:03:27.5282858Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-28T02:03:27.5283084Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T02:03:27.5283285Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T02:03:27.5283484Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-28T02:03:27.5283685Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-28T02:03:27.5283858Z ##[endgroup]
+2026-10-28T02:03:27.6856243Z [bench] corpus 25 files / 4844 lines (scale 0.05)
+2026-10-28T02:03:30.8133632Z [bench] cold builds ...
+2026-10-28T02:03:37.8198924Z [bench] hot queries ...
+2026-10-28T02:03:38.7617831Z [bench] search ...
+2026-10-28T02:03:38.8523531Z [bench] wrote /home/runner/work/SVWeave/SVWeave/.svweave/bench/20261028T020327Z-s0.05.json
+2026-10-28T02:03:39.5904674Z SHA256 digest of uploaded artifact zip is 3adc2a7f2758435447b8fcb17c81807231ef1b89ce5186cfe59275ef69e096cc
+2026-10-28T02:03:39.5905240Z Finalizing artifact upload
+2026-10-28T02:03:40.0100969Z Artifact svweave-evidence.zip successfully finalized. Artifact ID 12785928465
+2026-10-28T02:03:40.0101538Z Artifact svweave-evidence has been successfully uploaded! Final size is 52549 bytes. Artifact ID is 12785928465
+2026-10-28T02:03:40.0105633Z Artifact download URL: https://github.com/DVman9527/SVWeave/actions/runs/40617140613/artifacts/12785928465

@@ -904,7 +904,7 @@ root_mappings:
 | MCP Python SDK | 2.3.0 |
 | Accellera UVM（`uvm-core`） | 2020.3.1 |
 
-**引导安装。** 联网，一次性：`scripts/bootstrap_locked.py` 下载每个制品，在使用前校验其 SHA-256，解压时带路径穿越防护，并依据锁定的 `uv.lock` 构建 Serena venv。`--verify-only` 在不联网的情况下将已安装状态与锁定文件比较。对于离线机器，用 `scripts/bootstrap_locked.py --fetch-only` 准备缓存，复制仓库和 `.toolchain/`，然后运行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最后以 `--verify-only` 收尾。洁净室离线运行由 `tests/integration/test_dep01_cleanroom.py` 测试（在构建主机上进行网络隔离，而不是在单独的物理隔离机器上）。`scripts/gateway_lock_refresh.py` 是一个维护者工具，用于重新生成锁定文件中的网关 wheelhouse 部分。流程：`docs/install.md`。
+**引导安装。** 联网，一次性：`scripts/bootstrap_locked.py` 下载每个制品，在使用前校验其 SHA-256，解压时带路径穿越防护，并依据锁定的 `uv.lock` 构建 Serena venv。`--verify-only` 在不联网的情况下将已安装状态与锁定文件比较。对于离线机器，用 `scripts/bootstrap_locked.py --fetch-only` 准备缓存，复制仓库和 `.toolchain/`，然后运行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最后以 `--verify-only` 收尾。修订后的 cleanroom 契约 `DEP-01-R2-host-controller` 保留 offline install/verify 的网络隔离和各 backend 的单独隔离，但 trusted controller 在 host 上执行，**不保证 controller 的外层网络隔离**；新 native 验收仍为 **NOT_RUN**，不是 end-to-end offline 或物理 air-gap 声明。见 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是一个维护者工具，用于重新生成锁定文件中的网关 wheelhouse 部分。流程：`docs/install.md`。
 
 **沙箱。** 每个后端（包括 pyslang worker）都通过一个 `bwrap` 参数数组启动：系统和工具链只读，只对其候选副本（如适用）和自身状态目录可读写，`--unshare-net`，独立的 PID 命名空间（随网关一同终止），并且没有真实的 `$HOME`。原始源码不以可写方式挂载，或根本不挂载。`bwrap` 不施加 CPU、内存或 pid 数限制，也没有 seccomp 过滤器；只有 HDL worker 有内存限制（`RLIMIT_AS`）。如果非特权用户命名空间不可用，后端会失败关闭，或仅在显式标记的降级模式下运行（ADR-011）。
 

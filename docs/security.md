@@ -210,6 +210,22 @@ cleanup on timeout/output overflow. Pure boundary regressions live in
 validation, not a release decision or a substitute for `scripts/qualify.py`, owner waivers,
 license sign-off, or EDA qualification.
 
+### DEP-01-R2: explicit host-controller exception, not a backend exception
+
+The user authorized **`DEP-01-R2-host-controller`** on **2026-10-28 03:17:21 UTC**; see
+[ADR-016](adr/ADR-016-dep01-trusted-host-controller.md). Only DEP-01's reviewed orchestration
+controller moves to the host without an outer network namespace. Its network isolation is
+**not guaranteed**; do not describe the revised test as end-to-end offline or air-gapped.
+This is not permission for controller downloads/source uploads, repository hooks or host HDL
+analysis. The controller uses an explicit environment without inherited secrets.
+
+Offline installation and verification still run under network-disabled isolation. Every
+backend/helper still uses mandatory read-only/no-network/no-inherited-secret bwrap with
+dedicated state and existing cleanup/bounds. No AppArmor/sysctl/capability change, degraded
+fallback, product-runtime or Slurm policy exception is authorized. Revised acceptance is
+**NOT_RUN pending new CI**; the original DEP-01 denial/FAIL/BLOCKED and the option-1 scoped
+results remain historical evidence, not a pass of this narrower contract.
+
 ## 8. Reporting issues
 
 Report security problems privately to the repository owner (contact: TBD by owner). Include the

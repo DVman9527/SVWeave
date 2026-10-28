@@ -106,7 +106,7 @@ GATE_MODULES: dict[str, list[str]] = {
            "test_edit_crash", "test_edt_flow", "test_int_hardening", "test_adapters_hardening",
            "test_adapters_redaction", "test_sandbox", "test_int_sandbox"],
     "G0": ["test_int_sandbox", "test_sandbox", "test_ci_sandbox_gate", "test_ci_bwrap_apparmor",
-           "test_ci_qualification", "test_ci_required_backends", "test_ci_probe_isolation",
+           "test_ci_qualification", "test_ci_required_backends", "test_ci_probe_isolation", "test_ci_cleanroom_contract",
            "test_int_probe_isolation", "test_native_test_containment"],
 }
 

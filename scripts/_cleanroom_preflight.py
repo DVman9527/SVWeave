@@ -1,7 +1,7 @@
-"""DEP-01 diagnostics for mandatory backend isolation inside the offline setup namespace.
+"""DEP-01 diagnostics for mandatory backend isolation in the supplied controller context.
 
 This controller does not alter a policy, retry a denied native backend, or allow degraded mode.
-The caller supplies the existing network-disabled transport; only the standard host-capability
+The caller explicitly supplies the transport; only the standard host-capability
 probe runs in the child, before any source-analyzing backend is started.
 """
 from __future__ import annotations
@@ -48,7 +48,7 @@ raise SystemExit(0 if capability.available else 1)
 """
 
 
-def collect_nested_preflight(
+def collect_sandbox_preflight(
     python: Path,
     room: Path,
     run_netless: Callable[[list[str], Path, float], CompletedProcess[str]],
@@ -71,3 +71,7 @@ def collect_nested_preflight(
     capability = report.get("observation", {}).get("capability", {})
     report["ready"] = result.returncode == 0 and isinstance(capability, dict) and capability.get("available") is True
     return report
+
+
+# Historical R1 callers/tests retain their explicit network-disabled transport.
+collect_nested_preflight = collect_sandbox_preflight

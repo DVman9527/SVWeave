@@ -155,13 +155,26 @@ passing subtests. [Run 40490935466](../evidence/dep01-nested-denial-run404909354
 at `4a7a360` passed 40 isolation checks (36 pure + 4 native), but its DEP-01 diagnostic failed
 on a time-correlated AppArmor denial of nested `bwrap` capability 21 / `sys_admin`.
 That diagnostic-only run did not execute the full backend probe, broad suites, mutation or
-benchmark. The latest broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`; later
-reviewed fixes and 195 local pure PASS are not a passing full updated rerun. On **2026-10-28
+benchmark. The historical broad run remains 235 cases / 229 PASS / 6 FAIL at `2d26630`; later
+reviewed fixes and 195 local pure PASS do not rewrite that result. Earlier on **2026-10-28
 the user selected option 1**: preserve the original controller-plus-backend isolation guarantee,
 keep DEP-01 **BLOCKED**, and continue the other regressions with an explicit blocked ledger.
-No narrower controller contract or policy/topology relaxation was selected. The separately
-scoped run is being prepared; no new execution result is claimed here. These newer results
-are not verified by the older Verilator run and do not change its bounded import/query claim.
+No narrower controller contract was selected for that run.
+[Run 40617140613](../evidence/remaining-regressions-run40617140613/README.md) at exact source
+`4b6454417ca1f92fae5063116f9458cbfbca443d` now passes **234 selected regressions**, with zero
+failures/errors/skips and an identity-bound ledger retaining the sole DEP-01 exclusion as
+**BLOCKED, unwaived, acceptance unchanged**. Separate boundary checks pass 40 cases (four also
+appear in the selected suite), fresh mutations kill 26/26, and the 0.05-scale benchmark passes
+only measured smoke targets; graph search is SKIPPED and reference host/corpus unmet.
+**Native Verilator was not rerun.** These new scoped results neither reuse the older Verilator
+run as current evidence nor change its bounded import/query claim or full qualification status.
+
+The later **2026-10-28 03:17:21 UTC** instruction explicitly selects
+[DEP-01-R2-host-controller](adr/ADR-016-dep01-trusted-host-controller.md) for future acceptance:
+offline install/verify and each backend remain isolated; the trusted controller runs on the
+host with no outer network-isolation guarantee. Revised DEP-01 is **NOT_RUN pending new CI**,
+not a rerun of Verilator or a rewrite of the original FAIL/BLOCKED. No AppArmor/sysctl/capability
+change or backend fallback is approved by this narrower controller contract.
 
 This native PASS does not prove all original source spans, reconstruct erased references,
 populate slang's authoritative index, extend UVM generic-body traversal, or change edit

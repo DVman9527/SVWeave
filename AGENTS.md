@@ -26,6 +26,14 @@ plan section 28 and tells you where things are. Status: developer preview, UNQUA
    the original. Do not weaken CAS, approval, journal or recovery. Unknown safety state fails closed.
 9. Do not execute repository shell hooks, push, merge, or touch secrets. No network at run time
    (only `scripts/bootstrap_locked.py` downloads).
+   The explicitly authorized **DEP-01-R2-host-controller** acceptance revision is limited to
+   that test's trusted host controller: it has no outer network-isolation guarantee, while
+   offline installation/verification remain network-isolated and every backend still requires
+   read-only source/tool inputs, no network and no inherited secrets in mandatory bwrap.
+   This permits neither controller downloads/source uploads nor a product-runtime, Slurm,
+   AppArmor, sysctl, capability or degraded-backend exception. See
+   `docs/adr/ADR-016-dep01-trusted-host-controller.md` and plan 30.12; revised acceptance is
+   NOT_RUN until new exact-source evidence, and historical DEP-01 FAIL/BLOCKED stays unchanged.
 10. Golden files (`fixtures/expected/`) are hand-reviewed. Update one only with a written semantic
     reason; never to make CI green.
 11. Keep the statuses apart: static analysis, EDA compile, simulation, formal, coverage. SKIP,
