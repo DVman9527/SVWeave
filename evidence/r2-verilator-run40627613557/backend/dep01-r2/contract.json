@@ -1,0 +1,24 @@
+{
+  "revision": "DEP-01-R2-host-controller",
+  "status": "PASS",
+  "original_contract_status": "BLOCKED",
+  "original_contract_reclassified": false,
+  "controller_network_isolated": false,
+  "offline_install_verification_network_isolated": true,
+  "backend_isolation": "mandatory_bwrap",
+  "release_qualified": false,
+  "ci_identity_verified": true,
+  "source_identity": {
+    "git_head": "cc931de898069bed0a51497737d4ad60603e4c51",
+    "src_tree_sha256": "2492cfb9ac867014452871e11bea13bf5f21ee52fb1024b30f91ea60d8979660"
+  },
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "03447a65ae1a8665936799e8baa372d0cf87bde87607ce06ccf63be282ba8b6a",
+  "artifacts": ".svweave/ci/dep01-r2/run-3hmrxg13",
+  "started_at_utc": "2026-10-28T03:38:42.802259+00:00",
+  "source_manifest_sha256": {
+    "before": "71428d2cb84a13fe54531e2417342bd9ed263e46af624410f98c6c86ad28e8bb",
+    "after": "71428d2cb84a13fe54531e2417342bd9ed263e46af624410f98c6c86ad28e8bb"
+  },
+  "finished_at_utc": "2026-10-28T03:39:08.612526+00:00"
+}

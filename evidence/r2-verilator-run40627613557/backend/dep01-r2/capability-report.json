@@ -1,0 +1,2029 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-28T03:38:48.032374+00:00",
+  "generator": "scripts/probe_backends.py",
+  "platform": "linux-x86_64",
+  "qualification_state": "UNQUALIFIED",
+  "mcp_client_sdk": "2.3.0",
+  "isolation": "mandatory_bwrap",
+  "probe_artifacts": "${REPO}/.svweave/probe/run-7koxgfn9",
+  "sandbox_host_capability": {
+    "available": true,
+    "bwrap_path": "/usr/bin/bwrap",
+    "version": "bubblewrap 0.9.0",
+    "reason": null
+  },
+  "backends": {
+    "pyslang": {
+      "backend": "pyslang",
+      "kind": "in-process binding run in a child worker process",
+      "version": "12.0.0",
+      "source_manifest_sha256": {
+        "before": "bd505b9f08a3dc2b3ea40fc13261d97a8563a6d17faa325ddee3d233981c8cf4",
+        "after": "bd505b9f08a3dc2b3ea40fc13261d97a8563a6d17faa325ddee3d233981c8cf4"
+      },
+      "checks": [
+        {
+          "check": "demo LANES=2: 2 demo_lane instances, 0 diagnostics",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": {
+            "count": 2,
+            "diags": 0
+          }
+        },
+        {
+          "check": "demo LANES=4: 4 demo_lane instances with g_lane[i].u_lane paths",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": [
+            "demo_top.g_lane[0].u_lane",
+            "demo_top.g_lane[1].u_lane",
+            "demo_top.g_lane[2].u_lane",
+            "demo_top.g_lane[3].u_lane"
+          ]
+        },
+        {
+          "check": "port actual expression keeps slice data_i[lane]",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "data_i[lane]"
+        },
+        {
+          "check": "bind: one stream_hold_sva per lane",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": [
+            "demo_top.g_lane[0].u_lane.u_stream_hold_sva",
+            "demo_top.g_lane[1].u_lane.u_stream_hold_sva"
+          ]
+        },
+        {
+          "check": "UVM profile: 0 errors, two distinct run_phase scopes",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": [
+            {
+              "q": "svw_demo_uvm_pkg::svw_driver::run_phase",
+              "hier": "svw_demo_uvm_pkg::svw_driver::run_phase",
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "offset": 312
+            },
+            {
+              "q": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+              "hier": "svw_demo_uvm_pkg::svw_monitor::run_phase",
+              "file": "fixtures/uvm/svw_demo_uvm_pkg.sv",
+              "offset": 637
+            }
+          ]
+        },
+        {
+          "check": "original fixture sources unchanged",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": {
+            "before": "bd505b9f08a3dc2b3ea40fc13261d97a8563a6d17faa325ddee3d233981c8cf4",
+            "after": "bd505b9f08a3dc2b3ea40fc13261d97a8563a6d17faa325ddee3d233981c8cf4"
+          }
+        }
+      ],
+      "measurements": {
+        "demo_L2": {
+          "wall_s": 0.116,
+          "peak_rss_kib": 32752
+        },
+        "demo_L4": {
+          "wall_s": 0.117,
+          "peak_rss_kib": 32856
+        },
+        "uvm": {
+          "wall_s": 0.417,
+          "peak_rss_kib": 127168
+        }
+      },
+      "status": "READY",
+      "probe_wall_s": 0.727
+    },
+    "slang_cli": {
+      "backend": "slang_cli",
+      "kind": "reproduction/diagnostic CLI (ADR-003)",
+      "binary": "${REPO}/.toolchain/slang/slang",
+      "binary_sha256": "c6e06db368042fa369a7a84d1082bada97c6ff466f9a14de43b624c25c9944a1",
+      "version": "slang version 12.0.0+545f88b2e",
+      "source_manifest_sha256": {
+        "before": "5ef9cba82e38c25bc08dc11a94751b59ae1869323db9310108cf87516c11038a",
+        "after": "5ef9cba82e38c25bc08dc11a94751b59ae1869323db9310108cf87516c11038a"
+      },
+      "argv": [
+        "${REPO}/.toolchain/slang/slang",
+        "-f",
+        "fixtures/demo/filelists/rtl.f",
+        "-I",
+        "fixtures/demo/include",
+        "-DSVW_DEMO=1",
+        "--single-unit",
+        "--top",
+        "demo_top",
+        "--ast-json",
+        "${REPO}/.svweave/probe/run-7koxgfn9/slang_cli-qfq2s95p/design.ast.json",
+        "--ast-json-source-info",
+        "--all-deps",
+        "${REPO}/.svweave/probe/run-7koxgfn9/slang_cli-qfq2s95p/dependencies.txt"
+      ],
+      "checks": [
+        {
+          "check": "plan §10.6 command: build succeeded with 0 errors",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "Top level design units:\n    demo_top\n\n\nBuild succeeded: 0 errors, 0 warnings\n"
+        },
+        {
+          "check": "--all-deps lists the include header",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": [
+            "fixtures/demo/sva/stream_hold_sva.sv",
+            "fixtures/demo/rtl/demo_top.sv",
+            "fixtures/demo/rtl/demo_lane.sv",
+            "fixtures/demo/include/demo_defs.svh",
+            "fixtures/demo/sva/demo_bind.sv"
+          ]
+        },
+        {
+          "check": "original fixture sources unchanged",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": {
+            "before": "5ef9cba82e38c25bc08dc11a94751b59ae1869323db9310108cf87516c11038a",
+            "after": "5ef9cba82e38c25bc08dc11a94751b59ae1869323db9310108cf87516c11038a"
+          }
+        }
+      ],
+      "status": "READY",
+      "paired_with_pyslang": "slang 12.0.0+545f88b2e / pyslang 12.0.0 (same release tag v12.0)"
+    },
+    "cbm": {
+      "backend": "codebase-memory-mcp",
+      "binary": "${REPO}/.toolchain/cbm/codebase-memory-mcp",
+      "binary_sha256": "ce11c141431aeadd788506c3a7e6942db8fd438dec369d0707a39ec9fd8c6510",
+      "state_config": "Configuration:\n  auto_index                = false     \n  auto_index_limit          = 50000     \n  auto_watch                = false     \n  watcher_enabled           = false     \n  ui-lang                   = auto      \n  ui_enabled                = false     \n  ui_port                   = 9749      \n",
+      "snapshot_manifest_sha256": "ff659021c78104f827ddf9360846afd1a91474f9890775ebd3f2a3e55a68a5f6",
+      "alive": true,
+      "initialize": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "prompts": {
+            "listChanged": false
+          },
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "serverInfo": {
+          "name": "codebase-memory-mcp",
+          "version": "0.11.0"
+        },
+        "instructions": "Graph first: search_graph for symbols, trace_path for relationships, get_code_snippet for source, query_graph for multi-hop, and get_architecture for overview. Use search_code/grep for literals or coverage gaps. Indexes auto-refresh. Check cited-path coverage; paginate."
+      },
+      "protocol_version": "2025-11-25",
+      "server_info": {
+        "name": "codebase-memory-mcp",
+        "version": "0.11.0"
+      },
+      "tools": [
+        {
+          "name": "index_repository",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "repo_path": {
+                "type": "string",
+                "description": "Repository path"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "moderate",
+                  "fast",
+                  "cross-repo-intelligence"
+                ],
+                "default": "full",
+                "description": "full: all+semantic; moderate: filtered+semantic; fast: filtered only; cross-repo-intelligence: link services."
+              },
+              "target_projects": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Cross-repo targets; [\"*\"] means all."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name override; Non-ASCII bytes are encoded; unsafe characters normalized."
+              },
+              "persistence": {
+                "type": "boolean",
+                "default": false,
+                "description": "Write .codebase-memory/graph.db.zst."
+              }
+            },
+            "required": [
+              "repo_path"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "search_graph",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "name_pattern": {
+                "type": "string"
+              },
+              "qn_pattern": {
+                "type": "string"
+              },
+              "file_pattern": {
+                "type": "string"
+              },
+              "relationship": {
+                "type": "string"
+              },
+              "min_degree": {
+                "type": "integer"
+              },
+              "max_degree": {
+                "type": "integer"
+              },
+              "exclude_entry_points": {
+                "type": "boolean"
+              },
+              "include_connected": {
+                "type": "boolean"
+              },
+              "semantic_query": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Not with query."
+              },
+              "semantic_limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 0,
+                "maximum": 500
+              },
+              "semantic_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0,
+                "maximum": 99998
+              },
+              "limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "default": 3200,
+                "minimum": 128,
+                "maximum": 1000000
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "detail": {
+                "type": "string",
+                "enum": [
+                  "ids",
+                  "default"
+                ],
+                "default": "default"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "query_graph",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Cypher query"
+              },
+              "project": {
+                "type": "string"
+              },
+              "graph": {
+                "type": "string",
+                "enum": [
+                  "code",
+                  "missed"
+                ],
+                "default": "code",
+                "description": "code graph (default) or missed coverage-gap file tree."
+              },
+              "max_rows": {
+                "type": "integer",
+                "description": "Visible rows (default 200; max 99998); 0 uses the legacy maximum. Evaluation is unchanged.",
+                "minimum": 0,
+                "default": 200
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "description": "Live compatibility paging; cannot be combined with cursor."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Snapshot continuation; keep query/project/graph. Format, budget, and max_rows may change."
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 128,
+                "maximum": 1000000,
+                "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token. Rows stay whole."
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree",
+                "description": "tree may use local @N+suffix prefix refs; json uses direct strings."
+              }
+            },
+            "required": [
+              "query",
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "trace_path",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "function_name": {
+                "type": "string"
+              },
+              "project": {
+                "type": "string"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "inbound",
+                  "outbound",
+                  "both"
+                ],
+                "default": "both"
+              },
+              "depth": {
+                "type": "integer",
+                "default": 3,
+                "minimum": 1,
+                "maximum": 15
+              },
+              "limit": {
+                "type": "integer",
+                "default": 100,
+                "minimum": 1,
+                "maximum": 5000,
+                "description": "Rows/page; gte flags the 5000-node engine ceiling."
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "default": 3200,
+                "minimum": 128,
+                "maximum": 1000000,
+                "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token. Evidence/args yield before nearest graph rows."
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Pass next/next_cursor with traversal args unchanged; budget may increase."
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "calls",
+                  "data_flow",
+                  "cross_service"
+                ],
+                "default": "calls",
+                "description": "calls, argument-aware data_flow, or service edges."
+              },
+              "parameter_name": {
+                "type": "string",
+                "description": "data_flow parameter filter."
+              },
+              "edge_types": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "risk_labels": {
+                "type": "boolean",
+                "default": false,
+                "description": "Add hop-risk labels."
+              },
+              "include_tests": {
+                "type": "boolean",
+                "default": false
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree",
+                "description": "tree chooses smaller complete direct/grouped output; json uses stable grouped tables."
+              },
+              "include_evidence": {
+                "type": "boolean",
+                "default": false,
+                "description": "Add resolver class and confidence."
+              }
+            },
+            "required": [
+              "function_name",
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "get_code_snippet",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "qualified_name": {
+                "type": "string",
+                "description": "search_graph qn, or short name."
+              },
+              "project": {
+                "type": "string"
+              },
+              "include_neighbors": {
+                "type": "boolean",
+                "default": false
+              },
+              "source_mode": {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "full",
+                  "outline"
+                ],
+                "default": "auto",
+                "description": "auto outlines 200+ line containers; full returns source; outline lists members."
+              },
+              "member_limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "member_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "start_line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "max_lines": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 128,
+                "maximum": 1000000,
+                "description": "auto/outline sizing hint (default 2500), hard ceiling 4 UTF-8 bytes/token. Lines stay whole; explicit full is uncapped unless set."
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "qualified_name",
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "get_file_outline",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "file_path": {
+                "type": "string",
+                "description": "Exact repository-relative file path"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "description": "Optional exact node-label filter"
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200,
+                "default": 100
+              },
+              "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "file_path"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "get_graph_schema",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              },
+              "diagnostics": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full"
+                ],
+                "default": "none"
+              },
+              "limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "compare_graphs",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "base_project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target_project": {
+                "type": "string",
+                "minLength": 1
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000,
+                "default": 200
+              },
+              "scan_limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000000,
+                "default": 2000000
+              }
+            },
+            "required": [
+              "base_project",
+              "target_project"
+            ],
+            "additionalProperties": false
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "get_architecture",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string",
+                "description": "Directory prefix (for example apps/hoa)."
+              },
+              "aspects": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "all",
+                    "overview",
+                    "structure",
+                    "dependencies",
+                    "routes",
+                    "languages",
+                    "packages",
+                    "entry_points",
+                    "hotspots",
+                    "boundaries",
+                    "layers",
+                    "file_tree",
+                    "clusters",
+                    "cycles"
+                  ]
+                },
+                "description": "all=everything; overview=compact except file_tree; omitted=languages/packages/entry_points; cycles is opt-in."
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "search_code",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "pattern": {
+                "type": "string"
+              },
+              "project": {
+                "type": "string"
+              },
+              "file_pattern": {
+                "type": "string"
+              },
+              "path_filter": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "compact",
+                  "full",
+                  "files"
+                ],
+                "default": "compact"
+              },
+              "context": {
+                "type": "integer"
+              },
+              "regex": {
+                "type": "boolean",
+                "default": false
+              },
+              "debug": {
+                "type": "boolean",
+                "default": false,
+                "description": "Add scope_ms/scan_ms/enrich_ms phase timings."
+              },
+              "limit": {
+                "type": "integer",
+                "default": 10,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "result_limit": {
+                "type": "integer",
+                "default": 10,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "result_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "raw_limit": {
+                "type": "integer",
+                "default": 5,
+                "minimum": 0,
+                "maximum": 100
+              },
+              "raw_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "raw_content_offset": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Raw-line byte offset; omit for match-centered preview."
+              },
+              "directory_limit": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 0,
+                "maximum": 64
+              },
+              "directory_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "match_limit": {
+                "type": "integer",
+                "default": 8,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "source_max_lines": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 1,
+                "maximum": 200
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 128,
+                "maximum": 1000000
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "pattern",
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "list_projects",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              },
+              "detail": {
+                "type": "string",
+                "enum": [
+                  "identity",
+                  "stats"
+                ],
+                "default": "identity",
+                "description": "stats adds node/edge/database-size counts."
+              },
+              "include_details": {
+                "type": "boolean",
+                "default": false,
+                "description": "Alias for detail=stats: include branch, node/edge counts and database size. Slower."
+              },
+              "limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "metadata_only": {
+                "type": "boolean",
+                "default": false,
+                "description": "Compatibility: omit counts, size, and branch."
+              }
+            }
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "delete_project",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "index_status",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "verbose": {
+                "type": "boolean",
+                "default": false,
+                "description": "Add worktree/shadow Git paths for index-location debugging."
+              },
+              "diagnostics": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "summary",
+                  "full"
+                ],
+                "default": "none",
+                "description": "Coverage rows: counts, five samples, or up to 500."
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "check_index_coverage",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 128
+              },
+              "path_limit": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 1,
+                "maximum": 128
+              },
+              "path_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "scopes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 32
+              },
+              "scope_limit": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "scope_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "diagnostics": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full"
+                ],
+                "default": "none"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "detect_changes",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string",
+                "enum": [
+                  "files",
+                  "impact"
+                ],
+                "default": "impact"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "inbound",
+                  "outbound",
+                  "both"
+                ],
+                "default": "inbound",
+                "description": "inbound=callers; outbound=dependencies; both=union."
+              },
+              "depth": {
+                "type": "integer",
+                "default": 2
+              },
+              "limit": {
+                "type": "integer",
+                "default": 200,
+                "maximum": 5000
+              },
+              "impact_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "impact_cursor": {
+                "type": "string"
+              },
+              "changed_limit": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 0,
+                "maximum": 5000
+              },
+              "changed_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "changed_cursor": {
+                "type": "string"
+              },
+              "module_limit": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 0,
+                "maximum": 256
+              },
+              "module_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "module_cursor": {
+                "type": "string"
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "default": 3200,
+                "minimum": 128,
+                "maximum": 1000000,
+                "description": "Sizing hint; hard ceiling is 4 UTF-8 bytes/token."
+              },
+              "base_branch": {
+                "type": "string",
+                "default": "main"
+              },
+              "since": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "manage_adr",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "outline",
+                  "get",
+                  "update",
+                  "set_sections",
+                  "sections"
+                ],
+                "default": "outline",
+                "description": "outline pages headings; get reads; update replaces the whole document; set_sections rewrites only the named sections and leaves every other byte untouched (an identical repeated write is byte-identical, so retrying is safe); sections is legacy."
+              },
+              "content": {
+                "type": "string",
+                "description": "Whole document for update"
+              },
+              "section_updates": {
+                "type": "object",
+                "description": "set_sections: section name -> new body. Any heading name works; names match exactly, including case.",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "section_limit": {
+                "type": "integer",
+                "default": 50,
+                "minimum": 1,
+                "maximum": 500
+              },
+              "section_offset": {
+                "type": "integer",
+                "default": 0,
+                "minimum": 0
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "tree",
+                  "json"
+                ],
+                "default": "tree"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
+        },
+        {
+          "name": "ingest_traces",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "traces": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "caller": {
+                      "type": "string"
+                    },
+                    "callee": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "project": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "traces",
+              "project"
+            ]
+          },
+          "outputSchema": null,
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": false,
+            "idempotentHint": false,
+            "openWorldHint": false
+          }
+        }
+      ],
+      "schema_digest": {
+        "tools_list_sha256": "f8e127dc64775bb0977e9acdb3a2e128e0b6d60a2994241aac16dabd32e00eec",
+        "per_tool_schema_sha256": {
+          "index_repository": "6bc4a37dca36ffe00caef563811eb4461241721802255ccf1cc10409b336d63b",
+          "search_graph": "da3b6f9893a747db20db0cbbd38171748ac071df550813805bf90e98dc913199",
+          "query_graph": "73cbbe7c61d878db7d3d95f91914e932005ee6afe96e98004065ad3fcee360a3",
+          "trace_path": "e7a15a39d841b9a5ea84a872ab24de6ef69a6ef1afebbe2e28bd06c1b8d512f7",
+          "get_code_snippet": "c6044821d59c2cf09c4ed98264f332a53986d950b651097465a3306708624c74",
+          "get_file_outline": "3576b302c94097e70567acb579f28828ccde1e69e9f0630466987c6596566ac7",
+          "get_graph_schema": "65256bf0c43d4aa95bdd0586444a75d9a46557294d31bbf831451da71e072696",
+          "compare_graphs": "4f9270f71a894dd03acadee4fafad4416d64ceb8035511d3fb409a873d35effa",
+          "get_architecture": "3bbfc8acb0c94f7e20ab96379f9fdb1dc2c151dab17cb274698d51463d326bbd",
+          "search_code": "226fc27a4744bed00a3d4948721aada6349f5da29651bd52900a2546602e73d6",
+          "list_projects": "c866268d53240f77825f43a4617dc269599a9ba9f1058b9f717b4fc37c72ec9c",
+          "delete_project": "1379040bafe1ff0ad862456c608f3765d908badc3d06738d2cd84e97d3be07ca",
+          "index_status": "0b086d1399e158d1aee61ab1edc3709a85200b283ccec738cc90a8ecc94c06a1",
+          "check_index_coverage": "3c738ccb4c19c5d3de1f637cee78974b4fa95aaa11459de39682d21a513d566c",
+          "detect_changes": "219ddf505ce27ba599706b0e1bd212a55a02e7065305ddabbc5e96e33c5f3939",
+          "manage_adr": "7ca174cbc8144745d6ce866524ee33e60fb1e1a4351a166f11cc918fb440fe57",
+          "ingest_traces": "473760bd684592c9f778e3b8e9a2dd4d1d8c40d7408b499ca00273e653ce2429"
+        }
+      },
+      "backend_process_tree_peak_rss": [
+        {
+          "pid": 3979,
+          "ppid": 3895,
+          "vm_hwm_kib": 2180,
+          "cmd": "/usr/bin/bwrap --die-with-parent --new-session --unshare-user --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --ro-bind /etc/ld.so.cache /etc/ld.so.cache"
+        },
+        {
+          "pid": 3980,
+          "ppid": 3979,
+          "vm_hwm_kib": 1564,
+          "cmd": "/usr/bin/bwrap --die-with-parent --new-session --unshare-user --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --ro-bind /etc/ld.so.cache /etc/ld.so.cache"
+        },
+        {
+          "pid": 3983,
+          "ppid": 3980,
+          "vm_hwm_kib": 23528,
+          "cmd": "${REPO}/.toolchain/cbm/codebase-memory-mcp --cbm-daemon-internal "
+        },
+        {
+          "pid": 3981,
+          "ppid": 3980,
+          "vm_hwm_kib": 19972,
+          "cmd": "${REPO}/.toolchain/cbm/codebase-memory-mcp "
+        }
+      ],
+      "index": {
+        "project": "tmp-dep01-h1j5j38g-cleanroom-.svweave-probe-run-7koxgfn9-cbm_snapshot-fixtures",
+        "status": "ready",
+        "nodes": 55,
+        "edges": 92,
+        "parse_unusable": [
+          "uvm/svw_demo_uvm_pkg.sv"
+        ],
+        "parse_partial": [
+          "demo/sva/demo_bind.sv",
+          "uvm/svw_uvm_cfgdb_pkg.sv",
+          "uvm/svw_uvm_ext_top.sv",
+          "uvm/svw_uvm_override_pkg.sv",
+          "uvm/svw_uvm_static_calls.sv"
+        ]
+      },
+      "checks": [
+        {
+          "check": "required tools present",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": {
+            "missing": []
+          }
+        },
+        {
+          "check": "index_status == ready",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "ready"
+        },
+        {
+          "check": "search_graph finds demo_lane",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": [
+            [
+              "tmp-dep01-h1j5j38g-cleanroom-.svweave-probe-run-7koxgfn9-cbm_snapshot-fixtures.demo.rtl.demo_lane.demo_lane",
+              "Class",
+              "demo/rtl/demo_lane.sv",
+              "2-17",
+              -10.186248736114917
+            ],
+            [
+              "tmp-dep01-h1j5j38g-cleanroom-.svweave-probe-run-7koxgfn9-cbm_snapshot-fixtures.demo.rtl.demo_lane",
+              "Module",
+              "demo/rtl/demo_lane.sv",
+              "1-19",
+              -4.837111051069376
+            ]
+          ]
+        },
+        {
+          "check": "search_graph finds class svw_driver",
+          "pass": false,
+          "required_for_ready": true,
+          "detail": []
+        },
+        {
+          "check": "two run_phase methods extracted",
+          "pass": false,
+          "required_for_ready": true,
+          "detail": [
+            [
+              "run_phase",
+              "Function",
+              "20-20",
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "check": "no fixture file parse_unusable",
+          "pass": false,
+          "required_for_ready": true,
+          "detail": [
+            "uvm/svw_demo_uvm_pkg.sv"
+          ]
+        },
+        {
+          "check": "read-only fixture snapshot unchanged",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": null
+        }
+      ],
+      "gateway_must_not_expose": [
+        "delete_project",
+        "manage_adr",
+        "ingest_traces",
+        "index_repository:cross-repo"
+      ],
+      "snapshot_unchanged_by_probe": true,
+      "status": "DEGRADED",
+      "probe_wall_s": 13.721
+    },
+    "serena": {
+      "backend": "serena",
+      "exe": "${REPO}/.toolchain/serena-venv/bin/serena",
+      "config": {
+        "serena_home": "${REPO}/.svweave/probe/run-7koxgfn9/serena_state/work/home/.serena",
+        "context_file": "${REPO}/.svweave/probe/run-7koxgfn9/serena_state/ctx/svweave_context.yml",
+        "project_yml": "${REPO}/.svweave/probe/run-7koxgfn9/serena_state/work/projects/fixtures/.serena/project.yml"
+      },
+      "verible_filelist": [
+        "demo/include/demo_defs.svh",
+        "demo/rtl/demo_lane.sv",
+        "demo/rtl/demo_top.sv",
+        "demo/sva/demo_bind.sv",
+        "demo/sva/stream_hold_sva.sv",
+        "uvm/svw_demo_uvm_pkg.sv",
+        "uvm/svw_uvm_cfgdb_pkg.sv",
+        "uvm/svw_uvm_ext_top.sv",
+        "uvm/svw_uvm_override_pkg.sv",
+        "uvm/svw_uvm_static_calls.sv",
+        "uvm/svw_uvm_top.sv"
+      ],
+      "verible_ls": "${REPO}/.toolchain/verible/bin/verible-verilog-ls",
+      "verible_ls_sha256": "d401eaa313b52afd04b0bdf8c1f81c3988e4b79caf6a02039967a184ed8eaf4a",
+      "verible_ls_version": "Version\tv0.0-4296-g0f262651\nCommit-Timestamp\t2026-09-23T08:15:19Z\nBuilt\t2026-09-23T08:18:08Z",
+      "serena_version": "1.7.0",
+      "which_verible_in_serena_env": "${REPO}/.toolchain/verible/bin/verible-verilog-ls",
+      "args": [
+        "start-mcp-server",
+        "--project",
+        "${REPO}/.svweave/probe/run-7koxgfn9/serena_candidate/fixtures",
+        "--context",
+        "${REPO}/.svweave/probe/run-7koxgfn9/serena_state/ctx/svweave_context.yml",
+        "--transport",
+        "stdio",
+        "--enable-web-dashboard",
+        "false",
+        "--open-web-dashboard",
+        "false",
+        "--enable-gui-log-window",
+        "false",
+        "--log-level",
+        "INFO",
+        "--tool-timeout",
+        "120"
+      ],
+      "alive": true,
+      "initialize": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {
+          "experimental": {},
+          "prompts": {
+            "listChanged": false
+          },
+          "resources": {
+            "subscribe": false,
+            "listChanged": false
+          },
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "serverInfo": {
+          "name": "Serena",
+          "version": "1.28.1",
+          "websiteUrl": "https://oraios.github.io/serena"
+        },
+        "instructions": "CRITICAL: Before starting to work on a coding task, call the `initial_instructions` tool to read the 'Serena Instructions Manual'."
+      },
+      "protocol_version": "2025-11-25",
+      "server_info": {
+        "name": "Serena",
+        "version": "1.28.1",
+        "websiteUrl": "https://oraios.github.io/serena"
+      },
+      "tools": [
+        {
+          "name": "replace_symbol_body",
+          "inputSchema": {
+            "properties": {
+              "name_path": {
+                "title": "Name Path",
+                "type": "string",
+                "description": "Name path of the symbol whose body to replace."
+              },
+              "relative_path": {
+                "title": "Relative Path",
+                "type": "string",
+                "description": "The relative path to the file containing the symbol."
+              },
+              "body": {
+                "title": "Body",
+                "type": "string",
+                "description": "The new symbol body. The symbol body is the definition of a symbol\nin the programming language, including e.g. the signature line for functions.\nDepending on the language, it may or may not include a preceding docstring or other preceding annotations."
+              }
+            },
+            "required": [
+              "name_path",
+              "relative_path",
+              "body"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Replace Symbol Body",
+            "readOnlyHint": false,
+            "destructiveHint": true
+          }
+        },
+        {
+          "name": "get_symbols_overview",
+          "inputSchema": {
+            "properties": {
+              "relative_path": {
+                "title": "Relative Path",
+                "type": "string",
+                "description": "The relative path to the file to get the overview of."
+              },
+              "depth": {
+                "default": -1,
+                "title": "Depth",
+                "type": "integer",
+                "description": "Depth up to which descendants shall be retrieved.\nDefault (-1) results in a language specific choice: 1 for java and kotlin and 0 for other languages."
+              },
+              "max_answer_chars": {
+                "default": -1,
+                "title": "Max Answer Chars",
+                "type": "integer",
+                "description": "If the overview is longer than this number of characters,\nno content will be returned. -1 means the default value from the config will be used.\nDon't adjust unless there is really no other way to get the content required for the task."
+              }
+            },
+            "required": [
+              "relative_path"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Get Symbols Overview",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          }
+        },
+        {
+          "name": "find_symbol",
+          "inputSchema": {
+            "properties": {
+              "name_path_pattern": {
+                "title": "Name Path Pattern",
+                "type": "string",
+                "description": "The name path matching pattern (see above)."
+              },
+              "depth": {
+                "default": 0,
+                "title": "Depth",
+                "type": "integer",
+                "description": "Depth up to which descendants shall be retrieved (e.g. use 1 to also retrieve immediate children;\nfor the case where the symbol is a class, this will return its methods).\nIgnored if `include_body=True`. Default 0."
+              },
+              "relative_path": {
+                "default": "",
+                "title": "Relative Path",
+                "type": "string",
+                "description": "(optional) restrict search to this file or directory. If None, searches entire codebase.\nIf a directory is passed, the search will be restricted to the files in that directory.\nIf a file is passed, the search will be restricted to that file."
+              },
+              "include_body": {
+                "default": false,
+                "title": "Include Body",
+                "type": "boolean",
+                "description": "Whether to include the symbol's source code. Use judiciously."
+              },
+              "include_info": {
+                "default": false,
+                "title": "Include Info",
+                "type": "boolean",
+                "description": "Whether to include additional info (hover-like, typically including docstring and signature),\nabout the symbol (ignored if include_body is True). Info is never included for child symbols.\nNote: Depending on the language, this can be slow (e.g., C/C++)."
+              },
+              "include_kinds": {
+                "default": [],
+                "items": {
+                  "type": "integer"
+                },
+                "title": "Include Kinds",
+                "type": "array",
+                "description": "(optional) limits results to the given LSP symbol kinds (integers)."
+              },
+              "exclude_kinds": {
+                "default": [],
+                "items": {
+                  "type": "integer"
+                },
+                "title": "Exclude Kinds",
+                "type": "array",
+                "description": "(optional) list of LSP symbol kinds (integers) to exclude."
+              },
+              "substring_matching": {
+                "default": false,
+                "title": "Substring Matching",
+                "type": "boolean",
+                "description": "If True, use substring matching for the last element of the pattern, such that\n\"Foo/get\" would match \"Foo/getValue\" and \"Foo/getData\"."
+              },
+              "max_matches": {
+                "default": -1,
+                "title": "Max Matches",
+                "type": "integer",
+                "description": "Maximum number of permitted matches. If exceeded, a shortened result is returned\nwhich allows refining the search. -1 (default) means no limit. Set to 1 if you search for a single symbol."
+              },
+              "max_answer_chars": {
+                "default": -1,
+                "title": "Max Answer Chars",
+                "type": "integer",
+                "description": "Max result length; -1 for default."
+              }
+            },
+            "required": [
+              "name_path_pattern"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Find Symbol",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          }
+        },
+        {
+          "name": "find_referencing_symbols",
+          "inputSchema": {
+            "properties": {
+              "name_path": {
+                "title": "Name Path",
+                "type": "string",
+                "description": "Name path of the symbol."
+              },
+              "relative_path": {
+                "title": "Relative Path",
+                "type": "string",
+                "description": "The relative path to the file containing the symbol for which to find references."
+              },
+              "include_kinds": {
+                "default": [],
+                "items": {
+                  "type": "integer"
+                },
+                "title": "Include Kinds",
+                "type": "array",
+                "description": "(optional) limits results to the given LSP symbol kinds (integers)."
+              },
+              "exclude_kinds": {
+                "default": [],
+                "items": {
+                  "type": "integer"
+                },
+                "title": "Exclude Kinds",
+                "type": "array",
+                "description": "Optional list of LSP symbol kinds (integers) to exclude."
+              },
+              "max_answer_chars": {
+                "default": -1,
+                "title": "Max Answer Chars",
+                "type": "integer",
+                "description": "Max result length; -1 for default."
+              }
+            },
+            "required": [
+              "name_path",
+              "relative_path"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Find Referencing Symbols",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          }
+        },
+        {
+          "name": "find_declaration",
+          "inputSchema": {
+            "properties": {
+              "relative_path": {
+                "title": "Relative Path",
+                "type": "string",
+                "description": "The relative path to the source file containing the symbol for which to find the declaration."
+              },
+              "regex": {
+                "title": "Regex",
+                "type": "string",
+                "description": "A regular expression with one group, where the group matches the symbol for which to perform the lookup.\nFor example, to find the declaration of the `process` method in a call like `obj.process()`,\npass an expression like \"obj\\.(process)\\(process_input_arg=37\\)\".\nPrefer regexes with sufficiently large context around the group to render the match unambiguous.\nUses Python syntax with MULTILINE and DOTALL flags enabled."
+              },
+              "containing_symbol_name_path": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Containing Symbol Name Path",
+                "description": "Optional name path of a containing symbol whose body shall be searched instead of the full file."
+              },
+              "include_body": {
+                "default": false,
+                "title": "Include Body",
+                "type": "boolean",
+                "description": "Whether to include the symbol's body in the result. Default False."
+              },
+              "include_info": {
+                "default": false,
+                "title": "Include Info",
+                "type": "boolean",
+                "description": "Whether to include additional info (hover-like). Default False."
+              }
+            },
+            "required": [
+              "relative_path",
+              "regex"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Find Declaration",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          }
+        },
+        {
+          "name": "get_diagnostics_for_file",
+          "inputSchema": {
+            "properties": {
+              "relative_path": {
+                "title": "Relative Path",
+                "type": "string",
+                "description": "The relative path to the file to inspect."
+              },
+              "start_line": {
+                "default": 0,
+                "title": "Start Line",
+                "type": "integer",
+                "description": "The first 0-based line to include. Defaults to 0."
+              },
+              "end_line": {
+                "default": -1,
+                "title": "End Line",
+                "type": "integer",
+                "description": "The last 0-based line to include. Defaults to -1, which means until the end of the file."
+              },
+              "min_severity": {
+                "default": 4,
+                "title": "Min Severity",
+                "type": "integer",
+                "description": "Minimum LSP severity to include, where 1=Error, 2=Warning, 3=Information, 4=Hint.\nDiagnostics with lower-or-equal numeric severity are returned."
+              },
+              "max_answer_chars": {
+                "default": -1,
+                "title": "Max Answer Chars",
+                "type": "integer",
+                "description": "Max result length; -1 for default."
+              }
+            },
+            "required": [
+              "relative_path"
+            ],
+            "title": "applyArguments",
+            "type": "object"
+          },
+          "outputSchema": {
+            "properties": {
+              "result": {
+                "title": "Result",
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "title": "applyOutput",
+            "type": "object"
+          },
+          "annotations": {
+            "title": "Get Diagnostics For File",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          }
+        }
+      ],
+      "schema_digest": {
+        "tools_list_sha256": "b9883bfe248fedc54ab81522436d96e2fe6308c52114dda6d7a3861d99107494",
+        "per_tool_schema_sha256": {
+          "replace_symbol_body": "c1c6f5568b80427c400b8f769b718e18381bfd25b9a5696637fb442a22e3963c",
+          "get_symbols_overview": "040e5c6565e55b69d665af7478599af0222dbcfcb55ddcc7dbbe917f24f4e08e",
+          "find_symbol": "13699ed3b8da59bfcabe4f227c9ab74689964796530091e030100c078e05b143",
+          "find_referencing_symbols": "fb7867037102bd3515f8179b1fb09e40d29733c59b81abd2e7f1ccbe3da940f8",
+          "find_declaration": "850411a59c6afe605701a0fcbf6eaf3fdf2b224b1567755eda708643b1ebb661",
+          "get_diagnostics_for_file": "fd545b5066587af2a2ee89de3f4ce346596d5e4d815b6ea55f766fa1201b1d32"
+        }
+      },
+      "backend_process_tree_peak_rss": [
+        {
+          "pid": 4098,
+          "ppid": 3895,
+          "vm_hwm_kib": 2184,
+          "cmd": "/usr/bin/bwrap --die-with-parent --new-session --unshare-user --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --ro-bind /etc/ld.so.cache /etc/ld.so.cache"
+        },
+        {
+          "pid": 4099,
+          "ppid": 4098,
+          "vm_hwm_kib": 1572,
+          "cmd": "/usr/bin/bwrap --die-with-parent --new-session --unshare-user --unshare-pid --unshare-ipc --unshare-uts --unshare-cgroup-try --unshare-net --ro-bind /usr /usr --symlink usr/bin /bin --symlink usr/sbin /sbin --symlink usr/lib /lib --symlink usr/lib64 /lib64 --ro-bind /etc/ld.so.cache /etc/ld.so.cache"
+        },
+        {
+          "pid": 4100,
+          "ppid": 4099,
+          "vm_hwm_kib": 121276,
+          "cmd": "${REPO}/.toolchain/serena-venv/bin/python ${REPO}/.toolchain/serena-venv/bin/serena start-mcp-server --project ${REPO}/.svweave/probe/run-7koxgfn9/serena_candidate/fixtures --context ${REPO}/.svweave/probe/run-7k"
+        },
+        {
+          "pid": 4120,
+          "ppid": 4100,
+          "vm_hwm_kib": 5492,
+          "cmd": "${REPO}/.toolchain/verible/bin/verible-verilog-ls "
+        }
+      ],
+      "queries": {
+        "overview": "{\"Package\": [{\"svw_demo_uvm_pkg\": {\"Class\": [\"svw_driver\", \"svw_monitor\", {\"svw_env\": {\"Function\": [\"build_phase\"]}}, {\"svw_smoke_test\": {\"Function\": [\"build_phase\"]}}]}}]}",
+        "find_demo_lane": "[{\"name_path\": \"fixtures/demo/rtl/demo_lane\", \"kind\": \"File\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 0, \"end_line\": 19}}, {\"name_path\": \"demo_lane\", \"kind\": \"Method\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 1, \"end_line\": 16}}]",
+        "find_svw_driver_run_phase": "[]",
+        "find_svw_env_build_phase": "[{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"kind\": \"Function\", \"relative_path\": \"uvm/svw_demo_uvm_pkg.sv\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}}]",
+        "refs_demo_lane": "{\"demo/rtl/demo_top.sv\": {\"Namespace\": [{\"name_path\": \"demo_top/g_lane\", \"body_location\": {\"start_line\": 15, \"end_line\": 26}, \"content_around_reference\": \"...  15:  for (genvar lane = 0; lane < LANES; lane++) begin : g_lane\\n  >  16:    demo_lane #(.DATA_W(DATA_W)) u_lane (\\n...  17:      .clk     (clk),\"}]}}"
+      },
+      "checks": [
+        {
+          "check": "required tools present",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": {
+            "missing": []
+          }
+        },
+        {
+          "check": "forbidden tools absent (shell/file-create/project-switch/dashboard/regex-replace/memory)",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": []
+        },
+        {
+          "check": "pinned verible-verilog-ls first on PATH",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "${REPO}/.toolchain/verible/bin/verible-verilog-ls"
+        },
+        {
+          "check": "find_symbol demo_lane",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "[{\"name_path\": \"fixtures/demo/rtl/demo_lane\", \"kind\": \"File\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 0, \"end_line\": 19}}, {\"name_path\": \"demo_lane\", \"kind\": \"Method\", \"relative_path\": \"demo/rtl/demo_lane.sv\", \"body_location\": {\"start_line\": 1, \"end_line\": 16}}]"
+        },
+        {
+          "check": "find_referencing_symbols demo_lane -> demo_top/g_lane",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "{\"demo/rtl/demo_top.sv\": {\"Namespace\": [{\"name_path\": \"demo_top/g_lane\", \"body_location\": {\"start_line\": 15, \"end_line\": 26}, \"content_around_reference\": \"...  15:  for (genvar lane = 0; lane < LANES; lane++) begin : g_lane\\n  >  16:    demo_lane #(.DATA_W(DATA_W)) u_lane (\\n...  17:      .clk     (clk),\"}]}}"
+        },
+        {
+          "check": "find_symbol svw_env/build_phase (function method)",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": "[{\"name_path\": \"svw_demo_uvm_pkg/svw_env/build_phase\", \"kind\": \"Function\", \"relative_path\": \"uvm/svw_demo_uvm_pkg.sv\", \"body_location\": {\"start_line\": 31, \"end_line\": 35}}]"
+        },
+        {
+          "check": "find_symbol svw_driver/run_phase (task method)",
+          "pass": false,
+          "required_for_ready": true,
+          "detail": "[]"
+        },
+        {
+          "check": "read-only fixture copy unchanged",
+          "pass": true,
+          "required_for_ready": true,
+          "detail": null
+        }
+      ],
+      "candidate_unchanged_by_probe": true,
+      "status": "DEGRADED",
+      "probe_wall_s": 5.972
+    }
+  },
+  "toolchain_lock_components_sha256": "87391633c5e1ec906faf26d5662459e27888731438efe71fc512fe1a506675e8",
+  "summary": {
+    "pyslang": "READY",
+    "slang_cli": "READY",
+    "cbm": "DEGRADED",
+    "serena": "DEGRADED"
+  },
+  "required_backend_errors": [],
+  "limitations": [
+    "cbm: search_graph finds class svw_driver",
+    "cbm: two run_phase methods extracted",
+    "cbm: no fixture file parse_unusable",
+    "serena: find_symbol svw_driver/run_phase (task method)"
+  ]
+}

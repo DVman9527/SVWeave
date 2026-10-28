@@ -126,7 +126,9 @@ requires read-only source/tool inputs, no network and no inherited secrets in ma
 The controller must not download dependencies or upload source. This is a narrower contract,
 not an end-to-end offline or physically air-gapped cleanroom claim.
 
-**Revised acceptance is NOT_RUN pending new exact-source CI.** New revision evidence belongs
+**Revised acceptance passed in [run 40627613557](../evidence/r2-verilator-run40627613557/README.md) at
+`cc931de898069bed0a51497737d4ad60603e4c51`.** This is the narrower R2 boundary only, not
+full qualification or a test of a later documentation commit. New revision evidence belongs
 under `.svweave/ci/dep01-r2/`, including the contract, bootstrap, controller preflight and
 capability reports. Original `evidence/dep01/cleanroom.json` is historical, not R2 evidence;
 the later [nested-denial run](../evidence/dep01-nested-denial-run40490935466/README.md) remains

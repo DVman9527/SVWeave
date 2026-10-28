@@ -172,14 +172,33 @@ run as current evidence nor change its bounded import/query claim or full qualif
 The later **2026-10-28 03:17:21 UTC** instruction explicitly selects
 [DEP-01-R2-host-controller](adr/ADR-016-dep01-trusted-host-controller.md) for future acceptance:
 offline install/verify and each backend remain isolated; the trusted controller runs on the
-host with no outer network-isolation guarantee. Revised DEP-01 is **NOT_RUN pending new CI**,
-not a rerun of Verilator or a rewrite of the original FAIL/BLOCKED. No AppArmor/sysctl/capability
-change or backend fallback is approved by this narrower controller contract.
+host with no outer network-isolation guarantee. Revised DEP-01 subsequently **passed** in
+run 40627613557 below; this does not rewrite the original FAIL/BLOCKED. No AppArmor/sysctl/
+capability change or backend fallback is approved by this narrower controller contract.
 
 This native PASS does not prove all original source spans, reconstruct erased references,
 populate slang's authoritative index, extend UVM generic-body traversal, or change edit
 eligibility. Simulation/formal/coverage/native-UVM acceptance remain `NOT_RUN` and full
 qualification remains **BLOCKED / UNQUALIFIED**, with owner waiver/license decisions open.
+
+### Latest measured rerun: run 40627613557
+
+[Retained exact-source evidence](../evidence/r2-verilator-run40627613557/README.md) binds the
+fresh native rerun to **`cc931de898069bed0a51497737d4ad60603e4c51`**: **5 native PASS**
+(HDL-VLT-01/02/05 real lint/JSON/import-query positives; HDL-VLT-03/04 specific expected-error
+rejections), **21 real slang semantic/UVM PASS** and **298 independently named supplement/gate
+cases PASS**, all zero failure/error/skip with strict JUnit equality. The old 195/270 mismatch
+is not normalized or retroactively accepted. Official 5.052 source pins and bootstrap/native
+binary hashes agree; pre-install identity is clean, with later `source_dirty` limited to the
+generated native-bootstrap evidence directory.
+
+The same run passes revised DEP-01-R2 within 236 required regressions and 62 boundary checks,
+plus fresh 26/26 mutations. Counts overlap. The trusted controller has no outer network-isolation
+guarantee; isolated offline stages and mandatory backend boundaries remain. Original DEP-01
+FAIL/BLOCKED is preserved. The benchmark remains 0.05-scale smoke with graph SKIPPED and
+reference host/corpus unmet. No full qualification, macro-location repair, authoritative reference
+merge, native Verilator UVM or simulation/formal/RTL coverage follows. Results apply only to the
+tested SHA, not later documentation commits.
 
 ### Observed native macro-location limitation
 

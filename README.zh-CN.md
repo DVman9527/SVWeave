@@ -61,10 +61,26 @@
 
 ## 状态
 
+### 已核对的 CI 范围（2026-10-28）
+
+[Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) 的三个 jobs 均成功；实测 source 为 **`cc931de898069bed0a51497737d4ad60603e4c51`**。以下结果有[原始 evidence 与 hashes](evidence/r2-verilator-run40627613557/README.md) 可核对：
+
+| 范围 | 已验证结果 |
+|---|---|
+| Required integration／fault-injection／acceptance | **236 PASS**＝205＋19＋12，包含修订 DEP-01-R2；0 failure/error/skip。 |
+| Sandbox／controller 边界检查 | **62 PASS**＝57 pure＋5 native；5 个 native 也包含在上述 236。 |
+| 真实 Verilator 5.052 static harness | **5 PASS**：3 个实际 lint／JSON／import-query positives＋2 个特定 expected-error rejections。 |
+| 真实 slang semantic/UVM／supplement gates | 分别 **21／298 PASS**；298 为独立命名 cases，符合 strict JUnit equality。各 scope 有重叠，不能相加。 |
+| 关键变异／性能 smoke | **26/26 KILLED**；0.05-scale、4,844 行／25 文件的实测 smoke targets 通过，不是 reference-scale qualification。 |
+
+**DEP-01-R2-host-controller PASS 仅代表已授权的较窄契约：** offline install/verify 仍隔离网络，每个 backend 仍有 mandatory 只读／无网络／无 secret sandbox；trusted controller 在 host 执行，**没有 outer network-isolation 保证**。原 DEP-01 **FAIL/BLOCKED** 保留，不重新分类；AppArmor／sysctl／capability 政策及产品 runtime 边界不变。
+
+**仍为 developer preview／UNQUALIFIED。** Graph 与 Serena 仍 DEGRADED；benchmark graph search 为 SKIPPED，未达到 reference host/corpus，page cache 为 warm。Verilator macro-expanded locations 仍 UNVERIFIED，没有合并为权威 references 或取得编辑权限。21 个 slang 测试不是 native Verilator UVM 验收；simulation／formal／RTL coverage、protected-source end-to-end 与 native Verilator UVM 仍 NOT_RUN。Owner／license gates 及完整 `qualify.py` release evaluation 尚未完成。结果仅对应实测 SHA，不代表后续仅改文档的 commit 已重跑。见[限制](docs/limitations.md)。
+
 ### 当前新增功能与限制（2026-10-27）
 
 - **UVM 静态调用 metadata：** 现有 references 查询通过 `context.uvm` 展示已识别、已解析的 config-db／factory／registry 调用及原样参数关联。证据为 `static_call_site`，`runtime_resolution=not_computed`；不代表 config-db 命中、factory 选择、phase 执行或 runtime topology，也不扩大 generic body 的遍历范围。见[支持特性](docs/supported_features.md#uvm-static-call-metadata-uvm-02--uvm-03)。
-- **可选 Verilator 5.052 inventory：** 导入已有 JSON，与 slang 索引分开查询；不启动 Verilator。结果保持 `EXTERNAL_DECLARED`、`PARTIAL`，未绑定 snapshot／build，不授权编辑，也不证明 HDL 成功。
+- **可选 Verilator 5.052 inventory：** 导入已有 JSON，与 slang 索引分开查询；产品导入功能不启动 Verilator（上述独立 CI harness 会执行）。结果保持 `EXTERNAL_DECLARED`、`PARTIAL`，未绑定 snapshot／build，不授权编辑，也不证明 HDL 成功。
 - **Protected-source preparation：** 显式选择单个文件，生成派生文件与 gap 报告，保留明文 bytes、CR/LF 和偏移，不修改原文件。这是词法留白，不是解密、编译器或猜造 blackbox；加密区的 definitions／interfaces／ports 仍为 `UNKNOWN`。不自动替换 manifest，也不自动将报告绑定到导入 JSON；下游工具必须保留原始 include 搜索环境。
 
 ```bash
@@ -904,7 +920,7 @@ root_mappings:
 | MCP Python SDK | 2.3.0 |
 | Accellera UVM（`uvm-core`） | 2020.3.1 |
 
-**引导安装。** 联网，一次性：`scripts/bootstrap_locked.py` 下载每个制品，在使用前校验其 SHA-256，解压时带路径穿越防护，并依据锁定的 `uv.lock` 构建 Serena venv。`--verify-only` 在不联网的情况下将已安装状态与锁定文件比较。对于离线机器，用 `scripts/bootstrap_locked.py --fetch-only` 准备缓存，复制仓库和 `.toolchain/`，然后运行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最后以 `--verify-only` 收尾。修订后的 cleanroom 契约 `DEP-01-R2-host-controller` 保留 offline install/verify 的网络隔离和各 backend 的单独隔离，但 trusted controller 在 host 上执行，**不保证 controller 的外层网络隔离**；新 native 验收仍为 **NOT_RUN**，不是 end-to-end offline 或物理 air-gap 声明。见 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是一个维护者工具，用于重新生成锁定文件中的网关 wheelhouse 部分。流程：`docs/install.md`。
+**引导安装。** 联网，一次性：`scripts/bootstrap_locked.py` 下载每个制品，在使用前校验其 SHA-256，解压时带路径穿越防护，并依据锁定的 `uv.lock` 构建 Serena venv。`--verify-only` 在不联网的情况下将已安装状态与锁定文件比较。对于离线机器，用 `scripts/bootstrap_locked.py --fetch-only` 准备缓存，复制仓库和 `.toolchain/`，然后运行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最后以 `--verify-only` 收尾。修订后的 cleanroom 契约 `DEP-01-R2-host-controller` 保留 offline install/verify 的网络隔离和各 backend 的单独隔离，但 trusted controller 在 host 上执行，**不保证 controller 的外层网络隔离**；较窄的新验收已在 `cc931de`／run 40627613557 **PASS**，不是 end-to-end offline 或物理 air-gap 声明。见 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是一个维护者工具，用于重新生成锁定文件中的网关 wheelhouse 部分。流程：`docs/install.md`。
 
 **沙箱。** 每个后端（包括 pyslang worker）都通过一个 `bwrap` 参数数组启动：系统和工具链只读，只对其候选副本（如适用）和自身状态目录可读写，`--unshare-net`，独立的 PID 命名空间（随网关一同终止），并且没有真实的 `$HOME`。原始源码不以可写方式挂载，或根本不挂载。`bwrap` 不施加 CPU、内存或 pid 数限制，也没有 seccomp 过滤器；只有 HDL worker 有内存限制（`RLIMIT_AS`）。如果非特权用户命名空间不可用，后端会失败关闭，或仅在显式标记的降级模式下运行（ADR-011）。
 
@@ -926,7 +942,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 **门禁。** `scripts/qualify.py` 根据实际结果计算 G0 至 G5，并写入 `.svweave/qualification/report.{json,md}`：G0 锁定文件校验、后端探测和沙箱测试；G1 清单、快照、配置和路径策略；G2 语义测试套件（真实的 pyslang 和 UVM）；G3 后端测试套件和 MCP 契约；G4 编辑安全和全部关键变异；G5 每个 P0 测试套件都没有 FAIL、BLOCKED 和 SKIP，验收测试，覆盖率至少 85% 语句和 80% 分支，文档检查，以及符合计划 22.3 预算的基准测试。由未运行步骤计算出的门禁为 `NOT_EVALUATED`，绝不是 PASS。只有当每个门禁都通过且没有未关闭的阻断项时，发布决定才是 `ACCEPTED_STATIC_PREVIEW`；否则为带原因的 `BLOCKED`。
 
-**变异测试套件。** `scripts/mutation_suite.py` 将二十二个刻意制造的缺陷（计划 20.5 的十个类别，其中一个类别有两个变体，另加十一个写入安全变异，针对恢复的 roll-forward 门禁、提交时的策略复查以及基于名称的 `slang_symbol` 编辑的目标选择规则）逐个注入仓库的一份临时副本，并运行对应的测试；当这些测试失败时，该变异即被杀死。`--only M01,M05` 可选择其中部分；除干净的失败之外的任何情况（缺少补丁锚点、超时、基线就是红的）都是 `ERROR`，绝不算被杀死。
+**变异测试套件（Mutation suite）。** `scripts/mutation_suite.py` 每次向仓库的一次性副本注入一个关键变异，共 26 个（M01–M26，涵盖计划 20.5 及额外的写入安全防护），并运行映射的测试；当测试因该变异而失败时，该变异即被杀死（killed）。`--only M01,M05` 可选择其中几个；缺少 patch 锚点、超时或失败 baseline 等结果是 `ERROR`，不算 killed。
 
 **基准测试。** `scripts/gen_corpus.py` 写出一个确定性的合成语料库，`scripts/benchmark.py` 记录主机、语料库和原始耗时（`evidence/bench/`），然后与计划 22.3 的预算进行比较。参考语料库为规模 1.0：约 500 个文件、100,000 行；缩小的规模会如实标注。
 

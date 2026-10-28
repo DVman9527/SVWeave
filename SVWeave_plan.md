@@ -2028,3 +2028,22 @@ Native Verilator 本次**未重跑**；`305e8c3` 的 native 5＋slang semantic/U
 
 本次只修訂上述窄範圍契約／project rules；新測試結果仍 **NOT_RUN**。即使日後 R2 PASS，也只證明較窄的新契約，不能補成原 outer-controller 隔離保證或完整 qualification。**Full qualification 仍 BLOCKED／UNQUALIFIED**；simulation／formal／RTL coverage、reference-scale performance 與 owner／license gates 仍分列。原 234 selected PASS、40 boundary PASS、26/26 mutation 及縮小規模 benchmark 均維持各自 run/source 的歷史解讀。
 
+### 30.13 驗證追加：DEP-01-R2 與 fresh native static PASS，完整 qualification 未完成（2026-10-28）
+
+[Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) 的 fast、real-backends、native-verilator 三個 jobs 均 **SUCCESS**，實測 source 為 **`cc931de898069bed0a51497737d4ad60603e4c51`**。[保留證據與 requirement mapping](evidence/r2-verilator-run40627613557/README.md)、[兩個 artifact 的完整 member hash manifest](evidence/r2-verilator-run40627613557/artifact-manifest.json) 提供原始 identity／JUnit／R2 contract／native report／fresh mutation／smoke benchmark 與 bounded job-log excerpt。Lock SHA-256 仍為 `ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9`。本段更新 30.12 當時的 NOT_RUN；不改寫原第 1–29 節或 30.1–30.12，也不宣稱後續僅改文件的 commit 已 native rerun。
+
+| 範圍／Test IDs | 新 exact-source 結果 | 驗收界線 |
+|---|---|---|
+| Required integration／fault-injection／acceptance | **236 PASS**＝205＋19＋12，0 failure/error/skip；保留先前 234 selected identities，新增 R2 body 與 native controller cleanup case。 | 包含 `test_DEP_01_R2_offline_install_then_host_controlled_isolated_backend_probes`；不是原 outer-controller 契約通過，也不是完整 release qualification。 |
+| HDL-CI-04/05、DEP-01-R2 controller guards | **62 PASS**＝57 pure＋5 native，0 failure/error/skip；包含 `test_DEP_01_R2_controller_timeout_reaps_native_detached_descendant`。 | 5 native 亦在上述 236，不能相加；實測涵蓋隔離、拒絕不合法 launch／identity、bounded output／timeout 與 native descendants 清理。 |
+| DEP-01-R2 實際 cleanroom | **PASS**，03:38:42.802259–03:39:08.612526 UTC；六個 setup／metadata／verify／probe execution rc=0、offline network check `BLOCKED errno=101`、fixture before/after hashes 相同。 | `ci_identity_verified=true`；`controller_network_isolated=false`、`offline_install_verification_network_isolated=true`、`backend_isolation=mandatory_bwrap`；original contract BLOCKED／not reclassified、`release_qualified=false`。 |
+| Native HDL-VLT-01/02/05 與 HDL-VLT-03/04 | **5 PASS**：3 真實 lint／JSON／import-query positives＋2 特定 expected-error rejections，0 failure/error/skip。 | Official Verilator 5.052 pin `ea338be98e1e838d3518809ce8899f85a009963c`，bootstrap/native source 與 binary/wrapper hashes 相符；不是 simulator 或 full-language 驗收。 |
+| Real slang semantic/UVM／supplement gates | 分別 **21 PASS／298 PASS**，0 failure/error/skip；298 為獨立命名 testcase nodes，strict JUnit equality 接受。 | 21 slang cases 亦在 236，且不是 native Verilator UVM；不同 suites 有重疊，不加成唯一測試總數。歷史 195 nodes／270 aggregate 不修改也不 retrovalidate。 |
+| Critical mutations M01–M26 | **26/26 KILLED**，0 survivor/error，26 baseline commands 均 rc=0；真實執行 03:46:34–03:56:05 UTC。 | Mutation JSON 未內嵌 SHA，以 run／artifact metadata 及 exact bounded job-log excerpt 連結當前 source；與前一個同日 run 的報告不同。October 13 carryover 不計入。 |
+| PERF-01 smoke | **scale 0.05，4,844 lines／25 files**；5 fresh builds、hot categories 各 30 samples，僅 measured smoke targets PASS。 | 4 logical CPUs／15.61 GiB RAM、warm page cache，`reference_host_met=false`／`reference_corpus=false`；graph search **SKIPPED**（`--no-graph`），不是 §22.3 reference-scale／graph performance qualification。 |
+
+**R2 PASS 只證明已授權的較窄契約。** Offline install／verify 與每個 backend 的 mandatory 唯讀／無網路／無 inherited secrets 隔離保留；trusted host controller **沒有 outer network-isolation 保證**，不稱為 end-to-end offline／air-gapped。AppArmor／sysctl／capability、產品 runtime 與 Slurm 安全規則未放寬。原 run 40490935466 的 DEP-01 raw FAIL／original contract BLOCKED、方案 1 的 234 selected PASS ledger、最初 native run 40471175289 FAIL 皆保持原樣；新 PASS 不是重新分類歷史失敗。
+
+Native identity 在安裝前 clean；稍後 `source_dirty` 只記錄生成的 `?? evidence/verilator-native-bootstrap/`，不隱去也不冒稱全程 clean。Macro-expanded locations 仍 **UNVERIFIED**、不可作 edit binding；external inventory 仍 `EXTERNAL_DECLARED/PARTIAL`、snapshot/build-unbound，沒有合併進 slang 權威 references。Graph／Serena 仍 **DEGRADED**，已知 UVM class/task extraction limitations 保留。
+
+使用者另於 **2026-10-28 03:37:02 UTC** 要求「驗證完成後一併更新 三語言 README」；English／繁中／简中 README 現同步上述結果、exact SHA、R2 較窄契約與剩餘限制。**Full qualification 仍 BLOCKED／UNQUALIFIED**：本 run 未執行新的 `qualify.py` 完整 release 評估；strict parser 核對不是執行 release gates。Owner G0 waiver／ADR-012／license sign-off、reference-scale performance 仍未完成；simulation／formal／RTL coverage、native Verilator UVM、protected-source end-to-end acceptance 仍 **NOT_RUN**。本次文件／evidence 更新不執行新的 backend 或自行 commit／push。

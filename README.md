@@ -74,6 +74,34 @@ compare-and-set write (TB4). Dashed lines are trust boundaries TB1 to TB4.*
 
 ## Status
 
+### Verified CI scope (2026-10-28)
+
+[Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) passed all
+three jobs at tested source **`cc931de898069bed0a51497737d4ad60603e4c51`**.
+[Raw evidence and hashes](evidence/r2-verilator-run40627613557/README.md) support:
+
+| Scope | Verified result |
+|---|---|
+| Required integration / fault-injection / acceptance | **236 PASS** = 205 + 19 + 12, including revised DEP-01-R2; zero failures/errors/skips. |
+| Sandbox/controller boundary checks | **62 PASS** = 57 pure + 5 native; the five native checks also occur in the 236. |
+| Real Verilator 5.052 static harness | **5 PASS**: 3 actual lint/JSON/import-query positives + 2 specific expected-error rejections. |
+| Real slang semantic/UVM / supplement gates | **21 / 298 PASS**, respectively; 298 independently named cases with strict JUnit equality. These suites overlap other scopes; do not add the counts. |
+| Critical mutations / performance smoke | **26/26 KILLED**; measured 0.05-scale smoke targets pass (4,844 lines / 25 files), not reference-scale qualification. |
+
+**DEP-01-R2-host-controller PASS is the narrower authorized contract:** offline install/verify
+remain network-isolated and every backend retains mandatory read-only/no-network/no-secret
+sandboxing, but the trusted controller runs on the host **without outer network isolation**.
+Original DEP-01 **FAIL/BLOCKED** is preserved, not reclassified. AppArmor/sysctl/capability
+policy and product runtime boundaries are unchanged.
+
+**Still developer preview / UNQUALIFIED.** Graph and Serena remain DEGRADED; benchmark graph
+search is SKIPPED, reference host/corpus are unmet and page cache was warm. Macro-expanded
+Verilator locations remain UNVERIFIED, with no authoritative merged references or edit authority.
+The 21 slang tests are not native Verilator UVM acceptance. Simulation/formal/RTL coverage,
+protected-source end-to-end and native Verilator UVM remain NOT_RUN; owner/license gates and
+full `qualify.py` release evaluation remain open. Results apply to the tested SHA, not an
+unexecuted later documentation commit. See [limitations](docs/limitations.md).
+
 ### Current additions and their limits (2026-10-27)
 
 - **UVM static call metadata:** the existing references query exposes `context.uvm` for
@@ -82,7 +110,8 @@ compare-and-set write (TB4). Dashed lines are trust boundaries TB1 to TB4.*
   factory choices, phase execution or runtime topology; it does not expand generic-body traversal.
   See [supported features](docs/supported_features.md#uvm-static-call-metadata-uvm-02--uvm-03).
 - **Optional Verilator 5.052 inventory:** import existing JSON artifacts, then inspect them
-  separately from slang. No Verilator executable runs; results remain `EXTERNAL_DECLARED`,
+  separately from slang. The product importer does not run Verilator (the separate CI harness
+  above does); results remain `EXTERNAL_DECLARED`,
   `PARTIAL` and unbound to a snapshot/build. They do not authorize edits or establish HDL success.
 - **Protected-source preparation:** explicitly prepare one source into a derived file and gap
   report, preserving plaintext bytes and CR/LF offsets without changing the original. This is
@@ -1321,7 +1350,7 @@ repository and `.toolchain/`, then run
 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv` and finish with
 `--verify-only`. The revised cleanroom contract `DEP-01-R2-host-controller` uses network-isolated
 offline install/verify and individually isolated backends, but a trusted host controller without
-an outer network-isolation guarantee. Its new native acceptance is **NOT_RUN**; it is not an
+an outer network-isolation guarantee. Its narrower acceptance **passed at `cc931de` in run 40627613557**; it is not an
 end-to-end offline or physically air-gapped claim. See [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md).
 `scripts/gateway_lock_refresh.py` is a maintainer tool that regenerates the
 gateway wheelhouse section of the lock. Procedure: `docs/install.md`.
@@ -1374,10 +1403,8 @@ and a benchmark within the plan 22.3 budgets. A gate computed from a step that d
 `NOT_EVALUATED`, never PASS. The release decision is `ACCEPTED_STATIC_PREVIEW` only when every gate
 passes and no blocker is open; otherwise `BLOCKED` with reasons.
 
-**Mutation suite.** `scripts/mutation_suite.py` injects twenty-two deliberate defects (the ten classes
-of plan 20.5, one class with two variants, plus eleven extra write-safety mutations for the recovery
-roll-forward gates, the commit-time policy recheck and the target-selecting rules of name-based
-`slang_symbol` edits) one at a time into a throwaway copy of the
+**Mutation suite.** `scripts/mutation_suite.py` injects 26 critical mutations (M01–M26, covering plan 20.5
+and additional write-safety guards) one at a time into a throwaway copy of the
 repository and runs the mapped tests; a mutation is killed when they fail. `--only M01,M05` selects some; anything
 other than a clean fail (missing patch anchor, timeout, red baseline) is `ERROR`, never killed.
 

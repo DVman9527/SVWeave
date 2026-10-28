@@ -32,8 +32,9 @@ plan section 28 and tells you where things are. Status: developer preview, UNQUA
    read-only source/tool inputs, no network and no inherited secrets in mandatory bwrap.
    This permits neither controller downloads/source uploads nor a product-runtime, Slurm,
    AppArmor, sysctl, capability or degraded-backend exception. See
-   `docs/adr/ADR-016-dep01-trusted-host-controller.md` and plan 30.12; revised acceptance is
-   NOT_RUN until new exact-source evidence, and historical DEP-01 FAIL/BLOCKED stays unchanged.
+   `docs/adr/ADR-016-dep01-trusted-host-controller.md` and plan 30.12–30.13. Revised acceptance
+   passed at `cc931de` in run 40627613557 only; historical DEP-01 FAIL/BLOCKED stays unchanged
+   and full qualification remains UNQUALIFIED.
 10. Golden files (`fixtures/expected/`) are hand-reviewed. Update one only with a written semantic
     reason; never to make CI green.
 11. Keep the statuses apart: static analysis, EDA compile, simulation, formal, coverage. SKIP,

@@ -61,10 +61,26 @@
 
 ## 狀態
 
+### 已核對的 CI 範圍（2026-10-28）
+
+[Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) 的三個 jobs 均成功；實測 source 為 **`cc931de898069bed0a51497737d4ad60603e4c51`**。以下結果有[原始 evidence 與 hashes](evidence/r2-verilator-run40627613557/README.md) 可核對：
+
+| 範圍 | 已驗證結果 |
+|---|---|
+| Required integration／fault-injection／acceptance | **236 PASS**＝205＋19＋12，包含修訂 DEP-01-R2；0 failure/error/skip。 |
+| Sandbox／controller 邊界檢查 | **62 PASS**＝57 pure＋5 native；5 個 native 亦包含在上述 236。 |
+| 真實 Verilator 5.052 static harness | **5 PASS**：3 個實際 lint／JSON／import-query positives＋2 個特定 expected-error rejections。 |
+| 真實 slang semantic/UVM／supplement gates | 分別 **21／298 PASS**；298 為獨立命名 cases，符合 strict JUnit equality。各 scope 有重疊，不能相加。 |
+| 關鍵變異／效能 smoke | **26/26 KILLED**；0.05-scale、4,844 行／25 檔案的實測 smoke targets 通過，不是 reference-scale qualification。 |
+
+**DEP-01-R2-host-controller PASS 僅代表已授權的較窄契約：** offline install/verify 仍隔離網路，每個 backend 仍有 mandatory 唯讀／無網路／無 secret sandbox；trusted controller 在 host 執行，**沒有 outer network-isolation 保證**。原 DEP-01 **FAIL/BLOCKED** 保留，不重新分類；AppArmor／sysctl／capability 政策及產品 runtime 邊界不變。
+
+**仍為 developer preview／UNQUALIFIED。** Graph 與 Serena 仍 DEGRADED；benchmark graph search 為 SKIPPED，未達 reference host/corpus，page cache 為 warm。Verilator macro-expanded locations 仍 UNVERIFIED，沒有合併成權威 references 或取得編輯權限。21 個 slang 測試不是 native Verilator UVM 驗收；simulation／formal／RTL coverage、protected-source end-to-end 與 native Verilator UVM 仍 NOT_RUN。Owner／license gates 及完整 `qualify.py` release evaluation 尚未完成。結果只對應實測 SHA，不代表後續僅改文件的 commit 已重跑。見[限制](docs/limitations.md)。
+
 ### 目前新增功能與限制（2026-10-27）
 
 - **UVM 靜態呼叫 metadata：** 既有 references 查詢透過 `context.uvm` 呈現已辨識、已解析的 config-db／factory／registry 呼叫及原樣參數對應。證據為 `static_call_site`，`runtime_resolution=not_computed`；不代表 config-db 命中、factory 選擇、phase 執行或 runtime topology，也不擴大 generic body 的走訪範圍。見[支援特性](docs/supported_features.md#uvm-static-call-metadata-uvm-02--uvm-03)。
-- **選用的 Verilator 5.052 inventory：** 匯入既有 JSON，與 slang 索引分開查閱；不啟動 Verilator。結果維持 `EXTERNAL_DECLARED`、`PARTIAL`，未綁定 snapshot／build，不授權編輯，也不證明 HDL 成功。
+- **選用的 Verilator 5.052 inventory：** 匯入既有 JSON，與 slang 索引分開查閱；產品匯入功能不啟動 Verilator（上述獨立 CI harness 會執行）。結果維持 `EXTERNAL_DECLARED`、`PARTIAL`，未綁定 snapshot／build，不授權編輯，也不證明 HDL 成功。
 - **Protected-source preparation：** 明確選取單一檔案，產生衍生檔與 gap 報告，保留明文 bytes、CR/LF 與位移，不修改原檔。這是詞法留白，不是解密、編譯器或猜造 blackbox；加密區的 definitions／interfaces／ports 仍為 `UNKNOWN`。不自動替換 manifest，也不自動將報告綁入匯入 JSON；下游工具必須保留原始 include 搜尋環境。
 
 ```bash
@@ -904,7 +920,7 @@ root_mappings:
 | MCP Python SDK | 2.3.0 |
 | Accellera UVM（`uvm-core`） | 2020.3.1 |
 
-**Bootstrap。** 線上執行一次：`scripts/bootstrap_locked.py` 會下載每個構件，使用前先驗證其 SHA-256，以防路徑穿越（path-traversal）的方式解壓縮，並依鎖定的 `uv.lock` 建立 Serena venv。`--verify-only` 在不使用網路的情況下比對已安裝狀態與 lock。對於離線機器，請以 `scripts/bootstrap_locked.py --fetch-only` 準備快取，複製儲存庫與 `.toolchain/`，然後執行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最後以 `--verify-only` 收尾。修訂 cleanroom 契約 `DEP-01-R2-host-controller` 保留 offline install/verify 的網路隔離與每個 backend 的個別隔離，但 trusted controller 在 host 執行，**不保證 controller 外層網路隔離**；新 native 驗收仍為 **NOT_RUN**，不是 end-to-end offline 或實體 air-gap 宣告。見 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是維護者工具，用來重新產生 lock 中閘道 wheelhouse 的部分。程序：`docs/install.md`。
+**Bootstrap。** 線上執行一次：`scripts/bootstrap_locked.py` 會下載每個構件，使用前先驗證其 SHA-256，以防路徑穿越（path-traversal）的方式解壓縮，並依鎖定的 `uv.lock` 建立 Serena venv。`--verify-only` 在不使用網路的情況下比對已安裝狀態與 lock。對於離線機器，請以 `scripts/bootstrap_locked.py --fetch-only` 準備快取，複製儲存庫與 `.toolchain/`，然後執行 `scripts/bootstrap_locked.py --offline --create-venv --venv-dir .venv`，最後以 `--verify-only` 收尾。修訂 cleanroom 契約 `DEP-01-R2-host-controller` 保留 offline install/verify 的網路隔離與每個 backend 的個別隔離，但 trusted controller 在 host 執行，**不保證 controller 外層網路隔離**；較窄的新驗收已在 `cc931de`／run 40627613557 **PASS**，不是 end-to-end offline 或實體 air-gap 宣告。見 [ADR-016](docs/adr/ADR-016-dep01-trusted-host-controller.md)。`scripts/gateway_lock_refresh.py` 是維護者工具，用來重新產生 lock 中閘道 wheelhouse 的部分。程序：`docs/install.md`。
 
 **沙箱。** 每個後端（包含 pyslang worker）都透過 `bwrap` 引數陣列啟動：系統與工具鏈為唯讀，只有其候選副本（適用時）與它自己的狀態目錄可讀寫，`--unshare-net`，擁有隨閘道結束而消失的獨立 PID 命名空間，且沒有真實的 `$HOME`。原始碼不會以可寫方式掛載，或根本不掛載。`bwrap` 不施加 CPU、記憶體或 pid 數量限制，也沒有 seccomp 過濾器；記憶體僅對 HDL worker 做限制（`RLIMIT_AS`）。若無法使用非特權使用者命名空間，後端會失敗即拒絕（fail closed），或僅在明確標示的降級模式下執行（ADR-011）。
 
@@ -926,7 +942,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 **關卡（Gates）。** `scripts/qualify.py` 依實際結果計算 G0 至 G5，並寫入 `.svweave/qualification/report.{json,md}`：G0 為 lock 已驗證、後端探測與沙箱測試；G1 為 manifest、快照、設定與路徑政策；G2 為語意測試套件（真實的 pyslang 與 UVM）；G3 為後端測試套件與 MCP 契約；G4 為編輯安全性與所有關鍵變異；G5 為每個 P0 測試套件都沒有 FAIL、BLOCKED 與 SKIP、驗收測試、至少 85% 述句與 80% 分支的覆蓋率、文件檢查，以及在計畫 22.3 預算之內的基準測試。由未執行的步驟所算出的關卡為 `NOT_EVALUATED`，絕不是 PASS。只有在每個關卡都通過且沒有任何開放的阻擋條件時，發行決定才會是 `ACCEPTED_STATIC_PREVIEW`；否則為 `BLOCKED` 並附上原因。
 
-**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把二十二個刻意製造的缺陷（計畫 20.5 的十個類別、其中一個類別有兩種變體，再加上十一個額外的寫入安全變異，涵蓋復原 roll-forward 關卡、提交時的政策重新檢查，以及以名稱為基礎的 `slang_symbol` 編輯的目標選擇規則）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
+**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把26 個關鍵變異（M01–M26，涵蓋計畫 20.5 及額外的寫入安全防護）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
 
 **基準測試（Benchmark）。** `scripts/gen_corpus.py` 寫出確定性的合成語料，`scripts/benchmark.py` 記錄主機、語料與原始計時（`evidence/bench/`），然後與計畫 22.3 的預算比較。參考語料為 scale 1.0：約 500 個檔案與 100,000 行；縮小規模的執行會被如此標示。
 

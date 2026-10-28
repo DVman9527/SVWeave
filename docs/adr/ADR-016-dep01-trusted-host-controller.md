@@ -1,6 +1,7 @@
 # ADR-016: DEP-01-R2 trusted host controller with isolated install and backends
 
-Status: **acceptance-contract revision authorized; revised native acceptance NOT_RUN**.
+Status: **acceptance-contract revision authorized; revised acceptance PASS at `cc931de`
+in run 40627613557 (2026-10-28)**. See [retained evidence](../../evidence/r2-verilator-run40627613557/README.md).
 Revision ID: **`DEP-01-R2-host-controller`**. Full qualification remains **BLOCKED / UNQUALIFIED**.
 
 ## Authority and superseded scope
@@ -55,8 +56,10 @@ HDL-CI-04/05 boundary tests remain regression anchors, not substitutes for the r
 integration. The old option-1 `remaining_regressions=true` scope is R1-only and must be rejected
 under this revision rather than silently deselecting the new R2 node or claiming its pass.
 
-**Current revised acceptance: NOT_RUN, pending exact-source CI.** The original denial and
-failure remain preserved. Even a future R2 pass would qualify only this narrower acceptance
-boundary, not prove the original outer-controller guarantee or full release qualification.
+**Revised acceptance passed** at exact source `cc931de898069bed0a51497737d4ad60603e4c51`
+in run 40627613557. Its 236 required cases include the actual R2 integration, and 62 boundary
+checks include native controller-timeout cleanup. The original denial/failure remain preserved.
+This pass verifies only the narrower acceptance boundary, not the original outer-controller
+guarantee, a later documentation commit, or full release qualification.
 Simulation/formal/RTL coverage, reference-scale performance and owner/license decisions remain
 separate.

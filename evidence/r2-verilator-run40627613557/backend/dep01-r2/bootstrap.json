@@ -1,0 +1,65 @@
+{
+  "lock": "${REPO}/toolchain.lock.json",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "toolchain_dir": "${REPO}/.toolchain",
+  "verify_only": false,
+  "offline": true,
+  "components": {
+    "uv": {
+      "source_url": "https://github.com/astral-sh/uv/releases/download/0.12.23/uv-x86_64-unknown-linux-gnu.tar.gz",
+      "installed_to": "${REPO}/.toolchain/uv",
+      "binary_sha256_ok": true,
+      "source": "pinned",
+      "version": "0.12.23",
+      "verified": true
+    },
+    "slang": {
+      "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+      "installed_to": "${REPO}/.toolchain/slang",
+      "binary_sha256_ok": true
+    },
+    "verible": {
+      "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+      "installed_to": "${REPO}/.toolchain/verible",
+      "binary_sha256_ok": true
+    },
+    "codebase_memory_mcp": {
+      "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+      "installed_to": "${REPO}/.toolchain/cbm",
+      "binary_sha256_ok": true
+    },
+    "uvm_core": {
+      "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+      "installed_to": "${REPO}/.toolchain/uvm-core",
+      "install_dir_present": true
+    },
+    "gateway_wheelhouse": {
+      "requirements_sha256_ok": true,
+      "wheels_expected": 31,
+      "wheels_present_sha256_ok": 31
+    },
+    "pyslang": {
+      "installed_version": "12.0.0"
+    },
+    "mcp_sdk": {
+      "installed_version": "2.3.0"
+    },
+    "svweave": {
+      "installed": "linked-src"
+    },
+    "serena_build_wheelhouse": {
+      "wheels_expected": 8,
+      "wheels_present_sha256_ok": 8
+    },
+    "serena": {
+      "commit_ok": true,
+      "uv_lock_sha256_ok": true,
+      "license_sha256_ok": true,
+      "serena_exe_present": true,
+      "serena_agent_version": "1.7.0"
+    }
+  },
+  "warnings": [],
+  "errors": [],
+  "ok": true
+}

@@ -239,7 +239,7 @@ evidence). Measured gaps on the fixtures:
   outcomes (270 producer-reported aggregate), not 270 independently named tests. At that
   source, the strict qualification parser rejects the count mismatch; raw XML is preserved.
   This is not a current full three-backend qualification or a waiver/license signoff.
-* Latest selected-scope evidence: [run 40617140613](../evidence/remaining-regressions-run40617140613/README.md)
+* Earlier option-1 selected-scope evidence: [run 40617140613](../evidence/remaining-regressions-run40617140613/README.md)
   at `4b6454417ca1f92fae5063116f9458cbfbca443d` passed fast CI and **234 selected regressions**
   (203 integration + 19 fault-injection + 12 acceptance), with zero failures/errors/skips.
   The identity-bound ledger validates **235 collected = 234 selected + 1 DEP-01 BLOCKED**;
@@ -278,9 +278,29 @@ evidence). Measured gaps on the fixtures:
   an outer network-isolation guarantee. This is a narrower contract, not equivalent to the old
   end-to-end network-isolated cleanroom. Controller downloads/source uploads, AppArmor/sysctl/
   capability changes, degraded backend fallback and broader product/Slurm exceptions remain
-  unauthorized. **Revised DEP-01 acceptance is NOT_RUN pending new exact-source CI**; original
+  unauthorized. **Revised DEP-01 acceptance passed at `cc931de` in run 40627613557**
+  under this narrower contract (see current evidence below); original
   DEP-01 FAIL/BLOCKED and option-1 selected-scope evidence stay unchanged. Full qualification
   remains **BLOCKED / UNQUALIFIED**; strict JUnit equality and separate EDA statuses are unchanged.
+
+### Latest exact-source validation (2026-10-28)
+
+[Run 40627613557](../evidence/r2-verilator-run40627613557/README.md) at
+**`cc931de898069bed0a51497737d4ad60603e4c51`** passed all three CI jobs. Required suites are
+**236 PASS** (205 integration + 19 fault-injection + 12 acceptance); boundary checks are
+**62 PASS** (57 pure + 5 native, with all five also in the 236). Actual DEP-01-R2 passed with
+original-contract BLOCKED/not-reclassified and controller-network-isolated=false explicit.
+Native Verilator was freshly rerun: **5 PASS**, plus **21 slang semantic/UVM** and **298
+independently named supplement/gate cases**, all zero failure/error/skip and strict JUnit
+accounting accepted. These scopes overlap and must not be summed.
+
+Fresh **26/26 mutations were killed**. Performance remains only a **0.05-scale smoke**:
+4,844 lines / 25 files, four logical CPUs / 15.61 GiB RAM, warm page cache,
+reference host/corpus unmet and graph SKIPPED. CBM/Serena remain DEGRADED. No new full
+`qualify.py` release evaluation, owner/license sign-off, simulation/formal/RTL coverage,
+native Verilator UVM or protected-source end-to-end acceptance is established. Macro source
+locations remain UNVERIFIED and external inventory remains nonauthoritative. Results bind to
+the tested SHA; later documentation commits are not automatically native-tested.
 
 ## 8. Graph export (ADR-014)
 
@@ -354,7 +374,9 @@ queries/imports or change slang authority. The revised harness passed its bounde
 subset in [run 40474142649](../evidence/verilator-native-run40474142649/README.md), exact source
 `305e8c30747ba2eeb1b53a66eaa29e8255d8e245`: three real lint/JSON/import-query positives
 (HDL-VLT-01/02/05) and two expected-error rejections (HDL-VLT-03/04), zero skips.
-This is not full Verilator-language or project qualification.
+The same bounded five cases were freshly rerun at `cc931de` in
+[run 40627613557](../evidence/r2-verilator-run40627613557/README.md). Neither run is full
+Verilator-language or project qualification.
 
 Initial native run [40471175289](../evidence/verilator-native-run40471175289/README.md)
 remains **FAIL**, because the legacy fixture exposed producer columns after macro expansion

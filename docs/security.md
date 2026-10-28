@@ -222,9 +222,11 @@ analysis. The controller uses an explicit environment without inherited secrets.
 Offline installation and verification still run under network-disabled isolation. Every
 backend/helper still uses mandatory read-only/no-network/no-inherited-secret bwrap with
 dedicated state and existing cleanup/bounds. No AppArmor/sysctl/capability change, degraded
-fallback, product-runtime or Slurm policy exception is authorized. Revised acceptance is
-**NOT_RUN pending new CI**; the original DEP-01 denial/FAIL/BLOCKED and the option-1 scoped
-results remain historical evidence, not a pass of this narrower contract.
+fallback, product-runtime or Slurm policy exception is authorized. Revised acceptance
+**passed at `cc931de898069bed0a51497737d4ad60603e4c51` in run 40627613557**; see
+[raw R2 contract and boundary evidence](../evidence/r2-verilator-run40627613557/README.md). This verifies the narrower
+contract only. The original DEP-01 denial/FAIL/BLOCKED and option-1 scoped results remain
+unchanged; full qualification is still UNQUALIFIED.
 
 ## 8. Reporting issues
 

@@ -337,6 +337,12 @@ HDL/reference coverage or complete full qualification.
 At **2026-10-28 03:17:21 UTC**, the user explicitly changed future acceptance to
 [DEP-01-R2-host-controller](adr/ADR-016-dep01-trusted-host-controller.md): offline install/verify
 and every backend remain isolated, but the trusted host controller has no outer network-isolation
-guarantee. No backend/policy relaxation follows. Revised acceptance is **NOT_RUN** pending new
-CI; the original DEP-01 FAIL/BLOCKED and the option-1 run are not converted to R2 success.
+guarantee. No backend/policy relaxation follows. The revised acceptance **passed at
+`cc931de898069bed0a51497737d4ad60603e4c51` in [run 40627613557](../evidence/r2-verilator-run40627613557/README.md)**:
+236 required cases (including R2), 62 boundary checks, native Verilator 5, slang semantic/UVM
+21 and 298 independently named supplement/gate cases all pass with zero failures/errors/skips.
+Scopes overlap; fresh mutations kill 26/26, while the 0.05-scale benchmark still skips graph
+and misses reference host/corpus. Original DEP-01 FAIL/BLOCKED and option-1 evidence remain
+unchanged. This is not new HDL coverage, full qualification, native Verilator UVM acceptance
+or verification of later documentation commits.
 See [the format, trust boundary and evidence](verilator_static_supplement.md).
