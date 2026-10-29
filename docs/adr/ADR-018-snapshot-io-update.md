@@ -72,11 +72,32 @@ This snapshot-only benchmark does not exercise semantic compilation or graph ind
 not the complete PERF-01 acceptance gate. Real worker equivalence, native Verilator static
 checks and exact-source CI are separate evidence; unit mocks cannot replace them.
 
-At this implementation-decision stage, new exact-source CI/native validation is **NOT_RUN**;
-there is no new PASS or qualification claim here. Historical validated runs retain their
-original source SHA, scope and limitations. Native application-client behavior, actual Claude
-registration/connection and Slurm site execution are not established by this work. Full release
-qualification remains **UNQUALIFIED**.
+### Exact-source validation (2026-10-29)
+
+[Run 40818546417](https://github.com/DVman9527/SVWeave/actions/runs/40818546417) completed all
+three jobs SUCCESS at **`9f86f35930f22d3e817b1be95324f171b9163009`**.
+[Retained raw proofs and audit](../../evidence/incremental-updates-run40818546417/README.md)
+record unit 1680 PASS + 1 SKIP, contracts 49 PASS, required integration/fault/acceptance 238 PASS,
+boundary 62 PASS, native Verilator static / slang semantic-UVM / supplement 5 / 21 / 298 PASS,
+and all 29 critical mutations KILLED without survivor/error. Scopes overlap; the skip is not PASS.
+The earlier run's one failed oracle comparison remains retained as FAIL: a narrowly tested
+absolute-path relocation for one empty-include warning corrected the test, not product behavior.
+
+**The requested performance improvement was not demonstrated.** Two real-worker edited pairs
+on one 500-file / 100,374-line top/profile measured end-to-end median 19.086518 s full versus
+19.277576 s update; capture 0.926423 s versus 0.995548 s; worker 7.258 s versus 7.331 s. These
+limited observations show no acceleration, not a stable estimate; timed update used `--no-git`,
+excluding Git-advisory overhead, and no graph/Serena. The 1,000-file / 200,936-line
+snapshot-only benchmark passed all 15 paired correctness checks but update was 2.4% / 8.9% /
+8.3% slower for no-op / one-file / broader edits. Both used ext4, four logical CPUs and warm page
+cache; changed captures used copy fallback, not native reflinks. Neither establishes PERF-01,
+graph performance or physical disk savings.
+
+Historical validated runs retain their original source SHA, scope and limitations. Results
+above apply to the tested source, not the later documentation/evidence-only commit. Native
+application-client behavior, actual Claude/Codex registration/connection and Slurm site execution
+are not established. Full `qualify.py`, simulation/formal/RTL coverage and native Verilator UVM
+acceptance remain NOT_RUN; full release qualification remains **UNQUALIFIED**.
 
 ## Requirement-to-test mapping
 
@@ -93,6 +114,7 @@ actual command, source/lock identity, status and retained evidence separately.
 | API/DOC-01: opt-in CLI and truthful bounded reports | `tests/unit/test_incremental_update_command.py::test_UPD_07_*`, `test_UPD_08_*`, `test_UPD_11_*`, `test_UPD_12_*`; `tests/unit/test_gateway_cli.py::test_DOC_01_*` | CLI options/exit policy, omissions and no claim that pre-worker failure completed analysis; no MCP schema addition. |
 | SNP-03 / SEC-02: Git is inert, optional and non-authoritative | `tests/unit/test_update_git.py` | Dirty/staged/untracked paths, ignored limitations, invalid/missing Git/base, hostile executable config, symlink escapes, output/time bounds. |
 | SNP-01–03 / plan 9.6: real semantic equivalence and historical queries | `tests/integration/test_incremental_update.py` | Mandatory-bwrap pinned worker, full-vs-update semantic rows, changed inputs and failed publication; distinct from unit results. |
+| Plan 9.4: narrowly relocated comparison paths | `tests/integration/incremental_compare.py`; `tests/unit/test_incremental_comparison.py` | Test-only relocation of the exact inventory-proven empty-include warning; other diagnostics/metadata and semantic differences remain strict. No product diagnostic is changed or suppressed. |
 | Plan 22.3: paired reproducible measurement | `tests/unit/test_incremental_snapshot_benchmark.py`; `scripts/benchmark_incremental_snapshot.py` | Independent snapshot equivalence and actual counters; elapsed time is an observation, not a speed gate. |
 
 Operational details: [update workflow](../operations.md#2a-opt-in-snapshot-io-update).

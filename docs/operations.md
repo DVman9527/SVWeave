@@ -132,6 +132,10 @@ are not executed; no fetch or network access is used. This advisory is separate 
 No speedup is guaranteed, especially on copy-fallback filesystems. Snapshot-only measurements
 are not full semantic/graph performance or release qualification. See
 [ADR-018](adr/ADR-018-snapshot-io-update.md) for requirement/test mapping and evidence boundaries.
+The [recorded exact-source comparison](../evidence/incremental-updates-run40818546417/README.md)
+passed correctness checks but did **not** demonstrate an end-to-end speedup; measured update
+timings were slower. Opt in deliberately rather than assuming a shared-MCP upgrade improves
+build speed automatically.
 
 ## 3. Evidence manifest
 

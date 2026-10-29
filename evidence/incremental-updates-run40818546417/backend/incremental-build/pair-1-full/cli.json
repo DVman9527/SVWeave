@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/home/runner/work/SVWeave/SVWeave/.venv/bin/python",
+    "/home/runner/work/SVWeave/SVWeave/scripts/benchmark_incremental_build.py",
+    "--_invoke",
+    ".svweave/ci/incremental-build/pair-1-full/capture-timing.json",
+    "--root",
+    "/home/runner/work/_temp/incremental-build-mgp1azo4/full",
+    "--compact",
+    "build",
+    "--profile",
+    "bench"
+  ],
+  "wall_s": 19.036803362,
+  "exit": 0,
+  "stdout": "{\"schema_version\":\"1.1\",\"request_id\":\"req-11de36412f58\",\"outcome\":\"OK\",\"workspace_id\":\"svweave-bench\",\"snapshot_id\":\"c0c0747b55b2fd5c578bbfa8c61a38953013c8bf15ec30e4ae48d0c992c19569\",\"build_id\":\"e6894c179199ab80b52443ba4372d8c16ae4020f7b8dd3c7f438a77e1d37e7e0\",\"profile\":\"bench\",\"freshness\":\"CURRENT\",\"analysis_coverage\":{\"completeness\":\"COMPLETE\",\"scope\":\"bench_top\",\"basis\":\"qualified_static_subset\",\"unresolved_count\":0,\"limitations\":[\"Static elaboration of the selected tops only; no runtime, simulation or formal result is represented.\",\"Assertion execution and proof status are NOT_RUN (slang only parses and elaborates them).\",\"References are source occurrences visited by slang in elaborated code; uninstantiated generic classes, inactive generate/`ifdef branches and library members never loaded are not covered, so absence of a reference is not proof of absence.\",\"Packed/unpacked dimension expressions, return-type names and class names used only as scope prefixes (Class::member) are not extracted as references.\"],\"reference_coverage\":{\"contract_version\":\"1\",\"status\":\"PARTIAL\",\"features\":{\"aggregate_member_type_names\":\"PARTIAL\",\"class_scope_prefix_names\":\"UNSUPPORTED\",\"elaborated_source_occurrences\":\"PARTIAL\",\"packed_dimension_expressions\":\"UNSUPPORTED\",\"subroutine_return_type_names\":\"UNSUPPORTED\",\"unpacked_dimension_expressions\":\"UNSUPPORTED\"},\"scopes\":{\"call_only_specialization_bodies\":\"NOT_SEARCHED\",\"elaborated_bodies\":\"PARTIAL\",\"inactive_branches\":\"NOT_SEARCHED\",\"unelaborated_definitions\":\"NOT_SEARCHED\",\"uninstantiated_generic_bodies\":\"NOT_SEARCHED\",\"unloaded_library_members\":\"NOT_SEARCHED\"},\"observations\":{\"unsupported_nodes_project\":0,\"unsupported_nodes_external\":0,\"dropped_references_project\":0,\"dropped_references_external\":0,\"unresolved_references\":0,\"dynamic_references\":0,\"scope_gaps\":{},\"inactive_regions\":{\"generate_branch_not_selected\":6808}},\"query\":null,\"searched_scope\":\"all analysed source files\",\"depth_limit\":null,\"result_truncated\":false,\"absence_proof_supported\":false,\"blockers\":[\"known_reference_omissions\",\"unsearched_source_scopes\",\"observed_inactive_regions\"]}},\"provenance\":{\"backend\":\"slang\",\"toolchain_id\":\"9a0d2edd9236e69446160fc854a33375b7d527f8caa94081f278966ace68ad68\",\"evidence_kind\":\"HDL_STATIC_RESOLVED\"},\"data\":{\"job_id\":\"48d20966-77c5-4fac-818c-9af7f334c860\",\"reused\":false,\"published\":true,\"config_id\":\"afac459b3aef8bbbadc6a7f379f013b58d38347108ef4986d5ff54dc02caeb04\",\"toolchain_id\":\"9a0d2edd9236e69446160fc854a33375b7d527f8caa94081f278966ace68ad68\",\"completeness\":\"COMPLETE\",\"diagnostic_outcome\":\"NO_ERRORS\",\"job_lifecycle\":\"SUCCEEDED\",\"reasons\":[],\"semantic_deviations\":[\"`__FILE__` and other path-observable strings show the immutable snapshot path, not the original path (plan 9.4); not bit-identical to the original tree\"],\"counts\":{\"declarations\":51732,\"references\":74202,\"instances\":573,\"port_bindings\":1859,\"assertions\":0,\"diagnostics\":0,\"errors\":0,\"warnings\":0,\"specializations\":0,\"unresolved\":0,\"dynamic_unresolved\":0},\"resource_usage\":{\"wall_s\":7.214,\"peak_rss_kib\":427160,\"user_cpu_s\":6.581,\"sys_cpu_s\":0.3,\"rusage_source\":\"worker\",\"memory_limit_mib\":8192,\"timeout_s\":600.0,\"isolation\":\"bwrap\",\"isolation_warnings\":[]},\"run_dir\":\".svweave/runs/48d20966-77c5-4fac-818c-9af7f334c860\",\"worker_isolation\":\"bwrap\"},\"pagination\":{\"limit\":100,\"next_cursor\":null,\"truncated\":false},\"warnings\":[],\"error\":null}\n",
+  "stderr": "",
+  "tree_rss_peak_kib_sampled": 580752,
+  "timeout_s": 180.0,
+  "output_limit_bytes": 2097152,
+  "controller_failure": null
+}

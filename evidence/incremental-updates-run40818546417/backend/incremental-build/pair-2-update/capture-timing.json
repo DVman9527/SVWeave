@@ -1,0 +1,9 @@
+{
+  "capture_calls": [
+    {
+      "function": "capture_snapshot_incremental",
+      "wall_s": 1.0003658690000066
+    }
+  ],
+  "capture_total_s": 1.0003658690000066
+}

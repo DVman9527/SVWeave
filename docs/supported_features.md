@@ -60,6 +60,10 @@ mapping and validation boundaries. Ordinary `build` and the frozen MCP tools rem
 Shared MCP users must invoke the update CLI explicitly; upgrading the runtime does not change
 `svw_build` into an update. A COMPLETE update publishes to the same workspace state, and its
 returned build ID can then be queried through the existing CLI/MCP tools.
+The [exact-source validation record](../evidence/incremental-updates-run40818546417/README.md)
+shows correctness checks passing at `9f86f35930f22d3e817b1be95324f171b9163009`, but **no measured
+end-to-end acceleration**; limited paired runs were slower. This remains developer preview /
+UNQUALIFIED, not a claim that the user's performance goal was achieved.
 
 ### Completeness verdict
 

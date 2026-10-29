@@ -1,0 +1,27 @@
+{
+  "request.json": {
+    "sha256": "ee647c53cf0f5a3e607aaa0a6ed27a0d1384601354b4786239200916a740e7a8",
+    "bytes": 88174,
+    "copied": true
+  },
+  "dependency_report.json": {
+    "sha256": "333111697a2fffd1f0f2101e127d3e13fb4d00b129f3ad0b3d65ef74b9b5f31d",
+    "bytes": 13650,
+    "copied": true
+  },
+  "resource_usage.json": {
+    "sha256": "1b2c07fa1beaf21e81cab726d6eada638105c38b495508ff4643907b0ce1c27b",
+    "bytes": 222,
+    "copied": true
+  },
+  "events.jsonl": {
+    "sha256": "4b8ee28cb98c4e15d31969b165e4d1fafe71226ddc2beed90361d21f3a52fc33",
+    "bytes": 1220,
+    "copied": true
+  },
+  "result.json": {
+    "sha256": "483ff3c33cd31b3d4e5bcafb99e0a178ff08242e777d07d807d125288bd8744d",
+    "bytes": 4190,
+    "copied": false
+  }
+}

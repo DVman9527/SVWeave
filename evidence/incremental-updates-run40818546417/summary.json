@@ -1,0 +1,198 @@
+{
+  "derived_from_retained_raw_files": true,
+  "tested_source": "9f86f35930f22d3e817b1be95324f171b9163009",
+  "qualification": "UNQUALIFIED",
+  "performance_goal": "NOT_DEMONSTRATED",
+  "junit": {
+    "backend/junit-probe-isolation.xml": {
+      "tests": 62,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 62,
+      "producer_suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "62",
+          "time": "8.922",
+          "timestamp": "2026-10-29T04:35:28.299268+00:00",
+          "hostname": "runnervm48cm3"
+        }
+      ]
+    },
+    "backend/junit-required.xml": {
+      "tests": 238,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 238,
+      "producer_suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "238",
+          "time": "641.457",
+          "timestamp": "2026-10-29T04:36:05.352664+00:00",
+          "hostname": "runnervm48cm3"
+        }
+      ]
+    },
+    "native/junit-gates-supplement.xml": {
+      "tests": 298,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 298,
+      "producer_suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "298",
+          "time": "4.337",
+          "timestamp": "2026-10-29T04:39:11.564498+00:00",
+          "hostname": "runnervm48cm3"
+        }
+      ]
+    },
+    "native/junit-semantic-uvm.xml": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 21,
+      "producer_suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "21",
+          "time": "37.496",
+          "timestamp": "2026-10-29T04:38:32.721639+00:00",
+          "hostname": "runnervm48cm3"
+        }
+      ]
+    },
+    "native/junit.xml": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 5,
+      "producer_suites": [
+        {
+          "name": "native-verilator-static",
+          "tests": "5",
+          "failures": "0",
+          "skipped": "0"
+        }
+      ]
+    },
+    "previous-run40816336648/junit-required.xml": {
+      "tests": 238,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 237,
+      "producer_suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "1",
+          "skipped": "0",
+          "tests": "238",
+          "time": "643.236",
+          "timestamp": "2026-10-29T04:12:38.242690+00:00",
+          "hostname": "runnervm48cm3"
+        }
+      ]
+    }
+  },
+  "fast": {
+    "unit": {
+      "method": "count unmodified quiet pytest progress markers in exact command block",
+      "passed": 1680,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0,
+      "other": 0
+    },
+    "contract": {
+      "method": "count unmodified quiet pytest progress markers in exact command block",
+      "passed": 49,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "other": 0
+    }
+  },
+  "mutation": {
+    "total": 29,
+    "killed": 29,
+    "survived": [],
+    "errors": [],
+    "all_killed": true
+  },
+  "real_build_benchmark": {
+    "summary": {
+      "full": {
+        "end_to_end_median_s": 19.08651819450006,
+        "capture_median_s": 0.9264226054999654,
+        "worker_median_s": 7.258
+      },
+      "update": {
+        "end_to_end_median_s": 19.277576292999925,
+        "capture_median_s": 0.9955475149999984,
+        "worker_median_s": 7.3309999999999995
+      }
+    },
+    "pairs": 2,
+    "runtime_workspace_removed": true,
+    "corpus": {
+      "generator": "scripts/gen_corpus.py",
+      "seed": 1,
+      "scale": 1.0,
+      "files": 500,
+      "packages": 30,
+      "interfaces": 40,
+      "modules": 429,
+      "lines": 100374,
+      "bytes": 2278538,
+      "content_sha256": "53eb6a07632b85f282e94d36c1b31f7d3f46f86a2416a4445d6f2d19f6d69883",
+      "top": "bench_top",
+      "profile": "bench"
+    },
+    "timed_update_git_advisory": "DISABLED (--no-git): timings exclude Git-advisory overhead",
+    "graph_and_serena": "NOT_RUN"
+  },
+  "snapshot_benchmark": {
+    "correctness": "PASS",
+    "pairs": 15,
+    "ratios": {
+      "no_op": 1.0244595387771998,
+      "one_file_edit": 1.0893609391732142,
+      "broader_edit": 1.082623385717515
+    },
+    "corpus": {
+      "generator": "scripts/gen_corpus.py",
+      "seed": 1,
+      "scale": 2.0,
+      "files": 1000,
+      "packages": 60,
+      "interfaces": 80,
+      "modules": 859,
+      "lines": 200936,
+      "bytes": 4561652,
+      "content_sha256": "a9b401b168a17f7d07cbd48e8b5986104f102a92dad9214bd163c6098f8b50b7",
+      "top": "bench_top",
+      "profile": "bench"
+    }
+  }
+}

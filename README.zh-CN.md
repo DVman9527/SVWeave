@@ -61,6 +61,40 @@
 
 ## 状态
 
+### 快照 I/O 更新验证（2026-10-29）
+
+[Run 40818546417](https://github.com/DVman9527/SVWeave/actions/runs/40818546417) 的三个 job
+均成功，实测来源为 **`9f86f35930f22d3e817b1be95324f171b9163009`**。
+[原始报告、JUnit、成对样本与哈希](evidence/incremental-updates-run40818546417/README.md)
+保留确切范围及前一次失败的 oracle 验证。
+
+**正确性检查通过；尚未证明用户要求的性能提升。** 第一阶段仅通过 **`svweave update`
+CLI 显式启用**，复用不可变快照 I/O 并提供可选 Git 提示。所有当前相关输入仍须哈希；
+除非已有完全相同的 COMPLETE 构建，否则标识变化仍需分析整个 profile。普通 `build` 和
+MCP `svw_build` 不变；仅升级共享 MCP 安装不会自动启用 update。
+
+| 范围 | 结果 |
+|---|---|
+| Unit / MCP contracts | **1680 PASS + 1 SKIP / 49 PASS**；skip 不算 PASS |
+| 必要 integration / fault-injection / acceptance | **238 PASS**，零 failure/error/skip，含真实 full/update 等价性 |
+| Sandbox/controller 边界 | **62 PASS**，零 failure/error/skip |
+| Native Verilator static / slang semantic-UVM / supplement gates | **5 / 21 / 298 PASS**，零 failure/error/skip |
+| 关键变异 | **29/29 KILLED**，无 survivor/error，含快照复用／竞争防护 M28–M29 |
+
+范围重叠，不可相加。单一合成 top/profile、**500 文件／100,374 行**的两个真实 worker
+修改对，端到端中位数为 **full 19.087 s／update 19.278 s**（约慢 1%）；capture 为
+**0.926／0.996 s**，worker 为 **7.258／7.331 s**。仅两对观测，不能作为稳定速度估计；
+计时的 update 使用 `--no-git`，不含 Git 提示开销，亦不含 graph/Serena。
+另一个 **1,000 文件／200,936 行**的快照专用语料库
+全部 15 对等价检查通过，但 no-op／单文件／较大修改的 update 成对比值中位数分别
+**慢 2.4%／8.9%／8.3%**。两者均为 ext4、四个逻辑 CPU、warm page cache；修改后的
+快照因 reflink 不可用而回退复制。未证明端到端加速、物理磁盘节省或通用性能收益。
+详见[用法与限制](#快照-io-更新仅-cli)。
+
+**仍为 UNQUALIFIED**：不是完整 `qualify.py`、simulation/formal/RTL coverage、native
+Verilator UVM acceptance、真实 Claude/Codex 应用程序注册或 Slurm site 资格认定。
+历史验证结果不变；以上仅对应实测来源，不代表后续文档／证据专用 commit 已重跑。
+
 ### 安装一次／跨工作区验证（2026-10-29）
 
 [Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) 的三个 job
@@ -160,7 +194,7 @@ G0 不是单纯的 PASS，因为 codebase-memory-mcp 和 Serena 的探测结果�
 
 ## 它不是什么（计划 4.3 非目标）
 
-不是仿真器、形式验证工具，也不是 lint/签核工具；不做位级连通性、时钟/复位域、CDC/RDC、时序或功耗分析；不恢复加密源码；不静态解析 UVM factory 覆盖、`config_db` 命中或运行时拓扑；不做 SVA 证明、覆盖率收敛或签核结论；不支持 VHDL、AMS 或混合语言语义；不是多租户服务，没有远程 HTTP 端点，也不提供托管的 Web UI（只有静态图导出，ADR-014）；没有增量编译（每次构建都是完整重建）；仅支持 Linux。影响分析的计数只是计数，不是风险评分；重命名预览不等于重命名（应用重命名要经过编辑流程和人工）。
+不是仿真器、形式验证工具，也不是 lint/签核工具；不做位级连通性、时钟/复位域、CDC/RDC、时序或功耗分析；不恢复加密源码；不静态解析 UVM factory 覆盖、`config_db` 命中或运行时拓扑；不做 SVA 证明、覆盖率收敛或签核结论；不支持 VHDL、AMS 或混合语言语义；不是多租户服务，没有远程 HTTP 端点，也不提供托管的 Web UI（只有静态图导出，ADR-014）；没有增量编译（完全相同的 COMPLETE 构建复用或整个 profile 分析；快照 I/O 复用另计）；仅支持 Linux。影响分析的计数只是计数，不是风险评分；重命名预览不等于重命名（应用重命名要经过编辑流程和人工）。
 
 ## 仓库布局
 
@@ -611,6 +645,36 @@ qualified`。若要让审批具有约束力，请让智能体以单独的 UID �
 9. **发布。** 构建行和计数在一个事务中写入并验证（暂存的行必须与导入的计数一致）；该 profile 的“当前构建”指针最后移动，并且**只针对 COMPLETE 构建**。`PARTIAL` 构建以及因依赖泄漏导致的 `BLOCKED` 构建会被存储，可通过 `build_id` 访问，但永远不会成为当前构建。失败的 worker（超时、崩溃、取消、因内存被杀、错误输出）不存储任何语义行；在分析之前就失败的构建（`MISSING_INPUT`、`UNSUPPORTED_OPTION`）什么都不存储，也没有 `build_id`。在每一种失败情况下，最后一个可用的构建保持为当前构建。
 10. **报告。** 信封携带 `outcome`、`analysis_coverage`（完整性、范围、限制）、`freshness`、`provenance`、计数以及一个 `run_dir`（`.svweave/runs/<job_id>/`），其中包含 `argument_ledger.json`、`snapshot_inventory.json`、`dependency_report.json`、`diagnostics.json`、`semantic_summary.json`、`result.json` 等。
 
+### 快照 I/O 更新（仅 CLI）
+
+针对一个大型 top/profile、只修改少量文件的工作流，可选择第一阶段的 update 路径：
+以下示例假定当前目录含 `svweave.yaml`；从其他目录运行时使用
+`svweave --root /path/to/project update --profile rtl_demo`。全局 MCP 的工作区发现不会
+自动应用到 CLI。
+
+```bash
+svweave update --profile rtl_demo
+svweave update --profile rtl_demo --base HEAD~1  # 只影响 Git 提示
+svweave update --profile rtl_demo --no-git       # 仍完整验证全部相关输入
+```
+
+这优化的是**快照 I/O**，不是增量语义编译或图索引更新。每个当前相关输入仍须哈希，
+包括 ignored/untracked 文件、外部根目录及 include/库查找候选。经过验证的完整快照可直接
+复用；否则建立另一个完整不可变目录树，视文件系统支持使用 reflink 或普通复制。
+只有完全相同且已为 COMPLETE 的构建才能复用语义结果；其他情况仍分析整个 profile。
+普通 `build` 和 MCP 工具保持不变。
+仅升级共享 MCP 安装不会自动启用 update；须显式对服务器绑定的同一工作区运行 CLI。
+COMPLETE 更新发布到该工作区，随后可用返回的 build ID 通过现有 CLI/MCP 工具查询，
+并继续遵守原有新鲜度检查。
+
+`data.update` 报告权威的快照文件／配置／查找差异、实际物化工作量、语义复用／分析状态
+及可选 Git 提示的限制。`delta` 模式不代表只复制已修改文件：不支持 reflink 时仍可能
+复制全部文件；逻辑字节计数不等于物理磁盘节省。Git 的 base 不决定 donor 快照或重建
+范围；仅比较元数据的 unstaged 提示可能漏报，untracked 提示可能含 ignored 名称。
+不保证提速。发布、历史结果、游标及编辑审批／CAS 的规则不变。详见
+[操作说明](docs/operations.md#2a-opt-in-snapshot-io-update) 和
+[ADR-018](docs/adr/ADR-018-snapshot-io-update.md)。
+
 ### 结果与退出码
 
 | 结果 | 完整性 / 结果 | 指针 | CLI 退出码 |
@@ -823,6 +887,7 @@ root_mappings:
 | `svweave snapshot create [--profile P]` | 捕获不可变快照 |
 | `svweave snapshot check --snapshot S` | 将快照与工作区比较（STALE 时退出码 5） |
 | `svweave build [--profile P] [--no-reuse]` | 解析、快照并用 slang 分析 |
+| `svweave update --profile P [--base REF] [--no-git]` | 可选快照 I/O 复用；完全相同的 COMPLETE 构建复用，否则分析整个 profile；附可选 Git 变更提示 |
 | `svweave query symbol --build B` | 按 `--symbol`、`--file` + `--byte` 或 `--name` 查找声明 |
 | `svweave query references --build B --symbol ID` | 已解析和未解析的出现位置，以及所搜索的作用域 |
 | `svweave query hierarchy --build B` | 实例树（`--top`、`--instance`、`--depth`） |
@@ -1010,7 +1075,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 **门禁。** `scripts/qualify.py` 根据实际结果计算 G0 至 G5，并写入 `.svweave/qualification/report.{json,md}`：G0 锁定文件校验、后端探测和沙箱测试；G1 清单、快照、配置和路径策略；G2 语义测试套件（真实的 pyslang 和 UVM）；G3 后端测试套件和 MCP 契约；G4 编辑安全和全部关键变异；G5 每个 P0 测试套件都没有 FAIL、BLOCKED 和 SKIP，验收测试，覆盖率至少 85% 语句和 80% 分支，文档检查，以及符合计划 22.3 预算的基准测试。由未运行步骤计算出的门禁为 `NOT_EVALUATED`，绝不是 PASS。只有当每个门禁都通过且没有未关闭的阻断项时，发布决定才是 `ACCEPTED_STATIC_PREVIEW`；否则为带原因的 `BLOCKED`。
 
-**变异测试套件（Mutation suite）。** `scripts/mutation_suite.py` 每次向仓库的一次性副本注入一个关键变异，共 27 个（M01–M27，涵盖计划 20.5 及额外的写入安全防护），并运行映射的测试；当测试因该变异而失败时，该变异即被杀死（killed）。`--only M01,M05` 可选择其中几个；缺少 patch 锚点、超时或失败 baseline 等结果是 `ERROR`，不算 killed。
+**变异测试套件（Mutation suite）。** `scripts/mutation_suite.py` 每次向仓库的一次性副本注入一个关键变异，共 29 个（M01–M29，涵盖计划 20.5 及额外的写入／工作区绑定／快照复用安全防护），并运行映射的测试；当测试因该变异而失败时，该变异即被杀死（killed）。`--only M01,M05` 可选择其中几个；缺少 patch 锚点、超时或失败 baseline 等结果是 `ERROR`，不算 killed。
 
 **基准测试。** `scripts/gen_corpus.py` 写出一个确定性的合成语料库，`scripts/benchmark.py` 记录主机、语料库和原始耗时（`evidence/bench/`），然后与计划 22.3 的预算进行比较。参考语料库为规模 1.0：约 500 个文件、100,000 行；缩小的规模会如实标注。
 
@@ -1053,7 +1118,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 1. 仅支持 Linux x86_64；macOS 和 Windows 未经资格认定。
 2. 没有 EDA 运行器：编译、仿真、形式验证和覆盖率均为 `NOT_RUN`，除非你导入证据。
-3. 每次构建都是完整重建；不做任何增量方面的声明。
+3. 无增量语义编译或图索引增量：update 仅复用快照 I/O；完全相同的 COMPLETE 构建可复用，否则分析整个 profile。
 4. pyslang 没有“查找所有引用”：缺少引用并不证明不存在，每个结果都会说明其搜索的作用域。
 5. 虚分派调用为 `dynamic_unresolved`（列出候选，不做选择）；不计算 UVM factory、`config_db` 和运行时拓扑。
 6. 加密源码和隐式黑盒永远不会是 COMPLETE（`PARTIAL`，禁用“不存在”声明）。

@@ -1,0 +1,11 @@
+{
+  "isolation": "bwrap",
+  "isolation_warnings": [],
+  "memory_limit_mib": 8192,
+  "peak_rss_kib": 427104,
+  "rusage_source": "worker",
+  "sys_cpu_s": 0.335,
+  "timeout_s": 600.0,
+  "user_cpu_s": 6.609,
+  "wall_s": 7.302
+}

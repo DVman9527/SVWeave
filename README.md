@@ -74,6 +74,43 @@ compare-and-set write (TB4). Dashed lines are trust boundaries TB1 to TB4.*
 
 ## Status
 
+### Snapshot I/O update validation (2026-10-29)
+
+[Run 40818546417](https://github.com/DVman9527/SVWeave/actions/runs/40818546417) completed all
+three jobs successfully at **`9f86f35930f22d3e817b1be95324f171b9163009`**.
+[Raw reports, JUnit, paired samples and hashes](evidence/incremental-updates-run40818546417/README.md)
+retain the exact scope, including the earlier failed oracle run.
+
+**Correctness checks passed; the requested performance improvement was not demonstrated.**
+Phase 1 is opt-in **`svweave update` CLI only**: immutable snapshot I/O reuse plus an optional
+Git advisory. All relevant current inputs are still hashed; changed identities require whole-profile
+analysis unless the exact COMPLETE build already exists. Ordinary `build` and MCP `svw_build`
+are unchanged; upgrading a shared MCP installation does not automatically enable update.
+
+| Scope | Result |
+|---|---|
+| Unit / MCP contracts | **1680 PASS + 1 SKIP / 49 PASS**; the skip is not PASS |
+| Required integration / fault-injection / acceptance | **238 PASS**, zero failures/errors/skips, including real full-vs-update equivalence |
+| Sandbox/controller boundaries | **62 PASS**, zero failures/errors/skips |
+| Native Verilator static / slang semantic-UVM / supplement gates | **5 / 21 / 298 PASS**, zero failures/errors/skips |
+| Critical mutations | **29/29 KILLED**, no survivors/errors; includes snapshot reuse/race guards M28–M29 |
+
+Counts overlap. On one generated top/profile with **500 files / 100,374 lines**, two real-worker
+edited pairs measured median end-to-end **19.087 s full vs 19.278 s update** (about 1% slower).
+Capture was **0.926 s vs 0.996 s**, worker **7.258 s vs 7.331 s**. These are two bounded observations,
+not a stable speed estimate; timed update used `--no-git`, excluding Git-advisory overhead, and
+graph/Serena were not part of this benchmark. On a separate
+**1,000-file / 200,936-line** snapshot-only corpus, all 15 paired equivalence checks passed but
+update was **2.4% / 8.9% / 8.3% slower** for no-op / one-file / broader edits (median paired ratios).
+Both ran on ext4 with four logical CPUs and warm page cache; reflinks fell back to copies for
+changed captures. No end-to-end acceleration, physical disk-saving or general performance claim
+is established. See [usage and limits](#snapshot-io-update-cli-only).
+
+**Still UNQUALIFIED**: this is not full `qualify.py`, simulation/formal/RTL coverage, native
+Verilator UVM acceptance, real Claude/Codex application registration or Slurm site qualification.
+Historical validated results remain unchanged. Results apply to the tested source above, not a
+later documentation/evidence-only commit.
+
 ### Install-once/global-workspace validation (2026-10-29)
 
 [Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) completed all
@@ -236,7 +273,7 @@ CDC/RDC, timing or power analysis; no recovery of encrypted source; no static re
 factory overrides, `config_db` hits or runtime topology; no SVA proof, coverage closure or
 signoff conclusion; no VHDL, AMS or mixed-language semantics; no multi-tenant service, no remote
 HTTP endpoint and no served web UI (only the static graph export, ADR-014); no incremental compile
-(every build is a full rebuild); Linux only. Impact counts are counts, not a risk score; a rename
+(exact COMPLETE reuse or whole-profile analysis; snapshot I/O reuse is separate); Linux only. Impact counts are counts, not a risk score; a rename
 preview is not a rename (applying goes through the edit loop and a human).
 
 ## Repository layout
@@ -947,6 +984,38 @@ exit 4. The numbers below match the diagram.
     (`.svweave/runs/<job_id>/`) holding `argument_ledger.json`, `snapshot_inventory.json`,
     `dependency_report.json`, `diagnostics.json`, `semantic_summary.json`, `result.json` and more.
 
+### Snapshot I/O update (CLI only)
+
+For one large top/profile with a few edits, opt into the Phase 1 update path:
+These examples assume the current directory contains `svweave.yaml`; from elsewhere use
+`svweave --root /path/to/project update --profile rtl_demo`. Global MCP workspace discovery
+does not automatically apply to the CLI.
+
+```bash
+svweave update --profile rtl_demo
+svweave update --profile rtl_demo --base HEAD~1  # Git advisory only
+svweave update --profile rtl_demo --no-git       # same full input verification
+```
+
+This optimizes **snapshot I/O**, not semantic compilation or graph reindexing. It still hashes
+every relevant current input, including ignored/untracked files, external roots and include/library
+lookup candidates. A verified existing full snapshot can be reused; otherwise another complete
+immutable tree is materialized, using optional reflinks or ordinary copies. Only an exact existing
+COMPLETE build reuses semantics; otherwise the whole profile is analyzed. Ordinary `build` and
+the MCP tools are unchanged.
+Upgrading the shared MCP installation alone does not enable this path: explicitly run the CLI
+update against the server's workspace. A COMPLETE update publishes to that same workspace, and
+its returned build ID can be queried through existing CLI/MCP tools with the usual freshness checks.
+
+`data.update` reports the authoritative snapshot file/config/lookup delta, actual materialization
+work, semantic reuse/analysis state and optional Git limitations. `delta` mode may still copy every
+file when reflinks are unsupported; logical byte counters are not physical disk savings. Git's base
+does not select the donor snapshot or rebuild set. Metadata-only unstaged hints can miss changes,
+and untracked hints may include ignored names. No speedup is guaranteed. Publication, historical
+results, cursors and edit approval/CAS retain their existing rules. See the
+[update workflow](docs/operations.md#2a-opt-in-snapshot-io-update) and
+[ADR-018](docs/adr/ADR-018-snapshot-io-update.md).
+
 ### Outcomes and exit codes
 
 | Result | Completeness / outcome | Pointer | CLI exit |
@@ -1197,6 +1266,7 @@ prints one JSON envelope.
 | `svweave snapshot create [--profile P]` | capture an immutable snapshot |
 | `svweave snapshot check --snapshot S` | compare a snapshot with the workspace (exit 5 when STALE) |
 | `svweave build [--profile P] [--no-reuse]` | resolve, snapshot and analyse with slang |
+| `svweave update --profile P [--base REF] [--no-git]` | opt-in snapshot I/O reuse; exact COMPLETE reuse or whole-profile analysis, with optional advisory Git changes |
 | `svweave query symbol --build B` | declaration lookup by `--symbol`, `--file` + `--byte`, or `--name` |
 | `svweave query references --build B --symbol ID` | resolved and unresolved occurrences, with the searched scope |
 | `svweave query hierarchy --build B` | instance tree (`--top`, `--instance`, `--depth`) |
@@ -1480,8 +1550,8 @@ and a benchmark within the plan 22.3 budgets. A gate computed from a step that d
 `NOT_EVALUATED`, never PASS. The release decision is `ACCEPTED_STATIC_PREVIEW` only when every gate
 passes and no blocker is open; otherwise `BLOCKED` with reasons.
 
-**Mutation suite.** `scripts/mutation_suite.py` injects 27 critical mutations (M01–M27, covering plan 20.5
-and additional write-safety guards) one at a time into a throwaway copy of the
+**Mutation suite.** `scripts/mutation_suite.py` injects 29 critical mutations (M01–M29, covering plan 20.5
+and additional write/workspace-binding/snapshot-reuse safety guards) one at a time into a throwaway copy of the
 repository and runs the mapped tests; a mutation is killed when they fail. `--only M01,M05` selects some; anything
 other than a clean fail (missing patch anchor, timeout, red baseline) is `ERROR`, never killed.
 
@@ -1562,7 +1632,8 @@ Ten of the most important; the collected list is `docs/limitations.md`.
 
 1. Linux x86_64 only; macOS and Windows are not qualified.
 2. No EDA runner: compile, simulation, formal and coverage are `NOT_RUN` unless you import evidence.
-3. Every build is a full rebuild; no incremental claim is made.
+3. No incremental semantic compilation or graph-index delta: update reuses snapshot I/O only;
+   exact COMPLETE builds may be reused, otherwise the whole profile is analyzed.
 4. pyslang has no "find all references": a missing reference is not proof of absence, and every
    result states its searched scope.
 5. Virtual-dispatch calls are `dynamic_unresolved` (candidates listed, none chosen); UVM factory,

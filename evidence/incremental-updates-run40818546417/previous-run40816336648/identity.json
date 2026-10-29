@@ -1,0 +1,14 @@
+{
+  "source_identity": {
+    "git_head": "c87a64e07de665265e4978cc244f4c6b849e172b",
+    "src_tree_sha256": "2eaedd085f82fb2ed45cba72cf3afdb17fa5b7516fad6ff982cb766e6a9da31c"
+  },
+  "git_status": "",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "98a9f021e9ee8993dd4628dcb411a0448d8b71443f67c24565d7ae7ceef28bb4",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+  "scope": "isolated backend validation only; not full qualification, release or EDA simulation",
+  "cleanroom_validation_only": "false",
+  "dep01_contract_revision": "DEP-01-R2-host-controller"
+}

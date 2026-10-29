@@ -61,6 +61,40 @@
 
 ## 狀態
 
+### 快照 I/O 更新驗證（2026-10-29）
+
+[Run 40818546417](https://github.com/DVman9527/SVWeave/actions/runs/40818546417) 的三個 job
+均成功，實測來源為 **`9f86f35930f22d3e817b1be95324f171b9163009`**。
+[原始報告、JUnit、成對樣本與雜湊](evidence/incremental-updates-run40818546417/README.md)
+保留確切範圍及前一次失敗的 oracle 驗證。
+
+**正確性檢查通過；尚未證明使用者要求的效能提升。** 第一階段僅透過 **`svweave update`
+CLI 明確啟用**，重用不可變快照 I/O 並提供可選 Git 提示。所有目前相關輸入仍須雜湊；
+除非已有完全相同的 COMPLETE 建置，否則身分變化仍需分析整個 profile。一般 `build` 和
+MCP `svw_build` 不變；僅升級共用 MCP 安裝不會自動啟用 update。
+
+| 範圍 | 結果 |
+|---|---|
+| Unit / MCP contracts | **1680 PASS + 1 SKIP / 49 PASS**；skip 不算 PASS |
+| 必要 integration / fault-injection / acceptance | **238 PASS**，零 failure/error/skip，含真實 full/update 等價性 |
+| Sandbox/controller 邊界 | **62 PASS**，零 failure/error/skip |
+| Native Verilator static / slang semantic-UVM / supplement gates | **5 / 21 / 298 PASS**，零 failure/error/skip |
+| 關鍵變異 | **29/29 KILLED**，無 survivor/error，含快照重用／競爭防護 M28–M29 |
+
+範圍重疊，不可相加。單一合成 top/profile、**500 檔案／100,374 行**的兩個真實 worker
+修改對，端到端中位數為 **full 19.087 s／update 19.278 s**（約慢 1%）；capture 為
+**0.926／0.996 s**，worker 為 **7.258／7.331 s**。僅兩對觀測，不能作為穩定速度估計；
+計時的 update 使用 `--no-git`，不含 Git 提示成本，亦不含 graph/Serena。
+另一個 **1,000 檔案／200,936 行**的快照專用語料庫
+全部 15 對等價檢查通過，但 no-op／單檔／較大修改的 update 成對比值中位數分別
+**慢 2.4%／8.9%／8.3%**。兩者均為 ext4、四個邏輯 CPU、warm page cache；修改後的
+快照因 reflink 不可用而退回複製。未證明端到端加速、實體磁碟節省或通用效能收益。
+詳見[用法與限制](#快照-io-更新僅-cli)。
+
+**仍為 UNQUALIFIED**：不是完整 `qualify.py`、simulation/formal/RTL coverage、native
+Verilator UVM acceptance、真實 Claude/Codex 應用程式註冊或 Slurm site 資格認定。
+歷史驗證結果不變；以上僅對應實測來源，不代表後續文件／證據專用 commit 已重跑。
+
 ### 安裝一次／跨工作區驗證（2026-10-29）
 
 [Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) 的三個 job
@@ -160,7 +194,7 @@ G0 不是單純的 PASS，因為 codebase-memory-mcp 與 Serena 的探測結果�
 
 ## 它不是什麼（計畫 4.3 非目標）
 
-不是模擬器、形式驗證工具，也不是 lint／簽核（signoff）工具；沒有位元層級連線、時脈／重置網域、CDC/RDC、時序或功耗分析；不還原加密的原始碼；不對 UVM factory override、`config_db` 命中或執行期拓樸做靜態解析；沒有 SVA 證明、覆蓋率收斂或簽核結論；不支援 VHDL、AMS 或混合語言語意；不是多租戶服務，沒有遠端 HTTP 端點，也沒有對外提供服務的網頁 UI（只有靜態圖譜匯出，ADR-014）；沒有增量編譯（每次建置都是完整重建）；僅支援 Linux。影響範圍的計數只是計數，不是風險分數；重新命名預覽並不是重新命名（套用必須經過編輯迴圈與人類）。
+不是模擬器、形式驗證工具，也不是 lint／簽核（signoff）工具；沒有位元層級連線、時脈／重置網域、CDC/RDC、時序或功耗分析；不還原加密的原始碼；不對 UVM factory override、`config_db` 命中或執行期拓樸做靜態解析；沒有 SVA 證明、覆蓋率收斂或簽核結論；不支援 VHDL、AMS 或混合語言語意；不是多租戶服務，沒有遠端 HTTP 端點，也沒有對外提供服務的網頁 UI（只有靜態圖譜匯出，ADR-014）；沒有增量編譯（完全相同的 COMPLETE 建置重用或整個 profile 分析；快照 I/O 重用另計）；僅支援 Linux。影響範圍的計數只是計數，不是風險分數；重新命名預覽並不是重新命名（套用必須經過編輯迴圈與人類）。
 
 ## 儲存庫結構
 
@@ -611,6 +645,36 @@ qualified`。若要取得具約束力的核准，請以獨立的 UID 執行代�
 9. **發布。** 建置資料列與計數在單一交易中寫入並經過驗證（暫存的資料列必須與匯入的計數相符）；該 profile 的「目前建置」指標最後才移動，而且**只在 COMPLETE 建置時才移動**。`PARTIAL` 建置，以及因相依性洩漏而 `BLOCKED` 的建置，會被儲存並可用 `build_id` 定址，但永遠不會成為目前建置。失敗的 worker（逾時、當機、取消、記憶體被殺、輸出錯誤）不會儲存任何語意資料列，而在分析之前就失敗的建置（`MISSING_INPUT`、`UNSUPPORTED_OPTION`）不儲存任何東西，也沒有 `build_id`。在所有失敗情況下，最後一個可用的建置仍是目前建置。
 10. **回報。** 回應封包帶有 `outcome`、`analysis_coverage`（完整度、範圍、限制）、`freshness`、`provenance`、計數，以及一個 `run_dir`（`.svweave/runs/<job_id>/`），內有 `argument_ledger.json`、`snapshot_inventory.json`、`dependency_report.json`、`diagnostics.json`、`semantic_summary.json`、`result.json` 等。
 
+### 快照 I/O 更新（僅 CLI）
+
+針對一個大型 top/profile、只修改少量檔案的工作流程，可選擇第一階段的 update 路徑：
+以下範例假定目前目錄含 `svweave.yaml`；從其他目錄執行時使用
+`svweave --root /path/to/project update --profile rtl_demo`。全域 MCP 的工作區探索不會
+自動套用至 CLI。
+
+```bash
+svweave update --profile rtl_demo
+svweave update --profile rtl_demo --base HEAD~1  # 只影響 Git 提示
+svweave update --profile rtl_demo --no-git       # 仍完整驗證所有相關輸入
+```
+
+這最佳化的是**快照 I/O**，不是增量語意編譯或圖索引更新。每個目前相關輸入仍須雜湊，
+包括 ignored/untracked 檔案、外部根目錄及 include/函式庫查找候選。經過驗證的完整快照
+可直接重用；否則建立另一個完整不可變目錄樹，視檔案系統支援使用 reflink 或一般複製。
+只有完全相同且已為 COMPLETE 的建置才能重用語意結果；其他情況仍分析整個 profile。
+一般 `build` 和 MCP 工具保持不變。
+僅升級共用 MCP 安裝不會自動啟用 update；須明確對伺服器綁定的同一工作區執行 CLI。
+COMPLETE 更新發布至該工作區，接著可用傳回的 build ID 透過既有 CLI/MCP 工具查詢，
+並繼續遵守原有新鮮度檢查。
+
+`data.update` 回報權威的快照檔案／設定／查找差異、實際具現化工作量、語意重用／分析
+狀態及可選 Git 提示的限制。`delta` 模式不代表只複製已修改檔案：不支援 reflink 時仍
+可能複製所有檔案；邏輯位元組計數不等於實體磁碟節省。Git 的 base 不決定 donor 快照
+或重建範圍；僅比較中繼資料的 unstaged 提示可能漏報，untracked 提示可能含 ignored
+名稱。不保證加速。發布、歷史結果、游標及編輯核准／CAS 的規則不變。詳見
+[操作說明](docs/operations.md#2a-opt-in-snapshot-io-update) 和
+[ADR-018](docs/adr/ADR-018-snapshot-io-update.md)。
+
 ### 結果與結束碼
 
 | 結果 | 完整度 / 結果 | 指標 | CLI 結束碼 |
@@ -823,6 +887,7 @@ root_mappings:
 | `svweave snapshot create [--profile P]` | 擷取不可變快照 |
 | `svweave snapshot check --snapshot S` | 比對快照與工作區（STALE 時結束碼為 5） |
 | `svweave build [--profile P] [--no-reuse]` | 解析、建立快照，並以 slang 分析 |
+| `svweave update --profile P [--base REF] [--no-git]` | 可選快照 I/O 重用；完全相同的 COMPLETE 建置重用，否則分析整個 profile；附可選 Git 變更提示 |
 | `svweave query symbol --build B` | 以 `--symbol`、`--file` + `--byte` 或 `--name` 查找宣告 |
 | `svweave query references --build B --symbol ID` | 已解析與未解析的出現處，並附上所搜尋的範圍 |
 | `svweave query hierarchy --build B` | 實例樹（`--top`、`--instance`、`--depth`） |
@@ -1010,7 +1075,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 **關卡（Gates）。** `scripts/qualify.py` 依實際結果計算 G0 至 G5，並寫入 `.svweave/qualification/report.{json,md}`：G0 為 lock 已驗證、後端探測與沙箱測試；G1 為 manifest、快照、設定與路徑政策；G2 為語意測試套件（真實的 pyslang 與 UVM）；G3 為後端測試套件與 MCP 契約；G4 為編輯安全性與所有關鍵變異；G5 為每個 P0 測試套件都沒有 FAIL、BLOCKED 與 SKIP、驗收測試、至少 85% 述句與 80% 分支的覆蓋率、文件檢查，以及在計畫 22.3 預算之內的基準測試。由未執行的步驟所算出的關卡為 `NOT_EVALUATED`，絕不是 PASS。只有在每個關卡都通過且沒有任何開放的阻擋條件時，發行決定才會是 `ACCEPTED_STATIC_PREVIEW`；否則為 `BLOCKED` 並附上原因。
 
-**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把 27 個關鍵變異（M01–M27，涵蓋計畫 20.5 及額外的寫入安全防護）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
+**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把 29 個關鍵變異（M01–M29，涵蓋計畫 20.5 及額外的寫入／工作區綁定／快照重用安全防護）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
 
 **基準測試（Benchmark）。** `scripts/gen_corpus.py` 寫出確定性的合成語料，`scripts/benchmark.py` 記錄主機、語料與原始計時（`evidence/bench/`），然後與計畫 22.3 的預算比較。參考語料為 scale 1.0：約 500 個檔案與 100,000 行；縮小規模的執行會被如此標示。
 
@@ -1053,7 +1118,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 1. 僅支援 Linux x86_64；macOS 與 Windows 未經資格認定。
 2. 沒有 EDA 執行器：除非你匯入證據，否則編譯、模擬、形式驗證與覆蓋率皆為 `NOT_RUN`。
-3. 每次建置都是完整重建；不宣稱任何增量能力。
+3. 無增量語意編譯或圖索引增量：update 僅重用快照 I/O；完全相同的 COMPLETE 建置可重用，否則分析整個 profile。
 4. pyslang 沒有「找出所有參照」功能：找不到參照並不等於證明不存在，且每個結果都會註明其搜尋範圍。
 5. 虛擬分派（virtual-dispatch）呼叫為 `dynamic_unresolved`（列出候選項，不選擇任何一個）；UVM factory、`config_db` 與執行期拓樸不會被計算。
 6. 加密的原始碼與隱含的黑盒絕不會是 COMPLETE（`PARTIAL`，停用「不存在」的宣稱）。

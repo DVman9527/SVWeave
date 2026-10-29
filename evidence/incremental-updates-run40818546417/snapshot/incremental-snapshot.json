@@ -1,0 +1,2292 @@
+{
+  "benchmark": "incremental-snapshot-paired",
+  "correctness": "PASS",
+  "source_identity": {
+    "git_head": "9f86f35930f22d3e817b1be95324f171b9163009",
+    "src_tree_sha256": "2eaedd085f82fb2ed45cba72cf3afdb17fa5b7516fad6ff982cb766e6a9da31c"
+  },
+  "source_hashes": {
+    "src/svweave/snapshot/capture.py": "ca748937046b8d8d0cd420a500b5c5fc6ea168408d056ac097b08b314954509f",
+    "src/svweave/snapshot/incremental.py": "b3ec42c196f44f710d4788f1fb766005b0ca5eed7b62490eb7657a6ec57bb42d",
+    "src/svweave/manifest/resolver.py": "dfcea5ae184104f669d1b71a5352badeec82aa98b643c6c74cd3d4b28ca0375f",
+    "scripts/gen_corpus.py": "9a84ccf0bd234688a9e6f1a7d5814dc690740b0c8d39d22d750d8c224bae0dea",
+    "scripts/benchmark_incremental_snapshot.py": "25b34cbdd3f5d9fb7f2f4e75728039be59caff2d646660bf04fa336e3df6c365"
+  },
+  "host": {
+    "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "logical_cpus": 4,
+    "filesystem": "Filesystem     Type 1K-blocks     Used Available Use% Mounted on\n/dev/root      ext4 151263856 63559136  87688336  43% /",
+    "max_rss_kib": 59700,
+    "page_cache": "warm; not dropped; setup outside timing"
+  },
+  "corpus": {
+    "generator": "scripts/gen_corpus.py",
+    "seed": 1,
+    "scale": 2.0,
+    "files": 1000,
+    "packages": 60,
+    "interfaces": 80,
+    "modules": 859,
+    "lines": 200936,
+    "bytes": 4561652,
+    "content_sha256": "a9b401b168a17f7d07cbd48e8b5986104f102a92dad9214bd163c6098f8b50b7",
+    "top": "bench_top",
+    "profile": "bench"
+  },
+  "workspace": "/home/runner/work/SVWeave/SVWeave/.svweave/ci/snapshot-paired-184vfwuq/work",
+  "trials": 5,
+  "method": "separate states; alternating mode order; unique edited target IDs; same-size comment edits; post-timing independent integrity checks",
+  "limitations": [
+    "Not a semantic/graph/Serena benchmark or PERF-01 qualification.",
+    "No fixed speed threshold. A slower fallback is reported, not hidden.",
+    "Incremental counters are actual logical I/O, not physical disk writes.",
+    "Legacy logical volumes are algorithm-derived and explicitly labeled.",
+    "Stage timers are nested/inclusive and add wrapper overhead; do not sum.",
+    "Same-size comment edits test capture, not semantic incremental compilation."
+  ],
+  "native_backends": "NOT_RUN",
+  "summary": {
+    "no_op": {
+      "full": {
+        "n": 5,
+        "median_s": 2.2140074059999506,
+        "min_s": 2.202573832999974,
+        "max_s": 2.2245876150000186,
+        "raw_s": [
+          2.2140074059999506,
+          2.2108770620000087,
+          2.202573832999974,
+          2.2245876150000186,
+          2.215765217000012
+        ]
+      },
+      "incremental": {
+        "n": 5,
+        "median_s": 2.268122483999946,
+        "min_s": 2.2472257590000027,
+        "max_s": 2.2809950099999696,
+        "raw_s": [
+          2.268161006000014,
+          2.2472257590000027,
+          2.268122483999946,
+          2.2616433140000254,
+          2.2809950099999696
+        ]
+      },
+      "median_paired_ratio_incremental_over_full": 1.0244595387771998
+    },
+    "one_file_edit": {
+      "full": {
+        "n": 5,
+        "median_s": 2.1593647350000538,
+        "min_s": 2.1453221369999937,
+        "max_s": 2.184234853000021,
+        "raw_s": [
+          2.1453221369999937,
+          2.1713352030000124,
+          2.1580044749999843,
+          2.184234853000021,
+          2.1593647350000538
+        ]
+      },
+      "incremental": {
+        "n": 5,
+        "median_s": 2.35482307999996,
+        "min_s": 2.338271330999987,
+        "max_s": 2.3721674070000063,
+        "raw_s": [
+          2.35482307999996,
+          2.365367755999955,
+          2.3721674070000063,
+          2.34494578500005,
+          2.338271330999987
+        ]
+      },
+      "median_paired_ratio_incremental_over_full": 1.0893609391732142
+    },
+    "broader_edit": {
+      "full": {
+        "n": 5,
+        "median_s": 2.162830819000078,
+        "min_s": 2.148007071000052,
+        "max_s": 2.1853633220000575,
+        "raw_s": [
+          2.148007071000052,
+          2.1853633220000575,
+          2.176587642999948,
+          2.1624642040000026,
+          2.162830819000078
+        ]
+      },
+      "incremental": {
+        "n": 5,
+        "median_s": 2.3415312240000503,
+        "min_s": 2.3334640959999433,
+        "max_s": 2.3572445199999947,
+        "raw_s": [
+          2.3449613819999513,
+          2.3334640959999433,
+          2.3572445199999947,
+          2.336298092999982,
+          2.3415312240000503
+        ]
+      },
+      "median_paired_ratio_incremental_over_full": 1.082623385717515
+    }
+  },
+  "pairs": [
+    {
+      "case": "no_op",
+      "trial": 1,
+      "full_s": 2.2140074059999506,
+      "incremental_s": 2.268161006000014,
+      "ratio_incremental_over_full": 1.0244595387771998,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "no_op",
+      "trial": 2,
+      "full_s": 2.2108770620000087,
+      "incremental_s": 2.2472257590000027,
+      "ratio_incremental_over_full": 1.0164408494822015,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "no_op",
+      "trial": 3,
+      "full_s": 2.202573832999974,
+      "incremental_s": 2.268122483999946,
+      "ratio_incremental_over_full": 1.0297600243941392,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "no_op",
+      "trial": 4,
+      "full_s": 2.2245876150000186,
+      "incremental_s": 2.2616433140000254,
+      "ratio_incremental_over_full": 1.0166573340380691,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "no_op",
+      "trial": 5,
+      "full_s": 2.215765217000012,
+      "incremental_s": 2.2809950099999696,
+      "ratio_incremental_over_full": 1.0294389461931686,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 1,
+      "full_s": 2.1453221369999937,
+      "incremental_s": 2.35482307999996,
+      "ratio_incremental_over_full": 1.0976547714614697,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 2,
+      "full_s": 2.1713352030000124,
+      "incremental_s": 2.365367755999955,
+      "ratio_incremental_over_full": 1.0893609391732142,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 3,
+      "full_s": 2.1580044749999843,
+      "incremental_s": 2.3721674070000063,
+      "ratio_incremental_over_full": 1.0992411899423997,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 4,
+      "full_s": 2.184234853000021,
+      "incremental_s": 2.34494578500005,
+      "ratio_incremental_over_full": 1.0735776795152292,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 5,
+      "full_s": 2.1593647350000538,
+      "incremental_s": 2.338271330999987,
+      "ratio_incremental_over_full": 1.0828514947475647,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "broader_edit",
+      "trial": 1,
+      "full_s": 2.148007071000052,
+      "incremental_s": 2.3449613819999513,
+      "ratio_incremental_over_full": 1.0916916492775803,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "broader_edit",
+      "trial": 2,
+      "full_s": 2.1853633220000575,
+      "incremental_s": 2.3334640959999433,
+      "ratio_incremental_over_full": 1.0677694058964726,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "broader_edit",
+      "trial": 3,
+      "full_s": 2.176587642999948,
+      "incremental_s": 2.3572445199999947,
+      "ratio_incremental_over_full": 1.0830000471522714,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "broader_edit",
+      "trial": 4,
+      "full_s": 2.1624642040000026,
+      "incremental_s": 2.336298092999982,
+      "ratio_incremental_over_full": 1.0803869440605913,
+      "identity_and_exact_tree_equivalence": "PASS"
+    },
+    {
+      "case": "broader_edit",
+      "trial": 5,
+      "full_s": 2.162830819000078,
+      "incremental_s": 2.3415312240000503,
+      "ratio_incremental_over_full": 1.082623385717515,
+      "identity_and_exact_tree_equivalence": "PASS"
+    }
+  ],
+  "samples": [
+    {
+      "case": "no_op",
+      "trial": 1,
+      "mode": "full",
+      "changed_files": 0,
+      "capture_wall_s": 2.2140074059999506,
+      "manifest_resolution_s": 0.4722601199999872,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2539755239999977
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2570803489999207
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7310060720000138
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.0210596829978158
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8988791659999151
+        },
+        "capture._content_matches": {
+          "calls": 1,
+          "wall_s": 0.04338114699999096
+        },
+        "capture.remove_snapshot_dir": {
+          "calls": 1,
+          "wall_s": 0.02075468999998975
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 1,
+      "mode": "incremental",
+      "changed_files": 0,
+      "capture_wall_s": 2.268161006000014,
+      "manifest_resolution_s": 0.48246491400004743,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "reused_existing",
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_copied": 0,
+        "bytes_copied": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 0,
+        "reflink_skipped": 0,
+        "reflink_supported": null,
+        "noop_snapshot_reused": true,
+        "attempts": 1,
+        "fallback_reasons": [],
+        "timings_s": {
+          "inventory_enumeration": 1.7382453689999693,
+          "source_hash": 0.13289134599995123,
+          "cached_snapshot_verify": 0.1359394579999389,
+          "total": 2.2668291579999504
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2533588700000564
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.25579954900001667
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.738222025999903
+        },
+        "incremental._hash_fd": {
+          "calls": 3003,
+          "wall_s": 0.03433423500268873
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8712492669999392
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.1363263299999744
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 2,
+      "mode": "incremental",
+      "changed_files": 0,
+      "capture_wall_s": 2.2472257590000027,
+      "manifest_resolution_s": 0.47088336800004527,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "reused_existing",
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_copied": 0,
+        "bytes_copied": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 0,
+        "reflink_skipped": 0,
+        "reflink_supported": null,
+        "noop_snapshot_reused": true,
+        "attempts": 1,
+        "fallback_reasons": [],
+        "timings_s": {
+          "inventory_enumeration": 1.7200485280000066,
+          "source_hash": 0.1344218469999987,
+          "cached_snapshot_verify": 0.13160909400005494,
+          "total": 2.2458448290000206
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.253073087999951
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.25552047999997285
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7200431279999293
+        },
+        "incremental._hash_fd": {
+          "calls": 3003,
+          "wall_s": 0.032605715001182034
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.854583527000159
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.1320762670000022
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 2,
+      "mode": "full",
+      "changed_files": 0,
+      "capture_wall_s": 2.2108770620000087,
+      "manifest_resolution_s": 0.4848294009999563,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2639324020000231
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2665080939999598
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7238522940000394
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.020537514002398893
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8872556439999926
+        },
+        "capture._content_matches": {
+          "calls": 1,
+          "wall_s": 0.03940273099999558
+        },
+        "capture.remove_snapshot_dir": {
+          "calls": 1,
+          "wall_s": 0.02095603400005075
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 3,
+      "mode": "full",
+      "changed_files": 0,
+      "capture_wall_s": 2.202573832999974,
+      "manifest_resolution_s": 0.4761892500000613,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25927023300005203
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26249085999995714
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7196035189999748
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.02083507099803228
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8861375449999969
+        },
+        "capture._content_matches": {
+          "calls": 1,
+          "wall_s": 0.03957407500001864
+        },
+        "capture.remove_snapshot_dir": {
+          "calls": 1,
+          "wall_s": 0.02086427399990498
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 3,
+      "mode": "incremental",
+      "changed_files": 0,
+      "capture_wall_s": 2.268122483999946,
+      "manifest_resolution_s": 0.4730722839999544,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "reused_existing",
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_copied": 0,
+        "bytes_copied": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 0,
+        "reflink_skipped": 0,
+        "reflink_supported": null,
+        "noop_snapshot_reused": true,
+        "attempts": 1,
+        "fallback_reasons": [],
+        "timings_s": {
+          "inventory_enumeration": 1.7373743000000559,
+          "source_hash": 0.13063735900004758,
+          "cached_snapshot_verify": 0.13100442500001463,
+          "total": 2.2666892479999206
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2610748349999312
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2635388649999868
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7373690789999046
+        },
+        "incremental._hash_fd": {
+          "calls": 3003,
+          "wall_s": 0.03198719400108985
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8681251099999372
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.13135194400001637
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 4,
+      "mode": "incremental",
+      "changed_files": 0,
+      "capture_wall_s": 2.2616433140000254,
+      "manifest_resolution_s": 0.4709366670000463,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "reused_existing",
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_copied": 0,
+        "bytes_copied": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 0,
+        "reflink_skipped": 0,
+        "reflink_supported": null,
+        "noop_snapshot_reused": true,
+        "attempts": 1,
+        "fallback_reasons": [],
+        "timings_s": {
+          "inventory_enumeration": 1.7240487689999782,
+          "source_hash": 0.13144320000003518,
+          "cached_snapshot_verify": 0.13439493399994262,
+          "total": 2.2602978720000237
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26383729299993774
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2662824779999937
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.724043760000086
+        },
+        "incremental._hash_fd": {
+          "calls": 3003,
+          "wall_s": 0.031781821996446524
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8556052910000744
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.1348249279999436
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 4,
+      "mode": "full",
+      "changed_files": 0,
+      "capture_wall_s": 2.2245876150000186,
+      "manifest_resolution_s": 0.4708903169999985,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2631341410000232
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26573728400001073
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.738031441999965
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.0208397420011579
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8892911149999918
+        },
+        "capture._content_matches": {
+          "calls": 1,
+          "wall_s": 0.03943952400004491
+        },
+        "capture.remove_snapshot_dir": {
+          "calls": 1,
+          "wall_s": 0.020768068000052153
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 5,
+      "mode": "full",
+      "changed_files": 0,
+      "capture_wall_s": 2.215765217000012,
+      "manifest_resolution_s": 0.4705174649999435,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26179831499996453
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26438403700001345
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7271275120000382
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.020748110998965785
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8894224069999837
+        },
+        "capture._content_matches": {
+          "calls": 1,
+          "wall_s": 0.03976151899996694
+        },
+        "capture.remove_snapshot_dir": {
+          "calls": 1,
+          "wall_s": 0.021000810999908026
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "no_op",
+      "trial": 5,
+      "mode": "incremental",
+      "changed_files": 0,
+      "capture_wall_s": 2.2809950099999696,
+      "manifest_resolution_s": 0.47346133300004567,
+      "snapshot_id": "a9ffb90f4926bc8c161829a70b78fe11172714630078ee4d9360822332994ad7",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "reused_existing",
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 1001,
+        "snapshot_bytes_verified": 4581513,
+        "files_copied": 0,
+        "bytes_copied": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 0,
+        "reflink_skipped": 0,
+        "reflink_supported": null,
+        "noop_snapshot_reused": true,
+        "attempts": 1,
+        "fallback_reasons": [],
+        "timings_s": {
+          "inventory_enumeration": 1.7329244930000414,
+          "source_hash": 0.14474332600013895,
+          "cached_snapshot_verify": 0.13047276300005706,
+          "total": 2.279441998999914
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26447928500010676
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26703367599998273
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7329186819999904
+        },
+        "incremental._hash_fd": {
+          "calls": 3003,
+          "wall_s": 0.03251203700165206
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.877783786000009
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.130766681999944
+        }
+      },
+      "tree_sha256": "d5151d6e2fe792c6768fc08918377973a45d49e4d29e829d259fe868c945fde9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 1,
+      "mode": "full",
+      "changed_files": 1,
+      "capture_wall_s": 2.1453221369999937,
+      "manifest_resolution_s": 0.4751210799998944,
+      "snapshot_id": "c85884cc04b2da26ee01af87ecdbaa60c9121eb02cfc6dc7ed198617165608db",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.260783081999989
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2640885159999016
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7117499749999752
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.02107542700025533
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.88226418499994
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006235005999997156
+        }
+      },
+      "tree_sha256": "7a658cfa38bf953250c5552614fa6e0038f7703cda22459709c3db3faa0485df",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 1,
+      "mode": "incremental",
+      "changed_files": 1,
+      "capture_wall_s": 2.35482307999996,
+      "manifest_resolution_s": 0.4780388699999776,
+      "snapshot_id": "c85884cc04b2da26ee01af87ecdbaa60c9121eb02cfc6dc7ed198617165608db",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 999,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7207036400000106,
+          "source_hash": 0.13182160799988196,
+          "cached_snapshot_verify": 0.013969664000001103,
+          "source_copy_and_hash": 0.12988603300186696,
+          "total": 2.3530273350000925
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2617346689999067
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2649896699999772
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7206991109999308
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021134065001433555
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8526522040000373
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.013982316999999966
+        },
+        "incremental._clone_verified": {
+          "calls": 1000,
+          "wall_s": 0.001538386002266634
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.1323515579991863
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006744969000010315
+        }
+      },
+      "tree_sha256": "7a658cfa38bf953250c5552614fa6e0038f7703cda22459709c3db3faa0485df",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 2,
+      "mode": "incremental",
+      "changed_files": 1,
+      "capture_wall_s": 2.365367755999955,
+      "manifest_resolution_s": 0.47416957199993703,
+      "snapshot_id": "0a58e6daabad0563da6a264a7233137ce54cebb4a3c4339100e842394766f635",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 999,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.748962913000014,
+          "source_hash": 0.13084704300001704,
+          "cached_snapshot_verify": 0.014062957999954051,
+          "source_copy_and_hash": 0.13004868100074418,
+          "total": 2.3635230210001055
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26102252900000167
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26357976600002075
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.748957212999926
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021168871000213585
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8799220639998566
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014077114999963669
+        },
+        "incremental._clone_verified": {
+          "calls": 1000,
+          "wall_s": 0.0015815839969945955
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.1325040879997914
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006530175999955645
+        }
+      },
+      "tree_sha256": "28da3d214ae1d3aa58cd9003e8870e7b1a41bd44334b904c027a6722ff791726",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 2,
+      "mode": "full",
+      "changed_files": 1,
+      "capture_wall_s": 2.1713352030000124,
+      "manifest_resolution_s": 0.4782411940000202,
+      "snapshot_id": "0a58e6daabad0563da6a264a7233137ce54cebb4a3c4339100e842394766f635",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26718883899991397
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2706040780000194
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.731819353999981
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.020750146998921082
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8968823239999892
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006325113000002602
+        }
+      },
+      "tree_sha256": "28da3d214ae1d3aa58cd9003e8870e7b1a41bd44334b904c027a6722ff791726",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 3,
+      "mode": "full",
+      "changed_files": 1,
+      "capture_wall_s": 2.1580044749999843,
+      "manifest_resolution_s": 0.48558258499997464,
+      "snapshot_id": "99d4dff9a2414f3d60b5b861208437d316330998d61485a8ad18fdd9d7d9c611",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25931474300000446
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26195216899998286
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7273640940001087
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.020467982998752632
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8858595970000351
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006236077000039586
+        }
+      },
+      "tree_sha256": "d1d3100b27f018310cf0352586d196d8c5318a159d7afb72660773eaa1d92002",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 3,
+      "mode": "incremental",
+      "changed_files": 1,
+      "capture_wall_s": 2.3721674070000063,
+      "manifest_resolution_s": 0.47254433299997345,
+      "snapshot_id": "99d4dff9a2414f3d60b5b861208437d316330998d61485a8ad18fdd9d7d9c611",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 999,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.757057745000111,
+          "source_hash": 0.13083570300000247,
+          "cached_snapshot_verify": 0.014285741999970014,
+          "source_copy_and_hash": 0.1297240590029105,
+          "total": 2.370486997999933
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25945710799999233
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2619749510000702
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7570527760000232
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021060329995520988
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8880117310001197
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.01429969900004835
+        },
+        "incremental._clone_verified": {
+          "calls": 1000,
+          "wall_s": 0.0015195359990229917
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13217026100232943
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006593075000068893
+        }
+      },
+      "tree_sha256": "d1d3100b27f018310cf0352586d196d8c5318a159d7afb72660773eaa1d92002",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 4,
+      "mode": "incremental",
+      "changed_files": 1,
+      "capture_wall_s": 2.34494578500005,
+      "manifest_resolution_s": 0.4712596360000134,
+      "snapshot_id": "2765a6fc28e210db54ea0a75aba3ccbcc9ed79c94a7cdf0f50bf4d9a202ced16",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 999,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7230479520000017,
+          "source_hash": 0.1308704159998797,
+          "cached_snapshot_verify": 0.014147423000054005,
+          "source_copy_and_hash": 0.13148629900160813,
+          "total": 2.343197037999971
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2635892010000589
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2667055709999886
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7230433339999536
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.020992503004436003
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8540311790000032
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014160777999904894
+        },
+        "incremental._clone_verified": {
+          "calls": 1000,
+          "wall_s": 0.0015087260009067904
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13398037199942792
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006539857000007032
+        }
+      },
+      "tree_sha256": "dd04c1da6c12831cd0ac9f2fb3405ba63f2f64ec5e3185c1fdb15de07c07b673",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 4,
+      "mode": "full",
+      "changed_files": 1,
+      "capture_wall_s": 2.184234853000021,
+      "manifest_resolution_s": 0.47178466900004423,
+      "snapshot_id": "2765a6fc28e210db54ea0a75aba3ccbcc9ed79c94a7cdf0f50bf4d9a202ced16",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2634017740000445
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26602045599997837
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.729997312999899
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.037899127998798576
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.9097241719999829
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.00650018299995736
+        }
+      },
+      "tree_sha256": "dd04c1da6c12831cd0ac9f2fb3405ba63f2f64ec5e3185c1fdb15de07c07b673",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 5,
+      "mode": "full",
+      "changed_files": 1,
+      "capture_wall_s": 2.1593647350000538,
+      "manifest_resolution_s": 0.4723153559999673,
+      "snapshot_id": "36336e558936695b3670799a9bf446361a0d9c719d0f550a6e6a50afed8ef943",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26224889700006315
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26487606900002447
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7255051979999507
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.020234983000591455
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8864979900000662
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.00617276600007699
+        }
+      },
+      "tree_sha256": "fd5d2a80f42625cb2528642499496ae5f1b085b3ce53e86f28dcca35194a7c3b",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "one_file_edit",
+      "trial": 5,
+      "mode": "incremental",
+      "changed_files": 1,
+      "capture_wall_s": 2.338271330999987,
+      "manifest_resolution_s": 0.4734829029999901,
+      "snapshot_id": "36336e558936695b3670799a9bf446361a0d9c719d0f550a6e6a50afed8ef943",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 999,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7212513380000019,
+          "source_hash": 0.13125539600002867,
+          "cached_snapshot_verify": 0.014277759000037804,
+          "source_copy_and_hash": 0.1297672659991349,
+          "total": 2.336148384000012
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2607983510000622
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2633549890000495
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7212458180000567
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021045726002057563
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8526207059999251
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014305250999996133
+        },
+        "incremental._clone_verified": {
+          "calls": 1000,
+          "wall_s": 0.0015309630011870468
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.1321990200003711
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006579143999942971
+        }
+      },
+      "tree_sha256": "fd5d2a80f42625cb2528642499496ae5f1b085b3ce53e86f28dcca35194a7c3b",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 1,
+      "mode": "full",
+      "changed_files": 100,
+      "capture_wall_s": 2.148007071000052,
+      "manifest_resolution_s": 0.47296882700004517,
+      "snapshot_id": "9cd8ff82301f7ea193d0e943be526bd466b60b07e749b09984595133f1837c7c",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25879412599999796
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2614305230000582
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7168471769998632
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.021013822999861986
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8844946610000761
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006226340000011987
+        }
+      },
+      "tree_sha256": "014e8d8567f6931e0e393770e86571f94b4d1ddeadc2a08fe58f5e3455c0d5b9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 1,
+      "mode": "incremental",
+      "changed_files": 100,
+      "capture_wall_s": 2.3449613819999513,
+      "manifest_resolution_s": 0.4731708269999899,
+      "snapshot_id": "9cd8ff82301f7ea193d0e943be526bd466b60b07e749b09984595133f1837c7c",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 900,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7255643199998758,
+          "source_hash": 0.13119992600002206,
+          "cached_snapshot_verify": 0.014059431999953631,
+          "source_copy_and_hash": 0.1299256770013244,
+          "total": 2.343100996999965
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2636067070000081
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26690096999993784
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.725558810999928
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021107769997001924
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.856877918999885
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014072534999968411
+        },
+        "incremental._clone_verified": {
+          "calls": 901,
+          "wall_s": 0.001394670999502523
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.1323774949988774
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006748895999976412
+        }
+      },
+      "tree_sha256": "014e8d8567f6931e0e393770e86571f94b4d1ddeadc2a08fe58f5e3455c0d5b9",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 2,
+      "mode": "incremental",
+      "changed_files": 100,
+      "capture_wall_s": 2.3334640959999433,
+      "manifest_resolution_s": 0.48428926600001887,
+      "snapshot_id": "086bcb0fd72f38d65d8b044963d082ee46e068e9c3032ae1c1a9f2741e06f0a1",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 900,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7184816909998517,
+          "source_hash": 0.13208882599997196,
+          "cached_snapshot_verify": 0.014058079000051293,
+          "source_copy_and_hash": 0.1296991019999041,
+          "total": 2.331635160000019
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25963425600002665
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26218460999996296
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.718476540999859
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021078794999425554
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8506894099999727
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.01407156400000531
+        },
+        "incremental._clone_verified": {
+          "calls": 901,
+          "wall_s": 0.0013675109987616452
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13219817099866304
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006527231999939431
+        }
+      },
+      "tree_sha256": "7616511a8cc8377a6ea14c2314c8bb1149767f563264b1b7e966e5dee75de625",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 2,
+      "mode": "full",
+      "changed_files": 100,
+      "capture_wall_s": 2.1853633220000575,
+      "manifest_resolution_s": 0.4744411000000355,
+      "snapshot_id": "086bcb0fd72f38d65d8b044963d082ee46e068e9c3032ae1c1a9f2741e06f0a1",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2637757219999912
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2672624749999386
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7474741219999714
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.021086127000216948
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.9109862029999931
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006253884999978254
+        }
+      },
+      "tree_sha256": "7616511a8cc8377a6ea14c2314c8bb1149767f563264b1b7e966e5dee75de625",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 3,
+      "mode": "full",
+      "changed_files": 100,
+      "capture_wall_s": 2.176587642999948,
+      "manifest_resolution_s": 0.48109644600003776,
+      "snapshot_id": "7923c07593a41e62efc50008f6c4b1e043c36382266daabf72f2d7f3b2680952",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2655219670000406
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26888187400004426
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7376189339998973
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.02106031300138511
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.9033118430000968
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006316763000086212
+        }
+      },
+      "tree_sha256": "ab500705bbad729ab3ce23715b9b4e95fbb5bb44607dd269fd44d9e2e7be31ad",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 3,
+      "mode": "incremental",
+      "changed_files": 100,
+      "capture_wall_s": 2.3572445199999947,
+      "manifest_resolution_s": 0.47587137300001814,
+      "snapshot_id": "7923c07593a41e62efc50008f6c4b1e043c36382266daabf72f2d7f3b2680952",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 900,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7394948379999278,
+          "source_hash": 0.13194865600007688,
+          "cached_snapshot_verify": 0.014108341999985896,
+          "source_copy_and_hash": 0.12995267499752572,
+          "total": 2.355335263000029
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2604648079999379
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26375632700001006
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7394897480000964
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.02121758199859869
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8715596490000053
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014121746000000712
+        },
+        "incremental._clone_verified": {
+          "calls": 901,
+          "wall_s": 0.001407781998864266
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13243006299990157
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006571658999973806
+        }
+      },
+      "tree_sha256": "ab500705bbad729ab3ce23715b9b4e95fbb5bb44607dd269fd44d9e2e7be31ad",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 4,
+      "mode": "incremental",
+      "changed_files": 100,
+      "capture_wall_s": 2.336298092999982,
+      "manifest_resolution_s": 0.4832827320000206,
+      "snapshot_id": "7a98eb346d32ff5b6c8c97f182db643ad4fdf08d6a2d238d6f751a7c2ab26738",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 900,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7228588620000664,
+          "source_hash": 0.13080844499995692,
+          "cached_snapshot_verify": 0.01410963199998605,
+          "source_copy_and_hash": 0.12950690399816267,
+          "total": 2.3342451479999227
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.25949171399997795
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26204016499991667
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7228528009999309
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021074446000056923
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8537818730000026
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014123146999963865
+        },
+        "incremental._clone_verified": {
+          "calls": 901,
+          "wall_s": 0.0014091739974446682
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13195345400151837
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006586522000020523
+        }
+      },
+      "tree_sha256": "83bb33ff5e56078849273ec832d90700de00f2ecec35f79bbad402ada05e2904",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 4,
+      "mode": "full",
+      "changed_files": 100,
+      "capture_wall_s": 2.1624642040000026,
+      "manifest_resolution_s": 0.4715981639999427,
+      "snapshot_id": "7a98eb346d32ff5b6c8c97f182db643ad4fdf08d6a2d238d6f751a7c2ab26738",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26060209500008114
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.26396450599997934
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7261561000000256
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.021158924998076145
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8929504370000814
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006260902999997597
+        }
+      },
+      "tree_sha256": "83bb33ff5e56078849273ec832d90700de00f2ecec35f79bbad402ada05e2904",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "incremental",
+        "full"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 5,
+      "mode": "full",
+      "changed_files": 100,
+      "capture_wall_s": 2.162830819000078,
+      "manifest_resolution_s": 0.47059111299995493,
+      "snapshot_id": "c94b45674f2823ba843c0a9cb0e29ce297cb797faece102bccf335c035eda1d2",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": null,
+      "legacy_logical_io": {
+        "basis": "derived from legacy single-attempt algorithm and verified returned inventory; not syscall or physical I/O counters",
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_hashed": 2002,
+        "bytes_hashed": 9163026,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_cloned": 0,
+        "bytes_cloned": 0
+      },
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.26043141700006345
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.27291178600000876
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7203527810000878
+        },
+        "capture._hash_file": {
+          "calls": 1001,
+          "wall_s": 0.02044601899990539
+        },
+        "capture._inventory": {
+          "calls": 1,
+          "wall_s": 0.8875713699999324
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006225056000062068
+        }
+      },
+      "tree_sha256": "b3769d6e7c1ab48354f6ed4b00539d4246c76d453465ae7316ff18441530341b",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    },
+    {
+      "case": "broader_edit",
+      "trial": 5,
+      "mode": "incremental",
+      "changed_files": 100,
+      "capture_wall_s": 2.3415312240000503,
+      "manifest_resolution_s": 0.473515558000031,
+      "snapshot_id": "c94b45674f2823ba843c0a9cb0e29ce297cb797faece102bccf335c035eda1d2",
+      "config_id": "96a3fe5e7bd7a89378277588dafce701acd2eeb649599af2fd8da28263ef3a88",
+      "inventory_files": 1001,
+      "inventory_bytes": 4581513,
+      "capture_stats": {
+        "mode": "delta",
+        "files_hashed": 3003,
+        "bytes_hashed": 13744539,
+        "snapshot_files_verified": 0,
+        "snapshot_bytes_verified": 0,
+        "files_copied": 1001,
+        "bytes_copied": 4581513,
+        "files_cloned": 0,
+        "bytes_cloned": 0,
+        "reflink_attempts": 1,
+        "reflink_skipped": 900,
+        "reflink_supported": false,
+        "noop_snapshot_reused": false,
+        "attempts": 1,
+        "fallback_reasons": [
+          "reflink_unavailable_errno_95"
+        ],
+        "timings_s": {
+          "inventory_enumeration": 1.7214872959999639,
+          "source_hash": 0.13158356799999638,
+          "cached_snapshot_verify": 0.014285309999991114,
+          "source_copy_and_hash": 0.13082318200122245,
+          "total": 2.3397656859999643
+        }
+      },
+      "legacy_logical_io": null,
+      "inclusive_stages": {
+        "capture._nested_include_dirs": {
+          "calls": 1,
+          "wall_s": 0.2622935839999627
+        },
+        "capture.build_spec": {
+          "calls": 1,
+          "wall_s": 0.2648816999999326
+        },
+        "capture._enumerate": {
+          "calls": 2,
+          "wall_s": 1.7214807529999234
+        },
+        "incremental._hash_fd": {
+          "calls": 2002,
+          "wall_s": 0.021194173998651422
+        },
+        "incremental._inventory": {
+          "calls": 2,
+          "wall_s": 1.8532066180000584
+        },
+        "incremental.verify_snapshot_tree": {
+          "calls": 1,
+          "wall_s": 0.014298965999955726
+        },
+        "incremental._clone_verified": {
+          "calls": 901,
+          "wall_s": 0.0014612390024240085
+        },
+        "incremental._copy_source": {
+          "calls": 1001,
+          "wall_s": 0.13325883899926794
+        },
+        "capture._freeze": {
+          "calls": 1,
+          "wall_s": 0.006536021999977493
+        }
+      },
+      "tree_sha256": "b3769d6e7c1ab48354f6ed4b00539d4246c76d453465ae7316ff18441530341b",
+      "integrity": "PASS: exact files/bytes; readonly; nlink=1; source/donor-independent inode",
+      "order": [
+        "full",
+        "incremental"
+      ]
+    }
+  ]
+}

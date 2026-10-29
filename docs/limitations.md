@@ -45,6 +45,16 @@ or limits can make it unavailable without preventing full authoritative capture.
 never prove absence of additional changes. See [operations](operations.md#2a-opt-in-snapshot-io-update)
 and [ADR-018](adr/ADR-018-snapshot-io-update.md).
 
+**Measured result, not a speed claim:** [run 40818546417's retained evidence](../evidence/incremental-updates-run40818546417/README.md)
+at `9f86f35930f22d3e817b1be95324f171b9163009` passed correctness checks but did not demonstrate
+the requested performance improvement. On one 500-file / 100,374-line top/profile, two real-worker
+edited pairs measured median end-to-end 19.086518 s full versus 19.277576 s update (about 1%
+slower). Timed update used `--no-git`, excluding Git-advisory overhead; graph/Serena were not
+included. The 1,000-file / 200,936-line snapshot-only test passed 15 pairs, with update 2.4% /
+8.9% / 8.3% slower for no-op / one-file / broader edits. These ext4/four-logical-CPU/warm-cache
+observations used copy fallback and do not establish native reflink savings, stable timing,
+graph performance or PERF-01 qualification. Full qualification remains UNQUALIFIED.
+
 ## 2. Semantic core (pyslang extraction, ADR-003, `docs/supported_features.md`)
 
 * **No "find all references" in pyslang.** References are the occurrences found by visiting
