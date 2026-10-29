@@ -25,9 +25,22 @@ def sha256_file(path: Path) -> str:
 
 
 def installed_root() -> Path:
-    """Root of the INSTALLED tool (where its ``toolchain.lock.json`` ships). Derived from this
-    module's own location, never from the cwd or from a repository under analysis."""
-    return Path(__file__).resolve().parents[3]
+    """Read-only assets belonging to this installation, never the analysed repository.
+
+    Wheels carry the frozen metadata and probe fixtures inside ``svweave/_runtime``.
+    Editable/offline source installs retain the adjacent checkout's shared toolchain.
+    Do not climb arbitrary installation ancestors: in a wheel ``parents[3]`` is not
+    a source root, and a lock found there would not belong to this package.
+    """
+    package = Path(__file__).resolve().parents[1]
+    bundled = package / "_runtime"
+    if bundled.is_dir():
+        return bundled
+    if package.parent.name == "src" and (package.parent.parent / LOCK_NAME).is_file():
+        return package.parent.parent
+    # Return the expected package location even when incomplete: locate_root then
+    # fails closed rather than selecting a cwd/project/system-level fallback.
+    return bundled
 
 
 def locate_root(explicit: Path | None = None) -> Path | None:

@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Critical mutation suite (plan 20.5, release gate "Critical invariants").
 
-Twenty-two deliberate defects (the ten classes of plan 20.5, class 7 with two variants, plus eleven
-extra write-safety mutations: M12 for the recovery roll-forward gates, M13 for the commit-time
-edit-policy recheck and M14 to M22 for the target-selecting rules of name-based slang_symbol
-edits: base-build checks, ambiguity, replacement shape, scope escape, base-span shape, symbol
-kind, directives, span equality, macro-body directives) are injected, one at a time, into a THROWAWAY COPY of the
+Twenty-seven deliberate defects cover the ten classes of plan 20.5 (class 7 has two variants),
+the M12–M22 extra write-safety rules, M23–M26 Slurm boundaries, and M27 shared-launcher workspace
+binding. They are injected, one at a time, into a THROWAWAY COPY of the
 repository. For each one the mapped test subset is run against the copy; a mutation is ``KILLED`` when the subset
 fails (pytest exit 1 with at least one FAILED test) and ``SURVIVED`` when it stays green. Anything
 else (patch anchor missing, syntax/collection error, timeout, red baseline) is ``ERROR`` and is
@@ -366,6 +364,16 @@ MUTATIONS: list[Mutation] = [
         ["tests/unit/test_srun_audit_regressions.py::test_SRUN_10_failed_remote_attempt_blocks_direct_and_async_new_work"],
     ),
 
+    m(
+        "M27", "allow a bound shared-launcher workspace to rebind through a later symlink",
+        "plan 14.2 workspace binding; GLB-04",
+        [Patch("src/svweave/application/options.py",
+               "        if self.bound_manifest_dir is None:\n",
+               "        if True:  # " + MARK + ":M27\n")],
+        ["tests/unit/test_global_launcher.py::test_GLB_04_bound_canonical_directory_cannot_be_retargeted",
+         "tests/unit/test_global_launcher.py::test_GLB_04_bound_manifest_cannot_become_a_symlink",
+         "tests/unit/test_global_launcher.py::test_GLB_04_rejected_binding_does_not_write_retargeted_event_log"],
+    ),
 ]
 
 

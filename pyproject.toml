@@ -29,9 +29,31 @@ dev = [
 
 [project.scripts]
 svweave = "svweave.cli:main"
+svweave-mcp = "svweave.launcher:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/svweave"]
+
+# Ship the reviewed bytes from their authoritative source locations, without a second
+# checked-in copy. Native backends still come from the pinned shared bootstrap install.
+[tool.hatch.build.targets.wheel.force-include]
+"toolchain.lock.json" = "svweave/_runtime/toolchain.lock.json"
+"capability_report.json" = "svweave/_runtime/capability_report.json"
+"license_manifest.json" = "svweave/_runtime/license_manifest.json"
+"THIRD_PARTY_NOTICES.md" = "svweave/_runtime/THIRD_PARTY_NOTICES.md"
+# Exact reviewed fixture files only: never bundle runtime/private debris in fixture directories.
+"fixtures/demo/filelists/rtl.f" = "svweave/_runtime/fixtures/demo/filelists/rtl.f"
+"fixtures/demo/include/demo_defs.svh" = "svweave/_runtime/fixtures/demo/include/demo_defs.svh"
+"fixtures/demo/rtl/demo_lane.sv" = "svweave/_runtime/fixtures/demo/rtl/demo_lane.sv"
+"fixtures/demo/rtl/demo_top.sv" = "svweave/_runtime/fixtures/demo/rtl/demo_top.sv"
+"fixtures/demo/sva/demo_bind.sv" = "svweave/_runtime/fixtures/demo/sva/demo_bind.sv"
+"fixtures/demo/sva/stream_hold_sva.sv" = "svweave/_runtime/fixtures/demo/sva/stream_hold_sva.sv"
+"fixtures/uvm/svw_demo_uvm_pkg.sv" = "svweave/_runtime/fixtures/uvm/svw_demo_uvm_pkg.sv"
+"fixtures/uvm/svw_uvm_cfgdb_pkg.sv" = "svweave/_runtime/fixtures/uvm/svw_uvm_cfgdb_pkg.sv"
+"fixtures/uvm/svw_uvm_ext_top.sv" = "svweave/_runtime/fixtures/uvm/svw_uvm_ext_top.sv"
+"fixtures/uvm/svw_uvm_override_pkg.sv" = "svweave/_runtime/fixtures/uvm/svw_uvm_override_pkg.sv"
+"fixtures/uvm/svw_uvm_static_calls.sv" = "svweave/_runtime/fixtures/uvm/svw_uvm_static_calls.sv"
+"fixtures/uvm/svw_uvm_top.sv" = "svweave/_runtime/fixtures/uvm/svw_uvm_top.sv"
 
 [tool.ruff]
 line-length = 100

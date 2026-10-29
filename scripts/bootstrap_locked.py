@@ -426,7 +426,7 @@ def link_self(venv_python: str, report: dict) -> None:
 
     The online path (``uv pip install -e .``) already does this. Offline the wheelhouse has no build
     backend (hatchling), so link this source tree the way an editable install does: a ``.pth`` file
-    plus a console script. Existing installs are left alone.
+    plus console scripts. Existing installs and existing launchers are left alone.
     """
     if _dist_version(venv_python, "svweave"):
         report["components"]["svweave"] = {"installed": "present"}
@@ -440,10 +440,11 @@ def link_self(venv_python: str, report: dict) -> None:
         report["errors"].append("svweave: cannot locate the venv site-packages")
         return
     Path(purelib, "svweave_src.pth").write_text(str(REPO / "src") + "\n")
-    script = Path(venv_python).parent / "svweave"
-    if not script.exists():
-        script.write_text(f"#!{venv_python}\nimport sys\nfrom svweave.cli import main\nsys.exit(main())\n")
-        script.chmod(0o755)
+    for name, module in (("svweave", "svweave.cli"), ("svweave-mcp", "svweave.launcher")):
+        script = Path(venv_python).parent / name
+        if not script.exists():
+            script.write_text(f"#!{venv_python}\nimport sys\nfrom {module} import main\nsys.exit(main())\n")
+            script.chmod(0o755)
     ok = subprocess.run([venv_python, "-I", "-c", "import svweave"], capture_output=True).returncode == 0
     report["components"]["svweave"] = {"installed": "linked-src" if ok else None}
     if not ok:

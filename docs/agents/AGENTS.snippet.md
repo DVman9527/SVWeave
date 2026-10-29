@@ -1,8 +1,8 @@
 <!-- svweave:begin -->
 ## SVWeave MCP (SystemVerilog code intelligence)
 
-This project has the SVWeave MCP server registered as `svweave` (14 `svw_*` tools; static slang
-analysis of one immutable build, no simulation, no EDA tool). The specialist that knows how to use
+Use the SVWeave MCP entry named `svweave`, whether globally or per-project registered:
+14 `svw_*` tools, static slang analysis of one immutable build, no simulation or EDA tool. The specialist that knows how to use
 it is `.claude/agents/svweave-mcp.md` (`svweave-mcp`).
 
 * **Use it for** SystemVerilog/UVM structure questions: instance hierarchy, port connections,
@@ -13,11 +13,14 @@ it is `.claude/agents/svweave-mcp.md` (`svweave-mcp`).
   UVM factory/`config_db` resolution, or anything that needs an EDA result: SVWeave reports those
   as `NOT_RUN`.
 
-Two hard rules for every AI in this project:
+Three hard rules for every AI in this project:
 
 1. A `PARTIAL`, `STALE`, `HISTORICAL` or `truncated` SVWeave answer is never proof of absence;
    cite `build_id`, completeness and freshness with each conclusion.
 2. An AI can never approve an edit. It may `prepare`/`validate`/`abort` through `svw_edit` (only
    when editing is enabled, off by default); a human runs `svweave edit approve` in a real
    terminal. Never edit sources behind the gateway's back when a controlled edit was requested.
+3. Check `svw_status` for the intended workspace before analysis. Global registration does not
+   grant trust or switch an existing session. On discovery/policy failure, stop; never auto-init,
+   widen `allowed_roots` or change policy to make the connection work.
 <!-- svweave:end -->

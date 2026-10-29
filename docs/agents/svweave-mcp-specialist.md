@@ -29,29 +29,60 @@ Source of truth for this file: `docs/mcp_contract.md`, `docs/operations.md`, `do
 `docs/security.md`, `docs/editing.md` and the README section "MCP tool reference" of the SVWeave
 repository. When this file and those disagree, they win.
 
-## 0. Setup (once)
+## 0. Setup (one shared runtime)
 
-One server, registered under the name `svweave` (the `mcp__svweave__*` tool names above assume it):
+Install SVWeave once outside the design projects using the pinned bootstrap, then reuse its
+`svweave` and `svweave-mcp` executables. Never bootstrap or copy a venv/toolchain into every
+project. Every project still needs a manifest, deliberate initialization and its own trusted
+policy; global registration grants no trust. Full procedure: `docs/install.md` section 2a.
+
+Preview a user-scope registration without changing the client:
 
 ```bash
-claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
+svweave mcp-config --client claude
+svweave mcp-config --client codex
 ```
 
-Details, Codex syntax and `.mcp.json` shape: README section "Using SVWeave with Claude Code and
-Codex"; client template in `docs/operations.md` section 4. Register only this server (not the raw
-codebase-memory-mcp or Serena servers). `--no-graph` in the args makes `svw_search` text-only.
-`/mcp` inside Claude Code shows the connection. The session is bound to one workspace; no tool
-takes a filesystem root, and every path argument is a path relative to the project.
+The JSON envelope contains `data.registration_shell`, `client_config` and `applied: false`.
+Review with the owner before applying a client configuration change. Keep one entry named
+`svweave` (the `mcp__svweave__*` tool names above assume it), not separate raw
+codebase-memory-mcp/Serena entries. Claude user-scope example:
+
+```bash
+claude mcp add --transport stdio --scope user svweave -- /ABS/PATH/.venv/bin/svweave-mcp --toolchain-root /ABS/PATH
+```
+
+`svweave-mcp` selects exactly one workspace before starting: explicit `--repo`/`--workspace`,
+then `SVWEAVE_PROJECT_ROOT`, otherwise the Claude `CLAUDE_PROJECT_DIR` hint and nearest
+manifest from cwd. Hint/cwd disagreement fails closed. Codex does not guarantee project cwd:
+retain `env_vars = ["SVWEAVE_PROJECT_ROOT"]` from the generated TOML and explicitly supply
+that environment variable when starting the client, or use a deliberate fixed `--repo`.
+A global registration with a fixed root still selects only that root in every project.
+`svweave serve --discover-workspace` provides the same startup selection for the regular CLI.
+
+Discovery is not authorization. Never create trust, expand `allowed_roots`, edit policy or
+install a wrapper to bypass a discovery/policy failure. Report it and stop. Check `svw_status`
+after connection and inspect the expected workspace ID, profiles and builds before querying.
+IDs may be reused across directories; if context is uncertain, ask for an explicit root rather
+than treating status alone as proof of an absolute path. A session cannot switch workspaces through a tool call; reconnect with the correct context.
+`--no-graph` makes `svw_search` text-only. `/mcp` in Claude Code shows the connection, not proof
+of the intended workspace. Native client behavior and Slurm execution are not qualified by
+these setup instructions; local remains the default.
 
 ### Installing into a project (for the AI doing the installation)
 
 Precondition: SVWeave itself is already installed (a `.venv/bin/svweave` exists); how to get there
 is README section "Installation", not this file. `/ABS/PATH/.venv/bin/svweave` below is that
 binary, `/ABS/PATH/TO/PROJECT` the target project root (the directory holding its `svweave.yaml`).
-Every step is idempotent; run them in the TARGET project.
+The shared user-scope registration above is preferred when available; do not duplicate it in
+each project. The specialist and routing snippet below are optional client guidance, not
+runtime dependencies. For reuse, Claude can load this specialist from
+`~/.claude/agents/svweave-mcp.md`; Codex can keep adapted workflow guidance in its global
+`AGENTS.md` (see `docs/install.md` section 2a). Preserve existing user instructions. Every step
+below is idempotent; run it in the TARGET project only when requested.
 
-1. **Register the server** under the name `svweave`, with absolute paths (the client starts the
-   process from its own working directory). Either the CLI form:
+1. **Explicit per-project alternative (skip with the global entry): register the server** under
+   the name `svweave`, with absolute paths (the client starts the process from its own working directory). Either the CLI form:
 
    ```bash
    claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
@@ -89,7 +120,7 @@ Every step is idempotent; run them in the TARGET project.
 
 ## 1. Mandatory workflow
 
-1. `svw_status` first: backend health (`NOT_PROBED` unless `probe:true`, which is slow),
+1. `svw_status` first: confirm the intended workspace, then backend health (`NOT_PROBED` unless `probe:true`, which is slow),
    `data.profiles[]` with `current_build` (`build_id`, `snapshot_id`, `completeness`, `freshness`;
    `null` when no COMPLETE build was ever published) and `latest_build` (a newer PARTIAL/BLOCKED
    one, if any), `pending_edits`, `isolation`, `client_boundary`, `capabilities.editing`.

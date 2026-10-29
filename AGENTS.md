@@ -87,7 +87,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest -m integration   # real ba
 SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest -m acceptance    # end-to-end demo flow
 .venv/bin/python scripts/bootstrap_locked.py --verify-only    # lock vs installed toolchain
 .venv/bin/python scripts/probe_backends.py                    # real backend contract probe
-.venv/bin/python scripts/mutation_suite.py                    # 22 critical mutations (plan 20.5 + 11)
+.venv/bin/python scripts/mutation_suite.py                    # 27 critical mutations (plan 20.5 + write/Slurm/workspace guards)
 .venv/bin/python scripts/benchmark.py --scale 0.1             # PERF-01 (use --scale 1.0 on a big host)
 .venv/bin/python scripts/qualify.py                           # all release gates, writes the report
 ```

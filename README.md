@@ -415,10 +415,49 @@ Re-run the installer as in the path you used (`--create-venv` repairs an existin
 * The documented flows no longer start with `uv venv`; an earlier `.venv` made that way is kept and
   re-used by `--create-venv`.
 
+### Install once; reuse it across projects
+
+Keep **one trusted SVWeave installation** outside your HDL projects. Run the pinned bootstrap
+and `--verify-only` above once in that checkout, then put `/ABS/PATH/.venv/bin` on `PATH`.
+Do not copy `.venv` or `.toolchain` into each design. Each project still needs its own
+`svweave.yaml`, deliberate `svweave init`, trusted policy and `.svweave/` state; installation
+and MCP registration are not permission to read a project or enable editing.
+
+The shared entry point is `/ABS/PATH/.venv/bin/svweave-mcp`. It selects **one workspace at
+startup**, then runs the existing stdio gateway; it is not a daemon that switches projects.
+Explicit `--repo /ABS/PATH/TO/PROJECT` (or `--workspace`) wins, then
+`SVWEAVE_PROJECT_ROOT`. Without an override, discovery uses `CLAUDE_PROJECT_DIR` and the nearest
+`svweave.yaml` from the launch directory, stopping at a Git checkout/worktree boundary.
+Conflicting hint/cwd workspaces, bad explicit paths and missing trust fail closed. Discovery
+never creates policy, expands `allowed_roots`, loads a project `.env`, or adds an MCP tool.
+
+Claude Code can use a single user-scope entry (run this yourself after reviewing it):
+
+```bash
+claude mcp add --transport stdio --scope user svweave -- /ABS/PATH/.venv/bin/svweave-mcp --toolchain-root /ABS/PATH
+```
+
+Claude supplies `CLAUDE_PROJECT_DIR` to local MCP servers. Codex also supports a global
+`[mcp_servers.svweave]` entry, but its documentation does **not** guarantee that the server's
+working directory is the active project: supply `--repo` or explicitly pass
+`SVWEAVE_PROJECT_ROOT` when needed. Do not assume global registration alone makes every client
+choose the right repository. Keep the entry name `svweave`; update an existing entry rather
+than creating duplicates. Project/local entries can shadow the user entry.
+
+See [shared installation and global registration](docs/install.md#2a-shared-installation-and-global-mcp-registration)
+for reviewed client templates, print-only `svweave mcp-config --client claude` /
+`svweave mcp-config --client codex` previews, overrides and migration.
+The existing explicit `svweave --root DIR serve --transport stdio` and
+`svweave serve --workspace DIR` flows below remain supported. Native Claude/Codex behavior and
+Slurm execution are **not qualified by this addition**; local execution remains the default.
+
 ### Connect your design project and your AI client
 
-These steps are run in the **target** project (the design you want to analyse), by the engineer
-or by the AI doing the installation; the same steps, written for the AI, are in
+The following is the **explicit per-project alternative** (the diagram shows that mode). If you
+use the shared global entry above, keep project initialization but skip the per-project MCP
+registration; the specialist and routing snippet are optional client guidance, not runtime
+dependencies. These steps are run in the **target** project (the design you want to analyse),
+by the engineer or by the AI doing the installation; the same steps, written for the AI, are in
 `docs/agents/svweave-mcp-specialist.md`, section "Installing into a project". Below,
 `/ABS/PATH` is this SVWeave checkout (so `/ABS/PATH/.venv/bin/svweave` is the binary) and
 `/ABS/PATH/TO/PROJECT` is the target project root, the directory that holds its `svweave.yaml`.
@@ -426,7 +465,7 @@ Every step is idempotent.
 
 <p align="center"><img src="docs/images/ai-integration.svg" alt="Connecting a design project and an AI client. Top: from the SVWeave checkout three things reach the target design project: (i) the MCP server registered under the name svweave with claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio, or .mcp.json with -s project, or the [mcp_servers.svweave] table for Codex, one entry only; (ii) the specialist agent .claude/agents/svweave-mcp.md with name svweave-mcp, copied from docs/agents/svweave-mcp-specialist.md; (iii) the block between the svweave:begin and svweave:end markers from docs/agents/AGENTS.snippet.md, inserted into AGENTS.md or CLAUDE.md by replacing the existing block or appending it once. Step 1 (svweave.yaml workspace, external root, first build) comes first and step 5 checks that /mcp shows svweave connected and svw_status returns OK. Middle: at run time the main agent, Claude Code or Codex, reads the AGENTS.md block and routes HDL structure questions to the svweave-mcp specialist, which calls the 14 mcp__svweave__svw_* tools over MCP stdio of one gateway process per client; each call returns one JSON envelope with build_id, snapshot_id, freshness and analysis_coverage. The specialist's workflow: svw_status, svw_build returning a job_id, svw_job polled to SUCCEEDED, queries with the build_id, and optionally svw_edit. Bottom: the agent may read, build and prepare, validate or abort an edit when editing is enabled; it can never approve: a human runs svweave edit approve on a real terminal before a commit." width="100%"></p>
 
-*Installing into a project leaves three artifacts there, all keyed to the name `svweave`: the MCP
+*This explicit per-project setup leaves three client artifacts there, keyed to `svweave`: MCP
 registration (`--root` binds that gateway to one project), the specialist agent and the routing
 block. The block is what makes the project's main agent hand SystemVerilog structure questions to
 the specialist instead of grepping; the specialist then builds first and queries that build, and
@@ -682,13 +721,19 @@ question to it, the build-then-query workflow, a question-to-tool table for all 
 how to read `freshness`, `analysis_coverage` and `pagination`, the editing rules (an agent can never
 approve) and the limitations it must state. `docs/agents/AGENTS.snippet.md` is the matching block
 for the project's `AGENTS.md`, delimited by `<!-- svweave:begin -->` / `<!-- svweave:end -->` so it
-can be inserted idempotently. Installing SVWeave into a project therefore means: register the
-server under the name `svweave` (below), copy the specialist to that project's
+can be inserted idempotently. These are optional routing aids, not a requirement to copy the
+runtime or register MCP again in every project. For explicit per-project integration, register
+the server under the name `svweave` (below), copy the specialist to that project's
 `.claude/agents/svweave-mcp.md`, and add the snippet to the project's `AGENTS.md` (or `CLAUDE.md`);
 the exact steps are in the specialist file, section "Installing into a project". Both files are
 kept under `docs/` because this repository's `.gitignore` excludes `.claude/`.
 
 ### Claude Code
+
+For one user-scope registration that discovers the active workspace, use
+[Install once; reuse it across projects](#install-once-reuse-it-across-projects). The following
+explicit binding remains available; adding `--scope user` to it would still bind **all** projects
+to that one fixed root, not enable discovery.
 
 ```bash
 claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
@@ -713,6 +758,11 @@ Inside Claude Code, `/mcp` shows the server and its connection status.
 
 ### Codex
 
+For a reusable global launcher and explicit project-context handoff, see
+[the shared setup](docs/install.md#2a-shared-installation-and-global-mcp-registration). The
+following global table deliberately binds to **one fixed project**, regardless of the active
+client directory.
+
 Add a table to `~/.codex/config.toml`:
 
 ```toml
@@ -727,7 +777,8 @@ the registered servers.
 
 ### Using both at once
 
-Each client starts **its own gateway process** on the same workspace. What is and is not shared:
+Each client starts **its own gateway process**, bound to one workspace at startup. When both
+select the same workspace, this is what is and is not shared:
 
 | Aspect | Behaviour | Evidence |
 |---|---|---|
@@ -1138,7 +1189,8 @@ prints one JSON envelope.
 | `svweave cache gc [--no-dry-run]` | garbage-collect snapshots; keeps the last 3 and referenced ones; dry run by default |
 | `svweave debug bundle --build B [--out DIR]` | reproduction bundle: hashes, manifest, diagnostics summary, redacted paths |
 | `svweave schema emit [--check] [--out DIR]` | write or verify `schemas/*.schema.json` |
-| `svweave serve --transport stdio [--workspace DIR] [--no-graph]` | MCP server on stdio |
+| `svweave serve --transport stdio [--workspace DIR] [--discover-workspace] [--no-graph]` | MCP server on stdio |
+| `svweave mcp-config --client claude\|codex` | print-only global MCP registration preview; never changes client config |
 | `svweave edit prepare --spec FILE` | create a candidate copy and apply the edits there |
 | `svweave edit validate --transaction T` | slang on baseline and candidate; diff and patch hash |
 | `svweave edit approve --transaction T --patch-hash H [--ttl-minutes N]` | human approval on a TTY |
@@ -1403,7 +1455,7 @@ and a benchmark within the plan 22.3 budgets. A gate computed from a step that d
 `NOT_EVALUATED`, never PASS. The release decision is `ACCEPTED_STATIC_PREVIEW` only when every gate
 passes and no blocker is open; otherwise `BLOCKED` with reasons.
 
-**Mutation suite.** `scripts/mutation_suite.py` injects 26 critical mutations (M01–M26, covering plan 20.5
+**Mutation suite.** `scripts/mutation_suite.py` injects 27 critical mutations (M01–M27, covering plan 20.5
 and additional write-safety guards) one at a time into a throwaway copy of the
 repository and runs the mapped tests; a mutation is killed when they fail. `--only M01,M05` selects some; anything
 other than a clean fail (missing patch anchor, timeout, red baseline) is `ERROR`, never killed.

@@ -272,13 +272,52 @@ svweave build --profile rtl_demo   # the shipped demo: exit 0
 * 由 build backend 尚未鎖定之前（2026-10-20 之前）的安裝程式所填入的 uv 快取，可能含有以未鎖定 backend 建置的 `proxy-tools` 或 `serena-agent` wheel，而 uv 會重用這類已建置的 wheel。升級後請刪除 `.toolchain/state/uv-cache`（或你的 `--uv-cache-dir`）一次。在 `vendor/` 路徑上，之後請重新解壓縮 `vendor/uv-cache.tar.gz`：它已用鎖定的 backend 與鎖定版本的 uv 重新產生（由其他 uv 版本寫入的快取使用不同的快取 bucket，離線時無法使用）。
 * 文件所述的流程不再以 `uv venv` 開頭；先前以該方式建立的 `.venv` 會被保留，並由 `--create-venv` 重用。
 
+### 安裝一次，跨專案共用
+
+把**一份受信任的 SVWeave 安裝**放在 HDL 專案之外。在該 checkout 執行一次上述固定版本
+bootstrap 與 `--verify-only`，再把 `/ABS/PATH/.venv/bin` 加到 `PATH`；不要替每個設計複製
+`.venv` 或 `.toolchain`。每個工作區仍需自己的 `svweave.yaml`、明確執行的 `svweave init`、
+受信任 policy 與 `.svweave/` 狀態。共用安裝／全域 MCP 註冊**不等於授權信任專案**。
+
+新入口 `/ABS/PATH/.venv/bin/svweave-mcp` 在啟動時綁定**一個工作區**，不是可切換專案的
+常駐多工服務。選擇順序：明確的 `--repo /ABS/PROJECT`（或 `--workspace`）、
+`SVWEAVE_PROJECT_ROOT`，然後是 `CLAUDE_PROJECT_DIR` 與啟動目錄往上最近的 `svweave.yaml`
+（遇 Git checkout/worktree 邊界就停止）。提示與 cwd 指向不同工作區、明確路徑無效或缺少
+受信任 policy 時一律拒絕；不會自動初始化、擴大 `allowed_roots` 或讀取專案 `.env`。
+
+先列印設定預覽，不會更改用戶端設定：
+
+```bash
+svweave mcp-config --client claude
+svweave mcp-config --client codex
+```
+
+檢閱 JSON 中的 `data.registration_shell`、`client_config` 與 `applied: false` 後才自行套用。
+Claude Code 可使用單一 user-scope 項目：
+
+```bash
+claude mcp add --transport stdio --scope user svweave -- /ABS/PATH/.venv/bin/svweave-mcp --toolchain-root /ABS/PATH
+```
+
+Claude 會提供 `CLAUDE_PROJECT_DIR`。Codex 也支援全域 `[mcp_servers.svweave]`，但文件
+**不保證** MCP 子行程的 cwd 是目前專案；保留預覽中的 `env_vars = ["SVWEAVE_PROJECT_ROOT"]`，
+必要時以 `SVWEAVE_PROJECT_ROOT=/ABS/PROJECT codex` 明確傳入，或用固定的 `--repo`。
+只保留名稱為 `svweave` 的一個項目，注意 local/project 設定可能遮蔽 user 設定。
+全域項目若寫死 root，仍會讓所有工作階段指向那個專案，不是自動探索。
+
+完整步驟、toolchain 與工作區狀態分離、遷移及限制見
+[共用安裝與全域註冊](docs/install.md#2a-shared-installation-and-global-mcp-registration)。
+既有 `svweave --root DIR serve --transport stdio`、`svweave serve --workspace DIR` 仍可用；
+`svweave serve --discover-workspace` 啟用相同探索。此功能**不是原生 Claude/Codex 或 Slurm
+驗收證據**；預設仍為本機執行，Slurm remote execution 仍是 BLOCKED / UNQUALIFIED。
+
 ### 連接你的設計專案與 AI 用戶端
 
-這些步驟在**目標**專案（你想分析的設計）中執行，由工程師或負責安裝的 AI 進行；為 AI 撰寫的相同步驟位於 `docs/agents/svweave-mcp-specialist.md` 的「Installing into a project」一節。下文中，`/ABS/PATH` 是這個 SVWeave checkout（因此 `/ABS/PATH/.venv/bin/svweave` 就是執行檔），`/ABS/PATH/TO/PROJECT` 是目標專案的根目錄，也就是存放其 `svweave.yaml` 的目錄。每個步驟都是冪等的。
+以下是**明確綁定單一專案的替代方案**，圖中也呈現此模式。若使用上面的全域項目，保留專案初始化，但略過逐專案 MCP 註冊；專門代理人與路由區塊只是選用的用戶端指引，不是 runtime 相依項。這些步驟在**目標**專案（你想分析的設計）中執行，由工程師或負責安裝的 AI 進行；為 AI 撰寫的相同步驟位於 `docs/agents/svweave-mcp-specialist.md` 的「Installing into a project」一節。下文中，`/ABS/PATH` 是這個 SVWeave checkout（因此 `/ABS/PATH/.venv/bin/svweave` 就是執行檔），`/ABS/PATH/TO/PROJECT` 是目標專案的根目錄，也就是存放其 `svweave.yaml` 的目錄。每個步驟都是冪等的。
 
 <p align="center"><img src="docs/images/ai-integration.svg" alt="接上設計專案與 AI 用戶端。上方：從 SVWeave checkout 有三樣東西進入目標設計專案：(i) 以 svweave 名稱註冊的 MCP 伺服器，指令為 claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio，或以 -s project 寫入 .mcp.json，或 Codex 的 [mcp_servers.svweave] 表格，只能有一個項目；(ii) 專門代理人 .claude/agents/svweave-mcp.md，name 為 svweave-mcp，複製自 docs/agents/svweave-mcp-specialist.md；(iii) docs/agents/AGENTS.snippet.md 中位於 svweave:begin 與 svweave:end 標記之間的區塊，插入 AGENTS.md 或 CLAUDE.md：已有區塊就取代，否則附加一次。步驟 1（svweave.yaml 工作區、外部根目錄、第一次建置）最先做，步驟 5 檢查 /mcp 顯示 svweave 已連線，且 svw_status 回傳 OK。中間：執行時，主代理人（Claude Code 或 Codex）讀取 AGENTS.md 區塊，把 HDL 結構問題交給 svweave-mcp 專門代理人；它透過每個用戶端各一個的閘道行程，以 MCP stdio 呼叫 14 個 mcp__svweave__svw_* 工具；每次呼叫回傳一個 JSON 回應封包，含 build_id、snapshot_id、freshness 與 analysis_coverage。專門代理人的工作流程：svw_status、回傳 job_id 的 svw_build、輪詢 svw_job 直到 SUCCEEDED、以 build_id 查詢，以及選用的 svw_edit。下方：啟用編輯時，代理人可以讀取、建置，以及準備、驗證或中止編輯；它永遠不能核准：提交前必須由人類在真正的終端機上執行 svweave edit approve。" width="100%"></p>
 
-*把 SVWeave 安裝進一個專案，會在那裡留下三樣東西，全都以 `svweave` 這個名稱連結在一起：MCP 註冊（`--root` 把該閘道綁定到單一專案）、專門代理人與路由區塊。正是這個區塊讓專案的主代理人把 SystemVerilog 結構問題交給專門代理人，而不是自己 grep；專門代理人則先建置、再查詢那次建置，提出編輯時停在 `validate`，因為核准只存在於人類的終端機上。這些用戶端設定都不在 SVWeave 測試套件的範圍內（見[在 Claude Code 與 Codex 中使用 SVWeave](#在-claude-code-與-codex-中使用-svweave)）。*
+*這個明確的逐專案設定會在那裡留下三樣用戶端設定，全都以 `svweave` 這個名稱連結在一起：MCP 註冊（`--root` 把該閘道綁定到單一專案）、專門代理人與路由區塊。正是這個區塊讓專案的主代理人把 SystemVerilog 結構問題交給專門代理人，而不是自己 grep；專門代理人則先建置、再查詢那次建置，提出編輯時停在 `validate`，因為核准只存在於人類的終端機上。這些用戶端設定都不在 SVWeave 測試套件的範圍內（見[在 Claude Code 與 Codex 中使用 SVWeave](#在-claude-code-與-codex-中使用-svweave)）。*
 
 **1. 把 SVWeave 指向專案。** SVWeave 不必位於設計之內：把 `svweave.yaml` 放在一個工作區目錄中，並把設計以**外部根目錄**的方式接上（在 `svweave.yaml` 中宣告時不帶 `path`，在 `svweave.local.yaml` 中對應到絕對路徑，並把該路徑加入受信任 `policy.json` 的 `allowed_roots`）：`docs/manifest.md` 第 2b 節有確切的 YAML，以及與模擬器命令列的差異（嚴格的 filelist、不接受模擬器選項、`timescale`、多個頂層、加密 IP、UVM）。在該工作區中：
 
@@ -437,9 +476,11 @@ SVWeave 透過 stdio 使用 MCP，因此任何 MCP 用戶端都能啟動它。�
 
 請使用絕對路徑：用戶端會從它自己的工作目錄啟動該行程。
 
-**專門代理人定義。** `docs/agents/svweave-mcp-specialist.md` 是一份現成的 Claude Code 代理人定義（`name: svweave-mcp`），告訴 AI 如何正確使用這個閘道：何時該把問題交給它、先建置再查詢的工作流程、涵蓋全部 14 個 `svw_*` 工具的「問題對應工具」表、如何解讀 `freshness`、`analysis_coverage` 與 `pagination`、編輯規則（代理人永遠不能核准）以及它必須向使用者說明的限制。`docs/agents/AGENTS.snippet.md` 則是要加進專案 `AGENTS.md` 的對應區塊，以 `<!-- svweave:begin -->` / `<!-- svweave:end -->` 標記包住，因此可以冪等地插入。把 SVWeave 安裝進一個專案，意思就是：以 `svweave` 名稱註冊伺服器（見下文）、把專門代理人複製到該專案的 `.claude/agents/svweave-mcp.md`、再把該區塊加進專案的 `AGENTS.md`（或 `CLAUDE.md`）；確切步驟見專門代理人檔案的「Installing into a project」一節。兩個檔案都放在 `docs/` 之下，是因為本儲存庫的 `.gitignore` 排除了 `.claude/`。
+**專門代理人定義。** `docs/agents/svweave-mcp-specialist.md` 是一份現成的 Claude Code 代理人定義（`name: svweave-mcp`），告訴 AI 如何正確使用這個閘道：何時該把問題交給它、先建置再查詢的工作流程、涵蓋全部 14 個 `svw_*` 工具的「問題對應工具」表、如何解讀 `freshness`、`analysis_coverage` 與 `pagination`、編輯規則（代理人永遠不能核准）以及它必須向使用者說明的限制。`docs/agents/AGENTS.snippet.md` 則是要加進專案 `AGENTS.md` 的對應區塊，以 `<!-- svweave:begin -->` / `<!-- svweave:end -->` 標記包住，因此可以冪等地插入。這些是選用的路由輔助，不要求在每個專案複製 runtime 或重複註冊 MCP。若選擇明確的逐專案整合：以 `svweave` 名稱註冊伺服器（見下文）、把專門代理人複製到該專案的 `.claude/agents/svweave-mcp.md`、再把該區塊加進專案的 `AGENTS.md`（或 `CLAUDE.md`）；確切步驟見專門代理人檔案的「Installing into a project」一節。兩個檔案都放在 `docs/` 之下，是因為本儲存庫的 `.gitignore` 排除了 `.claude/`。
 
 ### Claude Code
+
+跨專案共用的 user-scope 探索入口見[安裝一次，跨專案共用](#安裝一次跨專案共用)。以下保留明確綁定方式；只在此命令加 `--scope user` 仍會把所有專案綁定到同一個固定 root。
 
 ```bash
 claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJECT serve --transport stdio
@@ -462,6 +503,8 @@ claude mcp add svweave -- /ABS/PATH/.venv/bin/svweave --root /ABS/PATH/TO/PROJEC
 
 ### Codex
 
+可重用的全域入口與明確傳入專案環境變數見[共用設定](docs/install.md#2a-shared-installation-and-global-mcp-registration)。下面的全域 table 刻意綁定**一個固定專案**，不隨用戶端目前目錄切換。
+
 在 `~/.codex/config.toml` 加入一個 table：
 
 ```toml
@@ -475,7 +518,7 @@ args = ["--root", "/ABS/PATH/TO/PROJECT", "serve", "--transport", "stdio"]
 
 ### 同時使用兩者
 
-每個用戶端都會在同一個工作區上啟動**它自己的閘道行程**。哪些是共用的、哪些不是：
+每個用戶端都會啟動**它自己的閘道行程**，在啟動時綁定一個工作區。若兩者選中同一工作區，哪些是共用的、哪些不是：
 
 | 面向 | 行為 | 證據 |
 |---|---|---|
@@ -773,7 +816,8 @@ root_mappings:
 | `svweave cache gc [--no-dry-run]` | 對快照做垃圾回收；保留最近 3 個與被參照的快照；預設為試執行（dry run） |
 | `svweave debug bundle --build B [--out DIR]` | 重現用套件：雜湊、manifest、診斷摘要、已遮蔽的路徑 |
 | `svweave schema emit [--check] [--out DIR]` | 寫出或驗證 `schemas/*.schema.json` |
-| `svweave serve --transport stdio [--workspace DIR] [--no-graph]` | 透過 stdio 的 MCP 伺服器 |
+| `svweave serve --transport stdio [--workspace DIR] [--discover-workspace] [--no-graph]` | 透過 stdio 的 MCP 伺服器 |
+| `svweave mcp-config --client claude\|codex` | 只列印全域 MCP 設定預覽，絕不修改用戶端設定 |
 | `svweave edit prepare --spec FILE` | 建立候選副本並在其中套用編輯 |
 | `svweave edit validate --transaction T` | 對基準與候選副本執行 slang；產生 diff 與 patch 雜湊 |
 | `svweave edit approve --transaction T --patch-hash H [--ttl-minutes N]` | 在 TTY 上由人類核准 |
@@ -942,7 +986,7 @@ SVWEAVE_REQUIRE_BACKENDS=1 .venv/bin/python -m pytest tests/acceptance  # end-to
 
 **關卡（Gates）。** `scripts/qualify.py` 依實際結果計算 G0 至 G5，並寫入 `.svweave/qualification/report.{json,md}`：G0 為 lock 已驗證、後端探測與沙箱測試；G1 為 manifest、快照、設定與路徑政策；G2 為語意測試套件（真實的 pyslang 與 UVM）；G3 為後端測試套件與 MCP 契約；G4 為編輯安全性與所有關鍵變異；G5 為每個 P0 測試套件都沒有 FAIL、BLOCKED 與 SKIP、驗收測試、至少 85% 述句與 80% 分支的覆蓋率、文件檢查，以及在計畫 22.3 預算之內的基準測試。由未執行的步驟所算出的關卡為 `NOT_EVALUATED`，絕不是 PASS。只有在每個關卡都通過且沒有任何開放的阻擋條件時，發行決定才會是 `ACCEPTED_STATIC_PREVIEW`；否則為 `BLOCKED` 並附上原因。
 
-**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把26 個關鍵變異（M01–M26，涵蓋計畫 20.5 及額外的寫入安全防護）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
+**變異測試套件（Mutation suite）。** `scripts/mutation_suite.py` 一次一個地把 27 個關鍵變異（M01–M27，涵蓋計畫 20.5 及額外的寫入安全防護）注入到儲存庫的拋棄式副本中，並執行對應的測試；當這些測試失敗時，該變異即被殺死（killed）。`--only M01,M05` 可選擇其中幾個；任何不是乾淨失敗的結果（缺少 patch 錨點、逾時、基準（baseline）為紅燈）都是 `ERROR`，絕不算被殺死。
 
 **基準測試（Benchmark）。** `scripts/gen_corpus.py` 寫出確定性的合成語料，`scripts/benchmark.py` 記錄主機、語料與原始計時（`evidence/bench/`），然後與計畫 22.3 的預算比較。參考語料為 scale 1.0：約 500 個檔案與 100,000 行；縮小規模的執行會被如此標示。
 

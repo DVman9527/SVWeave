@@ -122,7 +122,9 @@ def configure_logging(log_file: Any = None) -> None:
 
 def make_gateway(opts: WorkspaceOptions, *, use_graph: bool = True) -> Gateway:
     ctx = opts.load()  # fail fast (config/policy errors) before serving
-    events = EventLog.for_session(ctx.state_dir, Redactor([ctx.project_root]))
+    events = EventLog.for_session(
+        ctx.state_dir, Redactor([ctx.project_root]), write_guard=opts.check_binding
+    )
     session = Session(opts, use_graph=use_graph, events=events)
     session.cursor_key()  # create the signing key now so read tools never write
     return Gateway(session, events)

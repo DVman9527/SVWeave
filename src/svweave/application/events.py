@@ -12,10 +12,12 @@ import os
 import threading
 import time
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from svweave.domain.errors import SvwError
 from svweave.security.redaction import Redactor
 
 log = logging.getLogger("svweave.gateway")
@@ -34,7 +36,13 @@ EVENT_KEYS = (
 
 
 class EventLog:
-    def __init__(self, path: Path, redactor: Redactor | None = None) -> None:
+    def __init__(
+        self, path: Path, redactor: Redactor | None = None,
+        *, write_guard: Callable[[], None] | None = None,
+    ) -> None:
+        self._write_guard = write_guard
+        if write_guard is not None:
+            write_guard()
         self.path = path
         self.redactor = redactor or Redactor()
         self._lock = threading.Lock()
@@ -42,9 +50,12 @@ class EventLog:
         os.close(os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o600))
 
     @classmethod
-    def for_session(cls, state_dir: Path, redactor: Redactor | None = None) -> EventLog:
+    def for_session(
+        cls, state_dir: Path, redactor: Redactor | None = None,
+        *, write_guard: Callable[[], None] | None = None,
+    ) -> EventLog:
         sid = f"serve-{datetime.now(UTC):%Y%m%dT%H%M%S}-{os.getpid()}-{uuid.uuid4().hex[:6]}"
-        return cls(state_dir / "runs" / sid / "events.jsonl", redactor)
+        return cls(state_dir / "runs" / sid / "events.jsonl", redactor, write_guard=write_guard)
 
     def emit(
         self,
@@ -78,6 +89,13 @@ class EventLog:
             rec["detail"] = self.redactor.text(detail)[:500]
         line = json.dumps(rec, sort_keys=True) + "\n"
         with self._lock:
+            if self._write_guard is not None:
+                try:
+                    self._write_guard()
+                except SvwError:
+                    # A rejected workspace binding must not reopen its cached lexical log
+                    # path through a new directory symlink, nor turn a tool error into a crash.
+                    return
             fd = os.open(self.path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | os.O_NOFOLLOW, 0o600)
             with os.fdopen(fd, "a", encoding="utf-8") as f:
                 f.write(line)

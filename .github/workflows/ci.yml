@@ -61,6 +61,21 @@ jobs:
           uv pip install --python .venv/bin/python -e '.[dev]'
       - name: Pinned wheels (pyslang, MCP SDK) and tool archives, SHA-256 verified against the lock
         run: .venv/bin/python scripts/bootstrap_locked.py
+      - name: Build and smoke-test the installed wheel outside the checkout (no native backends)
+        run: |
+          # Existing pyproject build-system pin; installation phase only, not a runtime download.
+          uv pip install --python .venv/bin/python hatchling==1.29.0
+          SVWEAVE_REQUIRE_PACKAGE_BUILD=1 .venv/bin/python -m pytest tests/unit/test_installed_runtime_assets.py -q --no-cov
+          .venv/bin/python scripts/ci_wheel_smoke.py
+      - name: Upload pure wheel smoke evidence (not backend qualification)
+        if: always()
+        # TODO(pin): actions/upload-artifact -> full commit SHA
+        uses: actions/upload-artifact@v4
+        with:
+          name: svweave-wheel-smoke
+          path: .svweave/ci/wheel-smoke.json
+          include-hidden-files: true
+          if-no-files-found: warn
       - name: Ruff
         run: .venv/bin/ruff check src tests
       - name: Mypy (strict)

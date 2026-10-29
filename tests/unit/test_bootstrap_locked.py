@@ -88,10 +88,16 @@ def test_link_self_makes_svweave_importable_in_a_bare_venv(tmp_path: Path) -> No
     script = Path(py).parent / "svweave"
     assert script.is_file() and script.stat().st_mode & 0o111
     assert script.read_text().startswith(f"#!{py}\n")
-    # a second run leaves an existing launcher alone
+    mcp_script = Path(py).parent / "svweave-mcp"
+    assert mcp_script.is_file() and mcp_script.stat().st_mode & 0o111
+    assert mcp_script.read_text().startswith(f"#!{py}\n")
+    assert "from svweave.launcher import main" in mcp_script.read_text()
+    # a second run leaves existing launchers alone
     script.write_text("#!custom\n")
+    mcp_script.write_text("#!custom-mcp\n")
     bs.link_self(py, {"components": {}, "errors": []})
     assert script.read_text() == "#!custom\n"
+    assert mcp_script.read_text() == "#!custom-mcp\n"
 
 
 def test_link_self_is_a_noop_without_a_source_tree(tmp_path: Path) -> None:

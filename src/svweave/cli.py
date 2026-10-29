@@ -41,6 +41,7 @@ class _State:
         self.compact = compact
         #: (allow_stale, allow_partial) while a query command runs, else None
         self.query_policy: tuple[bool, bool] | None = None
+        self.root_explicit = False
 
     def session(self, *, use_graph: bool = False) -> Session:
         return Session(self.opts, use_graph=use_graph)
@@ -176,6 +177,7 @@ def cli(
         execution_overrides=overrides or None,
     )
     ctx.obj = _State(opts, request_id, compact)
+    ctx.obj.root_explicit = ctx.get_parameter_source("root") is click.core.ParameterSource.COMMANDLINE
 
 
 @cli.command("init")
@@ -809,19 +811,64 @@ def query_evidence(
     help="Workspace directory containing svweave.yaml (default: --root).",
 )
 @click.option("--graph/--no-graph", default=True, show_default=True)
+@click.option(
+    "--discover-workspace", is_flag=True,
+    help="Select one workspace at startup from explicit path, project environment or cwd.",
+)
 @pass_state
-def serve_cmd(st: _State, transport: str, workspace: Path | None, graph: bool) -> None:
+def serve_cmd(
+    st: _State, transport: str, workspace: Path | None, graph: bool, discover_workspace: bool
+) -> None:
     """Run the MCP server on stdio (stdout = protocol only; logs -> stderr)."""
     from dataclasses import replace
 
     from svweave.server import serve_stdio
 
-    opts = st.opts if workspace is None else replace(st.opts, root=workspace.resolve())
     try:
+        if discover_workspace:
+            from svweave.config.discovery import discover_workspace as discover
+
+            root = discover(repo=st.opts.root if st.root_explicit else None, workspace=workspace)
+            if st.opts.manifest_path is not None and st.opts.manifest_path.parent != root:
+                raise SvwError(EC.INVALID_CONFIG, "explicit manifest conflicts with discovered workspace")
+            opts = replace(st.opts, root=root, bound_manifest_dir=root)
+        else:
+            opts = st.opts if workspace is None else replace(st.opts, root=workspace.resolve())
         serve_stdio(opts, use_graph=graph)
     except SvwError as e:
         click.echo(f"svweave serve: {e.code.value}: {e.message}", err=True)
         sys.exit(e.exit_code)
+
+
+@cli.command("mcp-config")
+@click.option("--client", type=click.Choice(["claude", "codex"]), required=True)
+@click.option("--executable", type=click.Path(dir_okay=False, path_type=Path), default=None)
+@click.option("--toolchain-root", type=click.Path(file_okay=False, path_type=Path), default=None)
+@click.option("--execution-provider", type=click.Choice(["local", "srun"]), default=None)
+@click.option("--execution-profile", default=None)
+@pass_state
+def mcp_config_cmd(
+    st: _State,
+    client: str,
+    executable: Path | None,
+    toolchain_root: Path | None,
+    execution_provider: str | None,
+    execution_profile: str | None,
+) -> None:
+    """Print a stable user-scope MCP registration preview; never changes client config."""
+    from svweave.application.registration import registration_preview
+
+    st.emit(st.run(lambda rid: Envelope(
+        request_id=rid,
+        outcome=Outcome.OK,
+        data=registration_preview(
+            client,
+            executable=executable,
+            toolchain_root=toolchain_root,
+            execution_provider=execution_provider,
+            execution_profile=execution_profile,
+        ),
+    )))
 
 
 @cli.group("evidence")

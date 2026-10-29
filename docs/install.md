@@ -79,6 +79,137 @@ Then run the first checks:
 .venv/bin/python scripts/probe_backends.py   # writes .svweave/probe/capability_report.json
 ```
 
+## 2a. Shared installation and global MCP registration
+
+### Install the runtime once, not inside each design
+
+Use one operator-controlled SVWeave checkout, for example `/ABS/PATH`, outside the HDL projects.
+Run section 2 (or the offline procedure in section 3) **once in that checkout**:
+
+```bash
+cd /ABS/PATH
+python3.12 scripts/bootstrap_locked.py --create-venv
+.venv/bin/python scripts/bootstrap_locked.py --verify-only
+export PATH="/ABS/PATH/.venv/bin:$PATH"
+```
+
+Both `svweave` and `svweave-mcp` now use the same gateway venv and pinned toolchain. Keep this
+checkout in place: the bootstrap links its `src/` into the venv, rather than copying a runtime
+into each HDL project. Add the `PATH` setting to your own shell configuration only if desired;
+SVWeave does not change shell or client configuration.
+
+| Shared installation | Per workspace (not shared across projects) |
+|---|---|
+| Gateway `.venv`, `.toolchain`, lock/capability metadata, probe fixtures; Serena has its own pinned venv | `svweave.yaml`, optional `svweave.local.yaml`, `.svweave/` database/snapshots/jobs/candidates/backend state |
+| Installed code and dependency versions | Trusted policy, approval records/key and cursor key under `$XDG_CONFIG_HOME/svweave/workspaces/<key>/` |
+
+A standard package install exposes the same two console entry points and bundles frozen metadata
+and probe fixtures under `svweave/_runtime`; it does **not** bundle or bootstrap native backends.
+Do not treat `pip`/`pipx` installation alone as a complete pinned backend installation. To use a
+separately provisioned shared toolchain, set `SVWEAVE_TOOLCHAIN_ROOT=/ABS/PATH` or pass
+`--toolchain-root /ABS/PATH` to `svweave-mcp`. This is the directory containing
+`toolchain.lock.json`, `capability_report.json` and `.toolchain/`, **not** `.toolchain/` itself.
+Toolchain selection never searches the current HDL project's files for a replacement lock.
+
+### Select one already-initialized workspace per process
+
+Each project still needs the deliberate setup in section 5. Discovery never runs `init`, grants
+trust or enables editing. `svweave-mcp` binds one canonical workspace before serving and keeps
+that binding for the process lifetime; changing project requires a new client/server session.
+There is no workspace-switch tool, project catalog or multi-workspace router.
+
+Selection order:
+
+1. `svweave-mcp --repo /ABS/PROJECT` or `--workspace /ABS/PROJECT`. The directory must contain
+   `svweave.yaml`; if both are given they must resolve to the same directory.
+2. `SVWEAVE_PROJECT_ROOT=/ABS/PROJECT`, an absolute directory containing `svweave.yaml`.
+3. `CLAUDE_PROJECT_DIR` and/or the launch directory. Find the nearest ancestor `svweave.yaml`,
+   stopping at a Git checkout/worktree/submodule boundary. If both select a workspace, they must
+   agree. A bad explicit path or client hint fails instead of falling back to a different project.
+
+Missing or conflicting selection, a symlinked manifest or missing trusted policy fails closed.
+Project text, `.env` files and MCP roots cannot authorize a workspace; `allowed_roots` remains
+unchanged. `svweave serve --discover-workspace` uses the same selector, with explicit top-level
+`--root` or `serve --workspace` as its highest-priority inputs. A conflicting `--manifest` from
+another directory is rejected. Without that flag, existing
+`svweave --root /ABS/PROJECT serve --transport stdio` and
+`svweave serve --workspace /ABS/PROJECT` retain their explicit-workspace behavior.
+
+### Preview first; register only after review
+
+```bash
+svweave mcp-config --client claude
+svweave mcp-config --client codex
+# if launcher and native tools were installed separately:
+svweave mcp-config --client codex --executable /ABS/VENV/bin/svweave-mcp --toolchain-root /ABS/PATH
+```
+
+These commands print a JSON envelope with `data.registration_shell`, `registration_argv`,
+`client_config` and `applied: false`. They never read or edit client configuration, run the
+registration, install dependencies or probe a client/backend. Review and manually apply **one**
+entry named `svweave` in each client; do not register raw Serena or codebase-memory-mcp servers.
+The generated arguments pin the absolute shared toolchain location, not a project root.
+
+**Claude Code:** the reviewed user-scope form is:
+
+```bash
+claude mcp add --transport stdio --scope user svweave -- /ABS/PATH/.venv/bin/svweave-mcp --toolchain-root /ABS/PATH
+```
+
+The [Claude Code MCP reference](https://code.claude.com/docs/en/mcp) documents `--scope user`
+and `CLAUDE_PROJECT_DIR` in local stdio servers. The launcher reads that hint; do not expand the registration shell's `$PWD`
+into a permanent `--repo` value when you want discovery. Check `/mcp`, then ask for `svw_status`
+and check its expected workspace ID, profiles and builds before analysis. IDs can be reused
+across directories, so status alone is not proof of an absolute root; use an explicit override
+when the project context is uncertain.
+
+**Codex:** its user configuration (`~/.codex/config.toml`, or the configured `CODEX_HOME`) can
+contain:
+
+```toml
+[mcp_servers.svweave]
+command = "/ABS/PATH/.venv/bin/svweave-mcp"
+args = ["--toolchain-root", "/ABS/PATH"]
+env_vars = ["SVWEAVE_PROJECT_ROOT"]
+```
+
+The [Codex MCP reference](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) documents user
+configuration and `env_vars` forwarding. Its [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
+allows an explicit `cwd` but does **not** specify that the default is the active project. When
+needed, explicitly hand off the project in the environment when starting the client:
+
+```bash
+SVWEAVE_PROJECT_ROOT=/ABS/PATH/TO/PROJECT codex
+```
+
+The `env_vars` line is essential to forward that caller-supplied value; `codex mcp add svweave --
+/ABS/PATH/.venv/bin/svweave-mcp --toolchain-root /ABS/PATH` alone does not add it. Alternatively,
+put `--repo /ABS/PATH/TO/PROJECT` in the launcher args for a deliberately fixed-workspace entry.
+A fixed `env.SVWEAVE_PROJECT_ROOT` in global config likewise pins every session to that project;
+it is not automatic selection. `codex mcp list` checks registration, not correct workspace
+binding; inspect `svw_status` after connection and use an explicit root if identity is ambiguous.
+
+**Migration:** retain each project's manifest, trusted policy and state. Replace the existing
+`svweave` entry rather than adding another; inspect local/project overrides that could shadow
+the user entry. Remove a redundant project entry only after reviewing it. The specialist agent
+and routing snippet are optional instructions, independent of runtime installation; existing
+explicit `--workspace`/`--root` entries remain valid. Uninitialized/untrusted projects must be
+initialized and reviewed separately, never auto-trusted by an agent.
+
+Optional reusable guidance also need not be copied into every checkout. Claude supports
+[user-level subagents](https://code.claude.com/docs/en/sub-agents) in `~/.claude/agents/`:
+after review, the specialist can live there as `svweave-mcp.md` instead of in each project's
+`.claude/agents/`. Codex supports [global instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
+in its home `AGENTS.md`; adapt the safety/workflow guidance rather than copying a Claude-only
+agent path. Preserve existing instructions and review project overrides. Neither guidance file
+replaces workspace trust or changes the MCP binding.
+
+Client documentation was checked on 2026-10-29; it is not a live-client test. This is a local
+startup convenience, not native Claude/Codex qualification or Slurm acceptance.
+Local execution remains the default; existing execution-policy checks still apply and Slurm
+remote execution remains **BLOCKED / UNQUALIFIED**. A pre-existing `svweave-slurm` wrapper is
+not supplied or validated by this repository; do not assume wrapper compatibility.
+
 ## 3. Offline bootstrap from `toolchain.lock.json`
 
 The installer reuses any artifact already present with the right hash, so a machine without
@@ -210,14 +341,18 @@ svweave build --profile P
 
 The trusted policy is created **outside** the repository
 (`$XDG_CONFIG_HOME/svweave/workspaces/<key>/policy.json`, see `docs/security.md`). Editing stays
-disabled until you deliberately enable it there (`docs/editing.md`). MCP client configuration:
-`docs/operations.md` section 4.
+disabled until you deliberately enable it there (`docs/editing.md`). This setup remains per
+workspace even with a shared installation; do not rerun bootstrap in each project. Global MCP
+registration is in section 2a; the explicit per-project alternative is in `docs/operations.md`
+section 4.
 
 ## 6. Uninstall
 
-Remove the virtual environment, `.toolchain/`, `.svweave/` and, if you want, the trusted directory
-`$XDG_CONFIG_HOME/svweave/workspaces/<key>/`. SVWeave does not modify any other user file and never
-edits an MCP client's configuration.
+For a shared installation, removing its virtual environment or `.toolchain/` affects every
+project using that runtime. Remove a project's `.svweave/` and trusted directory
+`$XDG_CONFIG_HOME/svweave/workspaces/<key>/` only if you also want to discard its state and trust.
+Review/remove the client entry and any shell `PATH` setting yourself; SVWeave never edits an MCP
+client's configuration.
 
 ## 7. Developer checks
 
