@@ -1,0 +1,213 @@
+{
+  "run_id": 40806959759,
+  "tested_source": "ca6ebb571137f683a5354a1bd78169341d933de1",
+  "artifact_metadata": "artifacts-metadata.json",
+  "members": [
+    {
+      "path": "backend/identity.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/identity.json",
+      "bytes": 699,
+      "sha256": "e3b3867fb173937722873d22d8ec884e7a98b6b8617f44eac7422d84c8decddc"
+    },
+    {
+      "path": "backend/junit-required.xml",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/junit_required.xml",
+      "bytes": 32749,
+      "sha256": "4b272c9be78b3656241c482137f831dc8ae665369283b968431528db7c90ebc2"
+    },
+    {
+      "path": "backend/junit-probe-isolation.xml",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/junit_probe_isolation.xml",
+      "bytes": 9991,
+      "sha256": "77aedda50a4a59d85920136d897fcab7aa2e51234873d462ff3f3f605f719c28"
+    },
+    {
+      "path": "backend/capability-report.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/capability_report.json",
+      "bytes": 68958,
+      "sha256": "66697e1d6b52b8ad994a8ef6585a9ef175a03a6be86ff0906b53fc35ade276c7"
+    },
+    {
+      "path": "backend/mutation-2026-10-29.json",
+      "source": "svweave-evidence",
+      "source_member": "evidence/mutation/2026-10-29.json",
+      "bytes": 49846,
+      "sha256": "3e7df4097c5e0313ab15758dbe66dbe3a527dda259ba1ac8a8e5fb2ca5dbea1e"
+    },
+    {
+      "path": "backend/benchmark-smoke.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/bench/20261029T025646Z-s0.05.json",
+      "bytes": 14605,
+      "sha256": "ee2b7ce364868dc162c9901dcc69beae0ed108a5d3407e8cce236df85ba0567b"
+    },
+    {
+      "path": "backend/dep01-r2/contract.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/contract.json",
+      "bytes": 1065,
+      "sha256": "21ede6a167464e8b60580bc2f266bced1a74a27af439b409c42fd2c325c75ce0"
+    },
+    {
+      "path": "backend/dep01-r2/controller-sandbox-preflight.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/controller-sandbox-preflight.json",
+      "bytes": 1145,
+      "sha256": "d6a35899f2994a8262cce3e1e6e6e95bf2af8afe93675c011e493917305c4610"
+    },
+    {
+      "path": "backend/dep01-r2/cleanroom-r2.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/cleanroom-r2.json",
+      "bytes": 5427,
+      "sha256": "b8e71c1ecb17f641b0d82921d0703d72cc2753c10801d815ce50897a2b3c94ff"
+    },
+    {
+      "path": "backend/dep01-r2/bootstrap.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/bootstrap.json",
+      "bytes": 2133,
+      "sha256": "eaead4379dc7a8530528a6167bec8ac6786a2b44cec30b090a8fb2bdc59601a0"
+    },
+    {
+      "path": "backend/dep01-r2/offline-network-check.stdout.log",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/offline-network-check.stdout.log",
+      "bytes": 18,
+      "sha256": "b93c98a7a79b217baa83838c0fd76a8cd626863e1eef04d477beb782d0cb12ca"
+    },
+    {
+      "path": "backend/dep01-r2/bootstrap.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/bootstrap.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "backend/dep01-r2/installed-mcp.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/installed-mcp.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "backend/dep01-r2/installed-pyslang.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/installed-pyslang.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "backend/dep01-r2/offline-network-check.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/offline-network-check.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "backend/dep01-r2/probe-controller.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/probe-controller.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "backend/dep01-r2/verify-only.execution.json",
+      "source": "svweave-evidence",
+      "source_member": ".svweave/ci/dep01-r2/run-0py9nzeo/verify-only.execution.json",
+      "bytes": 17,
+      "sha256": "c365161d39236fe0f1d32937fbc549796b8487d8faf65ed3879b96897c78ea5d"
+    },
+    {
+      "path": "native/identity.json",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": ".svweave/ci/identity.json",
+      "bytes": 587,
+      "sha256": "2d237a2d71ec53183766bf3c8cfa2113eaf06031aabca172773d1bc95dd3abf6"
+    },
+    {
+      "path": "native/junit-semantic-uvm.xml",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": ".svweave/ci/junit_semantic_uvm.xml",
+      "bytes": 3123,
+      "sha256": "d3d445fecc50a1b1244316676232dd124a6ecb1c5272d68e89ae1a98a46c8529"
+    },
+    {
+      "path": "native/junit-gates-supplement.xml",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": ".svweave/ci/junit_gates_supplement.xml",
+      "bytes": 43892,
+      "sha256": "b410dcff1643f775d024ea5d08e5ef8d6ec9fe465aa9483c44e30f1f10d7e3a6"
+    },
+    {
+      "path": "native/junit.xml",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": "evidence/verilator-native/junit.xml",
+      "bytes": 423,
+      "sha256": "b61c9854df27304df5b16326343bb502723eb53e71a77670d998279993472985"
+    },
+    {
+      "path": "native/report.json",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": "evidence/verilator-native/report.json",
+      "bytes": 51967,
+      "sha256": "6790fd3309682a0c9bb06f03a21b050bc837a5e8a997e56ec0ae8fc67dc08f0a"
+    },
+    {
+      "path": "native/bootstrap-report.json",
+      "source": "svweave-native-verilator-evidence",
+      "source_member": "evidence/verilator-native-bootstrap/report.json",
+      "bytes": 6324,
+      "sha256": "8727ebb87e143c66125b6a74968acd37a3fa0b33f33bbacb982b2846ec5a3acf"
+    },
+    {
+      "path": "packaging/wheel-smoke.json",
+      "source": "svweave-wheel-smoke",
+      "source_member": "wheel-smoke.json",
+      "bytes": 2579,
+      "sha256": "0c8f0cc4bd1a841ea5ac442beeef61fac05717d28129f81662925b3163a74d56"
+    },
+    {
+      "path": "fast-job.log",
+      "source": "GitHub Actions fast job log",
+      "source_member": "svweave-global-fast-run40806959759.log",
+      "bytes": 63352,
+      "sha256": "52cb158cec3cca879740bfd9520ac870f3707f3d70fef055ca5ef93e6837c3c8"
+    },
+    {
+      "path": "backend-job.log",
+      "source": "GitHub Actions backend job log",
+      "source_member": "svweave-global-backend-run40806959759.log",
+      "bytes": 72239,
+      "sha256": "0f083f8f74c034ae874377dbbda1503afe4141906ab2abb70515f6b55c5d0b55"
+    },
+    {
+      "path": "run-metadata.json",
+      "source": "GitHub Actions API",
+      "source_member": "svweave-global-run40806959759.json",
+      "bytes": 11830,
+      "sha256": "c537dca14d37eafb3847bc5eeadc619bc1cb9e5030ec0918d062fa65a16e613c"
+    },
+    {
+      "path": "artifacts-metadata.json",
+      "source": "GitHub Actions API",
+      "source_member": "svweave-global-run40806959759-artifacts.json",
+      "bytes": 2183,
+      "sha256": "5178f65204de7b8ca1f8aa874716c949c7de158888a77b44e246a59393cd1a81"
+    }
+  ],
+  "excluded": [
+    "historical evidence/mutation/2026-10-13.json carryover",
+    "native per-case AST/metadata/log files; retained in original artifact",
+    "duplicate R2 capability report and verbose install streams; retained in original artifact"
+  ],
+  "notes": [
+    "Copied members are byte-identical to downloaded artifacts or raw API/job logs.",
+    "summary.json is a derived audit, not a producer artifact.",
+    "Native report references per-case paths not copied here; original artifact contains them."
+  ]
+}

@@ -61,6 +61,30 @@
 
 ## 状态
 
+### 安装一次／跨工作区验证（2026-10-29）
+
+[Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) 的三个 job
+均成功，实测来源为 **`ca6ebb571137f683a5354a1bd78169341d933de1`**。
+[原始证据、哈希与范围](evidence/global-workspaces-run40806959759/README.md)：
+
+| 范围 | 结果 |
+|---|---|
+| 真实 wheel/sdist packaging + 独立 wheel smoke | **10 PASS、0 skip**；验证两个入口与已安装资源 |
+| Unit / MCP contracts | **1552 PASS + 1 SKIP / 49 PASS**；contracts 含两个真实 SDK stdio gateway 进程 |
+| 必要 integration / fault-injection / acceptance | **236 PASS**（205 + 19 + 12），零 failure/error/skip |
+| Sandbox/controller 边界 | **62 PASS**，零 failure/error/skip |
+| Native Verilator static / slang semantic-UVM / supplement gates | **5 / 21 / 298 PASS**，零 failure/error/skip |
+| 本次关键变异 | **27/27 KILLED**，含工作区／event-log 绑定防护 M27；无 survivor/error |
+| Benchmark smoke | 0.05 scale（4,844 行／25 文件）实测 targets 通过；graph search **SKIPPED** |
+
+范围互有重叠，不可相加。Quiet unit log 未记录那一个 skip 的原因。
+这验证共享安装、启动绑定及 native-backend 回归，**不代表真实 Claude/Codex 应用程序注册
+或 Slurm site 执行**。外部 `svweave-slurm` wrapper 未提供源码，兼容性仍未验证。
+**仍为 UNQUALIFIED**：完整 `qualify.py`、simulation/formal/RTL coverage 和 native Verilator
+UVM acceptance 仍 NOT_RUN；graph/Serena 仍 DEGRADED，warm-cache smoke 不是 reference
+qualification。结果仅对应实测来源，不代表后续 README／证据专用 commit 已重跑；较窄的
+DEP-01-R2 边界和下方历史结果保持不变。
+
 ### 已核对的 CI 范围（2026-10-28）
 
 [Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) 的三个 jobs 均成功；实测 source 为 **`cc931de898069bed0a51497737d4ad60603e4c51`**。以下结果有[原始 evidence 与 hashes](evidence/r2-verilator-run40627613557/README.md) 可核对：

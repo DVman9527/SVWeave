@@ -1,0 +1,123 @@
+{
+  "run_id": 40806959759,
+  "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40806959759",
+  "tested_source": "ca6ebb571137f683a5354a1bd78169341d933de1",
+  "run_conclusion": "success",
+  "scopes_are_not_additive": true,
+  "fast": {
+    "packaging": {
+      "passed": 10,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "method": "count raw pytest quiet progress markers in this command block; no fast-job JUnit was uploaded",
+      "source": "fast-job.log"
+    },
+    "unit": {
+      "passed": 1552,
+      "skipped": 1,
+      "failed": 0,
+      "errors": 0,
+      "method": "count raw pytest quiet progress markers in this command block; no fast-job JUnit was uploaded",
+      "source": "fast-job.log",
+      "skip_reason": "not identified in the raw quiet log; not reclassified as PASS"
+    },
+    "contract": {
+      "passed": 49,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0,
+      "method": "count raw pytest quiet progress markers in this command block; no fast-job JUnit was uploaded",
+      "source": "fast-job.log"
+    }
+  },
+  "junit": {
+    "backend/junit-required.xml": {
+      "passed": 236,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "strict_parse": "PASS; scripts/qualify.py::parse_junit",
+      "by_class_prefix": {
+        "tests.integration": 205,
+        "tests.fault_injection": 19,
+        "tests.acceptance": 12
+      }
+    },
+    "backend/junit-probe-isolation.xml": {
+      "passed": 62,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "strict_parse": "PASS; scripts/qualify.py::parse_junit",
+      "by_class_prefix": {
+        "tests.unit": 57,
+        "tests.integration": 5
+      }
+    },
+    "native/junit.xml": {
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "strict_parse": "PASS; scripts/qualify.py::parse_junit",
+      "by_class_prefix": {
+        "native_verilator": 5
+      }
+    },
+    "native/junit-semantic-uvm.xml": {
+      "passed": 21,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "strict_parse": "PASS; scripts/qualify.py::parse_junit",
+      "by_class_prefix": {
+        "tests.integration": 21
+      }
+    },
+    "native/junit-gates-supplement.xml": {
+      "passed": 298,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "strict_parse": "PASS; scripts/qualify.py::parse_junit",
+      "by_class_prefix": {
+        "tests.unit": 298
+      }
+    }
+  },
+  "mutations": {
+    "date": "2026-10-29T02:56:45+00:00",
+    "total": 27,
+    "killed": 27,
+    "survived": [],
+    "errors": [],
+    "all_killed": true,
+    "import_proof": {
+      "svweave_origin_under_python_I": "${REPO}/.svweave/mutation/repo/src/svweave/__init__.py",
+      "inside_scratch_copy": true
+    },
+    "source": "backend/mutation-2026-10-29.json",
+    "attribution": "Run/artifact metadata and backend-job.log; mutation JSON itself has no source SHA."
+  },
+  "benchmark": {
+    "source": "backend/benchmark-smoke.json",
+    "scale": 0.05,
+    "files": 25,
+    "lines": 4844,
+    "reference_host_met": false,
+    "reference_corpus": false,
+    "all_measured_targets_pass": true,
+    "graph_search": "SKIPPED",
+    "page_cache": "warm (not dropped: no privilege)"
+  },
+  "limitations": [
+    "developer preview / UNQUALIFIED; full scripts/qualify.py release evaluation NOT_RUN",
+    "one unit skip remains a skip; native/required suites have zero skips",
+    "real Claude/Codex application registration and connection NOT_RUN",
+    "Slurm site runtime and external svweave-slurm wrapper compatibility NOT_RUN; wrapper source not provided",
+    "simulation/formal/RTL coverage and native Verilator UVM acceptance NOT_RUN",
+    "benchmark reduced scale, warm page cache, graph search SKIPPED; not reference qualification",
+    "historical 22/22 and 26/26 mutation evidence remains unchanged"
+  ]
+}

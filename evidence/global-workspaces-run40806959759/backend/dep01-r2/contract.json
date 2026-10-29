@@ -1,0 +1,24 @@
+{
+  "revision": "DEP-01-R2-host-controller",
+  "status": "PASS",
+  "original_contract_status": "BLOCKED",
+  "original_contract_reclassified": false,
+  "controller_network_isolated": false,
+  "offline_install_verification_network_isolated": true,
+  "backend_isolation": "mandatory_bwrap",
+  "release_qualified": false,
+  "ci_identity_verified": true,
+  "source_identity": {
+    "git_head": "ca6ebb571137f683a5354a1bd78169341d933de1",
+    "src_tree_sha256": "a415e7e7754c07f87688a816d8145dde440e0f5404baf6289f5a31b7308b415a"
+  },
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "3e1cf4f8ced4a344f60659f33f628a8c9dfa71f441b6cbb0a8a681025699ca9f",
+  "artifacts": ".svweave/ci/dep01-r2/run-0py9nzeo",
+  "started_at_utc": "2026-10-29T02:35:05.456988+00:00",
+  "source_manifest_sha256": {
+    "before": "71428d2cb84a13fe54531e2417342bd9ed263e46af624410f98c6c86ad28e8bb",
+    "after": "71428d2cb84a13fe54531e2417342bd9ed263e46af624410f98c6c86ad28e8bb"
+  },
+  "finished_at_utc": "2026-10-29T02:35:37.952806+00:00"
+}

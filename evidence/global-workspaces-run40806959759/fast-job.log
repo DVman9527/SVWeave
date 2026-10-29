@@ -1,0 +1,800 @@
+﻿2026-10-29T02:32:34.0381918Z Current runner version: '2.338.0'
+2026-10-29T02:32:34.0398420Z ##[group]Runner Image Provisioner
+2026-10-29T02:32:34.0398935Z Hosted Compute Agent
+2026-10-29T02:32:34.0399334Z Version: 20261021.618
+2026-10-29T02:32:34.0399716Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+2026-10-29T02:32:34.0400133Z Build Date: 2026-10-21T00:45:21Z
+2026-10-29T02:32:34.0400618Z Worker ID: {448472db-949e-4d59-b63b-fb0c6ff56110}
+2026-10-29T02:32:34.0401219Z Region: westus3
+2026-10-29T02:32:34.0401577Z Cloud: Azure
+2026-10-29T02:32:34.0401914Z ##[endgroup]
+2026-10-29T02:32:34.0402668Z ##[group]Operating System
+2026-10-29T02:32:34.0403101Z Ubuntu
+2026-10-29T02:32:34.0403409Z 24.04.5
+2026-10-29T02:32:34.0403705Z LTS
+2026-10-29T02:32:34.0404058Z ##[endgroup]
+2026-10-29T02:32:34.0404384Z ##[group]Runner Image
+2026-10-29T02:32:34.0404831Z Image: ubuntu-24.04
+2026-10-29T02:32:34.0405170Z Version: 20261025.353.1
+2026-10-29T02:32:34.0405931Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-29T02:32:34.0406761Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+2026-10-29T02:32:34.0407387Z ##[endgroup]
+2026-10-29T02:32:34.0408003Z ##[group]GITHUB_TOKEN Permissions
+2026-10-29T02:32:34.0409240Z Contents: read
+2026-10-29T02:32:34.0409586Z Metadata: read
+2026-10-29T02:32:34.0409891Z ##[endgroup]
+2026-10-29T02:32:34.0411645Z Secret source: Actions
+2026-10-29T02:32:34.0412242Z Cache mode: write
+2026-10-29T02:32:34.0412711Z Prepare workflow directory
+2026-10-29T02:32:34.0606375Z Prepare all required actions
+2026-10-29T02:32:34.0636240Z Getting action download info
+2026-10-29T02:32:34.3537947Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-29T02:32:34.4417936Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-29T02:32:34.5491132Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-29T02:32:34.8832837Z Complete job name: fast checks (ruff, mypy, schema, unit, contract)
+2026-10-29T02:32:34.9395792Z ##[group]Run actions/checkout@v4
+2026-10-29T02:32:34.9396239Z with:
+2026-10-29T02:32:34.9396496Z   persist-credentials: false
+2026-10-29T02:32:34.9396797Z   repository: DVman9527/SVWeave
+2026-10-29T02:32:34.9399017Z   token: ***
+2026-10-29T02:32:34.9399264Z   ssh-strict: true
+2026-10-29T02:32:34.9399528Z   ssh-user: git
+2026-10-29T02:32:34.9399776Z   clean: true
+2026-10-29T02:32:34.9400036Z   sparse-checkout-cone-mode: true
+2026-10-29T02:32:34.9400340Z   fetch-depth: 1
+2026-10-29T02:32:34.9400591Z   fetch-tags: false
+2026-10-29T02:32:34.9400854Z   show-progress: true
+2026-10-29T02:32:34.9401244Z   lfs: false
+2026-10-29T02:32:34.9401499Z   submodules: false
+2026-10-29T02:32:34.9401773Z   set-safe-directory: true
+2026-10-29T02:32:34.9402070Z   allow-unsafe-pr-checkout: false
+2026-10-29T02:32:34.9402449Z ##[endgroup]
+2026-10-29T02:32:35.1706636Z Syncing repository: DVman9527/SVWeave
+2026-10-29T02:32:35.1707969Z ##[group]Getting Git version info
+2026-10-29T02:32:35.1708392Z Working directory is '/home/runner/work/SVWeave/SVWeave'
+2026-10-29T02:32:35.1708922Z [command]/usr/bin/git version
+2026-10-29T02:32:35.1783354Z git version 2.56.0
+2026-10-29T02:32:35.1797191Z ##[endgroup]
+2026-10-29T02:32:35.1807559Z Temporarily overriding HOME='/home/runner/work/_temp/a1a96dae-6391-4f6f-974d-fc3493ac2df7' before making global git config changes
+2026-10-29T02:32:35.1808788Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-29T02:32:35.1811130Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SVWeave/SVWeave
+2026-10-29T02:32:35.1857125Z Deleting the contents of '/home/runner/work/SVWeave/SVWeave'
+2026-10-29T02:32:35.1860497Z ##[group]Initializing the repository
+2026-10-29T02:32:35.1863774Z [command]/usr/bin/git init /home/runner/work/SVWeave/SVWeave
+2026-10-29T02:32:35.1962041Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-29T02:32:35.1963318Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-29T02:32:35.1964128Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-29T02:32:35.1964769Z hint: call:
+2026-10-29T02:32:35.1965125Z hint:
+2026-10-29T02:32:35.1965586Z hint: 	git config --global init.defaultBranch <name>
+2026-10-29T02:32:35.1966132Z hint:
+2026-10-29T02:32:35.1966626Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-29T02:32:35.1967434Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-29T02:32:35.1968066Z hint:
+2026-10-29T02:32:35.1968430Z hint: 	git branch -m <name>
+2026-10-29T02:32:35.1968842Z hint:
+2026-10-29T02:32:35.1969398Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-29T02:32:35.1972588Z Initialized empty Git repository in /home/runner/work/SVWeave/SVWeave/.git/
+2026-10-29T02:32:35.1982146Z [command]/usr/bin/git remote add origin https://github.com/DVman9527/SVWeave
+2026-10-29T02:32:35.2024872Z ##[endgroup]
+2026-10-29T02:32:35.2025631Z ##[group]Disabling automatic garbage collection
+2026-10-29T02:32:35.2028299Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-29T02:32:35.2056299Z ##[endgroup]
+2026-10-29T02:32:35.2056972Z ##[group]Setting up auth
+2026-10-29T02:32:35.2063244Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-29T02:32:35.2090089Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-29T02:32:35.2417608Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-29T02:32:35.2453406Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-29T02:32:35.2637584Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-29T02:32:35.2673040Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-29T02:32:35.2858274Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-29T02:32:35.2899059Z ##[endgroup]
+2026-10-29T02:32:35.2899619Z ##[group]Fetching the repository
+2026-10-29T02:32:35.2908651Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ca6ebb571137f683a5354a1bd78169341d933de1:refs/remotes/origin/validation/global-workspaces-20261029
+2026-10-29T02:32:38.1308965Z From https://github.com/DVman9527/SVWeave
+2026-10-29T02:32:38.1310492Z  * [new ref]         ca6ebb571137f683a5354a1bd78169341d933de1 -> origin/validation/global-workspaces-20261029
+2026-10-29T02:32:38.1314638Z ##[endgroup]
+2026-10-29T02:32:38.1314931Z ##[group]Determining the checkout info
+2026-10-29T02:32:38.1318294Z ##[endgroup]
+2026-10-29T02:32:38.1318491Z [command]/usr/bin/git sparse-checkout disable
+2026-10-29T02:32:38.1372242Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-29T02:32:38.1405336Z ##[group]Checking out the ref
+2026-10-29T02:32:38.1415565Z [command]/usr/bin/git checkout --progress --force -B validation/global-workspaces-20261029 refs/remotes/origin/validation/global-workspaces-20261029
+2026-10-29T02:32:38.4287568Z Switched to a new branch 'validation/global-workspaces-20261029'
+2026-10-29T02:32:38.4291773Z branch 'validation/global-workspaces-20261029' set up to track 'origin/validation/global-workspaces-20261029'.
+2026-10-29T02:32:38.4343034Z ##[endgroup]
+2026-10-29T02:32:38.4404947Z [command]/usr/bin/git log -1 --format=%H
+2026-10-29T02:32:38.4446457Z ca6ebb571137f683a5354a1bd78169341d933de1
+2026-10-29T02:32:38.4465063Z ##[group]Removing auth
+2026-10-29T02:32:38.4466187Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-29T02:32:38.4515218Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-29T02:32:38.4723096Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-29T02:32:38.4755621Z http.https://github.com/.extraheader
+2026-10-29T02:32:38.4761152Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-29T02:32:38.4797695Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-29T02:32:38.5008330Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-29T02:32:38.5046444Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-29T02:32:38.5251954Z ##[endgroup]
+2026-10-29T02:32:38.5538642Z ##[group]Run actions/setup-python@v5
+2026-10-29T02:32:38.5538832Z with:
+2026-10-29T02:32:38.5538955Z   python-version: 3.12
+2026-10-29T02:32:38.5539086Z   check-latest: false
+2026-10-29T02:32:38.5540615Z   token: ***
+2026-10-29T02:32:38.5540774Z   update-environment: true
+2026-10-29T02:32:38.5541111Z   allow-prereleases: false
+2026-10-29T02:32:38.5541273Z   freethreaded: false
+2026-10-29T02:32:38.5541398Z ##[endgroup]
+2026-10-29T02:32:38.6531656Z ##[group]Installed versions
+2026-10-29T02:32:38.6594980Z (node:2172) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-29T02:32:38.6595632Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-29T02:32:38.6596001Z Successfully set up CPython (3.12.15)
+2026-10-29T02:32:38.6596493Z ##[endgroup]
+2026-10-29T02:32:38.6725154Z ##[group]Run python -m pip install --upgrade pip==24.3.1 uv==0.5.11
+2026-10-29T02:32:38.6725506Z [36;1mpython -m pip install --upgrade pip==24.3.1 uv==0.5.11[0m
+2026-10-29T02:32:38.6725702Z [36;1muv venv --python 3.12 .venv[0m
+2026-10-29T02:32:38.6725885Z [36;1muv pip install --python .venv/bin/python -e '.[dev]'[0m
+2026-10-29T02:32:38.6764770Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:32:38.6765071Z env:
+2026-10-29T02:32:38.6765334Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:38.6765733Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:32:38.6766131Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:38.6766450Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:38.6766766Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:38.6767085Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:32:38.6767438Z ##[endgroup]
+2026-10-29T02:32:39.2812711Z Collecting pip==24.3.1
+2026-10-29T02:32:39.3315961Z   Downloading pip-24.3.1-py3-none-any.whl.metadata (3.7 kB)
+2026-10-29T02:32:39.5190155Z Collecting uv==0.5.11
+2026-10-29T02:32:39.5224550Z   Downloading uv-0.5.11-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+2026-10-29T02:32:39.5293315Z Downloading pip-24.3.1-py3-none-any.whl (1.8 MB)
+2026-10-29T02:32:39.5604188Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 89.0 MB/s  0:00:00
+2026-10-29T02:32:39.5648831Z Downloading uv-0.5.11-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (15.0 MB)
+2026-10-29T02:32:39.7149773Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.0/15.0 MB 100.3 MB/s  0:00:00
+2026-10-29T02:32:39.7552791Z Installing collected packages: uv, pip
+2026-10-29T02:32:39.8740109Z   Attempting uninstall: pip
+2026-10-29T02:32:39.8751072Z     Found existing installation: pip 26.2.2
+2026-10-29T02:32:39.9985294Z     Uninstalling pip-26.2.2:
+2026-10-29T02:32:40.0026966Z       Successfully uninstalled pip-26.2.2
+2026-10-29T02:32:40.9934703Z 
+2026-10-29T02:32:40.9944169Z Successfully installed pip-24.3.1 uv-0.5.11
+2026-10-29T02:32:41.0922234Z Using CPython 3.12.15 interpreter at: /opt/hostedtoolcache/Python/3.12.15/x64/bin/python3.12
+2026-10-29T02:32:41.0922602Z Creating virtual environment at: .venv
+2026-10-29T02:32:41.0925691Z Activate with: source .venv/bin/activate
+2026-10-29T02:32:41.4762122Z Resolved 30 packages in 346ms
+2026-10-29T02:32:42.0305909Z Prepared 30 packages in 553ms
+2026-10-29T02:32:42.0584146Z Installed 30 packages in 27ms
+2026-10-29T02:32:42.0584450Z  + annotated-types==0.8.0
+2026-10-29T02:32:42.0584691Z  + ast-serialize==0.13.1
+2026-10-29T02:32:42.0584887Z  + attrs==26.1.0
+2026-10-29T02:32:42.0585061Z  + click==8.5.0
+2026-10-29T02:32:42.0585241Z  + coverage==7.17.0
+2026-10-29T02:32:42.0585424Z  + hypothesis==6.169.0
+2026-10-29T02:32:42.0585622Z  + iniconfig==2.3.1
+2026-10-29T02:32:42.0585793Z  + jsonschema==4.26.0
+2026-10-29T02:32:42.0586054Z  + jsonschema-specifications==2025.9.1
+2026-10-29T02:32:42.0586312Z  + librt==0.16.0
+2026-10-29T02:32:42.0586474Z  + mypy==2.4.0
+2026-10-29T02:32:42.0586658Z  + mypy-extensions==1.1.0
+2026-10-29T02:32:42.0586870Z  + packaging==26.3
+2026-10-29T02:32:42.0587037Z  + pathspec==1.1.1
+2026-10-29T02:32:42.0587202Z  + pluggy==1.7.0
+2026-10-29T02:32:42.0587380Z  + pydantic==2.14.1
+2026-10-29T02:32:42.0587592Z  + pydantic-core==2.50.1
+2026-10-29T02:32:42.0587790Z  + pygments==2.21.0
+2026-10-29T02:32:42.0587964Z  + pytest==9.1.1
+2026-10-29T02:32:42.0588146Z  + pytest-cov==7.1.0
+2026-10-29T02:32:42.0588333Z  + pyyaml==6.0.3
+2026-10-29T02:32:42.0588540Z  + referencing==0.37.0
+2026-10-29T02:32:42.0588737Z  + rpds-py==2026.9.1
+2026-10-29T02:32:42.0588921Z  + ruff==0.17.0
+2026-10-29T02:32:42.0589108Z  + sortedcontainers==2.4.0
+2026-10-29T02:32:42.0589388Z  + svweave==0.1.0 (from file:///home/runner/work/SVWeave/SVWeave)
+2026-10-29T02:32:42.0589717Z  + types-jsonschema==4.26.0.20261006
+2026-10-29T02:32:42.0590055Z  + types-pyyaml==6.0.12.20260906
+2026-10-29T02:32:42.0590191Z  + typing-extensions==4.16.0
+2026-10-29T02:32:42.0590324Z  + typing-inspection==0.4.4
+2026-10-29T02:32:42.0729695Z ##[group]Run .venv/bin/python scripts/bootstrap_locked.py
+2026-10-29T02:32:42.0729943Z [36;1m.venv/bin/python scripts/bootstrap_locked.py[0m
+2026-10-29T02:32:42.0746492Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:32:42.0746623Z env:
+2026-10-29T02:32:42.0746766Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:42.0746994Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:32:42.0747217Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:42.0747423Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:42.0747622Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:42.0747823Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:32:42.0747998Z ##[endgroup]
+2026-10-29T02:32:52.0548744Z    Building serena-agent @ file:///home/runner/work/SVWeave/SVWeave/.toolchain/serena-src
+2026-10-29T02:32:52.1083063Z Downloading cryptography (4.5MiB)
+2026-10-29T02:32:52.1096232Z Downloading tiktoken (1.1MiB)
+2026-10-29T02:32:52.1106534Z Downloading pillow (6.6MiB)
+2026-10-29T02:32:52.1150534Z Downloading pydantic-core (2.0MiB)
+2026-10-29T02:32:52.2085181Z  Downloaded tiktoken
+2026-10-29T02:32:52.2186937Z    Building proxy-tools==0.1.0
+2026-10-29T02:32:52.2202229Z  Downloaded pydantic-core
+2026-10-29T02:32:52.2382111Z  Downloaded cryptography
+2026-10-29T02:32:52.2486088Z  Downloaded pillow
+2026-10-29T02:32:52.3109238Z       Built serena-agent @ file:///home/runner/work/SVWeave/SVWeave/.toolchain/serena-src
+2026-10-29T02:32:52.4670569Z       Built proxy-tools==0.1.0
+2026-10-29T02:32:52.4677240Z Prepared 72 packages in 422ms
+2026-10-29T02:32:52.4797754Z Uninstalled 8 packages in 11ms
+2026-10-29T02:32:52.5058861Z Installed 72 packages in 26ms
+2026-10-29T02:32:52.5059355Z  + annotated-types==0.7.0
+2026-10-29T02:32:52.5059793Z  + anthropic==0.117.0
+2026-10-29T02:32:52.5059972Z  + anyio==4.13.0
+2026-10-29T02:32:52.5060135Z  + attrs==26.1.0
+2026-10-29T02:32:52.5060319Z  + beautifulsoup4==4.14.2
+2026-10-29T02:32:52.5060557Z  + blinker==1.9.0
+2026-10-29T02:32:52.5060857Z  + bottle==0.13.4
+2026-10-29T02:32:52.5061254Z  + cattrs==26.1.0
+2026-10-29T02:32:52.5063412Z  + certifi==2026.2.25
+2026-10-29T02:32:52.5063580Z  + cffi==2.0.0
+2026-10-29T02:32:52.5063751Z  + charset-normalizer==3.4.6
+2026-10-29T02:32:52.5063945Z  + click==8.3.1
+2026-10-29T02:32:52.5064110Z  + cryptography==50.0.0
+2026-10-29T02:32:52.5064284Z  + distro==1.9.0
+2026-10-29T02:32:52.5064454Z  + docstring-parser==0.17.0
+2026-10-29T02:32:52.5064641Z  + dotenv==0.9.9
+2026-10-29T02:32:52.5064806Z  - editables==0.6
+2026-10-29T02:32:52.5064996Z  + filelock==3.25.2
+2026-10-29T02:32:52.5065156Z  + flask==3.1.3
+2026-10-29T02:32:52.5065308Z  + h11==0.16.0
+2026-10-29T02:32:52.5065463Z  - hatchling==1.32.4
+2026-10-29T02:32:52.5065641Z  + httpcore==1.0.9
+2026-10-29T02:32:52.5065816Z  + httpx==0.28.1
+2026-10-29T02:32:52.5065974Z  + httpx-sse==0.4.3
+2026-10-29T02:32:52.5066132Z  + idna==3.15
+2026-10-29T02:32:52.5066350Z  + itsdangerous==2.2.0
+2026-10-29T02:32:52.5066521Z  + jinja2==3.1.6
+2026-10-29T02:32:52.5066676Z  + jiter==0.13.0
+2026-10-29T02:32:52.5066830Z  + joblib==1.5.1
+2026-10-29T02:32:52.5066987Z  + jsonschema==4.26.0
+2026-10-29T02:32:52.5067157Z  + jsonschema-specifications==2025.9.1
+2026-10-29T02:32:52.5067303Z  + lsprotocol==2025.0.0
+2026-10-29T02:32:52.5067417Z  + markupsafe==3.0.3
+2026-10-29T02:32:52.5067526Z  + mcp==1.28.1
+2026-10-29T02:32:52.5067977Z  + mslex==1.3.0
+2026-10-29T02:32:52.5068131Z  + oslex==2.0.0
+2026-10-29T02:32:52.5068286Z  + overrides==7.7.0
+2026-10-29T02:32:52.5068452Z  - packaging==26.3
+2026-10-29T02:32:52.5068617Z  - pathspec==1.1.1
+2026-10-29T02:32:52.5068774Z  + pathspec==0.12.1
+2026-10-29T02:32:52.5068881Z  + pillow==12.3.0
+2026-10-29T02:32:52.5068984Z  - pluggy==1.6.0
+2026-10-29T02:32:52.5069087Z  + proxy-tools==0.1.0
+2026-10-29T02:32:52.5069208Z  + psutil==7.0.0
+2026-10-29T02:32:52.5069654Z  + pycparser==3.0
+2026-10-29T02:32:52.5069817Z  + pydantic==2.12.5
+2026-10-29T02:32:52.5070159Z  + pydantic-core==2.41.5
+2026-10-29T02:32:52.5070354Z  + pydantic-settings==2.14.2
+2026-10-29T02:32:52.5070542Z  + pygls==2.1.1
+2026-10-29T02:32:52.5070697Z  + pyjwt==2.12.0
+2026-10-29T02:32:52.5070852Z  + pystray==0.19.5
+2026-10-29T02:32:52.5071121Z  + python-dotenv==1.2.2
+2026-10-29T02:32:52.5071303Z  + python-multipart==0.0.31
+2026-10-29T02:32:52.5071490Z  + python-xlib==0.33
+2026-10-29T02:32:52.5071661Z  + pywebview==6.2
+2026-10-29T02:32:52.5071822Z  + pyyaml==6.0.2
+2026-10-29T02:32:52.5071982Z  + referencing==0.37.0
+2026-10-29T02:32:52.5072149Z  + regex==2026.2.28
+2026-10-29T02:32:52.5072309Z  + requests==2.33.0
+2026-10-29T02:32:52.5072470Z  + rpds-py==0.30.0
+2026-10-29T02:32:52.5072800Z  + ruamel-yaml==0.18.14
+2026-10-29T02:32:52.5073012Z  + ruamel-yaml-clib==0.2.15
+2026-10-29T02:32:52.5073206Z  + sensai-utils==1.5.0
+2026-10-29T02:32:52.5073524Z  + serena-agent==1.7.0 (from file:///home/runner/work/SVWeave/SVWeave/.toolchain/serena-src)
+2026-10-29T02:32:52.5073874Z  - setuptools==84.0.0
+2026-10-29T02:32:52.5074044Z  + six==1.17.0
+2026-10-29T02:32:52.5074198Z  + sniffio==1.3.1
+2026-10-29T02:32:52.5074358Z  + soupsieve==2.8.4
+2026-10-29T02:32:52.5074525Z  + sse-starlette==3.3.3
+2026-10-29T02:32:52.5074699Z  + starlette==1.3.1
+2026-10-29T02:32:52.5074860Z  + tiktoken==0.12.0
+2026-10-29T02:32:52.5075026Z  - tomlkit==0.15.1
+2026-10-29T02:32:52.5075184Z  + tqdm==4.67.1
+2026-10-29T02:32:52.5075356Z  - trove-classifiers==2026.9.21.13
+2026-10-29T02:32:52.5075570Z  + types-pyyaml==6.0.12.20250516
+2026-10-29T02:32:52.5075822Z  + typing-extensions==4.15.0
+2026-10-29T02:32:52.5076026Z  + typing-inspection==0.4.2
+2026-10-29T02:32:52.5077576Z  + urllib3==2.7.0
+2026-10-29T02:32:52.5077738Z  + uvicorn==0.42.0
+2026-10-29T02:32:52.5077902Z  + werkzeug==3.1.7
+2026-10-29T02:32:52.5996461Z   download https://github.com/astral-sh/uv/releases/download/0.12.23/uv-x86_64-unknown-linux-gnu.tar.gz
+2026-10-29T02:32:52.5997582Z   download https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz
+2026-10-29T02:32:52.5998319Z   download https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz
+2026-10-29T02:32:52.5999176Z   download https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz
+2026-10-29T02:32:52.5999827Z   download https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz
+2026-10-29T02:32:52.6000566Z   download https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl
+2026-10-29T02:32:52.6001621Z   download https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl
+2026-10-29T02:32:52.6002496Z   download https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl
+2026-10-29T02:32:52.6003510Z   download https://files.pythonhosted.org/packages/b1/db/dceb9dd5b231e1da801793f8acc9f3c52a7e1afe40bb1aae37e02b0faad5/cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+2026-10-29T02:32:52.6004472Z   download https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl
+2026-10-29T02:32:52.6005972Z   download https://files.pythonhosted.org/packages/1a/f1/b474e930c4d910328780e3940da76f5aa5cbc48ce1fc14e44d239d9ea9db/cryptography-50.0.2-cp311-abi3-manylinux_2_28_x86_64.whl
+2026-10-29T02:32:52.6006839Z   download https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
+2026-10-29T02:32:52.6007633Z   download https://files.pythonhosted.org/packages/09/ba/a4568248771ce81957bfb7cc600264a40fbcda092391ee1c415c50be4bea/httpcore2-2.13.1-py3-none-any.whl
+2026-10-29T02:32:52.6008604Z   download https://files.pythonhosted.org/packages/d8/9c/6fe8931fd9f381042a9e4c7d5a7b4cbf7016b252bec0c99a49fce42c3326/httpx2-2.13.1-py3-none-any.whl
+2026-10-29T02:32:52.6009384Z   download https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl
+2026-10-29T02:32:52.6010175Z   download https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl
+2026-10-29T02:32:52.6011184Z   download https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl
+2026-10-29T02:32:52.6012015Z   download https://files.pythonhosted.org/packages/20/d7/4a2878f128df729db3ca04e71bfce26405cc2e0c9ebe19c592feeb4c61b9/mcp-2.3.0-py3-none-any.whl
+2026-10-29T02:32:52.6012795Z   download https://files.pythonhosted.org/packages/ce/48/32583066b155bb5d4507e7887dc88ee23118cc4de8e2a12870c49719e2a8/mcp_types-2.3.0-py3-none-any.whl
+2026-10-29T02:32:52.6013760Z   download https://files.pythonhosted.org/packages/b9/2c/7fb13ecb1e8c0c268e26c6bc44be4a7f51996b2a3c006749ce6fc4fd7da2/nanobind_backend-1.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-29T02:32:52.6014730Z   download https://files.pythonhosted.org/packages/1e/41/f7dcf80b81ee8e71c1a2b59f14208bc723edbd89ed027a73b175abf6348e/opentelemetry_api-1.45.1-py3-none-any.whl
+2026-10-29T02:32:52.6015582Z   download https://files.pythonhosted.org/packages/90/11/0e6f11117525ff0eec40ebac3d313376f102df93ca44ad9e893ee85e4f89/pycparser-3.11-py3-none-any.whl
+2026-10-29T02:32:52.6016389Z   download https://files.pythonhosted.org/packages/35/ea/a56b9fe5066f3537b7882f77e9c5dfb26d8c2eefdaed9b5fc73d57b4dc22/pydantic-2.14.1-py3-none-any.whl
+2026-10-29T02:32:52.6017385Z   download https://files.pythonhosted.org/packages/90/24/48cd98388e4ac2c08d0800af36d15413db15e20387f1038123a2c86cb2f6/pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-29T02:32:52.6018504Z   download https://files.pythonhosted.org/packages/50/ca/44de4e75f8aadc457f0634be3b542815078ded46dca30efb960edeecad6e/pyjwt-2.15.1-py3-none-any.whl
+2026-10-29T02:32:52.6019482Z   download https://files.pythonhosted.org/packages/c6/20/1b6aec1fcb6d9c6efc491d651fa8e4064efba4ad43bd8ee1fa16096eca3d/pyslang-12.0.0-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+2026-10-29T02:32:52.6020497Z   download https://files.pythonhosted.org/packages/e1/04/e8135ebd1ad02c56ec633277529b2602ff99ff634be76cdba5744cf554fd/python_multipart-0.0.32-py3-none-any.whl
+2026-10-29T02:32:52.6021661Z   download https://files.pythonhosted.org/packages/8b/9d/b3589d3877982d4f2329302ef98a8026e7f4443c765c46cfecc8858c6b4b/pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+2026-10-29T02:32:52.6022742Z   download https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl
+2026-10-29T02:32:52.6023807Z   download https://files.pythonhosted.org/packages/1d/6d/b26eb1e75395925b3a142ed351cbed2ec8212f5c9d937aee3df32c701baa/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+2026-10-29T02:32:52.6024857Z   download https://files.pythonhosted.org/packages/be/e4/cdda14023c316d71493bc54fdffc3dd006631b88866145c9d3cc33e0f1df/sse_starlette-3.5.0-py3-none-any.whl
+2026-10-29T02:32:52.6025723Z   download https://files.pythonhosted.org/packages/4e/d6/1ec1b290f9e0fb067899b61e1d37a30c923068bad260b216dbe37a7d2967/starlette-1.7.0-py3-none-any.whl
+2026-10-29T02:32:52.6026559Z   download https://files.pythonhosted.org/packages/51/e9/3a7820be2bb0fe53b6bc9c3be26d3d1158004e4c3ab953aa6840b955b1e9/truststore-0.10.5-py3-none-any.whl
+2026-10-29T02:32:52.6027487Z   download https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl
+2026-10-29T02:32:52.6028583Z   download https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl
+2026-10-29T02:32:52.6029525Z   download https://files.pythonhosted.org/packages/38/0c/b54a4fdd7f90a3af8b02ebc9ce6712c2c208b7926a2f7bad95c33ebbe943/uvicorn-0.54.0-py3-none-any.whl
+2026-10-29T02:32:52.6030407Z   download https://files.pythonhosted.org/packages/cc/0e/d095533037fc9468f947b19f2da53f869804632b508808de41e86e801797/editables-0.6-py3-none-any.whl
+2026-10-29T02:32:52.6031389Z   download https://files.pythonhosted.org/packages/5f/80/91f51f439c05d4ec4623c22928ce16a938d6d793bf709477830823497859/hatchling-1.32.4-py3-none-any.whl
+2026-10-29T02:32:52.6032280Z   download https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl
+2026-10-29T02:32:52.6033200Z   download https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl
+2026-10-29T02:32:52.6034138Z   download https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl
+2026-10-29T02:32:52.6035082Z   download https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl
+2026-10-29T02:32:52.6035988Z   download https://files.pythonhosted.org/packages/13/bc/8c13eb66537dce1d2bd3a57132902f38d0e7f5bb46fa9f4daed9fe9d76ee/tomlkit-0.15.1-py3-none-any.whl
+2026-10-29T02:32:52.6036904Z   download https://files.pythonhosted.org/packages/30/81/0da8afb52a71d0a4f2bd3152357b1a441e393b286374802b9d3addab4ab5/trove_classifiers-2026.9.21.13-py3-none-any.whl
+2026-10-29T02:32:52.6037558Z {
+2026-10-29T02:32:52.6037746Z   "lock": "${REPO}/toolchain.lock.json",
+2026-10-29T02:32:52.6038110Z   "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+2026-10-29T02:32:52.6038600Z   "toolchain_dir": "${REPO}/.toolchain",
+2026-10-29T02:32:52.6038827Z   "verify_only": false,
+2026-10-29T02:32:52.6039016Z   "offline": false,
+2026-10-29T02:32:52.6039189Z   "components": {
+2026-10-29T02:32:52.6039357Z     "uv": {
+2026-10-29T02:32:52.6039738Z       "source_url": "https://github.com/astral-sh/uv/releases/download/0.12.23/uv-x86_64-unknown-linux-gnu.tar.gz",
+2026-10-29T02:32:52.6040197Z       "installed_to": "${REPO}/.toolchain/uv",
+2026-10-29T02:32:52.6040443Z       "binary_sha256_ok": true,
+2026-10-29T02:32:52.6040648Z       "source": "pinned",
+2026-10-29T02:32:52.6040833Z       "version": "0.12.23",
+2026-10-29T02:32:52.6041120Z       "verified": true
+2026-10-29T02:32:52.6041289Z     },
+2026-10-29T02:32:52.6041431Z     "slang": {
+2026-10-29T02:32:52.6041773Z       "source_url": "https://github.com/MikePopoloski/slang/releases/download/v12.0/slang-linux-x86_64.tar.gz",
+2026-10-29T02:32:52.6042191Z       "installed_to": "${REPO}/.toolchain/slang",
+2026-10-29T02:32:52.6042429Z       "binary_sha256_ok": true
+2026-10-29T02:32:52.6042613Z     },
+2026-10-29T02:32:52.6042757Z     "verible": {
+2026-10-29T02:32:52.6043230Z       "source_url": "https://github.com/chipsalliance/verible/releases/download/v0.0-4296-g0f262651/verible-v0.0-4296-g0f262651-linux-static-x86_64.tar.gz",
+2026-10-29T02:32:52.6043777Z       "installed_to": "${REPO}/.toolchain/verible",
+2026-10-29T02:32:52.6044016Z       "binary_sha256_ok": true
+2026-10-29T02:32:52.6044194Z     },
+2026-10-29T02:32:52.6044349Z     "codebase_memory_mcp": {
+2026-10-29T02:32:52.6044836Z       "source_url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.11.0/codebase-memory-mcp-linux-amd64-portable.tar.gz",
+2026-10-29T02:32:52.6045368Z       "installed_to": "${REPO}/.toolchain/cbm",
+2026-10-29T02:32:52.6045604Z       "binary_sha256_ok": true
+2026-10-29T02:32:52.6045789Z     },
+2026-10-29T02:32:52.6045934Z     "uvm_core": {
+2026-10-29T02:32:52.6046257Z       "source_url": "https://github.com/accellera-official/uvm-core/archive/refs/tags/2020.3.1.tar.gz",
+2026-10-29T02:32:52.6046660Z       "installed_to": "${REPO}/.toolchain/uvm-core",
+2026-10-29T02:32:52.6047024Z       "install_dir_present": true
+2026-10-29T02:32:52.6047220Z     },
+2026-10-29T02:32:52.6047373Z     "gateway_wheelhouse": {
+2026-10-29T02:32:52.6047565Z       "requirements_sha256_ok": true,
+2026-10-29T02:32:52.6047783Z       "wheels_expected": 31,
+2026-10-29T02:32:52.6047980Z       "wheels_present_sha256_ok": 31
+2026-10-29T02:32:52.6048169Z     },
+2026-10-29T02:32:52.6048309Z     "pyslang": {
+2026-10-29T02:32:52.6048481Z       "installed_version": "12.0.0"
+2026-10-29T02:32:52.6048681Z     },
+2026-10-29T02:32:52.6048827Z     "mcp_sdk": {
+2026-10-29T02:32:52.6048997Z       "installed_version": "2.3.0"
+2026-10-29T02:32:52.6049188Z     },
+2026-10-29T02:32:52.6049327Z     "svweave": {
+2026-10-29T02:32:52.6049490Z       "installed": "present"
+2026-10-29T02:32:52.6049670Z     },
+2026-10-29T02:32:52.6049833Z     "serena_build_wheelhouse": {
+2026-10-29T02:32:52.6050034Z       "wheels_expected": 8,
+2026-10-29T02:32:52.6050225Z       "wheels_present_sha256_ok": 8
+2026-10-29T02:32:52.6050417Z     },
+2026-10-29T02:32:52.6050562Z     "serena": {
+2026-10-29T02:32:52.6050721Z       "commit_ok": true,
+2026-10-29T02:32:52.6050903Z       "uv_lock_sha256_ok": true,
+2026-10-29T02:32:52.6051218Z       "license_sha256_ok": true,
+2026-10-29T02:32:52.6051422Z       "serena_exe_present": true,
+2026-10-29T02:32:52.6051634Z       "serena_agent_version": "1.7.0"
+2026-10-29T02:32:52.6051835Z     }
+2026-10-29T02:32:52.6051973Z   },
+2026-10-29T02:32:52.6052116Z   "warnings": [],
+2026-10-29T02:32:52.6052277Z   "errors": [],
+2026-10-29T02:32:52.6052429Z   "ok": true
+2026-10-29T02:32:52.6052577Z }
+2026-10-29T02:32:52.6135757Z ##[group]Run # Existing pyproject build-system pin; installation phase only, not a runtime download.
+2026-10-29T02:32:52.6136211Z [36;1m# Existing pyproject build-system pin; installation phase only, not a runtime download.[0m
+2026-10-29T02:32:52.6136502Z [36;1muv pip install --python .venv/bin/python hatchling==1.29.0[0m
+2026-10-29T02:32:52.6136971Z [36;1mSVWEAVE_REQUIRE_PACKAGE_BUILD=1 .venv/bin/python -m pytest tests/unit/test_installed_runtime_assets.py -q --no-cov[0m
+2026-10-29T02:32:52.6137276Z [36;1m.venv/bin/python scripts/ci_wheel_smoke.py[0m
+2026-10-29T02:32:52.6153275Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:32:52.6153403Z env:
+2026-10-29T02:32:52.6153541Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:52.6153767Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:32:52.6153986Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:52.6154207Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:52.6154407Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:32:52.6154610Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:32:52.6154781Z ##[endgroup]
+2026-10-29T02:32:52.6262386Z Resolved 5 packages in 1ms
+2026-10-29T02:32:52.6283679Z Installed 2 packages in 2ms
+2026-10-29T02:32:52.6283970Z  + hatchling==1.29.0
+2026-10-29T02:32:52.6284200Z  + trove-classifiers==2026.9.21.13
+2026-10-29T02:32:57.8155555Z ..........                                                               [100%]
+2026-10-29T02:33:00.0677983Z {
+2026-10-29T02:33:00.0678237Z   "checks": {
+2026-10-29T02:33:00.0678468Z     "bundled_assets_match": true,
+2026-10-29T02:33:00.0678749Z     "hostile_cwd_ignored": true,
+2026-10-29T02:33:00.0678976Z     "installed_package": true,
+2026-10-29T02:33:00.0679218Z     "invalid_override_fails_closed": true,
+2026-10-29T02:33:00.0679475Z     "shared_toolchain_override": true
+2026-10-29T02:33:00.0679695Z   },
+2026-10-29T02:33:00.0679902Z   "client_settings": "NOT_MODIFIED",
+2026-10-29T02:33:00.0680128Z   "console_help": [
+2026-10-29T02:33:00.0680302Z     "svweave",
+2026-10-29T02:33:00.0680475Z     "svweave-mcp"
+2026-10-29T02:33:00.0680647Z   ],
+2026-10-29T02:33:00.0680816Z   "native_backends": "NOT_RUN",
+2026-10-29T02:33:00.0681233Z   "runtime_asset_sha256": {
+2026-10-29T02:33:00.0681672Z     "svweave/_runtime/THIRD_PARTY_NOTICES.md": "394ac1b09d0cbfa2e7e336c00f759fd8b772b989ecc922e55e59c52b8f500327",
+2026-10-29T02:33:00.0682353Z     "svweave/_runtime/capability_report.json": "7d4c99803bb124c18f9d739f7ccffa9b6789e51e6ceb00fae2eeccaeeaf9475f",
+2026-10-29T02:33:00.0683043Z     "svweave/_runtime/fixtures/demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+2026-10-29T02:33:00.0683767Z     "svweave/_runtime/fixtures/demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+2026-10-29T02:33:00.0684470Z     "svweave/_runtime/fixtures/demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+2026-10-29T02:33:00.0685162Z     "svweave/_runtime/fixtures/demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+2026-10-29T02:33:00.0685833Z     "svweave/_runtime/fixtures/demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+2026-10-29T02:33:00.0686532Z     "svweave/_runtime/fixtures/demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+2026-10-29T02:33:00.0687197Z     "svweave/_runtime/fixtures/uvm/svw_demo_uvm_pkg.sv": "de4075a37f90472f0c4c1efd7286726e8b88c21f183b351e9ad4bfb096541a6d",
+2026-10-29T02:33:00.0687853Z     "svweave/_runtime/fixtures/uvm/svw_uvm_cfgdb_pkg.sv": "3247971cd70b880ba55ab760ea36df90dd6226686afe0ccaaff15fa731a8e660",
+2026-10-29T02:33:00.0688501Z     "svweave/_runtime/fixtures/uvm/svw_uvm_ext_top.sv": "1a3844fdedaba73dad6f12271701f1652db326fd618f4cee59960a5f5f91f6d2",
+2026-10-29T02:33:00.0689466Z     "svweave/_runtime/fixtures/uvm/svw_uvm_override_pkg.sv": "2344fda6f44e5d5b23f83a1954c3b6a5c850cd847fe4761ac67f141805aca71c",
+2026-10-29T02:33:00.0690129Z     "svweave/_runtime/fixtures/uvm/svw_uvm_static_calls.sv": "e1adb31b5807c7fb83fef6a4d87c2d6b12118c493f3bfcfaddc02d7357fd0384",
+2026-10-29T02:33:00.0691030Z     "svweave/_runtime/fixtures/uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97",
+2026-10-29T02:33:00.0691637Z     "svweave/_runtime/license_manifest.json": "db73fbbccb6d3632900bce8e2b342a620f1bfbff77eb22345361c3f64c4c500d",
+2026-10-29T02:33:00.0692239Z     "svweave/_runtime/toolchain.lock.json": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9"
+2026-10-29T02:33:00.0692637Z   },
+2026-10-29T02:33:00.0692852Z   "scope": "pure wheel packaging; not backend qualification",
+2026-10-29T02:33:00.0693128Z   "status": "PASS",
+2026-10-29T02:33:00.0693452Z   "toolchain_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+2026-10-29T02:33:00.0693995Z   "wheel_sha256": "e20c076f4708f8db8a5daa84cf7d1ade2c55fd01cb917211a9dc1f2d5cd45663"
+2026-10-29T02:33:00.0694330Z }
+2026-10-29T02:33:00.0825342Z ##[group]Run actions/upload-artifact@v4
+2026-10-29T02:33:00.0825511Z with:
+2026-10-29T02:33:00.0825632Z   name: svweave-wheel-smoke
+2026-10-29T02:33:00.0825789Z   path: .svweave/ci/wheel-smoke.json
+2026-10-29T02:33:00.0825943Z   include-hidden-files: true
+2026-10-29T02:33:00.0826084Z   if-no-files-found: warn
+2026-10-29T02:33:00.0826217Z   compression-level: 6
+2026-10-29T02:33:00.0826340Z   overwrite: false
+2026-10-29T02:33:00.0826453Z env:
+2026-10-29T02:33:00.0826604Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:00.0826845Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:00.0827078Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:00.0827292Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:00.0827504Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:00.0827718Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:00.0827918Z ##[endgroup]
+2026-10-29T02:33:00.1954837Z (node:2541) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-29T02:33:00.1955313Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-29T02:33:00.1986496Z With the provided path, there will be 1 file uploaded
+2026-10-29T02:33:00.1990160Z Artifact name is valid!
+2026-10-29T02:33:00.1990421Z Root directory input is valid!
+2026-10-29T02:33:00.5505477Z Beginning upload of artifact content to blob storage
+2026-10-29T02:33:00.5647646Z (node:2541) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-29T02:33:00.7905632Z Uploaded bytes 1347
+2026-10-29T02:33:00.8528053Z Finished uploading artifact content to blob storage!
+2026-10-29T02:33:00.8528570Z SHA256 digest of uploaded artifact zip is 5bd0e819a227097a97a7422388f7d30072dfedf2a36866a404e8d98a9afdb607
+2026-10-29T02:33:00.8529817Z Finalizing artifact upload
+2026-10-29T02:33:01.3619146Z Artifact svweave-wheel-smoke.zip successfully finalized. Artifact ID 12867724490
+2026-10-29T02:33:01.3619888Z Artifact svweave-wheel-smoke has been successfully uploaded! Final size is 1347 bytes. Artifact ID is 12867724490
+2026-10-29T02:33:01.3625233Z Artifact download URL: https://github.com/DVman9527/SVWeave/actions/runs/40806959759/artifacts/12867724490
+2026-10-29T02:33:01.3764347Z ##[group]Run .venv/bin/ruff check src tests
+2026-10-29T02:33:01.3764545Z [36;1m.venv/bin/ruff check src tests[0m
+2026-10-29T02:33:01.3781483Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:33:01.3781626Z env:
+2026-10-29T02:33:01.3781779Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.3782024Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:01.3782265Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.3782479Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.3782695Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.3783049Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:01.3783237Z ##[endgroup]
+2026-10-29T02:33:01.4152776Z All checks passed!
+2026-10-29T02:33:01.4184375Z ##[group]Run .venv/bin/mypy
+2026-10-29T02:33:01.4184544Z [36;1m.venv/bin/mypy[0m
+2026-10-29T02:33:01.4200053Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:33:01.4200194Z env:
+2026-10-29T02:33:01.4200351Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.4200603Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:01.4200840Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.4201372Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.4201590Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:01.4201815Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:01.4202002Z ##[endgroup]
+2026-10-29T02:33:05.1698377Z Success: no issues found in 136 source files
+2026-10-29T02:33:05.1940143Z ##[group]Run .venv/bin/svweave schema emit --check
+2026-10-29T02:33:05.1940382Z [36;1m.venv/bin/svweave schema emit --check[0m
+2026-10-29T02:33:05.1956977Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:33:05.1957116Z env:
+2026-10-29T02:33:05.1957265Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:05.1957499Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:05.1957727Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:05.1957933Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:05.1958136Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:05.1958352Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:05.1958529Z ##[endgroup]
+2026-10-29T02:33:06.0053062Z {
+2026-10-29T02:33:06.0053311Z   "schema_version": "1.1",
+2026-10-29T02:33:06.0053552Z   "request_id": "req-eee4e4620666",
+2026-10-29T02:33:06.0053897Z   "outcome": "OK",
+2026-10-29T02:33:06.0054083Z   "workspace_id": null,
+2026-10-29T02:33:06.0054274Z   "snapshot_id": null,
+2026-10-29T02:33:06.0054452Z   "build_id": null,
+2026-10-29T02:33:06.0054633Z   "profile": null,
+2026-10-29T02:33:06.0054810Z   "freshness": "UNKNOWN",
+2026-10-29T02:33:06.0055004Z   "analysis_coverage": {
+2026-10-29T02:33:06.0055204Z     "completeness": "COMPLETE",
+2026-10-29T02:33:06.0055407Z     "scope": null,
+2026-10-29T02:33:06.0055572Z     "basis": null,
+2026-10-29T02:33:06.0055747Z     "unresolved_count": 0,
+2026-10-29T02:33:06.0055916Z     "limitations": [],
+2026-10-29T02:33:06.0056048Z     "reference_coverage": null
+2026-10-29T02:33:06.0056176Z   },
+2026-10-29T02:33:06.0056306Z   "provenance": {
+2026-10-29T02:33:06.0056419Z     "backend": null,
+2026-10-29T02:33:06.0056536Z     "toolchain_id": null,
+2026-10-29T02:33:06.0056660Z     "evidence_kind": null
+2026-10-29T02:33:06.0056779Z   },
+2026-10-29T02:33:06.0056876Z   "data": {
+2026-10-29T02:33:06.0056983Z     "out_of_sync": []
+2026-10-29T02:33:06.0057096Z   },
+2026-10-29T02:33:06.0057195Z   "pagination": {
+2026-10-29T02:33:06.0057306Z     "limit": 100,
+2026-10-29T02:33:06.0057418Z     "next_cursor": null,
+2026-10-29T02:33:06.0057537Z     "truncated": false
+2026-10-29T02:33:06.0057649Z   },
+2026-10-29T02:33:06.0057746Z   "warnings": [],
+2026-10-29T02:33:06.0057854Z   "error": null
+2026-10-29T02:33:06.0057959Z }
+2026-10-29T02:33:06.1008308Z ##[group]Run sudo apt-get update && sudo apt-get install -y bubblewrap
+2026-10-29T02:33:06.1008784Z [36;1msudo apt-get update && sudo apt-get install -y bubblewrap[0m
+2026-10-29T02:33:06.1009170Z [36;1m.venv/bin/python scripts/ci_prepare_bwrap_apparmor.py[0m
+2026-10-29T02:33:06.1009532Z [36;1mprobe_started_at=$(date -u '+%Y-%m-%d %H:%M:%S.%6N UTC')[0m
+2026-10-29T02:33:06.1009919Z [36;1mecho "Mandatory worker sandbox probe started: $probe_started_at"[0m
+2026-10-29T02:33:06.1010265Z [36;1mif .venv/bin/python - <<'PY'[0m
+2026-10-29T02:33:06.1010556Z [36;1mfrom svweave.security.sandbox import probe_host[0m
+2026-10-29T02:33:06.1011204Z [36;1m[0m
+2026-10-29T02:33:06.1011405Z [36;1mcapability = probe_host(refresh=True)[0m
+2026-10-29T02:33:06.1011674Z [36;1mif not capability.available:[0m
+2026-10-29T02:33:06.1012060Z [36;1m    raise SystemExit(f"Mandatory worker sandbox unavailable: {capability.reason}")[0m
+2026-10-29T02:33:06.1012565Z [36;1mprint(f"Mandatory worker sandbox ready: {capability.version}")[0m
+2026-10-29T02:33:06.1012883Z [36;1mPY[0m
+2026-10-29T02:33:06.1013047Z [36;1mthen[0m
+2026-10-29T02:33:06.1013216Z [36;1m  :[0m
+2026-10-29T02:33:06.1013384Z [36;1melse[0m
+2026-10-29T02:33:06.1013568Z [36;1m  probe_status=$?[0m
+2026-10-29T02:33:06.1013916Z [36;1m  # Diagnostics are bounded and read-only; they never repair or replace this gate.[0m
+2026-10-29T02:33:06.1014413Z [36;1m  timeout 60s bash scripts/ci_sandbox_diagnostics.sh "$probe_started_at" || true[0m
+2026-10-29T02:33:06.1014786Z [36;1m  exit "$probe_status"[0m
+2026-10-29T02:33:06.1015007Z [36;1mfi[0m
+2026-10-29T02:33:06.1036379Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:33:06.1036601Z env:
+2026-10-29T02:33:06.1036830Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:06.1037209Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:06.1037575Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:06.1037926Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:06.1038257Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:06.1038614Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:06.1038907Z ##[endgroup]
+2026-10-29T02:33:06.1672162Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-29T02:33:06.2037301Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-29T02:33:06.2083336Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-29T02:33:06.2131118Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-29T02:33:06.2163198Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-29T02:33:06.2333906Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-10-29T02:33:06.2938481Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1406 kB]
+2026-10-29T02:33:06.3051883Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [310 kB]
+2026-10-29T02:33:06.3063822Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1707 kB]
+2026-10-29T02:33:06.3122535Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [343 kB]
+2026-10-29T02:33:06.3158525Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1809 kB]
+2026-10-29T02:33:06.3194059Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+2026-10-29T02:33:06.3214733Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+2026-10-29T02:33:06.3713235Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1146 kB]
+2026-10-29T02:33:06.3756668Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+2026-10-29T02:33:06.3771846Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1223 kB]
+2026-10-29T02:33:06.4053557Z Get:18 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [669 kB]
+2026-10-29T02:33:06.4143118Z Get:19 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [605 kB]
+2026-10-29T02:33:06.4226845Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+2026-10-29T02:33:09.0223461Z Fetched 10.5 MB in 1s (13.7 MB/s)
+2026-10-29T02:33:09.6155677Z Reading package lists...
+2026-10-29T02:33:09.6469818Z Reading package lists...
+2026-10-29T02:33:09.8015537Z Building dependency tree...
+2026-10-29T02:33:09.8020682Z Reading state information...
+2026-10-29T02:33:09.9217163Z The following NEW packages will be installed:
+2026-10-29T02:33:09.9219529Z   bubblewrap
+2026-10-29T02:33:09.9371939Z 0 upgraded, 1 newly installed, 0 to remove and 5 not upgraded.
+2026-10-29T02:33:09.9372180Z Need to get 50.4 kB of archives.
+2026-10-29T02:33:09.9372413Z After this operation, 133 kB of additional disk space will be used.
+2026-10-29T02:33:09.9372641Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-29T02:33:10.0248449Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 bubblewrap amd64 0.9.0-1ubuntu0.3 [50.4 kB]
+2026-10-29T02:33:10.2173713Z Fetched 50.4 kB in 0s (513 kB/s)
+2026-10-29T02:33:10.2347617Z Selecting previously unselected package bubblewrap.
+2026-10-29T02:33:10.2592089Z (Reading database ... 
+2026-10-29T02:33:10.2592703Z (Reading database ... 5%
+2026-10-29T02:33:10.2593135Z (Reading database ... 10%
+2026-10-29T02:33:10.2593470Z (Reading database ... 15%
+2026-10-29T02:33:10.2594042Z (Reading database ... 20%
+2026-10-29T02:33:10.2594279Z (Reading database ... 25%
+2026-10-29T02:33:10.2594612Z (Reading database ... 30%
+2026-10-29T02:33:10.2594904Z (Reading database ... 35%
+2026-10-29T02:33:10.2595189Z (Reading database ... 40%
+2026-10-29T02:33:10.2595412Z (Reading database ... 45%
+2026-10-29T02:33:10.2644916Z (Reading database ... 50%
+2026-10-29T02:33:10.2645180Z (Reading database ... 55%
+2026-10-29T02:33:10.3976806Z (Reading database ... 60%
+2026-10-29T02:33:10.5848120Z (Reading database ... 65%
+2026-10-29T02:33:10.7920298Z (Reading database ... 70%
+2026-10-29T02:33:10.9991888Z (Reading database ... 75%
+2026-10-29T02:33:11.0970554Z (Reading database ... 80%
+2026-10-29T02:33:11.2101439Z (Reading database ... 85%
+2026-10-29T02:33:11.2957676Z (Reading database ... 90%
+2026-10-29T02:33:11.4607850Z (Reading database ... 95%
+2026-10-29T02:33:11.4608156Z (Reading database ... 100%
+2026-10-29T02:33:11.4608450Z (Reading database ... 215504 files and directories currently installed.)
+2026-10-29T02:33:11.4647469Z Preparing to unpack .../bubblewrap_0.9.0-1ubuntu0.3_amd64.deb ...
+2026-10-29T02:33:11.4664953Z Unpacking bubblewrap (0.9.0-1ubuntu0.3) ...
+2026-10-29T02:33:11.5028966Z Setting up bubblewrap (0.9.0-1ubuntu0.3) ...
+2026-10-29T02:33:11.5068178Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-29T02:33:11.5086196Z Not building database; man-db/auto-update is not 'true'.
+2026-10-29T02:33:11.9686635Z 
+2026-10-29T02:33:11.9687184Z Running kernel seems to be up-to-date.
+2026-10-29T02:33:11.9687416Z 
+2026-10-29T02:33:11.9687512Z No services need to be restarted.
+2026-10-29T02:33:11.9687662Z 
+2026-10-29T02:33:11.9687755Z No containers need to be restarted.
+2026-10-29T02:33:11.9687907Z 
+2026-10-29T02:33:11.9688014Z No user sessions are running outdated binaries.
+2026-10-29T02:33:11.9688197Z 
+2026-10-29T02:33:11.9688358Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-29T02:33:13.4112646Z Official Ubuntu apparmor-profiles 4.0.1really4.0.1-0ubuntu0.24.04.9; sha256=90b02aa006eea7702cd4e851343e469e41365dda42145a3cb035de1d6c773b8c
+2026-10-29T02:33:13.4170106Z Official profile sha256=11d39094f044f0cda0febb3ad517b830301da6b2ce929664af09ee9e4dd264f9
+2026-10-29T02:33:13.4170604Z # This profile allows almost everything and only exists to allow
+2026-10-29T02:33:13.4171277Z # bwrap to work on a system with user namespace restrictions
+2026-10-29T02:33:13.4171465Z # being enforced.
+2026-10-29T02:33:13.4171627Z # bwrap is allowed access to user namespaces and capabilities
+2026-10-29T02:33:13.4171837Z # within the user namespace, but its children do not have
+2026-10-29T02:33:13.4172048Z # capabilities, blocking bwrap from being able to be used to
+2026-10-29T02:33:13.4172260Z # arbitrarily by-pass the user namespace restrictions.
+2026-10-29T02:33:13.4172436Z #
+2026-10-29T02:33:13.4172591Z # Note: the bwrap child is stacked against the bwrap profile due to
+2026-10-29T02:33:13.4172789Z # bwraps use of no-new-privs
+2026-10-29T02:33:13.4172987Z 
+2026-10-29T02:33:13.4173085Z # disabled by default as it can break some use cases on a system that
+2026-10-29T02:33:13.4173329Z # doesn't have or has disable user namespace restrictions for unconfined
+2026-10-29T02:33:13.4173529Z # use aa-enforce to enable it
+2026-10-29T02:33:13.4173619Z 
+2026-10-29T02:33:13.4173667Z abi <abi/4.0>,
+2026-10-29T02:33:13.4173737Z 
+2026-10-29T02:33:13.4173799Z include <tunables/global>
+2026-10-29T02:33:13.4173879Z 
+2026-10-29T02:33:13.4173966Z profile bwrap /usr/bin/bwrap flags=(attach_disconnected) {
+2026-10-29T02:33:13.4174145Z   allow capability,
+2026-10-29T02:33:13.4174276Z   # not allow all, to allow for pix stack
+2026-10-29T02:33:13.4174550Z   # sadly we have to allow  m every where to allow children to work under
+2026-10-29T02:33:13.4174739Z   # stacking.
+2026-10-29T02:33:13.4174856Z   allow file rwlkm /{**,},
+2026-10-29T02:33:13.4174984Z   allow network,
+2026-10-29T02:33:13.4175096Z   allow unix,
+2026-10-29T02:33:13.4175214Z   allow ptrace,
+2026-10-29T02:33:13.4175333Z   allow signal,
+2026-10-29T02:33:13.4175439Z   allow mqueue,
+2026-10-29T02:33:13.4175547Z   allow io_uring,
+2026-10-29T02:33:13.4175665Z   allow userns,
+2026-10-29T02:33:13.4175773Z   allow mount,
+2026-10-29T02:33:13.4175880Z   allow umount,
+2026-10-29T02:33:13.4175989Z   allow pivot_root,
+2026-10-29T02:33:13.4176104Z   allow dbus,
+2026-10-29T02:33:13.4176260Z   allow px /** -> bwrap//&unpriv_bwrap,
+2026-10-29T02:33:13.4176359Z 
+2026-10-29T02:33:13.4176464Z   # the local include should not be used without understanding the userns
+2026-10-29T02:33:13.4176657Z   # restriction.
+2026-10-29T02:33:13.4176833Z   # Site-specific additions and overrides. See local/README for details.
+2026-10-29T02:33:13.4177059Z   include if exists <local/bwrap-userns-restrict>
+2026-10-29T02:33:13.4177220Z }
+2026-10-29T02:33:13.4177280Z 
+2026-10-29T02:33:13.4177352Z profile unpriv_bwrap flags=(attach_disconnected) {
+2026-10-29T02:33:13.4177536Z   # not allow all, to allow for pix stack
+2026-10-29T02:33:13.4177685Z   allow file rwlkm /{**,},
+2026-10-29T02:33:13.4177815Z   allow network,
+2026-10-29T02:33:13.4177926Z   allow unix,
+2026-10-29T02:33:13.4178035Z   allow ptrace,
+2026-10-29T02:33:13.4178148Z   allow signal,
+2026-10-29T02:33:13.4178254Z   allow mqueue,
+2026-10-29T02:33:13.4178364Z   allow io_uring,
+2026-10-29T02:33:13.4178474Z   allow userns,
+2026-10-29T02:33:13.4178585Z   allow mount,
+2026-10-29T02:33:13.4178699Z   allow umount,
+2026-10-29T02:33:13.4178809Z   allow pivot_root,
+2026-10-29T02:33:13.4178923Z   allow dbus,
+2026-10-29T02:33:13.4178988Z 
+2026-10-29T02:33:13.4179048Z   allow pix /** -> &unpriv_bwrap,
+2026-10-29T02:33:13.4179140Z 
+2026-10-29T02:33:13.4179194Z   audit deny capability,
+2026-10-29T02:33:13.4179274Z 
+2026-10-29T02:33:13.4179377Z   # the local include should not be used without understanding the userns
+2026-10-29T02:33:13.4179568Z   # restriction.
+2026-10-29T02:33:13.4179736Z   # Site-specific additions and overrides. See local/README for details.
+2026-10-29T02:33:13.4179942Z   include if exists <local/unpriv_bwrap>
+2026-10-29T02:33:13.4180086Z }
+2026-10-29T02:33:13.4180143Z 
+2026-10-29T02:33:13.4504036Z Official bwrap profiles loaded; global user namespace restriction remains enabled
+2026-10-29T02:33:13.4597710Z Mandatory worker sandbox probe started: 2026-10-29 02:33:13.459520 UTC
+2026-10-29T02:33:13.4922239Z Mandatory worker sandbox ready: bubblewrap 0.9.0
+2026-10-29T02:33:13.5005814Z ##[group]Run .venv/bin/python -m pytest tests/unit -q --no-cov
+2026-10-29T02:33:13.5006219Z [36;1m.venv/bin/python -m pytest tests/unit -q --no-cov[0m
+2026-10-29T02:33:13.5027211Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:33:13.5027420Z env:
+2026-10-29T02:33:13.5027639Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:13.5028014Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:33:13.5028376Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:13.5028705Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:13.5029247Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:33:13.5029620Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:33:13.5029898Z ##[endgroup]
+2026-10-29T02:33:21.2982489Z .............................................................s.......... [  4%]
+2026-10-29T02:33:23.3283751Z ........................................................................ [  9%]
+2026-10-29T02:33:24.0721881Z ........................................................................ [ 13%]
+2026-10-29T02:33:25.6781232Z ........................................................................ [ 18%]
+2026-10-29T02:33:26.3691738Z ........................................................................ [ 23%]
+2026-10-29T02:33:32.4717131Z ........................................................................ [ 27%]
+2026-10-29T02:33:46.7633385Z ........................................................................ [ 32%]
+2026-10-29T02:33:59.0308360Z ........................................................................ [ 37%]
+2026-10-29T02:34:22.0719269Z ........................................................................ [ 41%]
+2026-10-29T02:34:36.3856703Z ........................................................................ [ 46%]
+2026-10-29T02:34:40.2927429Z ........................................................................ [ 50%]
+2026-10-29T02:34:44.8073133Z ........................................................................ [ 55%]
+2026-10-29T02:34:49.1046860Z ........................................................................ [ 60%]
+2026-10-29T02:34:49.9683619Z ........................................................................ [ 64%]
+2026-10-29T02:34:50.6550638Z ........................................................................ [ 69%]
+2026-10-29T02:34:52.8202599Z ........................................................................ [ 74%]
+2026-10-29T02:34:59.2481848Z ........................................................................ [ 78%]
+2026-10-29T02:35:00.1028675Z ........................................................................ [ 83%]
+2026-10-29T02:35:00.7733286Z ........................................................................ [ 88%]
+2026-10-29T02:35:01.2616636Z ........................................................................ [ 92%]
+2026-10-29T02:35:01.9162001Z ........................................................................ [ 97%]
+2026-10-29T02:35:02.5503496Z .........................................                                [100%]
+2026-10-29T02:35:02.9449156Z ##[group]Run .venv/bin/python -m pytest tests/contract -q --no-cov
+2026-10-29T02:35:02.9449439Z [36;1m.venv/bin/python -m pytest tests/contract -q --no-cov[0m
+2026-10-29T02:35:02.9465700Z shell: /usr/bin/bash -e {0}
+2026-10-29T02:35:02.9465836Z env:
+2026-10-29T02:35:02.9465982Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:35:02.9466217Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-29T02:35:02.9466456Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:35:02.9466659Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:35:02.9466862Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-29T02:35:02.9467072Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-29T02:35:02.9467248Z ##[endgroup]
+2026-10-29T02:35:12.4954876Z .................................................                        [100%]
+2026-10-29T02:35:12.6385752Z Post job cleanup.
+2026-10-29T02:35:12.7145917Z (node:6362) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-29T02:35:12.7146344Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-29T02:35:12.7290107Z Post job cleanup.
+2026-10-29T02:35:12.7883617Z [command]/usr/bin/git version
+2026-10-29T02:35:12.7919102Z git version 2.56.0
+2026-10-29T02:35:12.7944602Z Temporarily overriding HOME='/home/runner/work/_temp/189f15ac-f536-4280-8f47-6f2ba8833969' before making global git config changes
+2026-10-29T02:35:12.7945563Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-29T02:35:12.7947416Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SVWeave/SVWeave
+2026-10-29T02:35:12.7981121Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-29T02:35:12.8013548Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-29T02:35:12.8233086Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-29T02:35:12.8282661Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-29T02:35:12.8512075Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-29T02:35:12.8552199Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-29T02:35:12.8880864Z Cleaning up orphan processes
+2026-10-29T02:35:12.9128291Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

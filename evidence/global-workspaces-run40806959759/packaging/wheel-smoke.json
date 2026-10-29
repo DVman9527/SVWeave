@@ -1,0 +1,37 @@
+{
+  "checks": {
+    "bundled_assets_match": true,
+    "hostile_cwd_ignored": true,
+    "installed_package": true,
+    "invalid_override_fails_closed": true,
+    "shared_toolchain_override": true
+  },
+  "client_settings": "NOT_MODIFIED",
+  "console_help": [
+    "svweave",
+    "svweave-mcp"
+  ],
+  "native_backends": "NOT_RUN",
+  "runtime_asset_sha256": {
+    "svweave/_runtime/THIRD_PARTY_NOTICES.md": "394ac1b09d0cbfa2e7e336c00f759fd8b772b989ecc922e55e59c52b8f500327",
+    "svweave/_runtime/capability_report.json": "7d4c99803bb124c18f9d739f7ccffa9b6789e51e6ceb00fae2eeccaeeaf9475f",
+    "svweave/_runtime/fixtures/demo/filelists/rtl.f": "e2ddbe75b1bc79240474144f124923205960fb7ef1e0ce31682cf253c3c8dc1d",
+    "svweave/_runtime/fixtures/demo/include/demo_defs.svh": "d19ea1609a3ed821545903c52808c10c2031500e375a14195c64368a4142d54b",
+    "svweave/_runtime/fixtures/demo/rtl/demo_lane.sv": "e0307fdbbdcd69852a9480fb2f2d3e4811c2018f4d03ce797f2770e509f9710b",
+    "svweave/_runtime/fixtures/demo/rtl/demo_top.sv": "93b8957607cd50f74cc55f8349421e25171191d9c01c97957e998ef20271ceab",
+    "svweave/_runtime/fixtures/demo/sva/demo_bind.sv": "daf69272c3cd376ebf98cd4c7a28168c643c9a6a08152a1b79143fc586562074",
+    "svweave/_runtime/fixtures/demo/sva/stream_hold_sva.sv": "a55ed535031e17b84784709ceb8d14877a1df1fa7ceaeb26506a0f79d9aedbc6",
+    "svweave/_runtime/fixtures/uvm/svw_demo_uvm_pkg.sv": "de4075a37f90472f0c4c1efd7286726e8b88c21f183b351e9ad4bfb096541a6d",
+    "svweave/_runtime/fixtures/uvm/svw_uvm_cfgdb_pkg.sv": "3247971cd70b880ba55ab760ea36df90dd6226686afe0ccaaff15fa731a8e660",
+    "svweave/_runtime/fixtures/uvm/svw_uvm_ext_top.sv": "1a3844fdedaba73dad6f12271701f1652db326fd618f4cee59960a5f5f91f6d2",
+    "svweave/_runtime/fixtures/uvm/svw_uvm_override_pkg.sv": "2344fda6f44e5d5b23f83a1954c3b6a5c850cd847fe4761ac67f141805aca71c",
+    "svweave/_runtime/fixtures/uvm/svw_uvm_static_calls.sv": "e1adb31b5807c7fb83fef6a4d87c2d6b12118c493f3bfcfaddc02d7357fd0384",
+    "svweave/_runtime/fixtures/uvm/svw_uvm_top.sv": "41033ff619202d375c5ab2c03e9f94bb66b1fc49c057031c777b735f16df9f97",
+    "svweave/_runtime/license_manifest.json": "db73fbbccb6d3632900bce8e2b342a620f1bfbff77eb22345361c3f64c4c500d",
+    "svweave/_runtime/toolchain.lock.json": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9"
+  },
+  "scope": "pure wheel packaging; not backend qualification",
+  "status": "PASS",
+  "toolchain_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "wheel_sha256": "e20c076f4708f8db8a5daa84cf7d1ade2c55fd01cb917211a9dc1f2d5cd45663"
+}

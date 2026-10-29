@@ -74,6 +74,31 @@ compare-and-set write (TB4). Dashed lines are trust boundaries TB1 to TB4.*
 
 ## Status
 
+### Install-once/global-workspace validation (2026-10-29)
+
+[Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) completed all
+three jobs successfully at **`ca6ebb571137f683a5354a1bd78169341d933de1`**.
+[Raw proofs, hashes and scope](evidence/global-workspaces-run40806959759/README.md):
+
+| Scope | Result |
+|---|---|
+| Real wheel/sdist packaging + detached wheel smoke | **10 PASS, 0 skips**; both entry points and installed assets verified |
+| Unit / MCP contracts | **1552 PASS + 1 SKIP / 49 PASS**; contracts include two actual SDK stdio gateway processes |
+| Required integration / fault-injection / acceptance | **236 PASS** (205 + 19 + 12), zero failures/errors/skips |
+| Sandbox/controller boundaries | **62 PASS**, zero failures/errors/skips |
+| Native Verilator static / slang semantic-UVM / supplement gates | **5 / 21 / 298 PASS**, zero failures/errors/skips |
+| Fresh critical mutations | **27/27 KILLED**, including workspace/event-log binding guard M27; no survivors/errors |
+| Benchmark smoke | Measured targets pass at 0.05 scale (4,844 lines / 25 files); graph search **SKIPPED** |
+
+Counts overlap; do not sum them. The quiet unit log does not identify the one skip's reason.
+This validates shared installation, startup binding and native-backend regressions, **not real
+Claude/Codex application registration or Slurm site execution**. The external `svweave-slurm`
+wrapper's source was not supplied, so its compatibility is unverified. **Still UNQUALIFIED**:
+full `qualify.py`, simulation/formal/RTL coverage and native Verilator UVM acceptance remain
+NOT_RUN; graph/Serena remain DEGRADED and the warm-cache smoke is not reference qualification.
+Results apply to the exact tested source, not the later README/evidence-only commit. The
+narrower DEP-01-R2 boundary and historical results below remain unchanged.
+
 ### Verified CI scope (2026-10-28)
 
 [Run 40627613557](https://github.com/DVman9527/SVWeave/actions/runs/40627613557) passed all

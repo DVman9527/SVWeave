@@ -1,0 +1,12 @@
+{
+  "source_identity": {
+    "git_head": "ca6ebb571137f683a5354a1bd78169341d933de1",
+    "src_tree_sha256": "a415e7e7754c07f87688a816d8145dde440e0f5404baf6289f5a31b7308b415a"
+  },
+  "git_status": "",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "3e1cf4f8ced4a344f60659f33f628a8c9dfa71f441b6cbb0a8a681025699ca9f",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+  "scope": "targeted static validation only; not full qualification or simulation"
+}

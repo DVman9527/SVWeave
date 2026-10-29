@@ -204,6 +204,15 @@ in its home `AGENTS.md`; adapt the safety/workflow guidance rather than copying 
 agent path. Preserve existing instructions and review project overrides. Neither guidance file
 replaces workspace trust or changes the MCP binding.
 
+**Verified installation scope (2026-10-29):** [run 40806959759](../evidence/global-workspaces-run40806959759/README.md)
+at `ca6ebb571137f683a5354a1bd78169341d933de1` passed 10 real wheel/sdist checks and the detached
+installed-wheel smoke (both console entry points, bundled assets and explicit shared-toolchain
+override), plus 49 MCP/CLI contracts including two SDK stdio gateway processes. Required
+native-backend regressions and all 27 critical mutations also passed in that run. These scopes
+overlap; the separate unit suite retains one skip. This verifies neither live Claude/Codex
+registration nor a Slurm site; full qualification remains UNQUALIFIED. See the linked raw proofs
+for exact counts, limits and source identity rather than treating a later docs commit as tested.
+
 Client documentation was checked on 2026-10-29; it is not a live-client test. This is a local
 startup convenience, not native Claude/Codex qualification or Slurm acceptance.
 Local execution remains the default; existing execution-policy checks still apply and Slurm

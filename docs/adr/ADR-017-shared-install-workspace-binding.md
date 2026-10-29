@@ -59,11 +59,22 @@ permissions. Existing client-shell/same-UID approval limitations remain unchange
 
 ## Validation boundary
 
-The current mutation catalog has **27 entries (M01–M27)**. Full 27-mutation CI/native
-validation is **pending / NOT_RUN for this implementation slice**, not 27/27 KILLED. Prior
-22/22 or 26/26 evidence remains tied to its original source and scope. A focused pure M27
-baseline/mutant result does not upgrade that full-suite status. Native client
-connection and Slurm execution need separate evidence; configuration previews are not tests.
+[Run 40806959759](https://github.com/DVman9527/SVWeave/actions/runs/40806959759) completed
+SUCCESS at exact tested source **`ca6ebb571137f683a5354a1bd78169341d933de1`**. The full
+27-entry critical mutation harness now records **27/27 KILLED**, no survivors/errors, including
+M27's three baseline passes → three mutant failures. This supersedes this slice's earlier
+pending mutation status, not the historical 22/22 or 26/26 evidence.
+
+[Retained raw proofs and audit](../../evidence/global-workspaces-run40806959759/README.md) also
+record real packaging 10 PASS, unit 1552 PASS + 1 SKIP, contracts 49 PASS (including GLB-09),
+required native-backend regression 236 PASS, boundary checks 62 PASS, native Verilator static
+5 PASS, slang semantic/UVM 21 PASS and supplement gates 298 PASS. Scopes overlap; the one unit
+skip is not reclassified. The measured 0.05-scale smoke passes with graph search SKIPPED.
+
+Native **application-client** registration/connection and Slurm site execution remain NOT_RUN;
+SDK stdio and backend tests do not establish those claims. The external `svweave-slurm` wrapper
+source was not supplied. Full release qualification remains UNQUALIFIED and `qualify.py` was
+not run. Results belong to the tested SHA, not a later documentation/evidence commit.
 
 ## Requirement-to-test mapping
 
