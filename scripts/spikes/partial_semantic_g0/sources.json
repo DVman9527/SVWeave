@@ -1,0 +1,21 @@
+{
+  "slang": {
+    "url": "https://codeload.github.com/MikePopoloski/slang/tar.gz/545f88b2ed3a2d20325fbd17413af177a6bca72f",
+    "sha256": "2d424f4280c879daaf05a2e78efd6928c350cc3ac086da59b872a305a277f7b8"
+  },
+  "fmt": {
+    "url": "https://codeload.github.com/fmtlib/fmt/tar.gz/refs/tags/12.2.0",
+    "sha256": "8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0",
+    "bytes": 738355
+  },
+  "boost_regex": {
+    "url": "https://codeload.github.com/MikePopoloski/regex/tar.gz/refs/tags/boost-1.91.0",
+    "sha256": "b159cea3bf570394dd19f5fed7320005290809ba53fea15c630c3a6c2685db75",
+    "bytes": 513794
+  },
+  "tomlplusplus": {
+    "url": "https://codeload.github.com/marzer/tomlplusplus/tar.gz/refs/tags/v3.4.0",
+    "sha256": "8517f65938a4faae9ccf8ebb36631a38c1cadfb5efa85d9a72e15b9e97d25155",
+    "bytes": 1294731
+  }
+}

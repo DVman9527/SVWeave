@@ -28,6 +28,10 @@ on:
         description: "RETIRED R1-only mode: true fails before setup; use cleanroom_only for revised DEP-01-R2"
         type: boolean
         default: false
+      partial_semantic_g0:
+        description: "Experimental isolated slang expression-invalidation prototype only; not full G0 or qualification"
+        type: boolean
+        default: false
       native_verilator:
         description: "Run pinned native Verilator static lint/JSON and importer regressions (no simulation)"
         type: boolean
@@ -370,3 +374,35 @@ jobs:
             evidence/verilator-native/
           include-hidden-files: true
           if-no-files-found: error
+
+
+  partial-semantic-g0:
+    name: experimental native expression invalidation (not qualification)
+    if: github.event_name == 'workflow_dispatch' && inputs.partial_semantic_g0
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Explicit installation stage (official sources verified by SHA-256)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap cmake ninja-build g++ python3 patch
+          /usr/bin/python3 scripts/ci_prepare_bwrap_apparmor.py
+          /usr/bin/python3 scripts/spikes/partial_semantic_g0/setup.py --destination "$RUNNER_TEMP/partial-semantic-sources"
+      - name: Isolated stock and patched builds, sanitizers and strict native differential gate
+        run: |
+          /usr/bin/python3 scripts/spikes/partial_semantic_g0/run.py \
+            --sources "$RUNNER_TEMP/partial-semantic-sources" \
+            --state "$GITHUB_WORKSPACE/.svweave/ci/partial-semantic-g0"
+      - name: Preserve experiment evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: experimental-partial-semantic-g0
+          path: .svweave/ci/partial-semantic-g0/evidence/
+          include-hidden-files: true
+          if-no-files-found: warn

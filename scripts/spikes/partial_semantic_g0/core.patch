@@ -1,0 +1,287 @@
+--- a/include/slang/ast/Compilation.h
++++ b/include/slang/ast/Compilation.h
+@@ -6,6 +6,7 @@
+ // SPDX-License-Identifier: MIT
+ //------------------------------------------------------------------------------
+ #pragma once
++#include <map>
+ 
+ #include <memory>
+ 
+@@ -313,6 +314,14 @@
+ ///
+ class SLANG_EXPORT Compilation : public BumpAllocator {
+ public:
++    // Experimental instrumentation only. Counts native semantic operations, never output rows.
++    struct ExperimentalWork {
++        uint64_t expressions = 0, lookups = 0, assignments = 0, conversions = 0;
++        bool operator==(const ExperimentalWork&) const = default;
++    };
++    std::map<const Scope*, ExperimentalWork> experimentalWork;
++    uint64_t experimentalDiagnosticEmissions = 0;
++
+     /// Constructs a new instance of the Compilation class.
+     explicit Compilation(const Bag& options = {}, const SourceLibrary* defaultLib = nullptr);
+     Compilation(const Compilation& other) = delete;
+--- /dev/null
++++ b/include/slang/ast/ExperimentalLeafSession.h
+@@ -0,0 +1,34 @@
++// Experimental constant-expression rebinding micro-prototype. NOT a general update API.
++#pragma once
++#include "slang/ast/Compilation.h"
++#include "slang/text/SourceManager.h"
++#include "slang/syntax/SyntaxTree.h"
++namespace slang::ast {
++class ContinuousAssignSymbol;
++class SLANG_EXPORT ExperimentalLeafSession {
++public:
++    static std::string fixture(bool b);
++    ExperimentalLeafSession();
++    uint64_t generation() const { return generation_; }
++    // Rejects all inputs except the two exact fixture byte strings, before parsing/binding.
++    // At most two commits. No external native AST handles or concurrent callers supported.
++    bool update(std::string_view bytes);
++    std::string snapshot(uint64_t generation);
++    Compilation::ExperimentalWork changedWork() const;
++    Compilation::ExperimentalWork controlWork() const;
++    bool controlRetained() const;
++    bool unaffectedWorkRetained() const;
++private:
++    SourceManager sources;
++    std::vector<std::shared_ptr<syntax::SyntaxTree>> trees;
++    Compilation compilation;
++    std::vector<const ContinuousAssignSymbol*> changed;
++    const ContinuousAssignSymbol* control = nullptr;
++    const Expression* originalControl = nullptr;
++    uint64_t generation_ = 0;
++    bool currentB = false;
++    bool poisoned = false;
++    uint64_t acceptedDiagnosticEmissions = 0;
++    std::map<const Scope*, Compilation::ExperimentalWork> baselineWork;
++};
++}
+--- a/include/slang/ast/symbols/MemberSymbols.h
++++ b/include/slang/ast/symbols/MemberSymbols.h
+@@ -194,6 +194,7 @@
+     }
+ 
+ private:
++    friend class ExperimentalLeafSession;
+     mutable const Expression* assign = nullptr;
+     mutable std::optional<const TimingControl*> delay;
+ };
+--- a/source/ast/Compilation.cpp
++++ b/source/ast/Compilation.cpp
+@@ -1709,6 +1709,7 @@
+ }
+ 
+ Diagnostic& Compilation::addDiag(Diagnostic diag) {
++    ++experimentalDiagnosticEmissions;
+     SLANG_ASSERT(!isFrozen());
+ 
+     auto suppressDiag = [&]() -> Diagnostic& {
+--- a/source/ast/Expression.cpp
++++ b/source/ast/Expression.cpp
+@@ -756,6 +756,7 @@
+ Expression& Expression::create(Compilation& compilation, const ExpressionSyntax& syntax,
+                                const ASTContext& ctx, bitmask<ASTFlags> extraFlags,
+                                const Type* assignmentTarget) {
++    ++compilation.experimentalWork[ctx.scope].expressions;
+     ASTContext context = ctx.resetFlags(extraFlags);
+     Expression* result;
+     switch (syntax.kind) {
+--- a/source/ast/Lookup.cpp
++++ b/source/ast/Lookup.cpp
+@@ -1112,6 +1112,7 @@
+ 
+ void Lookup::name(const NameSyntax& syntax, const ASTContext& context, bitmask<LookupFlags> flags,
+                   LookupResult& result) {
++    ++context.getCompilation().experimentalWork[context.scope].lookups;
+     auto& scope = *context.scope;
+     result.nameRange = syntax.sourceRange();
+ 
+--- a/source/ast/expressions/ConversionExpression.cpp
++++ b/source/ast/expressions/ConversionExpression.cpp
+@@ -109,6 +109,7 @@
+ Expression& Expression::convertAssignment(const ASTContext& context, const Type& type,
+                                           Expression& expr, SourceRange assignmentRange,
+                                           Expression** lhsExpr) {
++    ++context.getCompilation().experimentalWork[context.scope].conversions;
+     if (expr.bad())
+         return expr;
+ 
+--- a/source/ast/symbols/MemberSymbols.cpp
++++ b/source/ast/symbols/MemberSymbols.cpp
+@@ -463,6 +463,7 @@
+     auto syntax = getSyntax();
+     SLANG_ASSERT(scope && syntax);
+ 
++    ++scope->getCompilation().experimentalWork[scope].assignments;
+     ASTContext context(*scope, LookupLocation::after(*this), ASTFlags::NonProcedural);
+     assign = &Expression::bind(syntax->as<ExpressionSyntax>(), context,
+                                ASTFlags::AssignmentAllowed);
+@@ -2546,3 +2547,164 @@
+ }
+ 
+ } // namespace slang::ast
++
++// Deliberately excluded from all production call paths; fixture-only research API.
++#include "slang/ast/ExperimentalLeafSession.h"
++#include "slang/ast/symbols/InstanceSymbols.h"
++#include "slang/ast/symbols/CompilationUnitSymbols.h"
++#include "slang/syntax/SyntaxVisitor.h"
++#include "slang/text/Json.h"
++#include <stdexcept>
++namespace slang::ast {
++std::string ExperimentalLeafSession::fixture(bool b) {
++    std::string text =
++        "module changed(output bit y); assign y = 1'b0; endmodule\n"
++        "module control(output bit y); assign y = 1'b1; endmodule\n"
++        "module top(output bit x, x2, z); changed u0(x); changed u2(x2); control u1(z); endmodule\n";
++    if (b) text[text.find("1'b0") + 3] = '1';
++    return text;
++}
++ExperimentalLeafSession::ExperimentalLeafSession() {
++    trees.push_back(syntax::SyntaxTree::fromText(fixture(false), sources, "fixture.sv"));
++    compilation.addSyntaxTree(trees.back());
++    if (!compilation.getAllDiagnostics().empty())
++        throw std::runtime_error("baseline diagnostics: admission denied");
++    auto visitor = makeVisitor([&](auto&, const ContinuousAssignSymbol& symbol) {
++        auto& body = symbol.getParentScope()->asSymbol().as<InstanceBodySymbol>();
++        if (body.getDefinition().name == "changed") {
++            if (std::find(changed.begin(), changed.end(), &symbol) == changed.end())
++                changed.push_back(&symbol);
++        }
++        if (body.getDefinition().name == "control") control = &symbol;
++        (void)symbol.getAssignment();
++    });
++    compilation.getRoot().visit(visitor);
++    if (changed.size() != 2 || !control) throw std::runtime_error("fixture hierarchy mismatch");
++    originalControl = &control->getAssignment();
++    acceptedDiagnosticEmissions = compilation.experimentalDiagnosticEmissions;
++}
++bool ExperimentalLeafSession::update(std::string_view bytes) {
++    if (poisoned) throw std::runtime_error("poisoned session; discard");
++    if (generation_ >= 2 || (bytes != fixture(false) && bytes != fixture(true))) return false;
++    bool nextB = bytes == fixture(true);
++    if (nextB == currentB) return false;
++    baselineWork = compilation.experimentalWork;
++    poisoned = true; // Any unexpected exception after admission permanently disables queries.
++    const auto diagnosticEmissions = compilation.experimentalDiagnosticEmissions;
++    // Unique physical buffers, stable logical filename supplied via fromText line directive.
++    // Both inputs have identical lengths and differ only in the RHS literal bit.
++    auto tree = syntax::SyntaxTree::fromText(bytes, sources, "fixture.sv");
++    const syntax::BinaryExpressionSyntax* replacement = nullptr;
++    auto syntaxVisitor = syntax::makeSyntaxVisitor(
++        [&](auto&, const syntax::BinaryExpressionSyntax& expr) {
++            if (!replacement) replacement = &expr;
++        });
++    tree->root().visit(syntaxVisitor);
++    auto actualSource = sources.getSourceText(tree->root().getFirstToken().location().buffer());
++    if (!actualSource.empty() && actualSource.back() == '\0') actualSource.remove_suffix(1);
++    if (actualSource != bytes) throw std::runtime_error("active source buffer mismatch");
++    if (!replacement || !tree->diagnostics().empty())
++        throw std::runtime_error("admitted fixture parse invariant failed");
++    std::vector<const Expression*> freshAssignments;
++    trees.push_back(std::move(tree));
++    for (auto symbol : changed) {
++        const auto& old = symbol->getAssignment().as<AssignmentExpression>();
++        auto sourceSlice = [&](SourceRange range) {
++            if (range.start().buffer() != range.end().buffer())
++                throw std::runtime_error("cross-buffer source range");
++            return sources.getSourceText(range.start().buffer()).substr(
++                range.start().offset(), range.end().offset() - range.start().offset());
++        };
++        auto newRight = replacement->right->sourceRange();
++        auto newLeft = replacement->left->sourceRange();
++        auto oldLeft = old.left().sourceRange;
++        if (sourceSlice(newRight) != (nextB ? "1'b1" : "1'b0") ||
++            sourceSlice(newLeft) != "y" || sourceSlice(oldLeft) != "y" ||
++            sources.getLineNumber(newLeft.start()) != sources.getLineNumber(oldLeft.start()) ||
++            sources.getColumnNumber(newLeft.start()) != sources.getColumnNumber(oldLeft.start()) ||
++            sources.getFileName(newLeft.start()) != "fixture.sv" ||
++            sources.getFileName(newRight.start()) != "fixture.sv")
++            throw std::runtime_error("generation source provenance invariant failed");
++        ASTContext context(*symbol->getParentScope(), LookupLocation::after(*symbol),
++                           ASTFlags::NonProcedural);
++        const auto& rhs = Expression::bindRValue(*old.left().type, *replacement->right,
++                                                replacement->sourceRange(), context);
++        if (compilation.experimentalDiagnosticEmissions != diagnosticEmissions)
++            throw std::runtime_error("new diagnostic emitted; discard poisoned session");
++        if (rhs.bad()) throw std::runtime_error("admitted fixture binding invariant failed; discard session");
++        auto fresh = compilation.emplace<AssignmentExpression>(old.op, old.isNonBlocking(),
++            *old.type, const_cast<Expression&>(old.left()), const_cast<Expression&>(rhs),
++            old.timingControl, replacement->sourceRange());
++        fresh->syntax = replacement;
++        // LHS driver/reference contribution is unchanged and is NOT registered a second time.
++        // Old assignment and RHS remain immutable in the arena; all tree owners stay alive.
++        freshAssignments.push_back(fresh);
++    }
++    for (size_t i = 0; i < changed.size(); ++i) changed[i]->assign = freshAssignments[i];
++    ++generation_;
++    currentB = nextB;
++    poisoned = false;
++    return true;
++}
++std::string ExperimentalLeafSession::snapshot(uint64_t generation) {
++    if (poisoned) throw std::runtime_error("poisoned session; discard");
++    if (generation != generation_) throw std::runtime_error("stale generation handle");
++    if (compilation.experimentalDiagnosticEmissions != acceptedDiagnosticEmissions ||
++        !compilation.getAllDiagnostics().empty()) throw std::runtime_error("unexpected diagnostics");
++    JsonWriter writer;
++    ASTSerializer serializer(compilation, writer);
++    serializer.setIncludeAddresses(false);
++    serializer.setIncludeSourceInfo(true);
++    serializer.setDetailedTypeInfo(true);
++    writer.startObject();
++    writer.writeProperty("root");
++    serializer.serialize(compilation.getRoot());
++    writer.writeProperty("concrete_instances");
++    writer.startArray();
++    auto instanceVisitor = makeVisitor([&](auto& visitor, const InstanceSymbol& instance) {
++        writer.startObject();
++        writer.writeProperty("path"); writer.writeValue(instance.getHierarchicalPath());
++        writer.writeProperty("body"); serializer.serialize(instance.body);
++        writer.writeProperty("resolved_targets"); writer.startArray();
++        auto targets = makeVisitor([&](auto&, const NamedValueExpression& expr) {
++            writer.writeValue(expr.symbol.getHierarchicalPath());
++        });
++        instance.body.visit(targets);
++        writer.endArray(); writer.endObject();
++        visitor.visitDefault(instance);
++    });
++    compilation.getRoot().visit(instanceVisitor);
++    writer.endArray(); writer.endObject();
++    if (compilation.experimentalDiagnosticEmissions != acceptedDiagnosticEmissions) {
++        poisoned = true;
++        throw std::runtime_error("diagnostic during snapshot; discard poisoned session");
++    }
++    return std::string(writer.view());
++}
++Compilation::ExperimentalWork ExperimentalLeafSession::changedWork() const {
++    Compilation::ExperimentalWork total;
++    for (auto symbol : changed) {
++        auto w = compilation.experimentalWork.at(symbol->getParentScope());
++        total.expressions += w.expressions;
++        total.lookups += w.lookups;
++        total.assignments += w.assignments;
++        total.conversions += w.conversions;
++    }
++    return total;
++}
++Compilation::ExperimentalWork ExperimentalLeafSession::controlWork() const {
++    return compilation.experimentalWork.at(control->getParentScope());
++}
++bool ExperimentalLeafSession::unaffectedWorkRetained() const {
++    auto current = compilation.experimentalWork;
++    auto baseline = baselineWork;
++    for (auto symbol : changed) {
++        current.erase(symbol->getParentScope());
++        baseline.erase(symbol->getParentScope());
++    }
++    return current == baseline;
++}
++bool ExperimentalLeafSession::controlRetained() const {
++    return &control->getAssignment() == originalControl;
++}
++}
