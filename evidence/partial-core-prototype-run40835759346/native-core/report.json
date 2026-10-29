@@ -1,0 +1,4141 @@
+{
+  "status": "MICRO_PROTOTYPE_PASS",
+  "scope": "experimental native expression invalidation only",
+  "production_pin_changed": false,
+  "general_g0": "NOT_ESTABLISHED",
+  "github_sha": "219f9b15ddf4b136b30446b917732195d07ddbda",
+  "lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "workflow_sha256": "7e27c48c57b87220f1947417ec430d8056d44f9216f5940c2b65bb7d8ae0b1a8",
+  "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+  "steps": [
+    {
+      "name": "isolation-check",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "version-g++",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "version-cmake",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "version-ninja",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "apply-patch",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "configure-stock",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "build-stock",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "configure-patched",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "build-patched",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "full-stock-a",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "full-stock-b",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "full-patched-a",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "full-patched-b",
+      "returncode": 0,
+      "failures": []
+    },
+    {
+      "name": "incremental",
+      "returncode": 0,
+      "failures": []
+    }
+  ],
+  "build_flags": [
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Debug",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DPython_EXECUTABLE=/usr/bin/python3",
+    "-DCMAKE_CXX_FLAGS_DEBUG=-O0 -g0",
+    "-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer",
+    "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined",
+    "-DSLANG_INCLUDE_TOOLS=OFF",
+    "-DSLANG_INCLUDE_TESTS=OFF",
+    "-DSLANG_INCLUDE_INSTALL=OFF",
+    "-DSLANG_USE_MIMALLOC=OFF",
+    "-DSLANG_INCLUDE_PYLIB=OFF",
+    "-DFETCHCONTENT_FULLY_DISCONNECTED=ON",
+    "-DFETCHCONTENT_UPDATES_DISCONNECTED=ON"
+  ],
+  "patch_sha256": "8626dd63c7ad350f58bf325c56dee6f11674c9e96c2f1bf40e7a55e36e38ed30",
+  "oracle_sha256": "5565a8895eeca4999bae2b81ae79b4fc6480057067f9476d6fa11a02a6da87a2",
+  "sources": {
+    "slang": {
+      "url": "https://codeload.github.com/MikePopoloski/slang/tar.gz/545f88b2ed3a2d20325fbd17413af177a6bca72f",
+      "sha256": "2d424f4280c879daaf05a2e78efd6928c350cc3ac086da59b872a305a277f7b8"
+    },
+    "fmt": {
+      "url": "https://codeload.github.com/fmtlib/fmt/tar.gz/refs/tags/12.2.0",
+      "sha256": "8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0",
+      "bytes": 738355
+    },
+    "boost_regex": {
+      "url": "https://codeload.github.com/MikePopoloski/regex/tar.gz/refs/tags/boost-1.91.0",
+      "sha256": "b159cea3bf570394dd19f5fed7320005290809ba53fea15c630c3a6c2685db75",
+      "bytes": 513794
+    },
+    "tomlplusplus": {
+      "url": "https://codeload.github.com/marzer/tomlplusplus/tar.gz/refs/tags/v3.4.0",
+      "sha256": "8517f65938a4faae9ccf8ebb36631a38c1cadfb5efa85d9a72e15b9e97d25155",
+      "bytes": 1294731
+    }
+  },
+  "binary_sha256": {
+    "stock": "c6539f2d56b95cfa5c5c564ab9920102f7cee3e79534884338cf4807d166293b",
+    "patched": "ec87486af8c8295dd9ca7c4b6b07191c224d95305d8a99f8d6df87d1d1a30cbe"
+  },
+  "incremental": {
+    "status": "MICRO_PROTOTYPE_PASS",
+    "general_g0": "NOT_ESTABLISHED",
+    "generations": [
+      {
+        "ast": {
+          "root": {
+            "name": "$root",
+            "kind": "Root",
+            "members": [
+              {
+                "name": "",
+                "kind": "CompilationUnit"
+              },
+              {
+                "name": "top",
+                "kind": "Instance",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "body": {
+                  "name": "top",
+                  "kind": "InstanceBody",
+                  "source_file": "fixture.sv",
+                  "source_line": 3,
+                  "source_column": 8,
+                  "members": [
+                    {
+                      "name": "x",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x"
+                    },
+                    {
+                      "name": "x",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x2"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "z"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "u0",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 42,
+                      "body": {
+                        "name": "changed",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 1,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b0",
+                                "constant": "1'b0"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "changed"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u2",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 57,
+                      "body": "changed",
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x2"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u1",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 73,
+                      "body": {
+                        "name": "control",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 2,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b1",
+                                "constant": "1'b1"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "control"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "z"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "definition": "top"
+                },
+                "connections": []
+              }
+            ]
+          },
+          "concrete_instances": [
+            {
+              "path": "top",
+              "body": {
+                "name": "top",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "x",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x"
+                  },
+                  {
+                    "name": "x",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x2"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "z"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "u0",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 42,
+                    "body": {
+                      "name": "changed",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 1,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 1,
+                            "source_line_end": 1,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b0",
+                              "constant": "1'b0"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "changed"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 45,
+                          "source_column_end": 46,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u2",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 57,
+                    "body": "changed",
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 60,
+                          "source_column_end": 62,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x2"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u1",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 73,
+                    "body": {
+                      "name": "control",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 2,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 2,
+                            "source_line_end": 2,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b1",
+                              "constant": "1'b1"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "control"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 76,
+                          "source_column_end": 77,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "z"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "definition": "top"
+              },
+              "resolved_targets": [
+                "top.x",
+                "top.u0.y",
+                "top.x2",
+                "top.u2.y",
+                "top.z",
+                "top.u1.y"
+              ]
+            },
+            {
+              "path": "top.u0",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b0",
+                        "constant": "1'b0"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u0.y"
+              ]
+            },
+            {
+              "path": "top.u2",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b0",
+                        "constant": "1'b0"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u2.y"
+              ]
+            },
+            {
+              "path": "top.u1",
+              "body": {
+                "name": "control",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 2,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 2,
+                      "source_line_end": 2,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b1",
+                        "constant": "1'b1"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "control"
+              },
+              "resolved_targets": [
+                "top.u1.y"
+              ]
+            }
+          ]
+        },
+        "diagnostics": [],
+        "active_source": "module changed(output bit y); assign y = 1'b0; endmodule\nmodule control(output bit y); assign y = 1'b1; endmodule\nmodule top(output bit x, x2, z); changed u0(x); changed u2(x2); control u1(z); endmodule\n",
+        "logical_path": "fixture.sv",
+        "macro_provenance": [],
+        "scope": "exact-three-module-constant-rhs-fixture-only"
+      },
+      {
+        "ast": {
+          "root": {
+            "name": "$root",
+            "kind": "Root",
+            "members": [
+              {
+                "name": "",
+                "kind": "CompilationUnit"
+              },
+              {
+                "name": "top",
+                "kind": "Instance",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "body": {
+                  "name": "top",
+                  "kind": "InstanceBody",
+                  "source_file": "fixture.sv",
+                  "source_line": 3,
+                  "source_column": 8,
+                  "members": [
+                    {
+                      "name": "x",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x"
+                    },
+                    {
+                      "name": "x",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x2"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "z"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "u0",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 42,
+                      "body": {
+                        "name": "changed",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 1,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b1",
+                                "constant": "1'b1"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "changed"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u2",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 57,
+                      "body": "changed",
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x2"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u1",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 73,
+                      "body": {
+                        "name": "control",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 2,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b1",
+                                "constant": "1'b1"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "control"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "z"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "definition": "top"
+                },
+                "connections": []
+              }
+            ]
+          },
+          "concrete_instances": [
+            {
+              "path": "top",
+              "body": {
+                "name": "top",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "x",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x"
+                  },
+                  {
+                    "name": "x",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x2"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "z"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "u0",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 42,
+                    "body": {
+                      "name": "changed",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 1,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 1,
+                            "source_line_end": 1,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b1",
+                              "constant": "1'b1"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "changed"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 45,
+                          "source_column_end": 46,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u2",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 57,
+                    "body": "changed",
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 60,
+                          "source_column_end": 62,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x2"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u1",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 73,
+                    "body": {
+                      "name": "control",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 2,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 2,
+                            "source_line_end": 2,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b1",
+                              "constant": "1'b1"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "control"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 76,
+                          "source_column_end": 77,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "z"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "definition": "top"
+              },
+              "resolved_targets": [
+                "top.x",
+                "top.u0.y",
+                "top.x2",
+                "top.u2.y",
+                "top.z",
+                "top.u1.y"
+              ]
+            },
+            {
+              "path": "top.u0",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b1",
+                        "constant": "1'b1"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u0.y"
+              ]
+            },
+            {
+              "path": "top.u2",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b1",
+                        "constant": "1'b1"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u2.y"
+              ]
+            },
+            {
+              "path": "top.u1",
+              "body": {
+                "name": "control",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 2,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 2,
+                      "source_line_end": 2,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b1",
+                        "constant": "1'b1"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "control"
+              },
+              "resolved_targets": [
+                "top.u1.y"
+              ]
+            }
+          ]
+        },
+        "diagnostics": [],
+        "active_source": "module changed(output bit y); assign y = 1'b1; endmodule\nmodule control(output bit y); assign y = 1'b1; endmodule\nmodule top(output bit x, x2, z); changed u0(x); changed u2(x2); control u1(z); endmodule\n",
+        "logical_path": "fixture.sv",
+        "macro_provenance": [],
+        "scope": "exact-three-module-constant-rhs-fixture-only"
+      },
+      {
+        "ast": {
+          "root": {
+            "name": "$root",
+            "kind": "Root",
+            "members": [
+              {
+                "name": "",
+                "kind": "CompilationUnit"
+              },
+              {
+                "name": "top",
+                "kind": "Instance",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "body": {
+                  "name": "top",
+                  "kind": "InstanceBody",
+                  "source_file": "fixture.sv",
+                  "source_line": 3,
+                  "source_column": 8,
+                  "members": [
+                    {
+                      "name": "x",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x"
+                    },
+                    {
+                      "name": "x",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 23,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "x2"
+                    },
+                    {
+                      "name": "x2",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 26,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Port",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "direction": "Out",
+                      "internalSymbol": "z"
+                    },
+                    {
+                      "name": "z",
+                      "kind": "Variable",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 30,
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "lifetime": "Static"
+                    },
+                    {
+                      "name": "u0",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 42,
+                      "body": {
+                        "name": "changed",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 1,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 1,
+                                "source_line_end": 1,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b0",
+                                "constant": "1'b0"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "changed"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 45,
+                              "source_column_end": 46,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u2",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 57,
+                      "body": "changed",
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 1,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "x2"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 60,
+                              "source_column_end": 62,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "u1",
+                      "kind": "Instance",
+                      "source_file": "fixture.sv",
+                      "source_line": 3,
+                      "source_column": 73,
+                      "body": {
+                        "name": "control",
+                        "kind": "InstanceBody",
+                        "source_file": "fixture.sv",
+                        "source_line": 2,
+                        "source_column": 8,
+                        "members": [
+                          {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          {
+                            "name": "y",
+                            "kind": "Variable",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "lifetime": "Static"
+                          },
+                          {
+                            "name": "",
+                            "kind": "ContinuousAssign",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 38,
+                            "assignment": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 46,
+                              "kind": "Assignment",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "left": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 38,
+                                "source_column_end": 39,
+                                "kind": "NamedValue",
+                                "type": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "symbol": "y"
+                              },
+                              "right": {
+                                "source_file_start": "fixture.sv",
+                                "source_file_end": "fixture.sv",
+                                "source_line_start": 2,
+                                "source_line_end": 2,
+                                "source_column_start": 42,
+                                "source_column_end": 46,
+                                "kind": "IntegerLiteral",
+                                "type": {
+                                  "name": "",
+                                  "kind": "PackedArrayType",
+                                  "elementType": {
+                                    "name": "bit",
+                                    "kind": "ScalarType",
+                                    "isSigned": false
+                                  },
+                                  "range": "[0:0]"
+                                },
+                                "value": "1'b1",
+                                "constant": "1'b1"
+                              },
+                              "isNonBlocking": false
+                            }
+                          }
+                        ],
+                        "definition": "control"
+                      },
+                      "connections": [
+                        {
+                          "port": {
+                            "name": "y",
+                            "kind": "Port",
+                            "source_file": "fixture.sv",
+                            "source_line": 2,
+                            "source_column": 27,
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "direction": "Out",
+                            "internalSymbol": "y"
+                          },
+                          "expr": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "z"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 3,
+                              "source_line_end": 3,
+                              "source_column_start": 76,
+                              "source_column_end": 77,
+                              "kind": "EmptyArgument",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              }
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "definition": "top"
+                },
+                "connections": []
+              }
+            ]
+          },
+          "concrete_instances": [
+            {
+              "path": "top",
+              "body": {
+                "name": "top",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 3,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "x",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x"
+                  },
+                  {
+                    "name": "x",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 23,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "x2"
+                  },
+                  {
+                    "name": "x2",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 26,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "z"
+                  },
+                  {
+                    "name": "z",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 30,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "u0",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 42,
+                    "body": {
+                      "name": "changed",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 1,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 1,
+                            "source_line_end": 1,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 1,
+                              "source_line_end": 1,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b0",
+                              "constant": "1'b0"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "changed"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 45,
+                          "source_column_end": 46,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 45,
+                            "source_column_end": 46,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u2",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 57,
+                    "body": "changed",
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 1,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 60,
+                          "source_column_end": 62,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "x2"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 60,
+                            "source_column_end": 62,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "u1",
+                    "kind": "Instance",
+                    "source_file": "fixture.sv",
+                    "source_line": 3,
+                    "source_column": 73,
+                    "body": {
+                      "name": "control",
+                      "kind": "InstanceBody",
+                      "source_file": "fixture.sv",
+                      "source_line": 2,
+                      "source_column": 8,
+                      "members": [
+                        {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        {
+                          "name": "y",
+                          "kind": "Variable",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "lifetime": "Static"
+                        },
+                        {
+                          "name": "",
+                          "kind": "ContinuousAssign",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 38,
+                          "assignment": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 2,
+                            "source_line_end": 2,
+                            "source_column_start": 38,
+                            "source_column_end": 46,
+                            "kind": "Assignment",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "left": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 38,
+                              "source_column_end": 39,
+                              "kind": "NamedValue",
+                              "type": {
+                                "name": "bit",
+                                "kind": "ScalarType",
+                                "isSigned": false
+                              },
+                              "symbol": "y"
+                            },
+                            "right": {
+                              "source_file_start": "fixture.sv",
+                              "source_file_end": "fixture.sv",
+                              "source_line_start": 2,
+                              "source_line_end": 2,
+                              "source_column_start": 42,
+                              "source_column_end": 46,
+                              "kind": "IntegerLiteral",
+                              "type": {
+                                "name": "",
+                                "kind": "PackedArrayType",
+                                "elementType": {
+                                  "name": "bit",
+                                  "kind": "ScalarType",
+                                  "isSigned": false
+                                },
+                                "range": "[0:0]"
+                              },
+                              "value": "1'b1",
+                              "constant": "1'b1"
+                            },
+                            "isNonBlocking": false
+                          }
+                        }
+                      ],
+                      "definition": "control"
+                    },
+                    "connections": [
+                      {
+                        "port": {
+                          "name": "y",
+                          "kind": "Port",
+                          "source_file": "fixture.sv",
+                          "source_line": 2,
+                          "source_column": 27,
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "direction": "Out",
+                          "internalSymbol": "y"
+                        },
+                        "expr": {
+                          "source_file_start": "fixture.sv",
+                          "source_file_end": "fixture.sv",
+                          "source_line_start": 3,
+                          "source_line_end": 3,
+                          "source_column_start": 76,
+                          "source_column_end": 77,
+                          "kind": "Assignment",
+                          "type": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "left": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "NamedValue",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            },
+                            "symbol": "z"
+                          },
+                          "right": {
+                            "source_file_start": "fixture.sv",
+                            "source_file_end": "fixture.sv",
+                            "source_line_start": 3,
+                            "source_line_end": 3,
+                            "source_column_start": 76,
+                            "source_column_end": 77,
+                            "kind": "EmptyArgument",
+                            "type": {
+                              "name": "bit",
+                              "kind": "ScalarType",
+                              "isSigned": false
+                            }
+                          },
+                          "isNonBlocking": false
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "definition": "top"
+              },
+              "resolved_targets": [
+                "top.x",
+                "top.u0.y",
+                "top.x2",
+                "top.u2.y",
+                "top.z",
+                "top.u1.y"
+              ]
+            },
+            {
+              "path": "top.u0",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b0",
+                        "constant": "1'b0"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u0.y"
+              ]
+            },
+            {
+              "path": "top.u2",
+              "body": {
+                "name": "changed",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 1,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 1,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 1,
+                      "source_line_end": 1,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 1,
+                        "source_line_end": 1,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b0",
+                        "constant": "1'b0"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "changed"
+              },
+              "resolved_targets": [
+                "top.u2.y"
+              ]
+            },
+            {
+              "path": "top.u1",
+              "body": {
+                "name": "control",
+                "kind": "InstanceBody",
+                "source_file": "fixture.sv",
+                "source_line": 2,
+                "source_column": 8,
+                "members": [
+                  {
+                    "name": "y",
+                    "kind": "Port",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "direction": "Out",
+                    "internalSymbol": "y"
+                  },
+                  {
+                    "name": "y",
+                    "kind": "Variable",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 27,
+                    "type": {
+                      "name": "bit",
+                      "kind": "ScalarType",
+                      "isSigned": false
+                    },
+                    "lifetime": "Static"
+                  },
+                  {
+                    "name": "",
+                    "kind": "ContinuousAssign",
+                    "source_file": "fixture.sv",
+                    "source_line": 2,
+                    "source_column": 38,
+                    "assignment": {
+                      "source_file_start": "fixture.sv",
+                      "source_file_end": "fixture.sv",
+                      "source_line_start": 2,
+                      "source_line_end": 2,
+                      "source_column_start": 38,
+                      "source_column_end": 46,
+                      "kind": "Assignment",
+                      "type": {
+                        "name": "bit",
+                        "kind": "ScalarType",
+                        "isSigned": false
+                      },
+                      "left": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 38,
+                        "source_column_end": 39,
+                        "kind": "NamedValue",
+                        "type": {
+                          "name": "bit",
+                          "kind": "ScalarType",
+                          "isSigned": false
+                        },
+                        "symbol": "y"
+                      },
+                      "right": {
+                        "source_file_start": "fixture.sv",
+                        "source_file_end": "fixture.sv",
+                        "source_line_start": 2,
+                        "source_line_end": 2,
+                        "source_column_start": 42,
+                        "source_column_end": 46,
+                        "kind": "IntegerLiteral",
+                        "type": {
+                          "name": "",
+                          "kind": "PackedArrayType",
+                          "elementType": {
+                            "name": "bit",
+                            "kind": "ScalarType",
+                            "isSigned": false
+                          },
+                          "range": "[0:0]"
+                        },
+                        "value": "1'b1",
+                        "constant": "1'b1"
+                      },
+                      "isNonBlocking": false
+                    }
+                  }
+                ],
+                "definition": "control"
+              },
+              "resolved_targets": [
+                "top.u1.y"
+              ]
+            }
+          ]
+        },
+        "diagnostics": [],
+        "active_source": "module changed(output bit y); assign y = 1'b0; endmodule\nmodule control(output bit y); assign y = 1'b1; endmodule\nmodule top(output bit x, x2, z); changed u0(x); changed u2(x2); control u1(z); endmodule\n",
+        "logical_path": "fixture.sv",
+        "macro_provenance": [],
+        "scope": "exact-three-module-constant-rhs-fixture-only"
+      }
+    ],
+    "assertions": {
+      "full_equivalence": true,
+      "stale_handle_rejected": true,
+      "unsupported_edits_rejected": true,
+      "rejection_atomic": true,
+      "control_identity_retained": true,
+      "control_native_work_unchanged": true,
+      "all_changed_occurrences_updated": true,
+      "source_provenance_verified": true,
+      "unaffected_native_work_unchanged": true,
+      "changed_native_work_observed": true,
+      "generation_limit_enforced": true
+    },
+    "counters": {
+      "control_before": {
+        "expressions": 3,
+        "lookups": 2,
+        "assignments": 1,
+        "conversions": 1
+      },
+      "control_after": {
+        "expressions": 3,
+        "lookups": 2,
+        "assignments": 1,
+        "conversions": 1
+      },
+      "changed_before": {
+        "expressions": 6,
+        "lookups": 4,
+        "assignments": 2,
+        "conversions": 2
+      },
+      "changed_after_b": {
+        "expressions": 8,
+        "lookups": 4,
+        "assignments": 2,
+        "conversions": 4
+      },
+      "changed_after_a": {
+        "expressions": 10,
+        "lookups": 4,
+        "assignments": 2,
+        "conversions": 6
+      }
+    }
+  },
+  "stock_vs_patched_full": "PASS"
+}

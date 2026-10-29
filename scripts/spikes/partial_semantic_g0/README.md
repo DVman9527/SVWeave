@@ -63,3 +63,12 @@ python -m unittest discover -s tests/unit -p test_partial_semantic_g0_harness.py
 
 Never run a compiler, native oracle or backend locally without the mandatory sandbox. A local
 host without bwrap is blocked for native validation; pure test success is not native success.
+
+## Observed validation
+
+[Run 40835759346](https://github.com/DVman9527/SVWeave/actions/runs/40835759346)
+passed at `219f9b15ddf4b136b30446b917732195d07ddbda`.
+[Raw evidence and scope audit](../../../evidence/partial-core-prototype-run40835759346/README.md)
+retain the independent stock/fork/full/incremental outputs and unchanged control work.
+This is **MICRO_PROTOTYPE_PASS**, not general G0, production support or a speedup claim.
+The earlier isolation-guard failure remains recorded as FAIL, before any native build.

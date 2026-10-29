@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "isolation": "bwrap",
+  "returncode": 0,
+  "failures": [],
+  "wall_seconds": 0.0671669249999951,
+  "peak_sampled_process_tree_rss_bytes": 0,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "stderr": ""
+}

@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--version"
+  ],
+  "isolation": "bwrap",
+  "returncode": 0,
+  "failures": [],
+  "wall_seconds": 0.0664518720000018,
+  "peak_sampled_process_tree_rss_bytes": 2088960,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "cmake version 3.28.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n",
+  "stderr": ""
+}

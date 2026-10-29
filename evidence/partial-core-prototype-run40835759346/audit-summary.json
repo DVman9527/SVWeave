@@ -1,0 +1,20 @@
+{
+  "run_id": 40835759346,
+  "source_sha": "219f9b15ddf4b136b30446b917732195d07ddbda",
+  "run_url": "https://github.com/DVman9527/SVWeave/actions/runs/40835759346",
+  "artifact_id": 12880424564,
+  "artifact_digest": "sha256:804cbceaad9420f8586cffcd8b3f35c44e74b9a2fdd3578242342064afe893ca",
+  "artifact_size_bytes": 26535,
+  "micro_prototype": "PASS",
+  "general_g0": "NOT_ESTABLISHED",
+  "fast_checks": "SUCCESS",
+  "unit_pass_markers": 1690,
+  "unit_skip_markers": 1,
+  "unit_count_basis": "pytest progress markers in exact job123320048763 log; skip reason unavailable",
+  "native_verilator_cases": 5,
+  "semantic_uvm_cases": 21,
+  "supplement_cases": 298,
+  "regression_failures_errors_skips": 0,
+  "production_lock_sha256": "ea20baf9bc2da3cb6b9dc41f0234c67f925ea37c5691b0bfbbb1ff30f86ef5e9",
+  "scope": "Exact allowlisted constant-expression replacement; all existing Verilator/UVM/supplement checks use their original scopes, not modified-core validation."
+}

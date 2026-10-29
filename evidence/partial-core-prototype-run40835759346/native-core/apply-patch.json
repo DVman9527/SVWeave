@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/usr/bin/patch",
+    "--batch",
+    "--fuzz=0",
+    "-p1",
+    "-i",
+    "/home/runner/work/SVWeave/SVWeave/scripts/spikes/partial_semantic_g0/core.patch"
+  ],
+  "isolation": "bwrap",
+  "returncode": 0,
+  "failures": [],
+  "wall_seconds": 0.06673012199999562,
+  "peak_sampled_process_tree_rss_bytes": 2088960,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "patching file include/slang/ast/Compilation.h\npatching file include/slang/ast/ExperimentalLeafSession.h\npatching file include/slang/ast/symbols/MemberSymbols.h\npatching file source/ast/Compilation.cpp\npatching file source/ast/Expression.cpp\npatching file source/ast/Lookup.cpp\npatching file source/ast/expressions/ConversionExpression.cpp\npatching file source/ast/symbols/MemberSymbols.cpp\n",
+  "stderr": ""
+}

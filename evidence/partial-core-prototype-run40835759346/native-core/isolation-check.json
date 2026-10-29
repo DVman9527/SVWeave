@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-c",
+    "import os\nimport pathlib\nimport tempfile\np = pathlib.Path('/home/runner/work/SVWeave/SVWeave/scripts/spikes/partial_semantic_g0/LeafUpdate.cpp')\nassert p.is_file(), \"fixture is not readable\"\nassert not pathlib.Path('/home/runner/work/SVWeave/SVWeave/.svweave/ci/partial-semantic-g0/host-only-canary').exists(), \"host canary visible\"\nassert set(os.environ) <= {'PATH', 'LANG', 'PYTHONDONTWRITEBYTECODE', 'LC_CTYPE'}, \"unexpected environment\"\nassert len(pathlib.Path('/proc/net/route').read_text().splitlines()) == 1, \"network route visible\"\nwith tempfile.NamedTemporaryFile() as temporary:\n    temporary.write(b'private tmp')\n    temporary.flush()\ntry:\n    p.open('ab').close()\nexcept OSError:\n    pass\nelse:\n    raise AssertionError('source writable')\nprint('ISOLATION_PASS')\n"
+  ],
+  "isolation": "bwrap",
+  "returncode": 0,
+  "failures": [],
+  "wall_seconds": 0.0796670490000011,
+  "peak_sampled_process_tree_rss_bytes": 1896448,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "ISOLATION_PASS\n",
+  "stderr": ""
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-c",
+    "import os,pathlib,socket,tempfile; p=pathlib.Path('/home/runner/work/SVWeave/SVWeave/scripts/spikes/partial_semantic_g0/LeafUpdate.cpp'); assert p.is_file(); assert not pathlib.Path('/home/runner/work/SVWeave/SVWeave/.svweave/ci/partial-semantic-g0/host-only-canary').exists(); assert set(os.environ) <= {'PATH','LANG','PYTHONDONTWRITEBYTECODE','LC_CTYPE'}; assert len(pathlib.Path('/proc/net/route').read_text().splitlines()) == 1; f=tempfile.NamedTemporaryFile(); f.write(b'private tmp'); f.flush(); exec('try:\n p.open(\"ab\").close()\nexcept OSError:\n pass\nelse:\n raise AssertionError(\"source writable\")'); print('ISOLATION_PASS')"
+  ],
+  "isolation": "bwrap",
+  "returncode": 1,
+  "failures": [],
+  "wall_seconds": 0.07950808000001075,
+  "peak_sampled_process_tree_rss_bytes": 0,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "",
+  "stderr": "  File \"<string>\", line 1\n    import os,pathlib,socket,tempfile; p=pathlib.Path('/home/runner/work/SVWeave/SVWeave/scripts/spikes/partial_semantic_g0/LeafUpdate.cpp'); assert p.is_file(); assert not pathlib.Path('/home/runner/work/SVWeave/SVWeave/.svweave/ci/partial-semantic-g0/host-only-canary').exists(); assert set(os.environ) <= {'PATH','LANG','PYTHONDONTWRITEBYTECODE','LC_CTYPE'}; assert len(pathlib.Path('/proc/net/route').read_text().splitlines()) == 1; f=tempfile.NamedTemporaryFile(); f.write(b'private tmp'); f.flush(); exec('try:\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ^\nSyntaxError: unterminated string literal (detected at line 1)\n"
+}

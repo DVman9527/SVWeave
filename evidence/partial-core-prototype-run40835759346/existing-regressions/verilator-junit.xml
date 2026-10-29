@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="native-verilator-static" tests="5" failures="0" skipped="0"><testcase classname="native_verilator" name="HDL-VLT-01" /><testcase classname="native_verilator" name="HDL-VLT-02" /><testcase classname="native_verilator" name="HDL-VLT-03" /><testcase classname="native_verilator" name="HDL-VLT-04" /><testcase classname="native_verilator" name="HDL-VLT-05" /></testsuite>

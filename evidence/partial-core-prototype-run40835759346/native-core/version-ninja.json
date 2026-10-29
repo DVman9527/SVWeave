@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/usr/bin/ninja",
+    "--version"
+  ],
+  "isolation": "bwrap",
+  "returncode": 0,
+  "failures": [],
+  "wall_seconds": 0.06678918200000084,
+  "peak_sampled_process_tree_rss_bytes": 0,
+  "timeout_seconds": 180,
+  "rss_limit_bytes": 3221225472,
+  "output_limit_per_pipe_bytes": 8388608,
+  "stdout": "1.11.1\n",
+  "stderr": ""
+}
