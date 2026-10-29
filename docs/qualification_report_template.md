@@ -60,7 +60,7 @@ Release decision: ACCEPTED_STATIC_PREVIEW | BLOCKED
 | G1 | manifest, snapshot, config, slang-argument, location and repo-profile test modules: no FAIL/ERROR/SKIP |
 | G2 | semantic modules (SEM, LOC, SVA, UVM, build identity, extractor DTO, query envelope): no FAIL/ERROR/SKIP, real pyslang and real UVM library |
 | G3 | graph, Serena, registry, stdio gateway and API modules plus the MCP contract suite: no FAIL/ERROR/SKIP |
-| G4 | edit unit modules, fault-injection suite and real-backend edit flow pass with no skip, and all 27 critical mutations (plan 20.5 plus write/Slurm/workspace-binding safety checks) are killed |
+| G4 | edit unit modules, fault-injection suite and real-backend edit flow pass with no skip, and all 29 critical mutations (plan 20.5 plus write/Slurm/workspace-binding/snapshot-reuse safety checks) are killed |
 | G5 | every P0 suite has zero FAIL/ERROR/SKIP; acceptance flow passes; statement coverage >= 85 %, branch coverage >= 80 %; docs check (CLI commands, schemas, samples, required files) passes; benchmark on the reference corpus meets the plan 22.3 budgets; README does not claim a license for SVWeave |
 
 A gate computed from a step that did not run is `NOT_EVALUATED`, not PASS. The release decision is

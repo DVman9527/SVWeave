@@ -26,6 +26,7 @@ from svweave.snapshot.capture import load_record
 from svweave.snapshot.models import SnapshotRecord
 from tests.conftest import Ws, profile
 from tests.integration.helpers import build, dbq, opts
+from tests.integration.incremental_compare import relocate_empty_include_diagnostic
 
 pytestmark = pytest.mark.integration
 
@@ -112,7 +113,9 @@ def _relocated_record(rec: SnapshotRecord, w: Ws) -> dict[str, Any]:
     return result
 
 
-def _semantic_rows(w: Ws, bid: str) -> dict[str, list[str]]:
+def _semantic_rows(
+    w: Ws, bid: str, *, diagnostic_snapshot: SnapshotRecord | None = None,
+) -> dict[str, list[str]]:
     result = {}
     for table in SEMANTIC_TABLES:
         rows = dbq(w, f'SELECT * FROM "{table}" WHERE build_id=?', bid)
@@ -121,6 +124,10 @@ def _semantic_rows(w: Ws, bid: str) -> dict[str, list[str]]:
         ignored = {"job_id"} if table in {"diagnostics", "build_reports"} else set()
         if table == "diagnostics":
             ignored.add("diagnostic_id")
+            if diagnostic_snapshot is not None:
+                files = w.root / ".svweave" / "snapshots" / diagnostic_snapshot.snapshot_id / "files"
+                rows = [relocate_empty_include_diagnostic(row, files, diagnostic_snapshot, shape="row")
+                        for row in rows]
         if table == "build_reports":
             for row in rows:
                 stats = json.loads(row["stats"])
@@ -177,7 +184,9 @@ def _full_oracle(tmp: Path, w: Ws, incremental: Envelope) -> None:
     full_record, full_bytes = _snapshot(full, expected.snapshot_id)
     assert _relocated_record(current_record, w) == _relocated_record(full_record, full)
     assert current_bytes == full_bytes
-    assert _semantic_rows(w, expected.build_id) == _semantic_rows(full, expected.build_id)
+    assert _semantic_rows(w, expected.build_id, diagnostic_snapshot=current_record) == _semantic_rows(
+        full, expected.build_id, diagnostic_snapshot=full_record,
+    )
     calls = (
         (Q.hierarchy, {}),
         (Q.connections, {"instance": "incremental_top.u0"}),
@@ -187,7 +196,14 @@ def _full_oracle(tmp: Path, w: Ws, incremental: Envelope) -> None:
         actual = query(opts(w), expected.build_id, request_id="equivalence", limit=500, **kw)
         oracle = query(opts(full), expected.build_id, request_id="equivalence", limit=500, **kw)
         assert not actual.pagination.truncated and not oracle.pagination.truncated
-        assert actual.model_dump(exclude={"workspace_id"}) == oracle.model_dump(exclude={"workspace_id"})
+        actual_data = actual.model_dump(exclude={"workspace_id"})
+        oracle_data = oracle.model_dump(exclude={"workspace_id"})
+        if query is Q.diagnostics:
+            for data, workspace, record in ((actual_data, w, current_record), (oracle_data, full, full_record)):
+                files = workspace.root / ".svweave" / "snapshots" / record.snapshot_id / "files"
+                data["data"]["items"] = [relocate_empty_include_diagnostic(item, files, record, shape="query")
+                                         for item in data["data"]["items"]]
+        assert actual_data == oracle_data
 
 
 def _run_files(w: Ws) -> dict[str, bytes]:
