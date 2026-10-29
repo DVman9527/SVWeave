@@ -340,6 +340,21 @@ def build_cmd(st: _State, profile: str | None, no_reuse: bool) -> None:
     st.emit(env, EXIT_BUILD if env.outcome in (Outcome.PARTIAL, Outcome.BLOCKED) else None)
 
 
+@cli.command("update")
+@click.option("--profile", default=None, help="Profile name (default: project.default_profile).")
+@click.option("--base", default=None, help="Git advisory base revision (default: HEAD); never an invalidation authority.")
+@click.option("--no-git", is_flag=True, help="Skip optional Git reporting; still verify every relevant input.")
+@pass_state
+def update_cmd(st: _State, profile: str | None, base: str | None, no_git: bool) -> None:
+    """Reuse immutable snapshot data; changed inputs still require whole-profile analysis."""
+    from svweave.application.evidence import record_static_for
+    from svweave.application.update import run_update
+
+    env = st.run(lambda rid: run_update(st.opts, profile, rid, base=base, git=not no_git), profile=profile)
+    record_static_for(st.opts, env.build_id)
+    st.emit(env, EXIT_BUILD if env.outcome in (Outcome.PARTIAL, Outcome.BLOCKED) else None)
+
+
 @cli.group("graph")
 def graph_grp() -> None:
     """Static graph export of a build (self-contained HTML, nothing is served)."""

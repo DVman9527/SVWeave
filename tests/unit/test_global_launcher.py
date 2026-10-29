@@ -377,7 +377,7 @@ def test_GLB_04_bound_manifest_cannot_become_a_symlink(tmp_path: Path) -> None:
 def test_GLB_08_workspace_binding_mutation_has_precise_anchor_and_pure_tests() -> None:
     from scripts.mutation_suite import MUTATIONS
 
-    assert {m.mid for m in MUTATIONS} == {f"M{i:02d}" for i in range(1, 28)}
+    assert {m.mid for m in MUTATIONS} == {f"M{i:02d}" for i in range(1, 30)}
     mutation = next(m for m in MUTATIONS if m.mid == "M27")
     assert len(mutation.patches) == 1
     patch = mutation.patches[0]
@@ -388,6 +388,15 @@ def test_GLB_08_workspace_binding_mutation_has_precise_anchor_and_pure_tests() -
         "tests/unit/test_global_launcher.py::test_GLB_04_bound_manifest_cannot_become_a_symlink",
         "tests/unit/test_global_launcher.py::test_GLB_04_rejected_binding_does_not_write_retargeted_event_log",
     ]
+    for mid in ("M28", "M29"):
+        snapshot_mutation = next(m for m in MUTATIONS if m.mid == mid)
+        assert len(snapshot_mutation.patches) == 1
+        snapshot_patch = snapshot_mutation.patches[0]
+        assert snapshot_patch.path == "src/svweave/snapshot/incremental.py"
+        assert (REPO / snapshot_patch.path).read_text().count(snapshot_patch.old) == 1
+        assert f"SVW_MUTATION:{mid}" in snapshot_patch.new
+        assert all(test.startswith("tests/unit/test_incremental_snapshot.py::")
+                   for test in snapshot_mutation.tests)
 
 
 

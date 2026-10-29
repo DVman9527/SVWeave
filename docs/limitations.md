@@ -17,11 +17,33 @@ timing or signoff result (plan 4.3).
 |---|---|
 | Linux only | Qualified host class: Linux x86_64 with unprivileged user namespaces and `bwrap`. macOS and Windows are not qualified (plan 4.2, P1). The pinned codebase-memory-mcp is the `linux-amd64-portable` static build. |
 | No product EDA runner | Product runtime does not invoke a simulator, formal or EDA compiler. A separate explicitly authorized native static-lint/JSON validation harness is test infrastructure, not EDA signoff or a query backend. `eda_compile`, `simulation`, `formal` and `coverage` remain separate; imported external evidence (`svweave evidence import`) is `EXTERNAL_DECLARED` and not verified by SVWeave. |
-| No incremental build | Every build is a full parse and elaboration (ADR-006). An edit triggers a full rebuild. There is no claim that changing one file is cheaper. |
+| No incremental semantic compilation | An exact COMPLETE build may be reused; otherwise the whole profile is parsed and elaborated (ADR-006). The opt-in update path reuses snapshot I/O only (ADR-018), not semantic rows or graph-index deltas. Changing one file is not guaranteed to be cheaper. |
 | Not a language-server replacement | No LSP, no semantic rename, no refactoring beyond the controlled edit flow. |
 | Not implemented (plan 4.3) | Bit-level connectivity, clock/reset domain analysis, CDC/RDC/timing/power, encrypted source recovery, UVM factory/`config_db` resolution, SVA proof, coverage closure, VHDL/AMS/mixed-language. |
 | One workspace per server | `svweave serve` is bound to one workspace; there is no HTTP endpoint (ADR-009); the only UI is the static HTML graph export (ADR-014). |
 | UVM | The pinned Accellera `uvm-core` 2020.3.1 is an external input mapped through `svweave.local.yaml`. UVM runtime topology, phase scheduling, factory overrides and `config_db` hits are not computed; call sites are listed as written. |
+
+### Snapshot update limits
+
+Phase 1 targets one large top/profile with small edits, but still enumerates and hashes every
+current relevant input, including ignored/untracked files, external roots and include/library
+lookup candidates. It does not select a dependency closure or trust a clean Git status. Snapshot
+and build identity, edit approval/CAS, cursor binding and immutable historical results are unchanged.
+
+The materialization mode `delta` means the donor-aware path was used, **not** that only changed
+files were copied. Reflinks depend on the filesystem; unsupported cloning falls back to copies,
+possibly of every file, with extra verification cost. `reused_existing` means a complete snapshot
+was verified, not that hashing was skipped. Reported byte counts are logical work, not measured
+physical disk traffic or disk-space savings; no universal speedup is promised.
+
+Git is an optional bounded advisory. Its base is not the previous published snapshot. Unstaged
+metadata hints can miss metadata-preserving changes or over-report changes; untracked hints do
+not apply repository ignore rules and may include ignored names. External roots and submodule
+contents are outside the advisory's coverage. Git absence, invalid
+base, unsupported metadata layouts (including linked-worktree gitfiles), unsafe configuration
+or limits can make it unavailable without preventing full authoritative capture. Truncated lists
+never prove absence of additional changes. See [operations](operations.md#2a-opt-in-snapshot-io-update)
+and [ADR-018](adr/ADR-018-snapshot-io-update.md).
 
 ## 2. Semantic core (pyslang extraction, ADR-003, `docs/supported_features.md`)
 

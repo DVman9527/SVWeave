@@ -173,6 +173,32 @@ def run_build(
     (exclusive non-blocking build lock, shared by the CLI and the MCP job manager). With
     ``expected_snapshot_id`` the build stops with STALE_SNAPSHOT when the captured snapshot differs.
     ``test_fault`` is a TEST-ONLY hook that is never read from configuration."""
+    return _run_build_with_capture(
+        opts, profile, request_id, reuse=reuse, handle=handle, on_job=on_job,
+        test_fault=test_fault, job_id=job_id, expected_snapshot_id=expected_snapshot_id,
+        expected_execution_fingerprint=expected_execution_fingerprint,
+    )
+
+
+def _run_build_with_capture(
+    opts: WorkspaceOptions,
+    profile: str | None,
+    request_id: str,
+    *,
+    reuse: bool = True,
+    handle: WorkerHandle | None = None,
+    on_job: Callable[[str, WorkerHandle], None] | None = None,
+    test_fault: str | None = None,
+    job_id: str | None = None,
+    expected_snapshot_id: str | None = None,
+    expected_execution_fingerprint: str | None = None,
+    capture: Callable[[WorkspaceContext, NormalizedManifest], SnapshotRecord] | None = None,
+) -> Envelope:
+    """Internal capture strategy seam; the public build API/default remains unchanged.
+
+    An alternative capture runs under the same build/workspace locks and must produce a fully
+    verified immutable snapshot. It cannot override semantic identity, workers or publication.
+    """
     ctx = opts.load()
     require_execution_fingerprint(ctx, expected_execution_fingerprint)
     request_execution = ctx.execution.fingerprint
@@ -192,6 +218,7 @@ def run_build(
                 job_id,
                 expected_snapshot_id,
                 request_execution,
+                capture,
             )
     except WorkspaceBusy as e:
         raise SvwError(
@@ -212,6 +239,7 @@ def _run_build_locked(
     job_id: str | None,
     expected_snapshot_id: str | None,
     expected_execution_fingerprint: str,
+    capture: Callable[[WorkspaceContext, NormalizedManifest], SnapshotRecord] | None = None,
 ) -> Envelope:
     ctx = opts.load()
     require_execution_fingerprint(ctx, expected_execution_fingerprint)
@@ -222,7 +250,7 @@ def _run_build_locked(
     nm = resolve_profile(ctx, name)
     write_manifest(ctx, nm)
     with workspace_lock(ctx.state_dir):
-        rec = capture_snapshot(ctx, nm)
+        rec = capture_snapshot(ctx, nm) if capture is None else capture(ctx, nm)
         with Database(ctx.state_dir / DB_FILENAME) as db:
             db.upsert_workspace(
                 ctx.workspace_id,

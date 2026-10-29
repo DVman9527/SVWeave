@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Critical mutation suite (plan 20.5, release gate "Critical invariants").
 
-Twenty-seven deliberate defects cover the ten classes of plan 20.5 (class 7 has two variants),
+Twenty-nine deliberate defects cover the ten classes of plan 20.5 (class 7 has two variants),
 the M12–M22 extra write-safety rules, M23–M26 Slurm boundaries, and M27 shared-launcher workspace
-binding. They are injected, one at a time, into a THROWAWAY COPY of the
+binding, plus M28–M29 verified incremental-snapshot reuse. They are injected, one at a time, into a THROWAWAY COPY of the
 repository. For each one the mapped test subset is run against the copy; a mutation is ``KILLED`` when the subset
 fails (pytest exit 1 with at least one FAILED test) and ``SURVIVED`` when it stays green. Anything
 else (patch anchor missing, syntax/collection error, timeout, red baseline) is ``ERROR`` and is
@@ -373,6 +373,23 @@ MUTATIONS: list[Mutation] = [
         ["tests/unit/test_global_launcher.py::test_GLB_04_bound_canonical_directory_cannot_be_retargeted",
          "tests/unit/test_global_launcher.py::test_GLB_04_bound_manifest_cannot_become_a_symlink",
          "tests/unit/test_global_launcher.py::test_GLB_04_rejected_binding_does_not_write_retargeted_event_log"],
+    ),
+    m(
+        "M28", "trust an existing incremental snapshot by its name without exact-tree verification",
+        "SNP-INC-05; plan 9.2/9.6 immutable input verification",
+        [Patch("src/svweave/snapshot/incremental.py",
+               "                        existing_valid = verify_snapshot_tree(final, rec, stats)\n",
+               "                        existing_valid = True  # " + MARK + ":M28\n")],
+        ["tests/unit/test_incremental_snapshot.py::test_SNP_INC_05_corrupt_cached_snapshot_is_not_reused"],
+    ),
+    m(
+        "M29", "publish an incremental snapshot after source or lookup inventory changed during materialization",
+        "SNP-INC-07; plan 9.2/9.6 capture race validation",
+        [Patch("src/svweave/snapshot/incremental.py",
+               "                if (files != after or lookup_copy != lookup_after\n"
+               "                        or (before is not None and (files != before or lookup_copy != lookup))):\n",
+               "                if False:  # " + MARK + ":M29\n")],
+        ["tests/unit/test_incremental_snapshot.py::test_SNP_INC_07_noop_race_retries_and_continuous_changes_are_bounded"],
     ),
 ]
 

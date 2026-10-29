@@ -24,7 +24,7 @@ G0 lock verified + lock fields non-null + backend probe (pyslang/slang READY, cb
 G1 manifest/snapshot/config/path-policy suites (unit + integration) with no FAIL/SKIP.
 G2 semantic suites (SEM/LOC/SVA/UVM/build identity, real pyslang, real UVM) with no FAIL/SKIP.
 G3 backend suites (cbm, Serena, registry, stdio gateway, API) + MCP contract tests.
-G4 edit safety (unit, fault injection, real-backend edit flow) + all 27 critical mutations (10 plan classes plus write/Slurm/workspace safety) killed.
+G4 edit safety (unit, fault injection, real-backend edit flow) + all 29 critical mutations (10 plan classes plus write/Slurm/workspace/snapshot safety) killed.
 G5 every P0 suite has no FAIL/BLOCKED/SKIP, acceptance flow, statement >= 85 %, branch >= 80 %,
    docs check, benchmark within the plan 22.3 budgets on the reference corpus.
 

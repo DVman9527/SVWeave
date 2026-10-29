@@ -7,6 +7,7 @@ exactly as they are on disk.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import os
 import posixpath
@@ -15,6 +16,7 @@ import shutil
 import stat
 import uuid
 from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -23,6 +25,7 @@ from svweave.config.paths import is_hardlinked
 from svweave.domain.errors import ErrorCode, SvwError
 from svweave.domain.ids import compute_snapshot_id
 from svweave.manifest.models import NormalizedManifest
+from svweave.security.safeio import read_regular_under, unsafe
 from svweave.snapshot.models import (
     Change,
     ExplicitEntry,
@@ -51,6 +54,76 @@ _INCLUDE_RE = re.compile(r'`include\s+"([^"\n]+)"')
 _HDL_SUFFIXES = frozenset({".sv", ".svh", ".v", ".vh", ".h", ".vp", ".svp"})
 
 
+def _open_scan_directory(path: Path) -> int:
+    """Anchor one checked scan directory without following any ancestor symlink."""
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+    fd = os.open(path.anchor, flags)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, flags, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def _read_scan_file(directory_fd: int, name: str) -> bytes:
+    """Bounded read of a regular directory member; a retargeted symlink fails closed."""
+    try:
+        fd = os.open(
+            name, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK,
+            dir_fd=directory_fd,
+        )
+    except OSError as exc:
+        raise unsafe(name, f"cannot open scanned source without following links ({exc.strerror})") from exc
+    try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            raise unsafe(name, "scanned source is not a regular file")
+        return os.read(fd, MAX_INCLUDE_SCAN_BYTES + 1)
+    finally:
+        os.close(fd)
+
+
+def _scan_directory_texts(
+    ctx: WorkspaceContext, logical_dir: str, budget: int,
+) -> Iterator[str | None]:
+    """Trust-check and anchor a directory once; only symlink files need the slow path.
+
+    Ordinary members are opened relative to the anchored fd with O_NOFOLLOW. A checked symlink
+    target is opened componentwise from '/', never by reopening the original alias. Oversized
+    files still consume the bounded scan-file budget, but are not interpreted as directives.
+    """
+    base = ctx.to_abs(logical_dir)
+    resolved_dir = ctx.resolve(str(base), ctx.project_root, is_dir=True)
+    fd = _open_scan_directory(resolved_dir.real)
+    try:
+        scanned = 0
+        for name in sorted(os.listdir(fd)):
+            if scanned >= budget:
+                break
+            if (Path(name).suffix not in _HDL_SUFFIXES or not ctx.allows_file(base / name)
+                    or not ctx.allows_file(resolved_dir.real / name)):
+                continue
+            st = os.stat(name, dir_fd=fd, follow_symlinks=False)
+            if stat.S_ISREG(st.st_mode):
+                data = _read_scan_file(fd, name)
+            elif stat.S_ISLNK(st.st_mode):
+                resolved = ctx.resolve(str(base / name), ctx.project_root)
+                data = read_regular_under(
+                    Path(resolved.real.anchor),
+                    resolved.real.relative_to(resolved.real.anchor).as_posix(),
+                    MAX_INCLUDE_SCAN_BYTES + 1,
+                )
+            else:
+                continue
+            scanned += 1
+            yield None if len(data) > MAX_INCLUDE_SCAN_BYTES else data.decode("utf-8", errors="replace")
+    finally:
+        os.close(fd)
+
+
 def _nested_include_dirs(ctx: WorkspaceContext, seeds: list[str]) -> list[str]:
     """Logical directories reachable through relative `include "dir/file"` directives, found by
     scanning the HDL files of the seed files' directories and, transitively, of the directories
@@ -64,24 +137,10 @@ def _nested_include_dirs(ctx: WorkspaceContext, seeds: list[str]) -> list[str]:
     scanned = 0
     while work:
         ldir = work.pop(0)
-        base = ctx.to_abs(ldir)
-        try:
-            names = sorted(os.listdir(base))
-        except OSError:
-            continue
-        for name in names:
-            if Path(name).suffix not in _HDL_SUFFIXES:
-                continue
-            fp = base / name
-            if scanned >= MAX_INCLUDE_SCAN_FILES or not fp.is_file():
-                continue
-            try:
-                if fp.stat().st_size > MAX_INCLUDE_SCAN_BYTES:
-                    continue
-                text = fp.read_text(encoding="utf-8", errors="replace")
-            except OSError:
-                continue
+        for text in _scan_directory_texts(ctx, ldir, MAX_INCLUDE_SCAN_FILES - scanned):
             scanned += 1
+            if text is None:
+                continue
             for inc in _INCLUDE_RE.findall(text):
                 if inc.startswith("/") or "/" not in inc:
                     continue
@@ -456,6 +515,28 @@ def snapshots_dir(ctx: WorkspaceContext) -> Path:
     return ctx.state_dir / "snapshots"
 
 
+@contextmanager
+def snapshot_publish_lock(ctx: WorkspaceContext) -> Iterator[None]:
+    """Serialize snapshot winner validation / corrupt-cache repair across capture modes.
+
+    Capture's shared workspace lock protects against GC, but intentionally allows another
+    capture. This narrow lock prevents a check-then-delete repair from deleting its valid winner.
+    """
+    path = ctx.state_dir / "snapshot.publish.lock"
+    fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_nlink != 1:
+            raise SvwError(ErrorCode.POLICY_DENIED, "unsafe snapshot publication lock")
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
+
 def capture_snapshot(
     ctx: WorkspaceContext,
     nm: NormalizedManifest,
@@ -529,16 +610,17 @@ def _capture(
                 lookup=lookup1,
             )
             final = root / sid
-            if final.exists() or final.is_symlink():
-                if not final.is_symlink() and _content_matches(final, files):
-                    remove_snapshot_dir(tmp)
-                    # same bytes, but THIS call's metadata (profile, config): the stored record
-                    # may have been written for another profile with the same inputs
-                    return record
-                remove_snapshot_dir(final)  # corrupt or planted: replaced by the verified copy
-            (tmp / "snapshot.json").write_text(record.model_dump_json(indent=2), encoding="utf-8")
-            _freeze(tmp)
-            os.rename(tmp, final)
+            with snapshot_publish_lock(ctx):
+                if final.exists() or final.is_symlink():
+                    if not final.is_symlink() and _content_matches(final, files):
+                        remove_snapshot_dir(tmp)
+                        # same bytes, but THIS call's metadata (profile, config): the stored record
+                        # may have been written for another profile with the same inputs
+                        return record
+                    remove_snapshot_dir(final)  # corrupt or planted: replaced by the verified copy
+                (tmp / "snapshot.json").write_text(record.model_dump_json(indent=2), encoding="utf-8")
+                _freeze(tmp)
+                os.rename(tmp, final)
             return record
         except BaseException:
             remove_snapshot_dir(tmp)

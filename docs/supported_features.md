@@ -37,6 +37,30 @@ runtime behaviour (factory resolution, `config_db` matching, phase scheduling), 
 Job state, completeness and diagnostics stay separate: a design with errors is job `SUCCEEDED`,
 analysis `PARTIAL`, diagnostics `HAS_ERRORS` (SEM-07).
 
+### Opt-in snapshot I/O reuse (Phase 1)
+
+The update path is for one large top/profile with a few edited inputs. It preserves the ordinary
+build pipeline and exact identities, but can avoid materializing an already verified full snapshot
+or use verified copy-on-write donor files while creating a new full snapshot. Every current
+relevant input and lookup candidate is still enumerated and content-checked independently of Git.
+No writable hardlinks, semantic dependency-closure rebuild or graph-index delta is introduced.
+
+Only an exact existing COMPLETE build can reuse semantic results. All other cases request
+whole-profile analysis; source/header/library membership, file order, defines, parameters,
+include order and toolchain changes are not reduced to a Git changed-file set. Publication,
+freshness, historical queries, cursors and edit approval/CAS retain the existing rules. An
+unchanged snapshot alone does not establish an unchanged semantic build identity.
+
+Materialization reports distinguish full copies, verified existing-tree reuse and the donor-aware
+path, and record actual copy/clone/hash work and fallback reasons. A donor-aware path can still
+copy the whole tree when reflinks are unavailable. This is an implementation inventory, not a
+new performance or qualification claim. See [operations](operations.md#2a-opt-in-snapshot-io-update)
+for the request-local report and [ADR-018](adr/ADR-018-snapshot-io-update.md) for requirement/test
+mapping and validation boundaries. Ordinary `build` and the frozen MCP tools remain unchanged.
+Shared MCP users must invoke the update CLI explicitly; upgrading the runtime does not change
+`svw_build` into an update. A COMPLETE update publishes to the same workspace state, and its
+returned build ID can then be queried through the existing CLI/MCP tools.
+
 ### Completeness verdict
 
 `COMPLETE` iff all of these hold:
@@ -115,6 +139,7 @@ another is), or the snapshot was garbage-collected), `analysis_coverage{complete
 | CLI | Service | Notes |
 |---|---|---|
 | `svweave build --profile P [--no-reuse]` | `run_build` | exit 0 COMPLETE; **3** errors/PARTIAL/BLOCKED; 4 timeout/crash/resource; 2 config |
+| `svweave update --profile P [--base REF] [--no-git]` | `run_update` | opt-in snapshot I/O reuse and advisory Git report; same semantic/publish/exit policy as build, no new MCP tool |
 | `svweave query symbol --build B (--symbol S \| --file F --byte N \| --name X)` | `symbol` | several candidates -> `AMBIGUOUS_SYMBOL` (exit 3), never auto-picked |
 | `svweave query references --build B --symbol S [--scope PREFIX]` | `references` | resolved + unresolved-name matches + virtual-dispatch candidates; `searched_scope`, `resolution_basis`; gaps appear in limitations |
 | `svweave query hierarchy --build B [--top T \| --instance I] [--depth N]` | `hierarchy` | pre-order, instance by id or display path |

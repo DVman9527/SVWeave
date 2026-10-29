@@ -108,6 +108,20 @@ jobs:
         run: .venv/bin/python -m pytest tests/unit -q --no-cov
       - name: Contract tests
         run: .venv/bin/python -m pytest tests/contract -q --no-cov
+      - name: Paired snapshot I/O benchmark (correctness gate, no speed threshold)
+        if: github.event_name == 'workflow_dispatch' && inputs.real_backends && !inputs.cleanroom_only
+        timeout-minutes: 10
+        run: .venv/bin/python scripts/benchmark_incremental_snapshot.py --files 1000 --trials 5 --out .svweave/ci/incremental-snapshot.json
+      - name: Upload snapshot I/O benchmark evidence
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.real_backends && !inputs.cleanroom_only
+        uses: actions/upload-artifact@v4
+        with:
+          name: svweave-incremental-snapshot-evidence
+          path: |
+            .svweave/ci/incremental-snapshot.json
+            .svweave/ci/incremental-snapshot.samples.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
       # Real-backend tests skip locally when a backend is missing; in this job they are not run at
       # all, and the fast job NEVER counts as release qualification (scripts/qualify.py does).
 
@@ -233,6 +247,10 @@ jobs:
       - name: Critical mutation suite (plan 20.5)
         if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/mutation_suite.py
+      - name: Paired full-build and snapshot-update benchmark (whole-profile semantics)
+        if: ${{ !inputs.cleanroom_only }}
+        timeout-minutes: 15
+        run: .venv/bin/python scripts/benchmark_incremental_build.py --scale 1.0 --pairs 2 --out .svweave/ci/incremental-build.json
       - name: Small-scale benchmark (smoke only; not the plan 22.3 reference run)
         if: ${{ !inputs.cleanroom_only }}
         run: .venv/bin/python scripts/benchmark.py --scale 0.05 --no-graph --cold-runs 5 --hot-runs 30

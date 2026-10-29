@@ -355,6 +355,18 @@ workspace even with a shared installation; do not rerun bootstrap in each projec
 registration is in section 2a; the explicit per-project alternative is in `docs/operations.md`
 section 4.
 
+After the first build, `svweave update --profile P` opts into snapshot I/O reuse for subsequent
+work on that profile. It uses the same installation and per-workspace state; no separate cache
+service, daemon, client registration or MCP schema change is needed. Add `--no-git` to skip the
+optional Git advisory. Ordinary `svweave build --profile P` remains unchanged. Update still
+hashes all relevant inputs and runs whole-profile semantic analysis unless the exact COMPLETE
+build is already reusable; reflink support and speedup are not guaranteed. See the
+[update workflow and report](operations.md#2a-opt-in-snapshot-io-update).
+Upgrading a shared MCP installation does **not** automatically enable this path: existing
+`svw_build` calls retain their default behavior. Run the CLI update explicitly against the same
+workspace; after a COMPLETE update, its published result is available to that workspace's CLI
+and MCP queries by the returned build ID, subject to the usual freshness checks.
+
 ## 6. Uninstall
 
 For a shared installation, removing its virtual environment or `.toolchain/` affects every
