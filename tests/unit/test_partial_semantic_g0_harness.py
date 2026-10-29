@@ -38,6 +38,16 @@ def archive(members):
 
 
 class PartialSemanticHarnessTests(unittest.TestCase):
+    def test_SEC_05_isolation_guard_compiles_without_native_execution(self):
+        source = Path("/synthetic/path with 'quote/fixture.cpp")
+        canary = Path("/host-only/canary")
+        guard = controller.isolation_guard(source, canary)
+        compile(guard, "<isolation-guard>", "exec")
+        self.assertIn("/proc/net/route", guard)
+        self.assertIn("source writable", guard)
+        self.assertIn("unexpected environment", guard)
+        self.assertNotIn("exec(", guard)
+
     def test_SEC_05_isolation_failure_precedes_any_native_launch(self):
         with (patch.object(controller, "wrap", side_effect=RuntimeError("no bwrap")),
               patch.object(controller.subprocess, "Popen") as popen):

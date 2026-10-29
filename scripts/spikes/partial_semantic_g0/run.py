@@ -172,6 +172,30 @@ def validate_incremental(value, full_a, full_b) -> None:
             raise ValueError("changed-leaf rebinding work not demonstrated")
 
 
+
+def isolation_guard(source: Path, canary: Path) -> str:
+    # Direct multiline code: nested exec/string escaping would defer syntax bugs until CI.
+    return f"""import os
+import pathlib
+import tempfile
+p = pathlib.Path({str(source)!r})
+assert p.is_file(), "fixture is not readable"
+assert not pathlib.Path({str(canary)!r}).exists(), "host canary visible"
+assert set(os.environ) <= {{'PATH', 'LANG', 'PYTHONDONTWRITEBYTECODE', 'LC_CTYPE'}}, "unexpected environment"
+assert len(pathlib.Path('/proc/net/route').read_text().splitlines()) == 1, "network route visible"
+with tempfile.NamedTemporaryFile() as temporary:
+    temporary.write(b'private tmp')
+    temporary.flush()
+try:
+    p.open('ab').close()
+except OSError:
+    pass
+else:
+    raise AssertionError('source writable')
+print('ISOLATION_PASS')
+"""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sources", type=Path, required=True)
@@ -207,17 +231,7 @@ def main() -> int:
         # Exercise actual isolation, not merely argv construction. No native fallback.
         canary = state / "host-only-canary"
         canary.write_text("synthetic-isolation-canary")
-        guard = (
-            "import os,pathlib,socket,tempfile; "
-            f"p=pathlib.Path({str(HERE / 'LeafUpdate.cpp')!r}); "
-            "assert p.is_file(); "
-            f"assert not pathlib.Path({str(canary)!r}).exists(); "
-            "assert set(os.environ) <= {'PATH','LANG','PYTHONDONTWRITEBYTECODE','LC_CTYPE'}; "
-            "assert len(pathlib.Path('/proc/net/route').read_text().splitlines()) == 1; "
-            "f=tempfile.NamedTemporaryFile(); f.write(b'private tmp'); f.flush(); "
-            "exec('try:\n p.open(\"ab\").close()\nexcept OSError:\n pass\nelse:\n raise AssertionError(\"source writable\")'); "
-            "print('ISOLATION_PASS')"
-        )
+        guard = isolation_guard(HERE / "LeafUpdate.cpp", canary)
         guard_spec = probe_spec(sources=(HERE / "LeafUpdate.cpp",))
         run_step("isolation-check", guard_spec, ["/usr/bin/python3", "-c", guard])
         # Even toolchain identity commands are sandboxed.
