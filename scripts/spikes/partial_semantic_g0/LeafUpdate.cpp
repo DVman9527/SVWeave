@@ -95,7 +95,7 @@ static std::string full(bool b, bool references = false, std::string* eventLedge
         instance.body.visit(targets);
         w.endArray();
         w.writeProperty("usage_semantics");
-        w.writeValue("per-instance-AST-occurrences; native-flags-shared-declaration-aggregate");
+        w.writeValue(std::string_view("per-instance-AST-occurrences; native-flags-shared-declaration-aggregate"));
         std::map<const ValueSymbol*, std::pair<uint64_t, uint64_t>> occurrenceCounts;
         for (auto& member : instance.body.members()) {
             if (auto assignment = member.as_if<ContinuousAssignSymbol>()) {
