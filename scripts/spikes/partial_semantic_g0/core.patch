@@ -8,7 +8,7 @@
  
  #include <memory>
  
-@@ -313,6 +314,14 @@
+@@ -313,6 +314,24 @@
  ///
  class SLANG_EXPORT Compilation : public BumpAllocator {
  public:
@@ -19,14 +19,24 @@
 +    };
 +    std::map<const Scope*, ExperimentalWork> experimentalWork;
 +    uint64_t experimentalDiagnosticEmissions = 0;
++    // Exact native noteReference events, NOT source occurrence counts. Unowned effects remain.
++    struct ExperimentalReference { const syntax::SyntaxNode* node; bool write; };
++    using ExperimentalReferences = std::vector<ExperimentalReference>;
++    std::map<const syntax::SyntaxNode*, std::pair<uint64_t, uint64_t>> experimentalReferenceCounts;
++    std::map<const void*, ExperimentalReferences> experimentalReferenceOwners;
++    ExperimentalReferences* experimentalReferenceCapture = nullptr;
++    bool experimentalDeferReferences = false;
++    void experimentalReplaceReferences(
++        std::vector<std::pair<const void*, ExperimentalReferences>> replacements);
++
 +
      /// Constructs a new instance of the Compilation class.
      explicit Compilation(const Bag& options = {}, const SourceLibrary* defaultLib = nullptr);
      Compilation(const Compilation& other) = delete;
 --- /dev/null
 +++ b/include/slang/ast/ExperimentalLeafSession.h
-@@ -0,0 +1,34 @@
-+// Experimental constant-expression rebinding micro-prototype. NOT a general update API.
+@@ -0,0 +1,39 @@
++// Experimental constant/local-bit-reference rebinding micro-prototype. NOT a general update API.
 +#pragma once
 +#include "slang/ast/Compilation.h"
 +#include "slang/text/SourceManager.h"
@@ -35,23 +45,28 @@
 +class ContinuousAssignSymbol;
 +class SLANG_EXPORT ExperimentalLeafSession {
 +public:
-+    static std::string fixture(bool b);
-+    ExperimentalLeafSession();
++    static std::string fixture(bool b, bool references = false);
++    explicit ExperimentalLeafSession(bool references = false);
 +    uint64_t generation() const { return generation_; }
 +    // Rejects all inputs except the two exact fixture byte strings, before parsing/binding.
 +    // At most two commits. No external native AST handles or concurrent callers supported.
 +    bool update(std::string_view bytes);
 +    std::string snapshot(uint64_t generation);
++    std::string referenceLedger(uint64_t generation);
 +    Compilation::ExperimentalWork changedWork() const;
 +    Compilation::ExperimentalWork controlWork() const;
 +    bool controlRetained() const;
++    bool referenceUsageVerified() const;
++    bool unaffectedAssignmentsRetained() const;
 +    bool unaffectedWorkRetained() const;
 +private:
++    bool references;
 +    SourceManager sources;
 +    std::vector<std::shared_ptr<syntax::SyntaxTree>> trees;
 +    Compilation compilation;
 +    std::vector<const ContinuousAssignSymbol*> changed;
 +    const ContinuousAssignSymbol* control = nullptr;
++    std::vector<std::pair<const ContinuousAssignSymbol*, const Expression*>> unchangedAssignments;
 +    const Expression* originalControl = nullptr;
 +    uint64_t generation_ = 0;
 +    bool currentB = false;
@@ -72,7 +87,76 @@
  };
 --- a/source/ast/Compilation.cpp
 +++ b/source/ast/Compilation.cpp
-@@ -1709,6 +1709,7 @@
+@@ -6,6 +6,7 @@
+ // SPDX-License-Identifier: MIT
+ //------------------------------------------------------------------------------
+ #include "slang/ast/Compilation.h"
++#include <limits>
+ 
+ #include "ElabVisitors.h"
+ #include "builtins/Builtins.h"
+@@ -1438,11 +1439,60 @@
+ 
+ void Compilation::noteReference(const SyntaxNode& node, bool isLValue) {
+     SLANG_ASSERT(!isFrozen());
++    if (experimentalReferenceCapture)
++        experimentalReferenceCapture->push_back({&node, isLValue});
++    if (experimentalDeferReferences) return;
++    auto& count = experimentalReferenceCounts[&node];
++    auto& value = isLValue ? count.second : count.first;
++    if (value == std::numeric_limits<uint64_t>::max())
++        throw std::runtime_error("reference event count overflow");
++    ++value;
+     auto [it, inserted] = referenceStatusMap.emplace(&node, std::pair{!isLValue, isLValue});
+     if (!inserted) {
+         it->second.first |= !isLValue;
+         it->second.second |= isLValue;
+     }
++}
++
++void Compilation::experimentalReplaceReferences(
++    std::vector<std::pair<const void*, ExperimentalReferences>> replacements) {
++    // Validate and stage every owner and shared-key aggregate BEFORE the commit boundary.
++    auto counts = experimentalReferenceCounts;
++    auto owners = experimentalReferenceOwners;
++    auto status = referenceStatusMap;
++    std::map<const syntax::SyntaxNode*, bool> touched;
++    std::map<const void*, bool> seen;
++    for (auto& [owner, replacement] : replacements) {
++        if (!seen.emplace(owner, true).second)
++            throw std::runtime_error("duplicate reference owner replacement");
++        for (auto event : owners.at(owner)) {
++            touched[event.node] = true;
++            auto& count = counts.at(event.node);
++            auto& value = event.write ? count.second : count.first;
++            if (!value) throw std::runtime_error("reference contribution underflow");
++            --value;
++        }
++        for (auto event : replacement) {
++            touched[event.node] = true;
++            auto& count = counts[event.node];
++            auto& value = event.write ? count.second : count.first;
++            if (value == std::numeric_limits<uint64_t>::max())
++                throw std::runtime_error("reference contribution overflow");
++            ++value;
++        }
++        owners.at(owner) = std::move(replacement);
++    }
++    // No native rebinding/global clear; only touched flags derive from complete event totals.
++    for (const auto& [node, ignored] : touched) {
++        const auto& count = counts.at(node);
++        status[node] = {count.first != 0, count.second != 0};
++    }
++    static_assert(noexcept(experimentalReferenceOwners.swap(owners)));
++    static_assert(noexcept(experimentalReferenceCounts.swap(counts)));
++    static_assert(noexcept(referenceStatusMap.swap(status)));
++    experimentalReferenceOwners.swap(owners);
++    experimentalReferenceCounts.swap(counts);
++    referenceStatusMap.swap(status);
+ }
+ 
+ void Compilation::noteReference(const Symbol& symbol, bool isLValue) {
+@@ -1709,6 +1759,7 @@
  }
  
  Diagnostic& Compilation::addDiag(Diagnostic diag) {
@@ -112,15 +196,32 @@
  
 --- a/source/ast/symbols/MemberSymbols.cpp
 +++ b/source/ast/symbols/MemberSymbols.cpp
-@@ -463,6 +463,7 @@
+@@ -6,6 +6,7 @@
+ // SPDX-License-Identifier: MIT
+ //------------------------------------------------------------------------------
+ #include "slang/ast/symbols/MemberSymbols.h"
++#include <stdexcept>
+ 
+ #include "../FmtHelpers.h"
+ 
+@@ -463,6 +464,16 @@
      auto syntax = getSyntax();
      SLANG_ASSERT(scope && syntax);
  
 +    ++scope->getCompilation().experimentalWork[scope].assignments;
++    auto& comp = scope->getCompilation();
++    struct CaptureGuard {
++        Compilation& comp;
++        Compilation::ExperimentalReferences* previous;
++        ~CaptureGuard() { comp.experimentalReferenceCapture = previous; }
++    } guard{comp, comp.experimentalReferenceCapture};
++    if (comp.experimentalDeferReferences)
++        throw std::runtime_error("nested experimental assignment owner capture");
++    comp.experimentalReferenceCapture = &comp.experimentalReferenceOwners[this];
      ASTContext context(*scope, LookupLocation::after(*this), ASTFlags::NonProcedural);
      assign = &Expression::bind(syntax->as<ExpressionSyntax>(), context,
                                 ASTFlags::AssignmentAllowed);
-@@ -2546,3 +2547,164 @@
+@@ -2546,3 +2557,297 @@
  }
  
  } // namespace slang::ast
@@ -133,7 +234,15 @@
 +#include "slang/text/Json.h"
 +#include <stdexcept>
 +namespace slang::ast {
-+std::string ExperimentalLeafSession::fixture(bool b) {
++std::string ExperimentalLeafSession::fixture(bool b, bool references) {
++    if (references) {
++        std::string text =
++            "module changed(output bit y, k); bit a, b; assign y = a & a; assign k = a; endmodule\n"
++            "module control(output bit y); bit a, b; assign y = a & a; endmodule\n"
++            "module top(output bit x, x2, k, k2, z); changed u0(x,k); changed u2(x2,k2); control u1(z); endmodule\n";
++        if (b) text.replace(text.find("a & a"), 5, "b & b");
++        return text;
++    }
 +    std::string text =
 +        "module changed(output bit y); assign y = 1'b0; endmodule\n"
 +        "module control(output bit y); assign y = 1'b1; endmodule\n"
@@ -141,35 +250,53 @@
 +    if (b) text[text.find("1'b0") + 3] = '1';
 +    return text;
 +}
-+ExperimentalLeafSession::ExperimentalLeafSession() {
-+    trees.push_back(syntax::SyntaxTree::fromText(fixture(false), sources, "fixture.sv"));
++ExperimentalLeafSession::ExperimentalLeafSession(bool references) : references(references) {
++    trees.push_back(syntax::SyntaxTree::fromText(fixture(false, references), sources, "fixture.sv"));
 +    compilation.addSyntaxTree(trees.back());
 +    if (!compilation.getAllDiagnostics().empty())
 +        throw std::runtime_error("baseline diagnostics: admission denied");
 +    auto visitor = makeVisitor([&](auto&, const ContinuousAssignSymbol& symbol) {
 +        auto& body = symbol.getParentScope()->asSymbol().as<InstanceBodySymbol>();
-+        if (body.getDefinition().name == "changed") {
++        const auto& assignment = symbol.getAssignment().as<AssignmentExpression>();
++        auto target = assignment.left().getSymbolReference();
++        if (body.getDefinition().name == "changed" && target && target->name == "y") {
 +            if (std::find(changed.begin(), changed.end(), &symbol) == changed.end())
 +                changed.push_back(&symbol);
 +        }
++        else unchangedAssignments.emplace_back(&symbol, &assignment);
 +        if (body.getDefinition().name == "control") control = &symbol;
 +        (void)symbol.getAssignment();
 +    });
 +    compilation.getRoot().visit(visitor);
 +    if (changed.size() != 2 || !control) throw std::runtime_error("fixture hierarchy mismatch");
++    for (auto owner : changed) {
++        const auto& assignment = owner->getAssignment().as<AssignmentExpression>();
++        auto leftSyntax = assignment.left().getSymbolReference()->getSyntax();
++        const syntax::SyntaxNode* readSyntax = nullptr;
++        for (auto& member : owner->getParentScope()->members())
++            if (member.name == "a") readSyntax = member.getSyntax();
++        uint64_t reads = 0, writes = 0;
++        for (auto event : compilation.experimentalReferenceOwners.at(owner)) {
++            if (event.write) { ++writes; if (event.node != leftSyntax) throw std::runtime_error("unexpected LHS contribution"); }
++            else { ++reads; if (!references || event.node != readSyntax) throw std::runtime_error("unexpected initial RHS contribution"); }
++        }
++        if (writes != 1 || reads != (references ? 2u : 0u))
++            throw std::runtime_error("fixture reference ownership invariant failed");
++    }
 +    originalControl = &control->getAssignment();
 +    acceptedDiagnosticEmissions = compilation.experimentalDiagnosticEmissions;
 +}
 +bool ExperimentalLeafSession::update(std::string_view bytes) {
 +    if (poisoned) throw std::runtime_error("poisoned session; discard");
-+    if (generation_ >= 2 || (bytes != fixture(false) && bytes != fixture(true))) return false;
-+    bool nextB = bytes == fixture(true);
-+    if (nextB == currentB) return false;
++    if (bytes != fixture(false, references) && bytes != fixture(true, references)) return false;
++    bool nextB = bytes == fixture(true, references);
++    if (nextB == currentB) return true; // Exact-byte no-op: no parsing, binding, generation advance.
++    if (generation_ >= 2) return false;
 +    baselineWork = compilation.experimentalWork;
 +    poisoned = true; // Any unexpected exception after admission permanently disables queries.
 +    const auto diagnosticEmissions = compilation.experimentalDiagnosticEmissions;
 +    // Unique physical buffers, stable logical filename supplied via fromText line directive.
-+    // Both inputs have identical lengths and differ only in the RHS literal bit.
++    // Inputs have identical lengths and differ only in the admitted RHS tokens.
 +    auto tree = syntax::SyntaxTree::fromText(bytes, sources, "fixture.sv");
 +    const syntax::BinaryExpressionSyntax* replacement = nullptr;
 +    auto syntaxVisitor = syntax::makeSyntaxVisitor(
@@ -183,6 +310,7 @@
 +    if (!replacement || !tree->diagnostics().empty())
 +        throw std::runtime_error("admitted fixture parse invariant failed");
 +    std::vector<const Expression*> freshAssignments;
++    std::vector<std::pair<const void*, Compilation::ExperimentalReferences>> stagedReferences;
 +    trees.push_back(std::move(tree));
 +    for (auto symbol : changed) {
 +        const auto& old = symbol->getAssignment().as<AssignmentExpression>();
@@ -195,7 +323,7 @@
 +        auto newRight = replacement->right->sourceRange();
 +        auto newLeft = replacement->left->sourceRange();
 +        auto oldLeft = old.left().sourceRange;
-+        if (sourceSlice(newRight) != (nextB ? "1'b1" : "1'b0") ||
++        if (sourceSlice(newRight) != (references ? (nextB ? "b & b" : "a & a") : (nextB ? "1'b1" : "1'b0")) ||
 +            sourceSlice(newLeft) != "y" || sourceSlice(oldLeft) != "y" ||
 +            sources.getLineNumber(newLeft.start()) != sources.getLineNumber(oldLeft.start()) ||
 +            sources.getColumnNumber(newLeft.start()) != sources.getColumnNumber(oldLeft.start()) ||
@@ -204,8 +332,31 @@
 +            throw std::runtime_error("generation source provenance invariant failed");
 +        ASTContext context(*symbol->getParentScope(), LookupLocation::after(*symbol),
 +                           ASTFlags::NonProcedural);
++        Compilation::ExperimentalReferences candidateReferences;
++        struct DeferredGuard {
++            Compilation& comp;
++            ~DeferredGuard() { comp.experimentalReferenceCapture = nullptr; comp.experimentalDeferReferences = false; }
++        } deferred{compilation};
++        if (compilation.experimentalReferenceCapture || compilation.experimentalDeferReferences)
++            throw std::runtime_error("nested deferred reference capture");
++        compilation.experimentalReferenceCapture = &candidateReferences;
++        compilation.experimentalDeferReferences = true;
 +        const auto& rhs = Expression::bindRValue(*old.left().type, *replacement->right,
 +                                                replacement->sourceRange(), context);
++        compilation.experimentalReferenceCapture = nullptr;
++        compilation.experimentalDeferReferences = false;
++        const syntax::SyntaxNode* expectedRead = nullptr;
++        for (auto& member : symbol->getParentScope()->members())
++            if (member.name == (nextB ? "b" : "a")) expectedRead = member.getSyntax();
++        if (candidateReferences.size() != (references ? 2u : 0u))
++            throw std::runtime_error("unexpected RHS reference event multiplicity");
++        for (auto event : candidateReferences)
++            if (event.write || !references || event.node != expectedRead)
++                throw std::runtime_error("RHS reference target invariant failed");
++        // Immutable LHS contribution stays once; only previous RHS reads are withdrawn.
++        for (auto event : compilation.experimentalReferenceOwners.at(symbol))
++            if (event.write) candidateReferences.push_back(event);
++        stagedReferences.emplace_back(symbol, std::move(candidateReferences));
 +        if (compilation.experimentalDiagnosticEmissions != diagnosticEmissions)
 +            throw std::runtime_error("new diagnostic emitted; discard poisoned session");
 +        if (rhs.bad()) throw std::runtime_error("admitted fixture binding invariant failed; discard session");
@@ -217,6 +368,7 @@
 +        // Old assignment and RHS remain immutable in the arena; all tree owners stay alive.
 +        freshAssignments.push_back(fresh);
 +    }
++    compilation.experimentalReplaceReferences(std::move(stagedReferences));
 +    for (size_t i = 0; i < changed.size(); ++i) changed[i]->assign = freshAssignments[i];
 +    ++generation_;
 +    currentB = nextB;
@@ -227,7 +379,10 @@
 +    if (poisoned) throw std::runtime_error("poisoned session; discard");
 +    if (generation != generation_) throw std::runtime_error("stale generation handle");
 +    if (compilation.experimentalDiagnosticEmissions != acceptedDiagnosticEmissions ||
-+        !compilation.getAllDiagnostics().empty()) throw std::runtime_error("unexpected diagnostics");
++        !compilation.getAllDiagnostics().empty()) {
++        poisoned = true;
++        throw std::runtime_error("unexpected diagnostics");
++    }
 +    JsonWriter writer;
 +    ASTSerializer serializer(compilation, writer);
 +    serializer.setIncludeAddresses(false);
@@ -247,7 +402,38 @@
 +            writer.writeValue(expr.symbol.getHierarchicalPath());
 +        });
 +        instance.body.visit(targets);
-+        writer.endArray(); writer.endObject();
++        writer.endArray();
++        writer.writeProperty("usage_semantics");
++        writer.writeValue("per-instance-AST-occurrences; native-flags-shared-declaration-aggregate");
++        std::map<const ValueSymbol*, std::pair<uint64_t, uint64_t>> occurrenceCounts;
++        for (auto& member : instance.body.members()) {
++            if (auto assignment = member.as_if<ContinuousAssignSymbol>()) {
++                auto& expr = assignment->getAssignment().as<AssignmentExpression>();
++                auto reads = makeVisitor([&](auto&, const NamedValueExpression& ref) {
++                    ++occurrenceCounts[&ref.symbol].first;
++                });
++                auto writes = makeVisitor([&](auto&, const NamedValueExpression& ref) {
++                    ++occurrenceCounts[&ref.symbol].second;
++                });
++                expr.right().visit(reads); expr.left().visit(writes);
++            }
++        }
++        writer.writeProperty("reference_usage"); writer.startArray();
++        for (auto& member : instance.body.members()) {
++            if (auto value = member.as_if<VariableSymbol>(); value && value->getSyntax()) {
++                auto count = occurrenceCounts[value];
++                auto flags = compilation.isReferenced(*value->getSyntax());
++                writer.startObject();
++                writer.writeProperty("target"); writer.writeValue(value->getHierarchicalPath());
++                writer.writeProperty("read_occurrences"); writer.writeValue(count.first);
++                writer.writeProperty("write_occurrences"); writer.writeValue(count.second);
++                writer.writeProperty("native_read"); writer.writeValue(flags.first);
++                writer.writeProperty("native_write"); writer.writeValue(flags.second);
++                writer.endObject();
++            }
++        }
++        writer.endArray();
++        writer.endObject();
 +        visitor.visitDefault(instance);
 +    });
 +    compilation.getRoot().visit(instanceVisitor);
@@ -255,6 +441,32 @@
 +    if (compilation.experimentalDiagnosticEmissions != acceptedDiagnosticEmissions) {
 +        poisoned = true;
 +        throw std::runtime_error("diagnostic during snapshot; discard poisoned session");
++    }
++    return std::string(writer.view());
++}
++std::string ExperimentalLeafSession::referenceLedger(uint64_t generation) {
++    if (poisoned || generation != generation_) throw std::runtime_error("invalid ledger handle");
++    JsonWriter writer;
++    writer.startArray();
++    auto visitor = makeVisitor([&](auto& visitor, const InstanceSymbol& instance) {
++        for (auto& member : instance.body.members()) {
++            if (auto value = member.as_if<VariableSymbol>(); value && value->getSyntax()) {
++                auto it = compilation.experimentalReferenceCounts.find(value->getSyntax());
++                auto count = it == compilation.experimentalReferenceCounts.end() ? std::pair<uint64_t,uint64_t>{0,0} : it->second;
++                writer.startObject();
++                writer.writeProperty("target"); writer.writeValue(value->getHierarchicalPath());
++                writer.writeProperty("read_events"); writer.writeValue(count.first);
++                writer.writeProperty("write_events"); writer.writeValue(count.second);
++                writer.endObject();
++            }
++        }
++        visitor.visitDefault(instance);
++    });
++    compilation.getRoot().visit(visitor);
++    writer.endArray();
++    if (compilation.experimentalDiagnosticEmissions != acceptedDiagnosticEmissions) {
++        poisoned = true;
++        throw std::runtime_error("diagnostic during ledger readout");
 +    }
 +    return std::string(writer.view());
 +}
@@ -280,6 +492,28 @@
 +        baseline.erase(symbol->getParentScope());
 +    }
 +    return current == baseline;
++}
++bool ExperimentalLeafSession::unaffectedAssignmentsRetained() const {
++    for (auto [symbol, expression] : unchangedAssignments)
++        if (&symbol->getAssignment() != expression) return false;
++    return true;
++}
++bool ExperimentalLeafSession::referenceUsageVerified() const {
++    if (!references || poisoned) return false;
++    for (auto owner : changed) {
++        bool foundA = false, foundB = false;
++        for (auto& symbol : owner->getParentScope()->members()) {
++            if (auto value = symbol.as_if<VariableSymbol>(); value && value->getSyntax()) {
++                auto flags = compilation.isReferenced(*value->getSyntax());
++                auto it = compilation.experimentalReferenceCounts.find(value->getSyntax());
++                auto reads = it == compilation.experimentalReferenceCounts.end() ? 0 : it->second.first;
++                if (value->name == "a") { foundA = true; if (!flags.first || !reads) return false; }
++                if (value->name == "b") { foundB = true; if (flags.first != currentB || (reads != 0) != currentB) return false; }
++            }
++        }
++        if (!foundA || !foundB) return false;
++    }
++    return unaffectedAssignmentsRetained();
 +}
 +bool ExperimentalLeafSession::controlRetained() const {
 +    return &control->getAssignment() == originalControl;

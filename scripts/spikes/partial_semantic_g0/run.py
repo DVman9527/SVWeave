@@ -18,6 +18,7 @@ import subprocess
 import sys
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -62,8 +63,13 @@ def tree_rss(root: int) -> tuple[int, int]:
     return sum(sizes.get(pid, 0) for pid in descendants), len(descendants)
 
 
+def progress(stage: str, event: str, **fields) -> None:
+    """Bounded controller metadata only, never streamed native output or environment."""
+    print(json.dumps({"stage": stage, "event": event, **fields}), flush=True)
+
+
 def execute(spec, argv: list[str], *, timeout: int, rss_limit: int,
-            output_limit: int = 8 * 1024 * 1024) -> dict:
+            output_limit: int = 8 * 1024 * 1024, stage: str | None = None) -> dict:
     command = wrap(spec, argv)  # No subprocess exists until mandatory isolation succeeds.
     start = time.monotonic()
     proc = subprocess.Popen(command.argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
@@ -71,6 +77,7 @@ def execute(spec, argv: list[str], *, timeout: int, rss_limit: int,
     buffers = [bytearray(), bytearray()]
     failures = []
     peak_rss = 0
+    next_progress = start + 30
 
     def kill():
         with contextlib.suppress(ProcessLookupError):
@@ -92,6 +99,11 @@ def execute(spec, argv: list[str], *, timeout: int, rss_limit: int,
         while proc.poll() is None:
             rss, count = tree_rss(proc.pid)
             peak_rss = max(peak_rss, rss)
+            now = time.monotonic()
+            if stage is not None and now >= next_progress:
+                progress(stage, "running", elapsed_seconds=round(now - start, 1),
+                         sampled_rss_bytes=rss, process_count=count)
+                next_progress = now + 30
             if rss > rss_limit or count > 128:
                 failures.append("RESOURCE_LIMIT")
                 kill()
@@ -124,6 +136,10 @@ ASSERTIONS = {
     "all_changed_occurrences_updated", "source_provenance_verified",
     "unaffected_native_work_unchanged",
 }
+REFERENCE_ASSERTIONS = ASSERTIONS | {
+    "same_bytes_noop", "native_lookup_rebound", "shared_contributions_preserved",
+    "last_reference_withdrawn", "reference_event_ledger_equivalent",
+}
 COUNTERS = {"control_before", "control_after", "changed_before", "changed_after_b", "changed_after_a"}
 WORK = {"expressions", "lookups", "assignments", "conversions"}
 
@@ -143,20 +159,34 @@ def strict_json(text: str):
     return json.loads(text, object_pairs_hook=pairs, parse_constant=bad_constant)
 
 
-def validate_incremental(value, full_a, full_b) -> None:
-    if not isinstance(value, dict) or set(value) != {"status", "general_g0", "generations", "assertions", "counters"}:
+def validate_incremental(value, full_a, full_b, *, reference: bool = False,
+                         full_ledgers=None) -> None:
+    fields = {"status", "general_g0", "generations", "assertions", "counters"}
+    if reference:
+        fields.add("reference_event_ledgers")
+    if not isinstance(value, dict) or set(value) != fields:
         raise ValueError("unknown or missing native oracle fields")
-    if value["status"] != "MICRO_PROTOTYPE_PASS" or value["general_g0"] != "NOT_ESTABLISHED":
+    status = "REFERENCE_MICRO_PROTOTYPE_PASS" if reference else "MICRO_PROTOTYPE_PASS"
+    if value["status"] != status or value["general_g0"] != "NOT_ESTABLISHED":
         raise ValueError("native oracle status/scope invalid")
-    if full_a == full_b or value["generations"] != [full_a, full_b, full_a]:
+    def canonical(obj):
+        return json.dumps(obj, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+    if canonical(full_a) == canonical(full_b) or canonical(value["generations"]) != canonical([full_a, full_b, full_a]):
         raise ValueError("separate-process generation oracle mismatch")
     for full in (full_a, full_b):
         if not isinstance(full, dict) or not full.get("ast") or full.get("diagnostics") != []:
             raise ValueError("missing AST or nonempty/missing diagnostics")
-        if full.get("scope") != "exact-three-module-constant-rhs-fixture-only":
+        scope = "exact-three-module-local-bit-reference-fixture-only" if reference else "exact-three-module-constant-rhs-fixture-only"
+        if full.get("scope") != scope:
             raise ValueError("unknown fixture scope")
+    if reference:
+        validate_reference_usage(full_a, b=False)
+        validate_reference_usage(full_b, b=True)
+        validate_reference_ledgers(value["reference_event_ledgers"], full_ledgers)
     assertions = value["assertions"]
-    if not isinstance(assertions, dict) or set(assertions) != ASSERTIONS or any(v is not True for v in assertions.values()):
+    expected_assertions = REFERENCE_ASSERTIONS if reference else ASSERTIONS
+    if not isinstance(assertions, dict) or set(assertions) != expected_assertions or any(v is not True for v in assertions.values()):
         raise ValueError("native assertions missing/failed")
     counters = value["counters"]
     if not isinstance(counters, dict) or set(counters) != COUNTERS:
@@ -167,10 +197,100 @@ def validate_incremental(value, full_a, full_b) -> None:
     control = counters["control_before"]
     if control != counters["control_after"] or any(control[key] <= 0 for key in WORK):
         raise ValueError("control semantic work missing or repeated")
-    for key in ("expressions", "conversions"):
+    for key in (("expressions", "conversions", "lookups") if reference else ("expressions", "conversions")):
         if not 0 < counters["changed_before"][key] < counters["changed_after_b"][key] < counters["changed_after_a"][key]:
             raise ValueError("changed-leaf rebinding work not demonstrated")
 
+
+
+
+def validate_reference_usage(snapshot, *, b: bool) -> None:
+    """Check actual common stock/fork exports, not self-reported assertion booleans."""
+    instances = snapshot.get("ast", {}).get("concrete_instances")
+    if not isinstance(instances, list):
+        raise ValueError("concrete instance reference evidence missing")
+    paths = [item.get("path") for item in instances if isinstance(item, dict)]
+    if len(paths) != len(instances) or len(set(paths)) != len(paths):
+        raise ValueError("invalid or duplicate concrete instance")
+    if set(paths) != {"top", "top.u0", "top.u2", "top.u1"}:
+        raise ValueError("exact fixture instance inventory mismatch")
+    by_path = {item["path"]: item for item in instances}
+    for path in ("top.u0", "top.u2"):
+        instance = by_path.get(path)
+        if instance is None:
+            raise ValueError("changed instance missing")
+        if instance.get("usage_semantics") != "per-instance-AST-occurrences; native-flags-shared-declaration-aggregate":
+            raise ValueError("reference usage aggregation semantics missing")
+        expected = {
+            f"{path}.a": (1 if b else 3, 0, True, False),
+            f"{path}.b": (2 if b else 0, 0, b, False),
+            f"{path}.y": (0, 1, False, True),
+            f"{path}.k": (0, 1, False, True),
+        }
+        records = instance.get("reference_usage")
+        if not isinstance(records, list) or len(records) != len(expected):
+            raise ValueError("per-symbol usage missing")
+        seen = set()
+        for record in records:
+            if not isinstance(record, dict) or set(record) != {"target", "read_occurrences", "write_occurrences", "native_read", "native_write"}:
+                raise ValueError("invalid reference usage fields")
+            target = record["target"]
+            if not isinstance(target, str) or target not in expected or target in seen:
+                raise ValueError("unknown/duplicate reference target")
+            seen.add(target)
+            if any(type(record[key]) is not int for key in ("read_occurrences", "write_occurrences")):
+                raise ValueError("invalid occurrence count")
+            if any(type(record[key]) is not bool for key in ("native_read", "native_write")):
+                raise ValueError("invalid native usage flag")
+            actual = tuple(record[key] for key in ("read_occurrences", "write_occurrences", "native_read", "native_write"))
+            if actual != expected[target]:
+                raise ValueError("reference occurrence/flag mismatch")
+        targets = instance.get("resolved_targets")
+        if not isinstance(targets, list) or any(not isinstance(target, str) for target in targets):
+            raise ValueError("qualified targets missing")
+        expected_targets = Counter({target: values[0] + values[1] for target, values in expected.items()
+                                    if values[0] + values[1]})
+        if Counter(targets) != expected_targets:
+            raise ValueError("qualified target occurrence mismatch")
+
+
+
+def validate_reference_ledgers(generations, full_ledgers) -> None:
+    if not isinstance(full_ledgers, list) or len(full_ledgers) != 2:
+        raise ValueError("separate-process native event oracle missing")
+    expected = [full_ledgers[0], full_ledgers[1], full_ledgers[0]]
+    if json.dumps(generations, sort_keys=True) != json.dumps(expected, sort_keys=True):
+        raise ValueError("separate-process native event ledger mismatch")
+    maps = []
+    for records in full_ledgers:
+        if not isinstance(records, list) or not records:
+            raise ValueError("native event ledger empty")
+        counts = {}
+        for record in records:
+            if not isinstance(record, dict) or set(record) != {"target", "read_events", "write_events"}:
+                raise ValueError("native event ledger fields invalid")
+            target = record["target"]
+            if not isinstance(target, str) or not target or target in counts:
+                raise ValueError("native event ledger target invalid/duplicated")
+            if any(type(record[key]) is not int or record[key] < 0 for key in ("read_events", "write_events")):
+                raise ValueError("native event count invalid")
+            counts[target] = (record["read_events"], record["write_events"])
+        maps.append(counts)
+    a, b = maps
+    if a.keys() != b.keys():
+        raise ValueError("native event target set changed")
+    changed = {f"{path}.{symbol}" for path in ("top.u0", "top.u2") for symbol in ("a", "b")}
+    if not changed <= a.keys():
+        raise ValueError("changed native event targets missing")
+    for target in a:
+        if a[target][1] != b[target][1] or (target not in changed and a[target][0] != b[target][0]):
+            raise ValueError("unaffected native reference events changed")
+    for path in ("top.u0", "top.u2"):
+        ar, br = f"{path}.a", f"{path}.b"
+        if not 0 < b[ar][0] < a[ar][0] or a[br][0] != 0 or b[br][0] <= 0:
+            raise ValueError("native owner withdrawal/shared contribution preservation missing")
+        if a[ar][0] - b[ar][0] != b[br][0]:
+            raise ValueError("withdrawn and rebound native multiplicities differ")
 
 
 def isolation_guard(source: Path, canary: Path) -> str:
@@ -214,7 +334,15 @@ def main() -> int:
               "patch_sha256": None, "oracle_sha256": None, "sources": None}
 
     def run_step(name, spec, argv, *, timeout=180, rss_limit=3 * 1024**3):
-        result = execute(spec, argv, timeout=timeout, rss_limit=rss_limit)
+        progress(name, "started", timeout_seconds=timeout, rss_limit_bytes=rss_limit)
+        try:
+            result = execute(spec, argv, timeout=timeout, rss_limit=rss_limit, stage=name)
+        except Exception as exc:
+            progress(name, "blocked", error_type=type(exc).__name__)
+            raise
+        progress(name, "finished", returncode=result["returncode"], failures=result["failures"],
+                 elapsed_seconds=result["wall_seconds"],
+                 peak_sampled_rss_bytes=result["peak_sampled_process_tree_rss_bytes"])
         (evidence / f"{name}.json").write_text(json.dumps(result, indent=2) + "\n")
         report["steps"].append({"name": name, "returncode": result["returncode"],
                                 "failures": result["failures"]})
@@ -259,31 +387,38 @@ def main() -> int:
                      timeout=3600, rss_limit=10 * 1024**3)
             binaries[variant] = build / "pcu_leaf_oracle"
         report["binary_sha256"] = {key: digest(path) for key, path in binaries.items()}
-        outputs = {}
-        for variant, binary in binaries.items():
-            spec = probe_spec(tools=(binary,), sources=(HERE / "LeafUpdate.cpp",))
+        for reference in (False, True):
+            prefix = "reference-" if reference else ""
+            outputs = {}
+            for variant, binary in binaries.items():
+                spec = probe_spec(tools=(binary,), sources=(HERE / "LeafUpdate.cpp",))
+                for version in ("a", "b"):
+                    outputs[variant, version] = run_step(f"{prefix}full-{variant}-{version}", spec,
+                                                        [str(binary), f"--{prefix}full", version])
             for version in ("a", "b"):
-                outputs[variant, version] = run_step(f"full-{variant}-{version}", spec,
-                                                    [str(binary), "--full", version])
-        for version in ("a", "b"):
-            if not outputs["stock", version].strip() or outputs["stock", version] != outputs["patched", version]:
-                raise RuntimeError(f"stock/fork full oracle mismatch: {version}")
-        binary = binaries["patched"]
-        spec = probe_spec(tools=(binary,), sources=(HERE / "LeafUpdate.cpp",))
-        result = run_step("incremental", spec, [str(binary), "--incremental"])
-        incremental = strict_json(result)
-        validate_incremental(incremental, strict_json(outputs["patched", "a"]),
-                             strict_json(outputs["patched", "b"]))
-        report["incremental"] = incremental
-        report["stock_vs_patched_full"] = "PASS"
-        report["status"] = "MICRO_PROTOTYPE_PASS"
+                if not outputs["stock", version].strip() or outputs["stock", version] != outputs["patched", version]:
+                    raise RuntimeError(f"{prefix}stock/fork full oracle mismatch: {version}")
+            binary = binaries["patched"]
+            spec = probe_spec(tools=(binary,), sources=(HERE / "LeafUpdate.cpp",))
+            result = run_step(f"{prefix}incremental", spec, [str(binary), f"--{prefix}incremental"])
+            incremental = strict_json(result)
+            full_ledgers = None
+            if reference:
+                full_ledgers = [strict_json(run_step(f"reference-ledger-full-{version}", spec,
+                                [str(binary), "--reference-ledger-full", version])) for version in ("a", "b")]
+            validate_incremental(incremental, strict_json(outputs["patched", "a"]),
+                                 strict_json(outputs["patched", "b"]), reference=reference,
+                                 full_ledgers=full_ledgers)
+            report[f"{prefix}incremental"] = incremental
+            report[f"{prefix}stock_vs_patched_full"] = "PASS"
+        report["status"] = "REFERENCE_MICRO_PROTOTYPE_PASS"
     except Exception as exc:
         report["status"] = "FAIL"
         report["error"] = f"{type(exc).__name__}: {exc}"
     finally:
         (evidence / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
-    return 0 if report["status"] == "MICRO_PROTOTYPE_PASS" else 1
+    return 0 if report["status"] == "REFERENCE_MICRO_PROTOTYPE_PASS" else 1
 
 
 if __name__ == "__main__":
